@@ -306,23 +306,30 @@ function handleContactSubmit(e) {
   });
 }
 
-// Hamburger en overlays
+// Hamburger en overlays - only add listeners if elements exist
 if (document.getElementById('hamburger')) {
   document.getElementById('hamburger').onclick = () => {
     trackEvent('menu_open', {
       label: 'Hamburger menu opened',
       custom_parameter_1: 'navigation'
     });
-    document.getElementById('menuOverlay').classList.add('open');
+    const menuOverlay = document.getElementById('menuOverlay');
+    if (menuOverlay) {
+      menuOverlay.classList.add('open');
+    }
   };
 }
 if (document.getElementById('closeMenu')) {
-  document.getElementById('closeMenu').onclick = () => {
+  document.getElementById('closeMenu').onclick = (e) => {
+    e.preventDefault();
     trackEvent('menu_close', {
       label: 'Menu closed',
       custom_parameter_1: 'navigation'
     });
-    document.getElementById('menuOverlay').classList.remove('open');
+    const menuOverlay = document.getElementById('menuOverlay');
+    if (menuOverlay) {
+      menuOverlay.classList.remove('open');
+    }
   };
 }
 if (document.getElementById('filterBtn')) {
@@ -577,8 +584,11 @@ function exportData() {
   });
 }
 
+// Check if we're on the map page
+const isMapPage = document.getElementById('map') !== null;
+
 // Initialize map only if we're on the map page
-if (document.getElementById('map')) {
+if (isMapPage) {
   // Function to initialize everything when Leaflet is ready
   async function initializeApp() {
     if (typeof L !== 'undefined') {
@@ -660,14 +670,22 @@ if (document.getElementById('map')) {
     initializeApp();
   }
 } else {
-  // For non-map pages, still load translations
+  // For non-map pages, still load translations but don't load opportunities data
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', async () => {
       await loadTranslations();
       updateUI();
+      
+      // Track page view for non-map pages
+      const pageName = document.title || 'Unknown Page';
+      trackPageView(pageName);
     });
   } else {
-    loadTranslations().then(updateUI);
+    loadTranslations().then(() => {
+      updateUI();
+      const pageName = document.title || 'Unknown Page';
+      trackPageView(pageName);
+    });
   }
 }
 
