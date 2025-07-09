@@ -146,8 +146,12 @@
         </div>
 
         <!-- Advanced Filters -->
-        <div class="advanced-filters">
-          <h3 data-i18n="advancedFilters">Geavanceerde Filters</h3>
+        <div class="advanced-filters" id="advancedFilters">
+          <div class="advanced-filters-header" onclick="toggleAdvancedFilters()">
+            <h3 data-i18n="advancedFilters">Geavanceerde Filters</h3>
+            <span class="advanced-filters-toggle">▼</span>
+          </div>
+          <div class="advanced-filters-content">
 
           <div class="filter-group">
             <strong data-i18n="locationFilter">Locatie Filter</strong>

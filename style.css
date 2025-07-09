@@ -1157,7 +1157,7 @@ button {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
-  padding: 0 1.5rem;
+  padding: 0;
 }
 
 .advanced-filters.open .advanced-filters-content {
@@ -1213,6 +1213,7 @@ button {
   padding: 0.75rem;
   background: #f8f9fa;
   border-radius: 4px;
+  margin-top: 0.75rem;
 }
 
 .distance-filter label {

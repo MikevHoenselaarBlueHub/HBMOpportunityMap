@@ -956,10 +956,12 @@ function exportData() {
 // Toggle advanced filters
 function toggleAdvancedFilters() {
   const advancedFilters = document.getElementById('advancedFilters');
+  const isOpening = !advancedFilters.classList.contains('open');
+  
   advancedFilters.classList.toggle('open');
   
   trackEvent('advanced_filters_toggle', {
-    action: advancedFilters.classList.contains('open') ? 'open' : 'close',
+    action: isOpening ? 'open' : 'close',
     label: 'Advanced filters toggled',
     custom_parameter_1: 'filter_interaction'
   });
