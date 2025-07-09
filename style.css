@@ -392,6 +392,21 @@ button {
   gap: 0.5rem;
 }
 
+.map-controls > button {
+  background: rgb(38, 123, 41);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.map-controls > button:hover {
+  background: #267b29;
+}
+
 .filter-dropdown {
   position: relative;
   display: inline-block;
@@ -1804,10 +1819,11 @@ button {
     right: 0.5rem;
     justify-content: space-between;
     position: fixed;
+    align-items: center;
   }
 
-  #filterBtn,
-  #exportBtn {
+  .map-controls > button,
+  .filter-dropdown {
     flex: 1;
     margin: 0 0.25rem;
   }
