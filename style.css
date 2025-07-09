@@ -533,6 +533,7 @@ button {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  z-index: 1100;
 }
 
 .list-header {
@@ -697,7 +698,7 @@ button {
   .main-content {
     position: relative;
   }
-  
+
   .map-container {
     flex: 1;
     position: absolute;
@@ -707,7 +708,7 @@ button {
     bottom: 0;
     z-index: 1;
   }
-  
+
   .list-container {
     flex: none;
     position: absolute;
@@ -721,22 +722,22 @@ button {
     border-left: none;
     border-top: 2px solid rgb(38, 123, 41);
   }
-  
+
   .list-container.show {
     transform: translateX(0);
   }
-  
+
   .mobile-only {
     display: block;
   }
-  
+
   .map-controls {
     flex-direction: row;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  
+
   #viewToggle {
     background: rgb(38, 123, 41);
     color: #fff;
@@ -747,7 +748,7 @@ button {
     cursor: pointer;
     transition: background 0.2s;
   }
-  
+
   #viewToggle:hover {
     background: #267b29;
   }
