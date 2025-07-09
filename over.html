@@ -15,6 +15,15 @@
         <span id="title">Kansenkaart</span>
       </a>
     </div>
+    <div class="header-controls">
+      <div class="language-selector">
+        <select id="languageSelect" onchange="setLanguage(this.value)">
+          <option value="nl">Nederlands</option>
+          <option value="en">English</option>
+          <option value="de">Deutsch</option>
+        </select>
+      </div>
+    </div>
     <button id="hamburger">&#9776;</button>
     <nav id="menuOverlay" class="overlay">
       <a href="#" id="closeMenu" class="close-btn">
@@ -30,14 +39,6 @@
       <a href="over.html" class="active" data-i18n="aboutHBM">Over HBM</a>
     </nav>
   </header>
-
-  <div class="language-selector">
-    <select id="languageSelect" onchange="setLanguage(this.value)">
-      <option value="nl">Nederlands</option>
-      <option value="en">English</option>
-      <option value="de">Deutsch</option>
-    </select>
-  </div>
 
   <main class="container">
     <h1>Over Healthy Building Movement</h1>

@@ -6,6 +6,7 @@ let map, markers = [];
 let pIcon, bIcon;
 let hoverLabel;
 let municipalityLayer;
+let markerClusterGroup;
 
 // Google Analytics 4 Event Tracking
 function trackEvent(eventName, parameters = {}) {
@@ -382,6 +383,13 @@ if (document.getElementById('selectNone')) {
     updateFilterState();
   };
 }
+
+// Data export functionality
+if (document.getElementById('exportBtn')) {
+  document.getElementById('exportBtn').onclick = () => {
+    exportData();
+  };
+}
 if (document.getElementById('closeDetail')) {
   document.getElementById('closeDetail').onclick = () => {
     trackEvent('detail_panel_close', {
@@ -511,6 +519,64 @@ function displaySearchResults(results) {
   }
 }
 
+// Export data function
+function exportData() {
+  if (!window.data) return;
+  
+  // Get filtered data
+  const filters = {};
+  document.querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
+    const name = cb.name;
+    if (!filters[name]) filters[name] = [];
+    filters[name].push(cb.value);
+  });
+
+  const filtered = window.data.filter(d => {
+    return Object.keys(filters).every(k => {
+      if (!filters[k] || filters[k].length === 0) return true;
+      const dataValue = d[k];
+      if (Array.isArray(dataValue)) {
+        return dataValue.some(val => filters[k].includes(val));
+      } else {
+        return filters[k].includes(dataValue);
+      }
+    });
+  });
+
+  // Create CSV content
+  const headers = ['Name', 'ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector', 'HBMType', 'Description', 'Latitude', 'Longitude'];
+  const csvContent = [
+    headers.join(','),
+    ...filtered.map(item => headers.map(header => {
+      const value = item[header];
+      if (Array.isArray(value)) {
+        return `"${value.join('; ')}"`;
+      }
+      return `"${value || ''}"`;
+    }).join(','))
+  ].join('\n');
+
+  // Create and download file
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `kansenkaart_export_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // Track export
+  trackEvent('data_export', {
+    export_format: 'csv',
+    items_count: filtered.length,
+    label: `Data exported: ${filtered.length} items`,
+    custom_parameter_1: 'data_interaction',
+    value: filtered.length
+  });
+}
+
 // Initialize map only if we're on the map page
 if (document.getElementById('map')) {
   // Function to initialize everything when Leaflet is ready
@@ -538,6 +604,17 @@ if (document.getElementById('map')) {
       
       // Track page view
       trackPageView('Kansenkaart');
+      
+      // Register service worker for offline support
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('Service Worker registered:', registration.scope);
+          })
+          .catch(error => {
+            console.log('Service Worker registration failed:', error);
+          });
+      }
       
       // Data laden
       fetch('opportunities.json')
@@ -902,7 +979,36 @@ function updateMap() {
 
   // Add markers for filtered data with clustering
   const bounds = [];
-  const markerGroup = L.featureGroup();
+  
+  // Initialize cluster group if not exists
+  if (!markerClusterGroup) {
+    // Try to use MarkerClusterGroup if available, fallback to regular group
+    if (typeof L.markerClusterGroup === 'function') {
+      markerClusterGroup = L.markerClusterGroup({
+        chunkedLoading: true,
+        chunkProgress: function(processed, total) {
+          // Optional: show loading progress
+        },
+        iconCreateFunction: function(cluster) {
+          const count = cluster.getChildCount();
+          let className = 'marker-cluster-small';
+          if (count > 10) className = 'marker-cluster-medium';
+          if (count > 100) className = 'marker-cluster-large';
+          
+          return L.divIcon({
+            html: `<div><span>${count}</span></div>`,
+            className: 'marker-cluster ' + className,
+            iconSize: L.point(40, 40)
+          });
+        }
+      });
+    } else {
+      markerClusterGroup = L.featureGroup();
+    }
+  } else {
+    // Clear existing markers from cluster group
+    markerClusterGroup.clearLayers();
+  }
   
   filtered.forEach(loc => {
     const markerOptions = {};
@@ -971,13 +1077,13 @@ function updateMap() {
       showHoverLabel(domEvent, loc.Name);
     });
     
-    markerGroup.addLayer(marker);
+    markerClusterGroup.addLayer(marker);
     markers.push(marker);
     bounds.push([loc.Latitude, loc.Longitude]);
   });
   
-  // Add marker group to map
-  map.addLayer(markerGroup);
+  // Add marker cluster group to map
+  map.addLayer(markerClusterGroup);
 
   // Adjust map view to show all markers
   if (bounds.length > 0) {

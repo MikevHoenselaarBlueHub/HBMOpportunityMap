@@ -164,6 +164,14 @@ header {
   background: #fff; 
   padding: 1rem; 
   z-index: 50;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 #hamburger { 
   font-size: 2rem; 
@@ -214,16 +222,6 @@ button {
   transition: all 0.2s ease;
 }
 
-.top-controls {
-  position: fixed;
-  top: 20px;
-  right: 1rem;
-  z-index: 1000;
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
 .search-container {
   display: flex;
   align-items: center;
@@ -270,8 +268,18 @@ button {
   background: #fff;
 }
 
+.map-controls {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 @media (max-width: 768px) {
-  .top-controls {
+  .header-controls {
     flex-direction: column;
     align-items: flex-end;
     gap: 0.5rem;
@@ -280,19 +288,25 @@ button {
   .search-container input {
     min-width: 150px;
   }
+  
+  .search-container {
+    display: none;
+  }
 }
 
-#filterBtn {
-  position: fixed;
-  bottom: 1rem;
-  left: 1rem;
-  z-index: 1000;
+#filterBtn, #exportBtn {
   background: rgb(38, 123, 41);
   color: #fff;
   border: none;
   padding: 0.75rem 1rem;
   border-radius: 4px;
   font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#filterBtn:hover, #exportBtn:hover {
+  background: #267b29;
 }
 
 .btn-primary, .cta-btn, #applyFilters {
@@ -788,9 +802,242 @@ button {
   }
 }
 
+/* === Clustering styles === */
+.marker-cluster {
+  background-clip: padding-box;
+  border-radius: 20px;
+}
+
+.marker-cluster div {
+  width: 30px;
+  height: 30px;
+  margin-left: 5px;
+  margin-top: 5px;
+  text-align: center;
+  border-radius: 15px;
+  font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+
+.marker-cluster span {
+  line-height: 30px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.marker-cluster-small {
+  background-color: rgba(181, 226, 140, 0.6);
+}
+
+.marker-cluster-small div {
+  background-color: rgba(110, 204, 57, 0.6);
+}
+
+.marker-cluster-medium {
+  background-color: rgba(241, 211, 87, 0.6);
+}
+
+.marker-cluster-medium div {
+  background-color: rgba(240, 194, 12, 0.6);
+}
+
+.marker-cluster-large {
+  background-color: rgba(253, 156, 115, 0.6);
+}
+
+.marker-cluster-large div {
+  background-color: rgba(241, 128, 23, 0.6);
+}
+
+/* === Enhanced responsive design === */
+@media (max-width: 480px) {
+  header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .header-controls {
+    justify-content: center;
+  }
+  
+  .search-container {
+    display: flex;
+    max-width: 100%;
+  }
+  
+  .search-container input {
+    min-width: 120px;
+    flex: 1;
+  }
+  
+  .map-controls {
+    flex-direction: row;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    justify-content: space-between;
+    position: fixed;
+  }
+  
+  #filterBtn, #exportBtn {
+    flex: 1;
+    margin: 0 0.25rem;
+  }
+  
+  .detail-actions {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    padding: 1rem;
+    border-top: 1px solid #eee;
+    margin: 0 -2rem -2rem -2rem;
+  }
+  
+  .map-legend {
+    bottom: 4rem;
+    right: 0.5rem;
+    left: 0.5rem;
+    text-align: center;
+  }
+  
+  .legend-item {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 320px) {
+  .search-container input {
+    min-width: 100px;
+  }
+  
+  .language-selector select {
+    font-size: 0.8rem;
+    padding: 0.4rem;
+  }
+  
+  h1 {
+    font-size: 2.5rem !important;
+  }
+  
+  .detail-header h2 {
+    font-size: 1.25rem;
+  }
+}
+
+/* === Improved touch targets === */
+@media (hover: none) and (pointer: coarse) {
+  button, .close-btn, label {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .search-container button {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .marker-cluster {
+    cursor: pointer;
+  }
+}
+
+/* === High contrast mode support === */
+@media (prefers-contrast: high) {
+  .search-container {
+    border-width: 3px;
+  }
+  
+  .btn-primary, .cta-btn, #applyFilters, #filterBtn, #exportBtn {
+    border: 2px solid #000;
+  }
+  
+  .detail-type-badge {
+    border: 2px solid #fff;
+  }
+}
+
+/* === Reduced motion support === */
+@media (prefers-reduced-motion: reduce) {
+  .overlay, button, .close-btn, #detailPanel {
+    transition: none;
+  }
+  
+  .marker-hover-label {
+    transition: none;
+  }
+}
+
+/* === Dark mode support === */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1a1a1a;
+    color: #fff;
+  }
+  
+  header {
+    background: #2d2d2d;
+  }
+  
+  .search-container {
+    background: #2d2d2d;
+    border-color: #4a4a4a;
+  }
+  
+  .search-container input {
+    color: #fff;
+  }
+  
+  .language-selector select {
+    background: #2d2d2d;
+    color: #fff;
+    border-color: #4a4a4a;
+  }
+  
+  .overlay {
+    background: #2d2d2d;
+  }
+  
+  #detailPanel {
+    background: #2d2d2d;
+  }
+  
+  .detail-row {
+    background: #3a3a3a;
+  }
+  
+  .map-legend {
+    background: rgba(45, 45, 45, 0.95);
+    border-color: #4a4a4a;
+  }
+}
+
+/* === Print styles === */
+@media print {
+  header, .map-controls, .map-legend, #detailPanel {
+    display: none !important;
+  }
+  
+  #map {
+    height: 100vh !important;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+  }
+}
+
 /* === Responsive nav === */
 @media screen and (min-width: 768px) {
   #hamburger { display: none; }
   #menuOverlay { display: none; }
   #desktopNav { display: flex; }
+  
+  .header-controls {
+    flex-direction: row;
+  }
+  
+  .search-container {
+    display: flex !important;
+  }
 }

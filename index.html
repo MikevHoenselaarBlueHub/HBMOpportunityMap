@@ -16,6 +16,19 @@
         <span id="title">Kansenkaart</span>
       </a>
     </div>
+    <div class="header-controls">
+      <div class="search-container">
+        <input type="text" id="mapSearch" placeholder="Zoek locaties..." />
+        <button id="searchBtn">🔍</button>
+      </div>
+      <div class="language-selector">
+        <select id="languageSelect" onchange="setLanguage(this.value)">
+          <option value="nl">Nederlands</option>
+          <option value="en">English</option>
+          <option value="de">Deutsch</option>
+        </select>
+      </div>
+    </div>
     <button id="hamburger">&#9776;</button>
     <nav id="menuOverlay" class="overlay">
       <a href="#" id="closeMenu" class="close-btn">
@@ -32,21 +45,12 @@
     </nav>
   </header>
 
-  <div class="top-controls">
-    <div class="search-container">
-      <input type="text" id="mapSearch" placeholder="Zoek locaties..." />
-      <button id="searchBtn">🔍</button>
-    </div>
-    <div class="language-selector">
-      <select id="languageSelect" onchange="setLanguage(this.value)">
-        <option value="nl">Nederlands</option>
-        <option value="en">English</option>
-        <option value="de">Deutsch</option>
-      </select>
-    </div>
-  </div>
   
-  <button id="filterBtn">Filters</button>
+  
+  <div class="map-controls">
+    <button id="filterBtn">Filters</button>
+    <button id="exportBtn">Export Data</button>
+  </div>
   <div id="filterOverlay" class="overlay">
     <a href="#" id="closeFilters" class="close-btn">
       <img src="icons/close.svg" alt="Sluiten" class="close-icon"/>
@@ -109,6 +113,9 @@
   </script>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js" onload="console.log('Leaflet loaded successfully')" onerror="console.error('Failed to load Leaflet')"></script>
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js" onload="console.log('MarkerCluster loaded successfully')" onerror="console.warn('MarkerCluster not available')"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
   <script src="script.js"></script>
 </body>
 </html>
