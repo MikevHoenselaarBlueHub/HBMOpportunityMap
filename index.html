@@ -1,133 +1,218 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kansenkaart</title>
-  <link rel="icon" href="favicon.ico" />
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-</head>
-<body>
-  <header>
-    <div id="branding">
-      <a href="index.html" class="logo-link">
-        <img src="https://healthybuildingmovement.com/resources/uploads/2023/11/Logo.svg" alt="HBM Logo" id="logo" onerror="this.style.display='none'"/>
-        <span id="title">Kansenkaart</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kansenkaart</title>
+    <link rel="icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  </head>
+  <body>
+    <header>
+      <div id="branding">
+        <a href="index.html" class="logo-link">
+          <img
+            src="https://healthybuildingmovement.com/resources/uploads/2023/11/Logo.svg"
+            alt="HBM Logo"
+            id="logo"
+            onerror="this.style.display='none'"
+          />
+          <span id="title">Kansenkaart</span>
+        </a>
+      </div>
+      <div class="header-controls">
+        <div class="search-container">
+          <input
+            type="text"
+            id="mapSearch"
+            placeholder="Doorzoek de kansenkaart"
+          />
+          <button id="searchBtn">
+            <svg
+              class="search-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M21 21L16.514 16.506M19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5 2C5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <button id="hamburger">&#9776;</button>
+      <nav id="menuOverlay" class="overlay">
+        <a href="#" id="closeMenu" class="close-btn">
+          <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
+        </a>
+        <a href="index.html" class="active" data-i18n="opportunityMap"
+          >Kansenkaart</a
+        >
+        <a href="info.html" data-i18n="moreInfo">Meer info</a>
+        <a href="over.html" data-i18n="aboutHBM">Over HBM</a>
+        <div class="menu-language-selector">
+          <strong data-i18n="language">Taal:</strong>
+          <select id="languageSelect" onchange="setLanguage(this.value)">
+            <option value="nl">Nederlands</option>
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
+      </nav>
+      <nav id="desktopNav">
+        <a href="index.html" class="active" data-i18n="opportunityMap"
+          >Kansenkaart</a
+        >
+        <a href="info.html" data-i18n="moreInfo">Meer info</a>
+        <a href="over.html" data-i18n="aboutHBM">Over HBM</a>
+        <div class="language-selector">
+          <select id="languageSelect" onchange="setLanguage(this.value)">
+            <option value="nl">Nederlands</option>
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
+      </nav>
+    </header>
+
+    <div class="map-controls">
+      <button id="filterBtn">Filters</button>
+      <button id="exportBtn">Export Data</button>
+    </div>
+    <div id="filterOverlay" class="overlay">
+      <a href="#" id="closeFilters" class="close-btn">
+        <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
       </a>
+      <form id="filtersForm">
+        <h2 data-i18n="filters">Filters</h2>
+        <div class="filter-actions">
+          <button type="button" id="selectAll">Selecteer alles</button>
+          <button type="button" id="selectNone">Selecteer geen</button>
+        </div>
+        <div>
+          <strong data-i18n="projectType">Type project</strong>
+          <div id="ProjectType"></div>
+        </div>
+        <div>
+          <strong data-i18n="organizationType">Organisatietype</strong>
+          <div id="OrganizationType"></div>
+        </div>
+        <div>
+          <strong data-i18n="organizationField">Vakgebied</strong>
+          <div id="OrganizationField"></div>
+        </div>
+        <div>
+          <strong data-i18n="hbmTopic">Thema</strong>
+          <div id="HBMTopic"></div>
+        </div>
+        <div>
+          <strong data-i18n="hbmCharacteristics">Kenmerken</strong>
+          <div id="HBMCharacteristics"></div>
+        </div>
+        <div>
+          <strong data-i18n="hbmSector">Sector</strong>
+          <div id="HBMSector"></div>
+        </div>
+        <div>
+          <label
+            ><input
+              type="checkbox"
+              name="HBMType"
+              value="Project"
+              checked
+              onchange="updateFilterState()"
+            />
+            <span data-i18n="projects">Projecten</span></label
+          >
+          <label
+            ><input
+              type="checkbox"
+              name="HBMType"
+              value="Bedrijf"
+              checked
+              onchange="updateFilterState()"
+            />
+            <span data-i18n="companies">Bedrijven</span></label
+          >
+        </div>
+        <button type="button" id="applyFilters">Toepassen</button>
+      </form>
     </div>
-    <div class="header-controls">
-      <div class="search-container">
-        <input type="text" id="mapSearch" placeholder="Doorzoek de kansenkaart" />
-        <button id="searchBtn">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M21 21L16.514 16.506M19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5 2C5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
+
+    <main id="map"></main>
+
+    <div id="mapLegend" class="map-legend">
+      <h4 data-i18n="legend">Legenda</h4>
+      <div class="legend-item">
+        <img
+          src="icons/marker-company.svg"
+          alt="Bedrijf marker"
+          class="legend-icon"
+        />
+        <span data-i18n="companies">Bedrijven</span>
       </div>
-      <div class="language-selector">
-        <select id="languageSelect" onchange="setLanguage(this.value)">
-          <option value="nl">Nederlands</option>
-          <option value="en">English</option>
-          <option value="de">Deutsch</option>
-        </select>
+      <div class="legend-item">
+        <img
+          src="icons/marker-project.svg"
+          alt="Project marker"
+          class="legend-icon"
+        />
+        <span data-i18n="projects">Projecten</span>
       </div>
     </div>
-    <button id="hamburger">&#9776;</button>
-    <nav id="menuOverlay" class="overlay">
-      <a href="#" id="closeMenu" class="close-btn">
-        <img src="icons/close.svg" alt="Sluiten" class="close-icon"/>
+
+    <div id="detailPanel">
+      <a href="#" id="closeDetail" class="close-btn">
+        <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
       </a>
-      <a href="index.html" class="active" data-i18n="opportunityMap">Kansenkaart</a>
-      <a href="info.html" data-i18n="moreInfo">Meer info</a>
-      <a href="over.html" data-i18n="aboutHBM">Over HBM</a>
-      <div class="menu-language-selector">
-        <strong data-i18n="language">Taal:</strong>
-        <select id="languageSelect" onchange="setLanguage(this.value)">
-          <option value="nl">Nederlands</option>
-          <option value="en">English</option>
-          <option value="de">Deutsch</option>
-        </select>
-      </div>
-    </nav>
-    <nav id="desktopNav">
-      <a href="index.html" class="active" data-i18n="opportunityMap">Kansenkaart</a>
-      <a href="info.html" data-i18n="moreInfo">Meer info</a>
-      <a href="over.html" data-i18n="aboutHBM">Over HBM</a>
-    </nav>
-  </header>
-
-  
-  
-  <div class="map-controls">
-    <button id="filterBtn">Filters</button>
-    <button id="exportBtn">Export Data</button>
-  </div>
-  <div id="filterOverlay" class="overlay">
-    <a href="#" id="closeFilters" class="close-btn">
-      <img src="icons/close.svg" alt="Sluiten" class="close-icon"/>
-    </a>
-    <form id="filtersForm">
-      <h2 data-i18n="filters">Filters</h2>
-      <div class="filter-actions">
-        <button type="button" id="selectAll">Selecteer alles</button>
-        <button type="button" id="selectNone">Selecteer geen</button>
-      </div>
-      <div><strong data-i18n="projectType">Type project</strong><div id="ProjectType"></div></div>
-      <div><strong data-i18n="organizationType">Organisatietype</strong><div id="OrganizationType"></div></div>
-      <div><strong data-i18n="organizationField">Vakgebied</strong><div id="OrganizationField"></div></div>
-      <div><strong data-i18n="hbmTopic">Thema</strong><div id="HBMTopic"></div></div>
-      <div><strong data-i18n="hbmCharacteristics">Kenmerken</strong><div id="HBMCharacteristics"></div></div>
-      <div><strong data-i18n="hbmSector">Sector</strong><div id="HBMSector"></div></div>
-      <div>
-        <label><input type="checkbox" name="HBMType" value="Project" checked onchange="updateFilterState()"/> <span data-i18n="projects">Projecten</span></label>
-        <label><input type="checkbox" name="HBMType" value="Bedrijf" checked onchange="updateFilterState()"/> <span data-i18n="companies">Bedrijven</span></label>
-      </div>
-      <button type="button" id="applyFilters">Toepassen</button>
-    </form>
-  </div>
-
-  <main id="map"></main>
-
-  <div id="mapLegend" class="map-legend">
-    <h4 data-i18n="legend">Legenda</h4>
-    <div class="legend-item">
-      <img src="icons/marker-company.svg" alt="Bedrijf marker" class="legend-icon">
-      <span data-i18n="companies">Bedrijven</span>
+      <!-- detail content -->
     </div>
-    <div class="legend-item">
-      <img src="icons/marker-project.svg" alt="Project marker" class="legend-icon">
-      <span data-i18n="projects">Projecten</span>
-    </div>
-  </div>
 
-  <div id="detailPanel">
-    <a href="#" id="closeDetail" class="close-btn">
-      <img src="icons/close.svg" alt="Sluiten" class="close-icon"/>
-    </a>
-    <!-- detail content -->
-  </div>
+    <div id="formOverlay"></div>
 
-  <div id="formOverlay"></div>
-
-  <!-- Google Analytics 4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2RMYQV239Q"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-2RMYQV239Q', {
-      page_title: 'HBM Kansenkaart',
-      custom_map: {
-        'custom_parameter_1': 'map_interaction'
+    <!-- Google Analytics 4 -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-2RMYQV239Q"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
       }
-    });
-  </script>
+      gtag("js", new Date());
+      gtag("config", "G-2RMYQV239Q", {
+        page_title: "HBM Kansenkaart",
+        custom_map: {
+          custom_parameter_1: "map_interaction",
+        },
+      });
+    </script>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js" onload="console.log('Leaflet loaded successfully')" onerror="console.error('Failed to load Leaflet')"></script>
-  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js" onload="console.log('MarkerCluster loaded successfully')" onerror="console.warn('MarkerCluster not available')"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
-  <script src="script.js"></script>
-</body>
+    <script
+      src="https://unpkg.com/leaflet/dist/leaflet.js"
+      onload="console.log('Leaflet loaded successfully')"
+      onerror="console.error('Failed to load Leaflet')"
+    ></script>
+    <script
+      src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"
+      onload="console.log('MarkerCluster loaded successfully')"
+      onerror="console.warn('MarkerCluster not available')"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"
+    />
+    <script src="script.js"></script>
+  </body>
 </html>

@@ -1,108 +1,139 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Over HBM</title>
-  <link rel="icon" href="favicon.ico" />
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header>
-    <div id="branding">
-      <a href="index.html" class="logo-link">
-        <img src="https://healthybuildingmovement.com/resources/uploads/2023/11/Logo.svg" alt="HBM Logo" id="logo" onerror="this.style.display='none'"/>
-        <span id="title">Kansenkaart</span>
-      </a>
-    </div>
-    <div class="header-controls">
-      <div class="language-selector">
-        <select id="languageSelect" onchange="setLanguage(this.value)">
-          <option value="nl">Nederlands</option>
-          <option value="en">English</option>
-          <option value="de">Deutsch</option>
-        </select>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Over HBM</title>
+    <link rel="icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div id="branding">
+        <a href="index.html" class="logo-link">
+          <img
+            src="https://healthybuildingmovement.com/resources/uploads/2023/11/Logo.svg"
+            alt="HBM Logo"
+            id="logo"
+            onerror="this.style.display='none'"
+          />
+          <span id="title">Kansenkaart</span>
+        </a>
       </div>
-    </div>
-    <button id="hamburger">&#9776;</button>
-    <nav id="menuOverlay" class="overlay">
-      <a href="#" id="closeMenu" class="close-btn">
-        <img src="icons/close.svg" alt="Sluiten" class="close-icon"/>
-      </a>
-      <a href="index.html" data-i18n="opportunityMap">Kansenkaart</a>
-      <a href="info.html" data-i18n="moreInfo">Meer info</a>
-      <a href="over.html" class="active" data-i18n="aboutHBM">Over HBM</a>
-      <div class="menu-language-selector">
-        <strong data-i18n="language">Taal:</strong>
-        <select id="languageSelect" onchange="setLanguage(this.value)">
-          <option value="nl">Nederlands</option>
-          <option value="en">English</option>
-          <option value="de">Deutsch</option>
-        </select>
+      <div class="header-controls">
+        <div class="search-container">
+          <input
+            type="text"
+            id="mapSearch"
+            placeholder="Doorzoek de kansenkaart"
+          />
+          <button id="searchBtn">
+            <svg
+              class="search-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M21 21L16.514 16.506M19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5 2C5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
-    </nav>
-    <nav id="desktopNav">
-      <a href="index.html" data-i18n="opportunityMap">Kansenkaart</a>
-      <a href="info.html" data-i18n="moreInfo">Meer info</a>
-      <a href="over.html" class="active" data-i18n="aboutHBM">Over HBM</a>
-    </nav>
-  </header>
+      <button id="hamburger">&#9776;</button>
+      <nav id="menuOverlay" class="overlay">
+        <a href="#" id="closeMenu" class="close-btn">
+          <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
+        </a>
+        <a href="index.html" data-i18n="opportunityMap">Kansenkaart</a>
+        <a href="info.html" data-i18n="moreInfo">Meer info</a>
+        <a href="over.html" class="active" data-i18n="aboutHBM">Over HBM</a>
+        <div class="menu-language-selector">
+          <strong data-i18n="language">Taal:</strong>
+          <select id="languageSelect" onchange="setLanguage(this.value)">
+            <option value="nl">Nederlands</option>
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
+      </nav>
+      <nav id="desktopNav">
+        <a href="index.html" data-i18n="opportunityMap">Kansenkaart</a>
+        <a href="info.html" data-i18n="moreInfo">Meer info</a>
+        <a href="over.html" class="active" data-i18n="aboutHBM">Over HBM</a>
+        <div class="language-selector">
+          <select id="languageSelect" onchange="setLanguage(this.value)">
+            <option value="nl">Nederlands</option>
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
+      </nav>
+    </header>
 
-  <main class="container">
-    <h1>Over Healthy Building Movement</h1>
-    <p>Dit is de pagina over Healthy Building Movement. Hier vertel je wie je bent, je missie en je doelen.</p>
-  </main>
+    <main class="container">
+      <h1>Over Healthy Building Movement</h1>
+      <p>
+        Dit is de pagina over Healthy Building Movement. Hier vertel je wie je
+        bent, je missie en je doelen.
+      </p>
+    </main>
 
-  <!-- Limited script loading for over page -->
-  <script>
-    // Only load basic functionality for over page
-    let currentLanguage = 'nl';
-    let translations = {};
-    
-    async function loadTranslations() {
-      try {
-        const response = await fetch(`translations/${currentLanguage}.json`);
-        translations = await response.json();
-      } catch (error) {
-        console.error('Error loading translations:', error);
-      }
-    }
-    
-    function t(key) {
-      return translations[key] || key;
-    }
-    
-    async function setLanguage(lang) {
-      currentLanguage = lang;
-      await loadTranslations();
-      updateUI();
-    }
-    
-    function updateUI() {
-      document.querySelectorAll('[data-i18n]').forEach(element => {
-        const key = element.getAttribute('data-i18n');
-        if (translations[key]) {
-          element.textContent = t(key);
+    <!-- Limited script loading for over page -->
+    <script>
+      // Only load basic functionality for over page
+      let currentLanguage = "nl";
+      let translations = {};
+
+      async function loadTranslations() {
+        try {
+          const response = await fetch(`translations/${currentLanguage}.json`);
+          translations = await response.json();
+        } catch (error) {
+          console.error("Error loading translations:", error);
         }
+      }
+
+      function t(key) {
+        return translations[key] || key;
+      }
+
+      async function setLanguage(lang) {
+        currentLanguage = lang;
+        await loadTranslations();
+        updateUI();
+      }
+
+      function updateUI() {
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          const key = element.getAttribute("data-i18n");
+          if (translations[key]) {
+            element.textContent = t(key);
+          }
+        });
+        document.title = t("aboutHBM") || "Over HBM";
+      }
+
+      // Hamburger menu functionality
+      document.getElementById("hamburger").onclick = () => {
+        document.getElementById("menuOverlay").classList.add("open");
+      };
+
+      document.getElementById("closeMenu").onclick = (e) => {
+        e.preventDefault();
+        document.getElementById("menuOverlay").classList.remove("open");
+      };
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", async () => {
+        await loadTranslations();
+        updateUI();
       });
-      document.title = t('aboutHBM') || 'Over HBM';
-    }
-    
-    // Hamburger menu functionality
-    document.getElementById('hamburger').onclick = () => {
-      document.getElementById('menuOverlay').classList.add('open');
-    };
-    
-    document.getElementById('closeMenu').onclick = (e) => {
-      e.preventDefault();
-      document.getElementById('menuOverlay').classList.remove('open');
-    };
-    
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', async () => {
-      await loadTranslations();
-      updateUI();
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
