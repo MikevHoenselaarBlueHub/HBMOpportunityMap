@@ -10,6 +10,9 @@ let markerClusterGroup;
 let currentListView = false;
 let filteredData = [];
 let isInitialLoad = true;
+let userLocationMarker = null;
+let userLocation = null;
+let savedFiltersData = [];
 
 // Google Analytics 4 Event Tracking
 function trackEvent(eventName, parameters = {}) {
@@ -446,6 +449,39 @@ if (document.getElementById('closeDetail')) {
       custom_parameter_1: 'content_interaction'
     });
     document.getElementById('detailPanel').classList.remove('open');
+  };
+}
+
+// Advanced filter event listeners
+if (document.getElementById('useMyLocation')) {
+  document.getElementById('useMyLocation').onclick = () => {
+    getUserLocation();
+  };
+}
+
+if (document.getElementById('distanceRange')) {
+  document.getElementById('distanceRange').oninput = (e) => {
+    document.getElementById('distanceValue').textContent = e.target.value + ' km';
+  };
+}
+
+if (document.getElementById('saveCurrentFilters')) {
+  document.getElementById('saveCurrentFilters').onclick = () => {
+    saveCurrentFilters();
+  };
+}
+
+if (document.getElementById('deleteSavedFilter')) {
+  document.getElementById('deleteSavedFilter').onclick = () => {
+    deleteSavedFilter();
+  };
+}
+
+if (document.getElementById('savedFiltersSelect')) {
+  document.getElementById('savedFiltersSelect').onchange = (e) => {
+    if (e.target.value) {
+      loadSavedFilter(e.target.value);
+    }
   };
 }
 
@@ -922,6 +958,7 @@ if (isMapPage && !isInfoPage && !isOverPage) {
           });
           
           createFilterCheckboxes();
+          loadSavedFiltersFromStorage();
           updateMap();
           updateUI();
         })
@@ -1422,6 +1459,200 @@ function navigateDetail(direction) {
   }
 }
 
+// Advanced filter functions
+function getUserLocation() {
+  const btn = document.getElementById('useMyLocation');
+  const distanceFilter = document.getElementById('distanceFilter');
+  
+  if (!navigator.geolocation) {
+    alert('Geolocatie wordt niet ondersteund door deze browser.');
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.textContent = 'Locatie ophalen...';
+  
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      userLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+      
+      // Add user location marker
+      if (userLocationMarker) {
+        map.removeLayer(userLocationMarker);
+      }
+      
+      userLocationMarker = L.circleMarker([userLocation.lat, userLocation.lng], {
+        className: 'user-location-marker',
+        radius: 8,
+        fillColor: '#007bff',
+        color: '#fff',
+        weight: 3,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).addTo(map);
+      
+      userLocationMarker.bindPopup('Uw locatie');
+      
+      // Show distance filter
+      distanceFilter.style.display = 'flex';
+      btn.textContent = '✓ Locatie ingesteld';
+      btn.disabled = false;
+      
+      // Update filters
+      updateFilterButtonLabel();
+      
+      trackEvent('user_location_set', {
+        label: 'User location set',
+        custom_parameter_1: 'location_interaction'
+      });
+    },
+    (error) => {
+      console.error('Geolocation error:', error);
+      alert('Kon uw locatie niet ophalen. Controleer uw browser instellingen.');
+      btn.textContent = '📍 Mijn locatie gebruiken';
+      btn.disabled = false;
+    }
+  );
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Radius of the Earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+function saveCurrentFilters() {
+  const filters = getActiveFilters();
+  const textFilter = document.getElementById('advancedTextFilter').value;
+  const filterMode = document.querySelector('input[name="filterMode"]:checked').value;
+  
+  const name = prompt('Geef een naam op voor deze filterset:');
+  if (!name) return;
+  
+  const filterSet = {
+    id: Date.now(),
+    name: name,
+    filters: filters,
+    textFilter: textFilter,
+    filterMode: filterMode,
+    userLocation: userLocation,
+    maxDistance: userLocation ? document.getElementById('distanceRange').value : null,
+    saved: new Date().toISOString()
+  };
+  
+  savedFiltersData.push(filterSet);
+  localStorage.setItem('kansenkaart_saved_filters', JSON.stringify(savedFiltersData));
+  updateSavedFiltersSelect();
+  
+  trackEvent('filters_saved', {
+    filter_name: name,
+    label: `Filters saved: ${name}`,
+    custom_parameter_1: 'filter_interaction'
+  });
+}
+
+function loadSavedFilter(filterId) {
+  const filterSet = savedFiltersData.find(f => f.id == filterId);
+  if (!filterSet) return;
+  
+  // Load basic filters
+  setActiveFilters(filterSet.filters);
+  
+  // Load text filter
+  document.getElementById('advancedTextFilter').value = filterSet.textFilter || '';
+  
+  // Load filter mode
+  document.querySelector(`input[name="filterMode"][value="${filterSet.filterMode}"]`).checked = true;
+  
+  // Load user location if available
+  if (filterSet.userLocation) {
+    userLocation = filterSet.userLocation;
+    
+    if (userLocationMarker) {
+      map.removeLayer(userLocationMarker);
+    }
+    
+    userLocationMarker = L.circleMarker([userLocation.lat, userLocation.lng], {
+      className: 'user-location-marker',
+      radius: 8,
+      fillColor: '#007bff',
+      color: '#fff',
+      weight: 3,
+      opacity: 1,
+      fillOpacity: 0.8
+    }).addTo(map);
+    
+    userLocationMarker.bindPopup('Uw locatie');
+    
+    document.getElementById('distanceFilter').style.display = 'flex';
+    document.getElementById('distanceRange').value = filterSet.maxDistance || 25;
+    document.getElementById('distanceValue').textContent = (filterSet.maxDistance || 25) + ' km';
+    document.getElementById('useMyLocation').textContent = '✓ Locatie ingesteld';
+  }
+  
+  updateFilterButtonLabel();
+  
+  trackEvent('filters_loaded', {
+    filter_name: filterSet.name,
+    label: `Filters loaded: ${filterSet.name}`,
+    custom_parameter_1: 'filter_interaction'
+  });
+}
+
+function deleteSavedFilter() {
+  const select = document.getElementById('savedFiltersSelect');
+  const filterId = select.value;
+  
+  if (!filterId) return;
+  
+  const filterSet = savedFiltersData.find(f => f.id == filterId);
+  if (!filterSet) return;
+  
+  if (confirm(`Weet u zeker dat u "${filterSet.name}" wilt verwijderen?`)) {
+    savedFiltersData = savedFiltersData.filter(f => f.id != filterId);
+    localStorage.setItem('kansenkaart_saved_filters', JSON.stringify(savedFiltersData));
+    updateSavedFiltersSelect();
+    
+    trackEvent('filters_deleted', {
+      filter_name: filterSet.name,
+      label: `Filters deleted: ${filterSet.name}`,
+      custom_parameter_1: 'filter_interaction'
+    });
+  }
+}
+
+function updateSavedFiltersSelect() {
+  const select = document.getElementById('savedFiltersSelect');
+  select.innerHTML = '<option value="">Selecteer opgeslagen filter...</option>';
+  
+  savedFiltersData.forEach(filterSet => {
+    const option = document.createElement('option');
+    option.value = filterSet.id;
+    option.textContent = `${filterSet.name} (${new Date(filterSet.saved).toLocaleDateString()})`;
+    select.appendChild(option);
+  });
+}
+
+function loadSavedFiltersFromStorage() {
+  try {
+    const saved = localStorage.getItem('kansenkaart_saved_filters');
+    if (saved) {
+      savedFiltersData = JSON.parse(saved);
+      updateSavedFiltersSelect();
+    }
+  } catch (error) {
+    console.error('Error loading saved filters:', error);
+  }
+}
+
 function updateMap() {
   if (!window.data || !document.getElementById('map')) return;
 
@@ -1508,10 +1739,16 @@ function updateMap() {
   
   // Get all checked filters
   const filters = getActiveFilters();
+  
+  // Get advanced filter settings
+  const textFilter = document.getElementById('advancedTextFilter')?.value.toLowerCase().trim() || '';
+  const filterMode = document.querySelector('input[name="filterMode"]:checked')?.value || 'AND';
+  const maxDistance = userLocation ? parseInt(document.getElementById('distanceRange')?.value || 25) : null;
 
   // Filter data based on selected filters
   const filtered = window.data.filter(d => {
-    return Object.keys(filters).every(k => {
+    // Basic filters
+    const basicMatch = Object.keys(filters).every(k => {
       if (!filters[k] || filters[k].length === 0) return true;
       const dataValue = d[k];
       if (Array.isArray(dataValue)) {
@@ -1520,6 +1757,39 @@ function updateMap() {
         return filters[k].includes(dataValue);
       }
     });
+    
+    // Text filter
+    let textMatch = true;
+    if (textFilter) {
+      const searchableText = [
+        d.Name,
+        d.Description,
+        Array.isArray(d.HBMTopic) ? d.HBMTopic.join(' ') : d.HBMTopic,
+        Array.isArray(d.OrganizationType) ? d.OrganizationType.join(' ') : d.OrganizationType,
+        Array.isArray(d.HBMSector) ? d.HBMSector.join(' ') : d.HBMSector
+      ].join(' ').toLowerCase();
+      
+      textMatch = searchableText.includes(textFilter);
+    }
+    
+    // Distance filter
+    let distanceMatch = true;
+    if (userLocation && maxDistance) {
+      const distance = calculateDistance(
+        userLocation.lat,
+        userLocation.lng,
+        d.Latitude,
+        d.Longitude
+      );
+      distanceMatch = distance <= maxDistance;
+    }
+    
+    // Combine filters based on mode
+    if (filterMode === 'OR') {
+      return basicMatch || textMatch || distanceMatch;
+    } else {
+      return basicMatch && textMatch && distanceMatch;
+    }
   });
 
   // Store filtered data and update list

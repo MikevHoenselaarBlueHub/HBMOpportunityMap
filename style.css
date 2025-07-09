@@ -895,6 +895,215 @@ button {
   padding: 0;
 }
 
+/* === Advanced Filters === */
+.advanced-filters {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f0f8ff;
+  border-radius: 8px;
+  border: 2px solid #007bff;
+}
+
+.advanced-filters h3 {
+  color: #007bff;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.filter-group {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.filter-group strong {
+  display: block;
+  color: #007bff;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.location-filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.location-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.location-btn:hover {
+  background: #218838;
+}
+
+.location-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.distance-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.distance-filter label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.distance-filter input[type="range"] {
+  flex: 1;
+  margin: 0 0.5rem;
+}
+
+.distance-filter span {
+  font-weight: bold;
+  color: #007bff;
+  min-width: 50px;
+}
+
+.filter-group input[type="text"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.filter-group input[type="text"]:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.combination-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.combination-controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.combination-controls label:hover {
+  background: #e9ecef;
+}
+
+.combination-controls input[type="radio"] {
+  margin: 0;
+}
+
+.saved-filters-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.save-filters-btn,
+.delete-filters-btn {
+  background: #ffc107;
+  color: #000;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.save-filters-btn:hover {
+  background: #e0a800;
+}
+
+.delete-filters-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.delete-filters-btn:hover {
+  background: #c82333;
+}
+
+.saved-filters-controls select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.saved-filters-controls select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+/* === User Location Marker === */
+.user-location-marker {
+  background: #007bff;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+  }
+}
+
+@media (max-width: 768px) {
+  .advanced-filters {
+    padding: 1rem;
+  }
+  
+  .filter-group {
+    padding: 0.75rem;
+  }
+  
+  .location-filter-controls {
+    gap: 0.5rem;
+  }
+  
+  .distance-filter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .saved-filters-controls {
+    gap: 0.75rem;
+  }
+}
+
 #applyFilters {
   width: 100%;
   margin-top: 1rem;
@@ -1601,21 +1810,162 @@ button {
 
 /* === Print styles === */
 @media print {
-
-  header,
-  .map-controls,
-  .map-legend,
-  #detailPanel {
-    display: none !important;
-  }
-
-  #map {
-    height: 100vh !important;
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
   body {
     margin: 0;
     padding: 0;
+    font-size: 12pt;
+    line-height: 1.4;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  header,
+  .map-controls,
+  .map-legend,
+  #detailPanel,
+  #filterOverlay,
+  #menuOverlay,
+  #formOverlay,
+  .close-btn,
+  button:not(.print-visible),
+  .overlay {
+    display: none !important;
+  }
+
+  #map {
+    height: 60vh !important;
+    width: 100% !important;
+    border: 1px solid #000 !important;
+  }
+
+  .main-content {
+    height: auto !important;
+    display: block !important;
+  }
+
+  .list-container {
+    position: static !important;
+    transform: none !important;
+    flex: none !important;
+    margin-top: 20px !important;
+    border: none !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .list-container.show,
+  .list-container {
+    transform: none !important;
+  }
+
+  .list-header {
+    border-bottom: 2px solid #000 !important;
+    padding: 10px 0 !important;
+    background: #fff !important;
+  }
+
+  .list-header h3 {
+    color: #000 !important;
+    font-size: 16pt !important;
+    margin: 0 !important;
+  }
+
+  .results-count {
+    color: #666 !important;
+    font-size: 10pt !important;
+  }
+
+  .opportunities-list {
+    padding: 0 !important;
+  }
+
+  .opportunity-card {
+    border: 1px solid #000 !important;
+    margin-bottom: 10px !important;
+    padding: 10px !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    break-inside: avoid !important;
+  }
+
+  .opportunity-card:hover {
+    border-color: #000 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  .card-title {
+    color: #000 !important;
+    font-size: 12pt !important;
+    font-weight: bold !important;
+  }
+
+  .card-type-badge {
+    color: #000 !important;
+    background: #fff !important;
+    border: 1px solid #000 !important;
+    font-size: 8pt !important;
+  }
+
+  .card-detail-label {
+    color: #000 !important;
+    font-weight: bold !important;
+  }
+
+  .card-detail-value {
+    color: #000 !important;
+  }
+
+  .card-description {
+    color: #000 !important;
+    font-size: 10pt !important;
+  }
+
+  .card-actions {
+    display: none !important;
+  }
+
+  .card-image,
+  .card-logo {
+    max-height: 50px !important;
+    filter: grayscale(100%) !important;
+  }
+
+  /* Print header */
+  @page {
+    margin: 1cm;
+    @top-center {
+      content: "HBM Kansenkaart - " counter(page);
+    }
+  }
+
+  /* Print title */
+  body::before {
+    content: "HBM Kansenkaart - Printversie";
+    display: block;
+    font-size: 18pt;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #000;
+  }
+
+  /* Print footer */
+  body::after {
+    content: "Gegenereerd op " date() " - healthybuildingmovement.com";
+    display: block;
+    font-size: 8pt;
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #000;
   }
 }
 
