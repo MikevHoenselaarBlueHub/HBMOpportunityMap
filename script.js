@@ -442,6 +442,20 @@ if (document.getElementById('shareBtn')) {
     copyURLToClipboard();
   };
 }
+
+// Save current filters from dropdown
+if (document.getElementById('saveCurrentFiltersBtn')) {
+  document.getElementById('saveCurrentFiltersBtn').onclick = () => {
+    saveCurrentFilters();
+  };
+}
+
+// Load saved filters from dropdown  
+if (document.getElementById('loadSavedFiltersBtn')) {
+  document.getElementById('loadSavedFiltersBtn').onclick = () => {
+    showSavedFiltersModal();
+  };
+}
 if (document.getElementById('closeDetail')) {
   document.getElementById('closeDetail').onclick = () => {
     trackEvent('detail_panel_close', {
@@ -1133,17 +1147,19 @@ async function loadMunicipalitiesFromOverpass(regions) {
   try {
     console.log('Loading municipality boundaries...');
     
-    // Use a simpler approach: load boundaries for the entire Euregio region
+    // Use a more focused approach: smaller bounding box for Euregio region
     const overpassUrl = 'https://overpass-api.de/api/interpreter';
     
-    // Simplified query for administrative boundaries in the region
+    // More focused query for administrative boundaries with timeout increase
     const query = `
-      [out:json][timeout:60];
+      [out:json][timeout:180];
       (
-        relation["admin_level"="8"]["place"!="city"](bbox:50.0,4.0,52.5,7.5);
+        relation["admin_level"~"^(8|9|10)$"]["name"](bbox:50.5,5.5,51.8,6.8);
       );
       out geom;
     `;
+    
+    console.log('Sending query to Overpass API...');
     
     const response = await fetch(overpassUrl, {
       method: 'POST',
@@ -1154,33 +1170,46 @@ async function loadMunicipalitiesFromOverpass(regions) {
     });
     
     if (!response.ok) {
+      console.error(`Overpass API HTTP error! status: ${response.status}`);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
+    console.log('Parsing response from Overpass API...');
     const data = await response.json();
+    
+    if (!data.elements || data.elements.length === 0) {
+      console.warn('No elements received from Overpass API');
+      throw new Error('No data received from Overpass API');
+    }
+    
+    console.log(`Received ${data.elements.length} elements from Overpass API`);
     let loadedCount = 0;
     
     // Process the response and create polygons
-    data.elements.forEach(element => {
-      if (element.type === 'relation' && element.members && element.tags && element.tags.name) {
+    data.elements.forEach((element, index) => {
+      if (element.type === 'relation' && element.tags && element.tags.name) {
         try {
-          // Convert relation to GeoJSON-like structure
-          const coordinates = convertRelationToCoordinates(element);
-          if (coordinates && coordinates.length > 0) {
+          console.log(`Processing municipality ${index + 1}/${data.elements.length}: ${element.tags.name}`);
+          
+          // Convert relation to coordinates using improved function
+          const coordinates = convertRelationToCoordinatesImproved(element);
+          if (coordinates && coordinates.length > 2) {
             const polygon = L.polygon(coordinates, {
               color: 'rgb(38, 123, 41)',
-              weight: 2,
-              opacity: 0.8,
+              weight: 1,
+              opacity: 0.7,
               fillColor: 'rgb(38, 123, 41)',
-              fillOpacity: 0.15,
-              smoothFactor: 1.0
+              fillOpacity: 0.1,
+              smoothFactor: 2.0
             });
             
             // Add popup with municipality name
-            polygon.bindPopup(`<strong>${element.tags.name}</strong>`);
+            polygon.bindPopup(`<strong>${element.tags.name}</strong><br><small>Admin level: ${element.tags.admin_level || 'Unknown'}</small>`);
             
             municipalityLayer.addLayer(polygon);
             loadedCount++;
+          } else {
+            console.warn(`Could not process coordinates for ${element.tags.name}`);
           }
         } catch (err) {
           console.warn(`Error processing municipality ${element.tags.name}:`, err);
@@ -1188,17 +1217,18 @@ async function loadMunicipalitiesFromOverpass(regions) {
       }
     });
     
-    console.log(`Loaded ${loadedCount} municipalities from OpenStreetMap`);
+    console.log(`Successfully loaded ${loadedCount} municipalities from OpenStreetMap`);
     
     // Make sure the layer is available in the layer control
     if (loadedCount === 0) {
-      throw new Error('No municipalities loaded');
+      throw new Error('No municipalities could be processed');
     }
     
   } catch (error) {
     console.error('Error loading municipalities from Overpass API:', error);
     
     // Fallback to simplified hardcoded boundaries for major cities
+    console.log('Loading fallback municipalities...');
     loadFallbackMunicipalities();
   }
 }
@@ -1238,6 +1268,51 @@ function convertRelationToCoordinates(element) {
     return null;
   } catch (error) {
     console.warn('Error converting relation coordinates:', error);
+    return null;
+  }
+}
+
+function convertRelationToCoordinatesImproved(element) {
+  try {
+    if (!element.members || element.members.length === 0) {
+      console.warn('No members found in relation');
+      return null;
+    }
+    
+    // Look for ways with geometry data
+    const waysWithGeometry = element.members.filter(member => 
+      member.type === 'way' && member.geometry && member.geometry.length > 2
+    );
+    
+    if (waysWithGeometry.length === 0) {
+      console.warn('No ways with geometry found');
+      return null;
+    }
+    
+    // Find the longest way (likely the main boundary)
+    let longestWay = waysWithGeometry[0];
+    for (const way of waysWithGeometry) {
+      if (way.geometry.length > longestWay.geometry.length) {
+        longestWay = way;
+      }
+    }
+    
+    // Convert the longest way to coordinates
+    const coordinates = longestWay.geometry.map(node => [node.lat, node.lon]);
+    
+    // Ensure the polygon is closed
+    if (coordinates.length > 2) {
+      const first = coordinates[0];
+      const last = coordinates[coordinates.length - 1];
+      if (first[0] !== last[0] || first[1] !== last[1]) {
+        coordinates.push([first[0], first[1]]);
+      }
+    }
+    
+    return coordinates.length > 3 ? coordinates : null;
+    
+  } catch (error) {
+    console.warn('Error in improved coordinate conversion:', error);
     return null;
   }
 }
@@ -1651,14 +1726,84 @@ function deleteSavedFilter() {
 
 function updateSavedFiltersSelect() {
   const select = document.getElementById('savedFiltersSelect');
-  select.innerHTML = '<option value="">Selecteer opgeslagen filter...</option>';
+  if (select) {
+    select.innerHTML = '<option value="">Selecteer opgeslagen filter...</option>';
+    
+    savedFiltersData.forEach(filterSet => {
+      const option = document.createElement('option');
+      option.value = filterSet.id;
+      option.textContent = `${filterSet.name} (${new Date(filterSet.saved).toLocaleDateString()})`;
+      select.appendChild(option);
+    });
+  }
+}
+
+function showSavedFiltersModal() {
+  if (savedFiltersData.length === 0) {
+    alert('Geen opgeslagen filters gevonden. Sla eerst een filter op.');
+    return;
+  }
+  
+  let modalHtml = `
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+      <div style="background: white; padding: 2rem; border-radius: 8px; max-width: 400px; width: 90%;">
+        <h3 style="margin-bottom: 1rem; color: rgb(38, 123, 41);">Opgeslagen Filters</h3>
+        <div style="margin-bottom: 1.5rem;">
+  `;
   
   savedFiltersData.forEach(filterSet => {
-    const option = document.createElement('option');
-    option.value = filterSet.id;
-    option.textContent = `${filterSet.name} (${new Date(filterSet.saved).toLocaleDateString()})`;
-    select.appendChild(option);
+    modalHtml += `
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border: 1px solid #ddd; margin-bottom: 0.5rem; border-radius: 4px;">
+        <div>
+          <strong>${filterSet.name}</strong><br>
+          <small style="color: #666;">${new Date(filterSet.saved).toLocaleDateString()}</small>
+        </div>
+        <div>
+          <button onclick="loadSavedFilter(${filterSet.id}); closeSavedFiltersModal();" style="background: rgb(38, 123, 41); color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; margin-right: 0.25rem; cursor: pointer;">Laden</button>
+          <button onclick="deleteSavedFilterFromModal(${filterSet.id})" style="background: #dc3545; color: white; border: none; padding: 0.25rem 0.5rem; border-radius: 3px; cursor: pointer;">×</button>
+        </div>
+      </div>
+    `;
   });
+  
+  modalHtml += `
+        </div>
+        <button onclick="closeSavedFiltersModal()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Sluiten</button>
+      </div>
+    </div>
+  `;
+  
+  const modalElement = document.createElement('div');
+  modalElement.id = 'savedFiltersModal';
+  modalElement.innerHTML = modalHtml;
+  document.body.appendChild(modalElement);
+}
+
+function closeSavedFiltersModal() {
+  const modal = document.getElementById('savedFiltersModal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+function deleteSavedFilterFromModal(filterId) {
+  const filterSet = savedFiltersData.find(f => f.id == filterId);
+  if (!filterSet) return;
+  
+  if (confirm(`Weet u zeker dat u "${filterSet.name}" wilt verwijderen?`)) {
+    savedFiltersData = savedFiltersData.filter(f => f.id != filterId);
+    localStorage.setItem('kansenkaart_saved_filters', JSON.stringify(savedFiltersData));
+    
+    // Close and reopen modal to refresh the list
+    closeSavedFiltersModal();
+    showSavedFiltersModal();
+    
+    trackEvent('filters_deleted', {
+      filter_name: filterSet.name,
+      label: `Filters deleted: ${filterSet.name}`,
+      custom_parameter_1: 'filter_interaction'
+    });
+  }
 }
 
 function loadSavedFiltersFromStorage() {
