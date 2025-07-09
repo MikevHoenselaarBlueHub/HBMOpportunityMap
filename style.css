@@ -398,8 +398,8 @@ button {
   align-items: center;
 }
 
-.map-controls > button,
-.map-controls-row > button {
+.map-controls>button,
+.map-controls-row>button {
   background: rgb(38, 123, 41);
   color: #fff;
   border: none;
@@ -410,8 +410,8 @@ button {
   transition: background 0.2s;
 }
 
-.map-controls > button:hover,
-.map-controls-row > button:hover {
+.map-controls>button:hover,
+.map-controls-row>button:hover {
   background: #267b29;
 }
 
@@ -420,7 +420,7 @@ button {
   display: inline-block;
 }
 
-.filter-dropdown > button {
+.filter-dropdown>button {
   background: rgb(38, 123, 41);
   color: #fff;
   border: none;
@@ -431,7 +431,7 @@ button {
   transition: background 0.2s;
 }
 
-.filter-dropdown > button:hover {
+.filter-dropdown>button:hover {
   background: #267b29;
 }
 
@@ -503,11 +503,11 @@ button {
     min-width: 250px;
     z-index: 9000;
   }
-  
+
   .filter-dropdown:hover .filter-dropdown-menu {
     transform: translate(-50%, -50%);
   }
-  
+
   .dropdown-item {
     padding: 1rem 1.5rem;
     font-size: 1rem;
@@ -530,9 +530,7 @@ button {
   }
 }
 
-#filterBtn,
-#exportBtn,
-#shareBtn {
+#filterBtn {
   background: rgb(38, 123, 41);
   color: #fff;
   border: none;
@@ -543,9 +541,7 @@ button {
   transition: background 0.2s;
 }
 
-#filterBtn:hover,
-#exportBtn:hover,
-#shareBtn:hover {
+#filterBtn:hover {
   background: #267b29;
 }
 
@@ -749,11 +745,11 @@ button {
   .no-results-opportunity {
     padding: 1.5rem;
   }
-  
+
   .no-results-opportunity h2 {
     font-size: 1.25rem;
   }
-  
+
   .contact-cta {
     gap: 0.75rem;
   }
@@ -963,15 +959,15 @@ button {
   padding: 1rem;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  border: 2px solid rgb(38, 123, 41);
   z-index: 1050;
   min-width: 150px;
 }
 
 /* Hide legend when list is shown on mobile */
 @media (max-width: 768px) {
-  .list-container.show ~ #mapLegend,
-  .list-container.show + .map-legend {
+
+  .list-container.show~#mapLegend,
+  .list-container.show+.map-legend {
     display: none;
   }
 }
@@ -1281,9 +1277,11 @@ button {
   0% {
     box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
   }
+
   70% {
     box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
   }
@@ -1293,20 +1291,20 @@ button {
   .advanced-filters {
     padding: 1rem;
   }
-  
+
   .filter-group {
     padding: 0.75rem;
   }
-  
+
   .location-filter-controls {
     gap: 0.5rem;
   }
-  
+
   .distance-filter {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .saved-filters-controls {
     gap: 0.75rem;
   }
@@ -1860,13 +1858,13 @@ button {
     flex: 1;
   }
 
-  .map-controls-row > button,
+  .map-controls-row>button,
   .map-controls-row .filter-dropdown {
     flex: 1;
     min-width: 0;
   }
 
-  .map-controls > button {
+  .map-controls>button {
     flex: 0 0 auto;
     margin-left: 0.5rem;
   }
@@ -2154,20 +2152,20 @@ button {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-  
+
   .contact-form-section {
     padding: 1.5rem;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .contact-detail {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .contact-detail strong {
     min-width: auto;
   }
@@ -2225,7 +2223,7 @@ button {
 }
 
 .municipality-label div {
-  background: rgba(255,255,255,0.95) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
   border: 1px solid rgb(38, 123, 41) !important;
   border-radius: 4px !important;
   padding: 2px 6px !important;
@@ -2233,7 +2231,7 @@ button {
   font-weight: bold !important;
   color: rgb(38, 123, 41) !important;
   white-space: nowrap !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* === Print styles === */
@@ -2368,6 +2366,7 @@ button {
   /* Print header */
   @page {
     margin: 1cm;
+
     @top-center {
       content: "HBM Kansenkaart - " counter(page);
     }
