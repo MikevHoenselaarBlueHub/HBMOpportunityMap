@@ -584,11 +584,16 @@ function exportData() {
   });
 }
 
-// Check if we're on the map page
+// Check if we're on the map page by looking for the map element
 const isMapPage = document.getElementById('map') !== null;
 
+// Check current page path to determine if we should load map-related scripts
+const currentPath = window.location.pathname;
+const isInfoPage = currentPath.includes('info') || currentPath.endsWith('info.html');
+const isOverPage = currentPath.includes('over') || currentPath.endsWith('over.html');
+
 // Initialize map only if we're on the map page
-if (isMapPage) {
+if (isMapPage && !isInfoPage && !isOverPage) {
   // Function to initialize everything when Leaflet is ready
   async function initializeApp() {
     if (typeof L !== 'undefined') {
@@ -670,7 +675,7 @@ if (isMapPage) {
     initializeApp();
   }
 } else {
-  // For non-map pages, still load translations but don't load opportunities data
+  // For non-map pages, only load translations and basic functionality
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', async () => {
       await loadTranslations();
@@ -679,6 +684,12 @@ if (isMapPage) {
       // Track page view for non-map pages
       const pageName = document.title || 'Unknown Page';
       trackPageView(pageName);
+      
+      // Don't load opportunities.json for info/over pages
+      if (!isInfoPage && !isOverPage) {
+        // Only load opportunities if not on info/over pages
+        console.log('Non-map page detected, skipping opportunities load');
+      }
     });
   } else {
     loadTranslations().then(() => {

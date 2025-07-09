@@ -53,6 +53,56 @@
     <p>Dit is de pagina over Healthy Building Movement. Hier vertel je wie je bent, je missie en je doelen.</p>
   </main>
 
-  <script src="script.js"></script>
+  <!-- Limited script loading for over page -->
+  <script>
+    // Only load basic functionality for over page
+    let currentLanguage = 'nl';
+    let translations = {};
+    
+    async function loadTranslations() {
+      try {
+        const response = await fetch(`translations/${currentLanguage}.json`);
+        translations = await response.json();
+      } catch (error) {
+        console.error('Error loading translations:', error);
+      }
+    }
+    
+    function t(key) {
+      return translations[key] || key;
+    }
+    
+    async function setLanguage(lang) {
+      currentLanguage = lang;
+      await loadTranslations();
+      updateUI();
+    }
+    
+    function updateUI() {
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        if (translations[key]) {
+          element.textContent = t(key);
+        }
+      });
+      document.title = t('aboutHBM') || 'Over HBM';
+    }
+    
+    // Hamburger menu functionality
+    document.getElementById('hamburger').onclick = () => {
+      document.getElementById('menuOverlay').classList.add('open');
+    };
+    
+    document.getElementById('closeMenu').onclick = (e) => {
+      e.preventDefault();
+      document.getElementById('menuOverlay').classList.remove('open');
+    };
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadTranslations();
+      updateUI();
+    });
+  </script>
 </body>
 </html>
