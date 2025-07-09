@@ -1031,6 +1031,43 @@ button {
   overflow-y: auto;
 }
 
+/* === Navigation arrows === */
+.detail-navigation {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(38, 123, 41, 0.9);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  z-index: 8100;
+}
+
+.detail-navigation:hover {
+  background: rgb(38, 123, 41);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.detail-navigation:disabled {
+  background: rgba(0, 0, 0, 0.3);
+  cursor: not-allowed;
+  transform: translateY(-50%);
+}
+
+.detail-navigation.prev {
+  left: 10px;
+}
+
+.detail-navigation.next {
+  right: 10px;
+}
+
 #detailPanel.open {
   bottom: 0;
 }

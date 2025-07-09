@@ -28,7 +28,7 @@
     "Longitude": 6.558629
   },
   {
-    "Name": "Demo Locatie 3 (Maastricht)",
+    "Name": "Demo Project 3 (Maastricht)",
     "ProjectType": ["Renovatie", "Nieuwbouw"],
     "OrganizationType": "Architect",
     "OrganizationField": "Architectuur",
@@ -56,7 +56,7 @@
     "Longitude": 6.121537
   },
   {
-    "Name": "Demo Locatie 5 (Maastricht)",
+    "Name": "Demo Project 5 (Maastricht)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Installatiebedrijf",
     "OrganizationField": ["Modulair", "Bouwservices"],
@@ -70,7 +70,7 @@
     "Longitude": 5.666746
   },
   {
-    "Name": "Demo Locatie 6 (Aachen)",
+    "Name": "Demo Project 6 (Aachen)",
     "ProjectType": ["Circulair", "Frisse Scholen"],
     "OrganizationType": "Onderzoeksinstituut",
     "OrganizationField": "Modulair",
@@ -84,7 +84,7 @@
     "Longitude": 6.069603
   },
   {
-    "Name": "Demo Locatie 7 (Roermond)",
+    "Name": "Demo Project 7 (Roermond)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Onderzoeksinstituut",
     "OrganizationField": ["Architectuur", "Zonne-energie"],
@@ -98,7 +98,7 @@
     "Longitude": 6.03597
   },
   {
-    "Name": "Demo Locatie 8 (Roermond)",
+    "Name": "Demo Project 8 (Roermond)",
     "ProjectType": ["Nieuwbouw", "Renovatie"],
     "OrganizationType": "Onderzoeksinstituut",
     "OrganizationField": "Zonne-energie",
@@ -112,7 +112,7 @@
     "Longitude": 5.963016
   },
   {
-    "Name": "Demo Locatie 9 (Roermond)",
+    "Name": "Demo Project 9 (Roermond)",
     "ProjectType": "Nieuwbouw",
     "OrganizationType": ["Installatiebedrijf", "Aannemer"],
     "OrganizationField": "Zonne-energie",
@@ -126,7 +126,7 @@
     "Longitude": 5.974328
   },
   {
-    "Name": "Demo Locatie 10 (Maastricht)",
+    "Name": "Demo Project 10 (Maastricht)",
     "ProjectType": "Nieuwbouw",
     "OrganizationType": "Onderzoeksinstituut",
     "OrganizationField": ["Zonne-energie", "Architectuur"],
@@ -140,7 +140,7 @@
     "Longitude": 5.711404
   },
   {
-    "Name": "Demo Locatie 11 (Aachen)",
+    "Name": "Demo Project 11 (Aachen)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Architect",
     "OrganizationField": "Bouwservices",
@@ -154,7 +154,7 @@
     "Longitude": 6.113933
   },
   {
-    "Name": "Demo Locatie 12 (Aachen)",
+    "Name": "Demo Project 12 (Aachen)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Architect",
     "OrganizationField": "Modulair",
@@ -238,7 +238,7 @@
     "Longitude": 5.683335
   },
   {
-    "Name": "Demo Locatie 18 (Venlo)",
+    "Name": "Demo Project 18 (Venlo)",
     "ProjectType": "Circulair",
     "OrganizationType": "Architect",
     "OrganizationField": "Bouwservices",
@@ -308,7 +308,7 @@
     "Longitude": 6.402091
   },
   {
-    "Name": "Demo Locatie 23 (Venlo)",
+    "Name": "Demo Project 23 (Venlo)",
     "ProjectType": "Nieuwbouw",
     "OrganizationType": "Architect",
     "OrganizationField": "Architectuur",
@@ -349,7 +349,7 @@
     "Longitude": 6.136362
   },
   {
-    "Name": "Demo Locatie 26 (Roermond)",
+    "Name": "Demo Project 26 (Roermond)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Onderzoeksinstituut",
     "OrganizationField": "Modulair",
@@ -362,7 +362,7 @@
     "Longitude": 6.032281
   },
   {
-    "Name": "Demo Locatie 27 (Heinsberg)",
+    "Name": "Demo Project 27 (Heinsberg)",
     "ProjectType": "Nieuwbouw",
     "OrganizationType": "Aannemer",
     "OrganizationField": "Modulair",
@@ -375,7 +375,7 @@
     "Longitude": 6.118804
   },
   {
-    "Name": "Demo Locatie 28 (Maastricht)",
+    "Name": "Demo Project 28 (Maastricht)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Installatiebedrijf",
     "OrganizationField": "Bouwservices",
@@ -388,7 +388,7 @@
     "Longitude": 5.658726
   },
   {
-    "Name": "Demo Locatie 29 (Aachen)",
+    "Name": "Demo Project 29 (Aachen)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Aannemer",
     "OrganizationField": "Modulair",
@@ -457,7 +457,7 @@
     "Longitude": 5.983776
   },
   {
-    "Name": "Demo Locatie 34 (M\u00f6nchengladbach)",
+    "Name": "Demo Project 34 (M\u00f6nchengladbach)",
     "ProjectType": "Circulair",
     "OrganizationType": "Installatiebedrijf",
     "OrganizationField": "Bouwservices",
@@ -470,7 +470,7 @@
     "Longitude": 6.400049
   },
   {
-    "Name": "Demo Locatie 35 (M\u00f6nchengladbach)",
+    "Name": "Demo Project 35 (M\u00f6nchengladbach)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Installatiebedrijf",
     "OrganizationField": "Modulair",
@@ -576,7 +576,7 @@
     "Longitude": 6.398399
   },
   {
-    "Name": "Demo Locatie 43 (Maastricht)",
+    "Name": "Demo Project 43 (Maastricht)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Architect",
     "OrganizationField": "Bouwservices",
@@ -589,7 +589,7 @@
     "Longitude": 5.649094
   },
   {
-    "Name": "Demo Locatie 44 (M\u00f6nchengladbach)",
+    "Name": "Demo Project 44 (M\u00f6nchengladbach)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Installatiebedrijf",
     "OrganizationField": "Architectuur",
@@ -628,7 +628,7 @@
     "Longitude": 6.444612
   },
   {
-    "Name": "Demo Locatie 47 (Maastricht)",
+    "Name": "Demo Project 47 (Maastricht)",
     "ProjectType": "Nieuwbouw",
     "OrganizationType": "Onderzoeksinstituut",
     "OrganizationField": "Architectuur",
@@ -641,7 +641,7 @@
     "Longitude": 5.739572
   },
   {
-    "Name": "Demo Locatie 48 (Krefeld)",
+    "Name": "Demo Project 48 (Krefeld)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Aannemer",
     "OrganizationField": "Zonne-energie",
@@ -667,7 +667,7 @@
     "Longitude": 6.154458
   },
   {
-    "Name": "Demo Locatie 50 (Aachen)",
+    "Name": "Demo Project 50 (Aachen)",
     "ProjectType": "Nieuwbouw",
     "OrganizationType": "Architect",
     "OrganizationField": "Bouwservices",
@@ -706,7 +706,7 @@
     "Longitude": 6.512566
   },
   {
-    "Name": "Demo Locatie 53 (M\u00f6nchengladbach)",
+    "Name": "Demo Project 53 (M\u00f6nchengladbach)",
     "ProjectType": "Circulair",
     "OrganizationType": "Installatiebedrijf",
     "OrganizationField": "Modulair",
@@ -719,7 +719,7 @@
     "Longitude": 6.465329
   },
   {
-    "Name": "Demo Locatie 54 (Venlo)",
+    "Name": "Demo Project 54 (Venlo)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Installatiebedrijf",
     "OrganizationField": "Modulair",
@@ -745,7 +745,7 @@
     "Longitude": 6.435992
   },
   {
-    "Name": "Demo Locatie 56 (Aachen)",
+    "Name": "Demo Project 56 (Aachen)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Onderzoeksinstituut",
     "OrganizationField": "Architectuur",
@@ -797,7 +797,7 @@
     "Longitude": 6.083119
   },
   {
-    "Name": "Demo Locatie 60 (Krefeld)",
+    "Name": "Demo Project 60 (Krefeld)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Aannemer",
     "OrganizationField": "Bouwservices",
@@ -836,7 +836,7 @@
     "Longitude": 6.404626
   },
   {
-    "Name": "Demo Locatie 63 (Maastricht)",
+    "Name": "Demo Project 63 (Maastricht)",
     "ProjectType": "Circulair",
     "OrganizationType": "Installatiebedrijf",
     "OrganizationField": "Modulair",
@@ -849,7 +849,7 @@
     "Longitude": 5.70717
   },
   {
-    "Name": "Demo Locatie 64 (Maastricht)",
+    "Name": "Demo Project 64 (Maastricht)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Aannemer",
     "OrganizationField": "Modulair",
@@ -875,7 +875,7 @@
     "Longitude": 5.671534
   },
   {
-    "Name": "Demo Locatie 66 (Roermond)",
+    "Name": "Demo Project 66 (Roermond)",
     "ProjectType": "Circulair",
     "OrganizationType": "Aannemer",
     "OrganizationField": "Architectuur",
@@ -914,7 +914,7 @@
     "Longitude": 6.188931
   },
   {
-    "Name": "Demo Locatie 69 (Venlo)",
+    "Name": "Demo Project 69 (Venlo)",
     "ProjectType": "Nieuwbouw",
     "OrganizationType": "Onderzoeksinstituut",
     "OrganizationField": "Modulair",
@@ -979,7 +979,7 @@
     "Longitude": 6.138764
   },
   {
-    "Name": "Demo Locatie 74 (Maastricht)",
+    "Name": "Demo Project 74 (Maastricht)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Aannemer",
     "OrganizationField": "Bouwservices",
@@ -1005,7 +1005,7 @@
     "Longitude": 6.090321
   },
   {
-    "Name": "Demo Locatie 76 (Maastricht)",
+    "Name": "Demo Project 76 (Maastricht)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Onderzoeksinstituut",
     "OrganizationField": "Zonne-energie",
@@ -1031,7 +1031,7 @@
     "Longitude": 6.124466
   },
   {
-    "Name": "Demo Locatie 78 (Maastricht)",
+    "Name": "Demo Project 78 (Maastricht)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Architect",
     "OrganizationField": "Modulair",
@@ -1044,7 +1044,7 @@
     "Longitude": 5.683955
   },
   {
-    "Name": "Demo Locatie 79 (M\u00f6nchengladbach)",
+    "Name": "Demo Project 79 (M\u00f6nchengladbach)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Architect",
     "OrganizationField": "Zonne-energie",
@@ -1109,7 +1109,7 @@
     "Longitude": 6.581794
   },
   {
-    "Name": "Demo Locatie 84 (Aachen)",
+    "Name": "Demo Project 84 (Aachen)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Aannemer",
     "OrganizationField": "Modulair",
@@ -1122,7 +1122,7 @@
     "Longitude": 6.074813
   },
   {
-    "Name": "Demo Locatie 85 (Krefeld)",
+    "Name": "Demo Project 85 (Krefeld)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Architect",
     "OrganizationField": "Bouwservices",
@@ -1161,7 +1161,7 @@
     "Longitude": 6.120865
   },
   {
-    "Name": "Demo Locatie 88 (Venlo)",
+    "Name": "Demo Project 88 (Venlo)",
     "ProjectType": "Nieuwbouw",
     "OrganizationType": "Installatiebedrijf",
     "OrganizationField": "Bouwservices",
@@ -1174,7 +1174,7 @@
     "Longitude": 6.123531
   },
   {
-    "Name": "Demo Locatie 89 (Aachen)",
+    "Name": "Demo Project 89 (Aachen)",
     "ProjectType": "Circulair",
     "OrganizationType": "Installatiebedrijf",
     "OrganizationField": "Architectuur",
@@ -1187,7 +1187,7 @@
     "Longitude": 6.122649
   },
   {
-    "Name": "Demo Locatie 90 (Venlo)",
+    "Name": "Demo Project 90 (Venlo)",
     "ProjectType": "Circulair",
     "OrganizationType": "Onderzoeksinstituut",
     "OrganizationField": "Architectuur",
@@ -1226,7 +1226,7 @@
     "Longitude": 6.108789
   },
   {
-    "Name": "Demo Locatie 93 (Heinsberg)",
+    "Name": "Demo Project 93 (Heinsberg)",
     "ProjectType": "Circulair",
     "OrganizationType": "Aannemer",
     "OrganizationField": "Modulair",
@@ -1252,7 +1252,7 @@
     "Longitude": 6.005542
   },
   {
-    "Name": "Demo Locatie 95 (Aachen)",
+    "Name": "Demo Project 95 (Aachen)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Installatiebedrijf",    "OrganizationField": "Modulair",
     "HBMTopic": "Binnenluchtkwaliteit",
@@ -1277,7 +1277,7 @@
     "Longitude": 6.065009
   },
   {
-    "Name": "Demo Locatie 97 (Heinsberg)",
+    "Name": "Demo Project 97 (Heinsberg)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Onderzoeksinstituut",
     "OrganizationField": "Zonne-energie",

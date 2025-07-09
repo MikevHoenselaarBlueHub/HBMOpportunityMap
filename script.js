@@ -630,8 +630,8 @@ function selectOpportunity(index) {
     map.setView([opportunity.Latitude, opportunity.Longitude], 14);
   }
   
-  // Show location details
-  showLocationDetails(opportunity);
+  // Show location details with index
+  showLocationDetails(opportunity, index);
   
   // Track card click
   trackEvent('list_item_click', {
@@ -921,7 +921,10 @@ function updateFilterState() {
   }
 }
 
-function showLocationDetails(location) {
+// Global variable for current detail index
+let currentDetailIndex = -1;
+
+function showLocationDetails(location, index = -1) {
   // Track location detail view
   const isProject = (Array.isArray(location.HBMType) ? location.HBMType.includes('Project') : location.HBMType === 'Project');
   trackEvent('location_detail_view', {
@@ -933,6 +936,14 @@ function showLocationDetails(location) {
     custom_parameter_1: 'content_engagement',
     is_project: isProject
   });
+  
+  // Set current index for navigation
+  if (index >= 0) {
+    currentDetailIndex = index;
+  } else {
+    // Find index in filteredData
+    currentDetailIndex = filteredData.findIndex(item => item.Name === location.Name);
+  }
   
   const detailPanel = document.getElementById('detailPanel');
   const locationName = location.Name;
@@ -949,10 +960,22 @@ function showLocationDetails(location) {
                  </div>`;
   }
   
+  // Navigation buttons
+  const prevDisabled = currentDetailIndex <= 0;
+  const nextDisabled = currentDetailIndex >= filteredData.length - 1;
+  
   detailPanel.innerHTML = `
     <a href="#" id="closeDetail" class="close-btn">
       <img src="icons/close.svg" alt="${t('close')}" class="close-icon"/>
     </a>
+    
+    <button class="detail-navigation prev" id="prevDetail" ${prevDisabled ? 'disabled' : ''}>
+      ←
+    </button>
+    <button class="detail-navigation next" id="nextDetail" ${nextDisabled ? 'disabled' : ''}>
+      →
+    </button>
+    
     <div class="detail-content">
       ${imageHtml}
       <div class="detail-header">
@@ -960,6 +983,11 @@ function showLocationDetails(location) {
         <div class="detail-type-badge ${isProject ? 'project' : 'company'}">
           ${Array.isArray(location.HBMType) ? location.HBMType.join(', ') : location.HBMType}
         </div>
+      </div>
+      
+      <div class="detail-description">
+        <h3>${t('description')}</h3>
+        <p>${location.Description}</p>
       </div>
       
       <div class="detail-info">
@@ -994,23 +1022,62 @@ function showLocationDetails(location) {
         </div>
       </div>
       
-      <div class="detail-description">
-        <h3>${t('description')}</h3>
-        <p>${location.Description}</p>
-      </div>
-      
       <div class="detail-actions">
         <button class="btn-primary" onclick="showContactForm(${JSON.stringify(location).replace(/"/g, '&quot;')})">${t('contact')}</button>
       </div>
     </div>
   `;
 
-  // Re-attach close event listener
+  // Re-attach event listeners
   detailPanel.querySelector('#closeDetail').onclick = () => {
     detailPanel.classList.remove('open');
   };
+  
+  // Navigation event listeners
+  const prevBtn = detailPanel.querySelector('#prevDetail');
+  const nextBtn = detailPanel.querySelector('#nextDetail');
+  
+  if (prevBtn && !prevDisabled) {
+    prevBtn.onclick = () => navigateDetail(-1);
+  }
+  
+  if (nextBtn && !nextDisabled) {
+    nextBtn.onclick = () => navigateDetail(1);
+  }
 
   detailPanel.classList.add('open');
+}
+
+function navigateDetail(direction) {
+  const newIndex = currentDetailIndex + direction;
+  
+  if (newIndex >= 0 && newIndex < filteredData.length) {
+    const nextLocation = filteredData[newIndex];
+    
+    // Update map view
+    if (map) {
+      map.setView([nextLocation.Latitude, nextLocation.Longitude], 14);
+    }
+    
+    // Update list highlight
+    document.querySelectorAll('.opportunity-card').forEach(card => card.classList.remove('highlighted'));
+    const targetCard = document.querySelector(`[data-index="${newIndex}"]`);
+    if (targetCard) {
+      targetCard.classList.add('highlighted');
+      targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    // Show new location details
+    showLocationDetails(nextLocation, newIndex);
+    
+    // Track navigation
+    trackEvent('detail_navigation', {
+      direction: direction > 0 ? 'next' : 'previous',
+      location_name: nextLocation.Name,
+      label: `Navigated ${direction > 0 ? 'next' : 'previous'} to: ${nextLocation.Name}`,
+      custom_parameter_1: 'navigation_interaction'
+    });
+  }
 }
 
 function updateMap() {
@@ -1220,7 +1287,20 @@ function updateMap() {
         is_project: isProject
       });
       
-      showLocationDetails(loc);
+      // Find index in filtered data
+      const locationIndex = filteredData.findIndex(item => item.Name === loc.Name);
+      
+      // Highlight corresponding list item
+      if (locationIndex >= 0) {
+        document.querySelectorAll('.opportunity-card').forEach(card => card.classList.remove('highlighted'));
+        const targetCard = document.querySelector(`[data-index="${locationIndex}"]`);
+        if (targetCard) {
+          targetCard.classList.add('highlighted');
+          targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+      
+      showLocationDetails(loc, locationIndex);
     });
     
     // Add hover events for label
