@@ -319,6 +319,249 @@ button {
   padding: 0 1.5rem;
 }
 
+/* === Marker hover label === */
+.marker-hover-label {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  pointer-events: none;
+  z-index: 10000;
+  white-space: nowrap;
+  max-width: 200px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* === Improved detail panel === */
+#detailPanel {
+  position: fixed; 
+  bottom: -100%; 
+  left: 0; 
+  width: 100%;
+  background: #fff; 
+  padding: 0;
+  transition: 0.3s; 
+  z-index: 2000;
+  border-top: 3px solid rgb(38, 123, 41);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+#detailPanel.open { 
+  bottom: 0; 
+}
+
+.detail-content {
+  padding: 2rem;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.detail-header h2 {
+  margin: 0;
+  color: rgb(38, 123, 41);
+  font-size: 1.5rem;
+}
+
+.detail-type-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: white;
+}
+
+.detail-type-badge.project {
+  background: rgb(38, 123, 41);
+}
+
+.detail-type-badge.company {
+  background: #2196F3;
+}
+
+.detail-info {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid rgb(38, 123, 41);
+}
+
+.detail-label {
+  font-weight: bold;
+  color: rgb(38, 123, 41);
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: #333;
+  flex: 1;
+}
+
+.detail-description {
+  margin-bottom: 2rem;
+}
+
+.detail-description h3 {
+  color: rgb(38, 123, 41);
+  margin-bottom: 0.5rem;
+}
+
+.detail-description p {
+  color: #666;
+  line-height: 1.6;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* === Contact form === */
+.contact-form-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.contact-form-header {
+  background: rgb(38, 123, 41);
+  color: white;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contact-form-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.contact-form-header .close-btn {
+  border-color: white;
+  color: white;
+}
+
+.contact-form-header .close-btn:hover {
+  background: white;
+  color: rgb(38, 123, 41);
+}
+
+.contact-form-header .close-btn:hover .close-icon {
+  filter: none;
+}
+
+.contact-form-content {
+  padding: 2rem;
+}
+
+.contact-form-content p {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid rgb(38, 123, 41);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: rgb(38, 123, 41);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+/* === Responsive improvements === */
+@media (max-width: 768px) {
+  .detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .detail-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .detail-label {
+    min-width: auto;
+  }
+  
+  .detail-actions {
+    flex-direction: column;
+  }
+  
+  .contact-form-container {
+    margin: 1rem;
+  }
+  
+  .contact-form-content {
+    padding: 1rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+}
+
 /* === Responsive nav === */
 @media screen and (min-width: 768px) {
   #hamburger { display: none; }

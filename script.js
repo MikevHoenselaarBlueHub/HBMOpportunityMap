@@ -1,102 +1,33 @@
-// Internationalization
-const translations = {
-  nl: {
-    selectAll: 'Selecteer alles',
-    selectNone: 'Selecteer geen',
-    apply: 'Toepassen',
-    noSelection: 'Maak een keuze uit een van de filters',
-    projectType: 'Type project',
-    organizationType: 'Organisatietype',
-    organizationField: 'Vakgebied',
-    hbmTopic: 'Thema',
-    hbmCharacteristics: 'Kenmerken',
-    hbmSector: 'Sector',
-    projects: 'Projecten',
-    companies: 'Bedrijven',
-    type: 'Type',
-    organization: 'Organisatie',
-    field: 'Vakgebied',
-    topic: 'Thema',
-    characteristics: 'Kenmerken',
-    sector: 'Sector',
-    description: 'Beschrijving',
-    contact: 'Contact opnemen',
-    moreInfo: 'Meer info',
-    aboutHBM: 'Over HBM',
-    close: 'Sluiten',
-    filters: 'Filters',
-    opportunityMap: 'Kansenkaart',
-    dataLoadError: 'Fout bij het laden van de data. Probeer de pagina te vernieuwen.',
-    leafletLoadError: 'Kaart bibliotheek kon niet worden geladen.'
-  },
-  en: {
-    selectAll: 'Select all',
-    selectNone: 'Select none',
-    apply: 'Apply',
-    noSelection: 'Make a choice from one of the filters',
-    projectType: 'Project type',
-    organizationType: 'Organization type',
-    organizationField: 'Field',
-    hbmTopic: 'Topic',
-    hbmCharacteristics: 'Characteristics',
-    hbmSector: 'Sector',
-    projects: 'Projects',
-    companies: 'Companies',
-    type: 'Type',
-    organization: 'Organization',
-    field: 'Field',
-    topic: 'Topic',
-    characteristics: 'Characteristics',
-    sector: 'Sector',
-    description: 'Description',
-    contact: 'Contact',
-    moreInfo: 'More info',
-    aboutHBM: 'About HBM',
-    close: 'Close',
-    filters: 'Filters',
-    opportunityMap: 'Opportunity Map',
-    dataLoadError: 'Error loading data. Please refresh the page.',
-    leafletLoadError: 'Map library could not be loaded.'
-  },
-  de: {
-    selectAll: 'Alle auswählen',
-    selectNone: 'Keine auswählen',
-    apply: 'Anwenden',
-    noSelection: 'Treffen Sie eine Auswahl aus einem der Filter',
-    projectType: 'Projekttyp',
-    organizationType: 'Organisationstyp',
-    organizationField: 'Fachbereich',
-    hbmTopic: 'Thema',
-    hbmCharacteristics: 'Merkmale',
-    hbmSector: 'Sektor',
-    projects: 'Projekte',
-    companies: 'Unternehmen',
-    type: 'Typ',
-    organization: 'Organisation',
-    field: 'Fachbereich',
-    topic: 'Thema',
-    characteristics: 'Merkmale',
-    sector: 'Sektor',
-    description: 'Beschreibung',
-    contact: 'Kontakt aufnehmen',
-    moreInfo: 'Mehr Infos',
-    aboutHBM: 'Über HBM',
-    close: 'Schließen',
-    filters: 'Filter',
-    opportunityMap: 'Chancenkarte',
-    dataLoadError: 'Fehler beim Laden der Daten. Bitte aktualisieren Sie die Seite.',
-    leafletLoadError: 'Kartenbibliothek konnte nicht geladen werden.'
-  }
-};
 
+// Global variables
 let currentLanguage = 'nl';
+let translations = {};
+let map, markers = [];
+let pIcon, bIcon;
+let hoverLabel;
 
-function t(key) {
-  return translations[currentLanguage][key] || key;
+// Load translations
+async function loadTranslations() {
+  try {
+    const response = await fetch(`translations/${currentLanguage}.json`);
+    translations = await response.json();
+  } catch (error) {
+    console.error('Error loading translations:', error);
+    // Fallback to Dutch if translation file fails to load
+    if (currentLanguage !== 'nl') {
+      currentLanguage = 'nl';
+      await loadTranslations();
+    }
+  }
 }
 
-function setLanguage(lang) {
+function t(key) {
+  return translations[key] || key;
+}
+
+async function setLanguage(lang) {
   currentLanguage = lang;
+  await loadTranslations();
   updateUI();
 }
 
@@ -115,7 +46,7 @@ function updateUI() {
   // Update all elements with data-i18n attributes
   document.querySelectorAll('[data-i18n]').forEach(element => {
     const key = element.getAttribute('data-i18n');
-    if (translations[currentLanguage][key]) {
+    if (translations[key]) {
       element.textContent = t(key);
     }
   });
@@ -139,6 +70,156 @@ function updateUI() {
   if (companyCheckbox && companyCheckbox.nextElementSibling) {
     companyCheckbox.nextElementSibling.textContent = t('companies');
   }
+}
+
+// Create hover label for markers
+function createHoverLabel() {
+  if (!hoverLabel) {
+    hoverLabel = document.createElement('div');
+    hoverLabel.className = 'marker-hover-label';
+    hoverLabel.style.cssText = `
+      position: absolute;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+      pointer-events: none;
+      z-index: 10000;
+      white-space: nowrap;
+      max-width: 200px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      display: none;
+    `;
+    document.body.appendChild(hoverLabel);
+  }
+}
+
+function showHoverLabel(e, text) {
+  if (!hoverLabel) createHoverLabel();
+  
+  hoverLabel.textContent = text;
+  hoverLabel.style.display = 'block';
+  
+  // Position the label near the cursor but keep it in viewport
+  const rect = document.documentElement.getBoundingClientRect();
+  const labelRect = hoverLabel.getBoundingClientRect();
+  
+  let x = e.clientX + 10;
+  let y = e.clientY - 30;
+  
+  // Adjust if label would go outside viewport
+  if (x + labelRect.width > window.innerWidth) {
+    x = e.clientX - labelRect.width - 10;
+  }
+  if (y < 0) {
+    y = e.clientY + 10;
+  }
+  
+  hoverLabel.style.left = x + 'px';
+  hoverLabel.style.top = y + 'px';
+}
+
+function hideHoverLabel() {
+  if (hoverLabel) {
+    hoverLabel.style.display = 'none';
+  }
+}
+
+// Contact form functions
+function showContactForm(location) {
+  const formOverlay = document.getElementById('formOverlay');
+  formOverlay.innerHTML = `
+    <div class="contact-form-container">
+      <div class="contact-form-header">
+        <h2>${t('contactForm')}</h2>
+        <a href="#" id="closeContactForm" class="close-btn">
+          <img src="icons/close.svg" alt="${t('close')}" class="close-icon"/>
+        </a>
+      </div>
+      <div class="contact-form-content">
+        <p><strong>${t('interestedIn')}:</strong> ${location.Name}</p>
+        <form id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+          <input type="hidden" name="subject" value="${t('interestedIn')}: ${location.Name}">
+          <input type="hidden" name="interested_in" value="${location.Name}">
+          
+          <div class="form-group">
+            <label for="firstName">${t('firstName')} *</label>
+            <input type="text" id="firstName" name="firstName" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="lastName">${t('lastName')} *</label>
+            <input type="text" id="lastName" name="lastName" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">${t('email')} *</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="company">${t('company')}</label>
+            <input type="text" id="company" name="company">
+          </div>
+          
+          <div class="form-group">
+            <label for="phone">${t('phone')}</label>
+            <input type="tel" id="phone" name="phone">
+          </div>
+          
+          <div class="form-group">
+            <label for="message">${t('message')} *</label>
+            <textarea id="message" name="message" rows="5" required></textarea>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="closeContactForm()">${t('cancel')}</button>
+            <button type="submit" class="btn-primary">${t('send')}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+  
+  formOverlay.classList.add('open');
+  
+  // Add event listeners
+  document.getElementById('closeContactForm').onclick = closeContactForm;
+  document.getElementById('contactForm').onsubmit = handleContactSubmit;
+}
+
+function closeContactForm() {
+  document.getElementById('formOverlay').classList.remove('open');
+}
+
+function handleContactSubmit(e) {
+  e.preventDefault();
+  
+  // Get form data
+  const formData = new FormData(e.target);
+  
+  // You can implement your own email sending logic here
+  // For now, we'll use Formspree (replace YOUR_FORM_ID with actual ID)
+  fetch('https://formspree.io/f/YOUR_FORM_ID', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'Accept': 'application/json'
+    }
+  }).then(response => {
+    if (response.ok) {
+      alert('Bericht succesvol verzonden!');
+      closeContactForm();
+    } else {
+      alert('Er is een fout opgetreden. Probeer het opnieuw.');
+    }
+  }).catch(error => {
+    console.error('Error:', error);
+    alert('Er is een fout opgetreden. Probeer het opnieuw.');
+  });
 }
 
 // Hamburger en overlays
@@ -178,15 +259,14 @@ if (document.getElementById('closeDetail')) {
   };
 }
 
-// Kaart & markers
-let map, markers = [];
-let pIcon, bIcon;
-
 // Initialize map only if we're on the map page
 if (document.getElementById('map')) {
   // Function to initialize everything when Leaflet is ready
-  function initializeApp() {
+  async function initializeApp() {
     if (typeof L !== 'undefined') {
+      // Load translations first
+      await loadTranslations();
+      
       // Initialize icons
       pIcon = L.icon({ 
         iconUrl: 'icons/marker-project.svg', 
@@ -201,6 +281,9 @@ if (document.getElementById('map')) {
         popupAnchor: [0, -40]
       });
       
+      // Create hover label
+      createHoverLabel();
+      
       // Data laden
       fetch('opportunities.json')
         .then(res => res.json())
@@ -208,11 +291,12 @@ if (document.getElementById('map')) {
           window.data = data;
           createFilterCheckboxes();
           updateMap();
+          updateUI();
         })
         .catch(error => {
           console.error('Error loading data:', error);
           const mapElement = document.getElementById('map');
-          mapElement.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Fout bij het laden van de data. Probeer de pagina te vernieuwen.</div>';
+          mapElement.innerHTML = `<div style="padding: 2rem; text-align: center; color: #666;">${t('dataLoadError')}</div>`;
         });
     } else {
       // Retry after a short delay
@@ -222,13 +306,19 @@ if (document.getElementById('map')) {
 
   // Wait for DOM and then initialize
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      initializeApp();
+    document.addEventListener('DOMContentLoaded', initializeApp);
+  } else {
+    initializeApp();
+  }
+} else {
+  // For non-map pages, still load translations
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadTranslations();
       updateUI();
     });
   } else {
-    initializeApp();
-    updateUI();
+    loadTranslations().then(updateUI);
   }
 }
 
@@ -284,22 +374,61 @@ function updateFilterState() {
 
 function showLocationDetails(location) {
   const detailPanel = document.getElementById('detailPanel');
+  const locationName = location.Name;
+  const isProject = (Array.isArray(location.HBMType) ? location.HBMType.includes('Project') : location.HBMType === 'Project');
+  
   detailPanel.innerHTML = `
     <a href="#" id="closeDetail" class="close-btn">
       <img src="icons/close.svg" alt="${t('close')}" class="close-icon"/>
     </a>
-    <h2>${location.Name}</h2>
-    <p><strong>${t('type')}:</strong> ${Array.isArray(location.HBMType) ? location.HBMType.join(', ') : location.HBMType}</p>
-    <p><strong>${t('projectType')}:</strong> ${Array.isArray(location.ProjectType) ? location.ProjectType.join(', ') : location.ProjectType}</p>
-    <p><strong>${t('organizationType')}:</strong> ${Array.isArray(location.OrganizationType) ? location.OrganizationType.join(', ') : location.OrganizationType}</p>
-    <p><strong>${t('organizationField')}:</strong> ${Array.isArray(location.OrganizationField) ? location.OrganizationField.join(', ') : location.OrganizationField}</p>
-    <p><strong>${t('hbmTopic')}:</strong> ${Array.isArray(location.HBMTopic) ? location.HBMTopic.join(', ') : location.HBMTopic}</p>
-    <p><strong>${t('hbmCharacteristics')}:</strong> ${Array.isArray(location.HBMCharacteristics) ? location.HBMCharacteristics.join(', ') : location.HBMCharacteristics}</p>
-    <p><strong>${t('hbmSector')}:</strong> ${Array.isArray(location.HBMSector) ? location.HBMSector.join(', ') : location.HBMSector}</p>
-    <p><strong>${t('description')}:</strong> ${location.Description}</p>
-    <div style="margin-top: 1rem;">
-      <button class="btn-primary">${t('contact')}</button>
-      <button class="btn-secondary">${t('moreInfo')}</button>
+    <div class="detail-content">
+      <div class="detail-header">
+        <h2>${locationName}</h2>
+        <div class="detail-type-badge ${isProject ? 'project' : 'company'}">
+          ${Array.isArray(location.HBMType) ? location.HBMType.join(', ') : location.HBMType}
+        </div>
+      </div>
+      
+      <div class="detail-info">
+        <div class="detail-row">
+          <span class="detail-label">${t('projectType')}:</span>
+          <span class="detail-value">${Array.isArray(location.ProjectType) ? location.ProjectType.join(', ') : location.ProjectType}</span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">${t('organizationType')}:</span>
+          <span class="detail-value">${Array.isArray(location.OrganizationType) ? location.OrganizationType.join(', ') : location.OrganizationType}</span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">${t('organizationField')}:</span>
+          <span class="detail-value">${Array.isArray(location.OrganizationField) ? location.OrganizationField.join(', ') : location.OrganizationField}</span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">${t('hbmTopic')}:</span>
+          <span class="detail-value">${Array.isArray(location.HBMTopic) ? location.HBMTopic.join(', ') : location.HBMTopic}</span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">${t('hbmCharacteristics')}:</span>
+          <span class="detail-value">${Array.isArray(location.HBMCharacteristics) ? location.HBMCharacteristics.join(', ') : location.HBMCharacteristics}</span>
+        </div>
+        
+        <div class="detail-row">
+          <span class="detail-label">${t('hbmSector')}:</span>
+          <span class="detail-value">${Array.isArray(location.HBMSector) ? location.HBMSector.join(', ') : location.HBMSector}</span>
+        </div>
+      </div>
+      
+      <div class="detail-description">
+        <h3>${t('description')}</h3>
+        <p>${location.Description}</p>
+      </div>
+      
+      <div class="detail-actions">
+        <button class="btn-primary" onclick="showContactForm(${JSON.stringify(location).replace(/"/g, '&quot;')})">${t('contact')}</button>
+      </div>
     </div>
   `;
 
@@ -354,9 +483,27 @@ function updateMap() {
     }
     
     const marker = L.marker([loc.Latitude, loc.Longitude], markerOptions).addTo(map);
+    
+    // Add click event
     marker.on('click', () => {
       showLocationDetails(loc);
     });
+    
+    // Add hover events for label
+    marker.on('mouseover', (e) => {
+      const domEvent = e.originalEvent;
+      showHoverLabel(domEvent, loc.Name);
+    });
+    
+    marker.on('mouseout', () => {
+      hideHoverLabel();
+    });
+    
+    marker.on('mousemove', (e) => {
+      const domEvent = e.originalEvent;
+      showHoverLabel(domEvent, loc.Name);
+    });
+    
     markers.push(marker);
     bounds.push([loc.Latitude, loc.Longitude]);
   });
