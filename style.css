@@ -70,6 +70,19 @@ header {
 /* === Buttons === */
 button { cursor: pointer; }
 
+#filterBtn {
+  position: fixed;
+  top: 100px;
+  left: 1rem;
+  z-index: 1000;
+  background: rgb(38, 123, 41);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
 .cta-btn, #applyFilters {
   background: rgb(38, 123, 41); 
   color: #fff; 
@@ -107,7 +120,8 @@ button { cursor: pointer; }
 #map {
   flex: 1;
   width: 100%;
-  min-height: 400px; /* Fallback */
+  min-height: 400px;
+  height: calc(100vh - 80px); /* Header height compensation */
 }
 
 #detailPanel {

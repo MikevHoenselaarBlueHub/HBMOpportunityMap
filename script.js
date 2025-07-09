@@ -46,6 +46,11 @@ fetch('opportunities.json')
     window.data = data;
     createFilterCheckboxes();
     updateMap();
+  })
+  .catch(error => {
+    console.error('Error loading data:', error);
+    const mapElement = document.getElementById('map');
+    mapElement.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Fout bij het laden van de data. Probeer de pagina te vernieuwen.</div>';
   });
 
 function createFilterCheckboxes() {
@@ -61,6 +66,35 @@ function createFilterCheckboxes() {
       });
     }
   });
+}
+
+function showLocationDetails(location) {
+  const detailPanel = document.getElementById('detailPanel');
+  detailPanel.innerHTML = `
+    <a href="#" id="closeDetail" class="close-btn">
+      <img src="icons/close.svg" alt="Sluiten" class="close-icon"/>
+    </a>
+    <h2>${location.Name}</h2>
+    <p><strong>Type:</strong> ${location.HBMType}</p>
+    <p><strong>Project type:</strong> ${location.ProjectType}</p>
+    <p><strong>Organisatie:</strong> ${location.OrganizationType}</p>
+    <p><strong>Vakgebied:</strong> ${location.OrganizationField}</p>
+    <p><strong>Thema:</strong> ${location.HBMTopic}</p>
+    <p><strong>Kenmerken:</strong> ${location.HBMCharacteristics}</p>
+    <p><strong>Sector:</strong> ${location.HBMSector}</p>
+    <p><strong>Beschrijving:</strong> ${location.Description}</p>
+    <div style="margin-top: 1rem;">
+      <button class="cta-btn">Contact opnemen</button>
+      <button class="btn-secondary">Meer info</button>
+    </div>
+  `;
+  
+  // Re-attach close event listener
+  detailPanel.querySelector('#closeDetail').onclick = () => {
+    detailPanel.classList.remove('open');
+  };
+  
+  detailPanel.classList.add('open');
 }
 
 function updateMap() {
@@ -82,8 +116,7 @@ function updateMap() {
     const icon = loc.HBMType === 'Project' ? pIcon : bIcon;
     const marker = L.marker([loc.Latitude, loc.Longitude], { icon }).addTo(map);
     marker.on('click', () => {
-      document.getElementById('detailPanel').classList.add('open');
-      // Vul detailPanel content hier aan
+      showLocationDetails(loc);
     });
     markers.push(marker);
     bounds.push([loc.Latitude, loc.Longitude]);
