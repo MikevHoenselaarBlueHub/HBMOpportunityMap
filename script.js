@@ -1024,8 +1024,167 @@ function createFilterCheckboxes() {
 }
 
 function loadMunicipalityBoundaries() {
-  // Define municipality boundaries for the main cities in the region
-  const municipalities = [
+  // Define region boundaries for the Euregio Maas-Rijn
+  const regions = {
+    // Netherlands - Limburg
+    'NL-Limburg': [
+      'Beek', 'Beekdaelen', 'Beesel', 'Bergen (L.)', 'Brunssum', 'Echt-Susteren', 'Eijsden-Margraten', 
+      'Gennep', 'Gulpen-Wittem', 'Heerlen', 'Horst aan de Maas', 'Kerkrade', 'Landgraaf', 'Leudal', 
+      'Maasgouw', 'Maastricht', 'Meerssen', 'Nederweert', 'Peel en Maas', 'Roerdalen', 'Roermond', 
+      'Simpelveld', 'Sittard-Geleen', 'Stein', 'Vaals', 'Valkenburg aan de Geul', 'Venlo', 'Venray', 
+      'Voerendaal', 'Weert'
+    ],
+    // Netherlands - Noord-Brabant
+    'NL-Noord-Brabant': [
+      'Aalburg', 'Alphen-Chaam', 'Asten', 'Baarle-Nassau', 'Bergen op Zoom', 'Bernheze', 'Best', 
+      'Bladel', 'Boekel', 'Boxmeer', 'Boxtel', 'Breda', 'Cranendonck', 'Cuijk', 'Deurne', 'Dongen', 
+      'Drimmelen', 'Eersel', 'Eindhoven', 'Etten-Leur', 'Geertruidenberg', 'Geldrop-Mierlo', 'Gemert-Bakel', 
+      'Gilze en Rijen', 'Goirle', 'Grave', 'Haaren', 'Halderberge', 'Heeze-Leende', 'Helmond', 
+      'Heusden', 'Hilvarenbeek', 'Laarbeek', 'Landerd', 'Loon op Zand', 'Meierijstad', 'Mill en Sint Hubert', 
+      'Moerdijk', 'Nuenen, Gerwen en Nederwetten', 'Oirschot', 'Oisterwijk', 'Oosterhout', 'Oss', 
+      'Reusel-De Mierden', 'Roosendaal', 'Rucphen', 'Sint-Michielsgestel', 'Someren', 'Son en Breugel', 
+      'Steenbergen', 'Tilburg', 'Uden', 'Valkenswaard', 'Veldhoven', 'Vught', 'Waalre', 'Waalwijk', 
+      'Woensdrecht', 'Woudrichem', 'Zundert'
+    ],
+    // Germany - NRW Kreise
+    'DE-Heinsberg': [
+      'Heinsberg', 'Erkelenz', 'Hückelhoven', 'Übach-Palenberg', 'Geilenkirchen', 'Gangelt', 'Selfkant', 
+      'Waldfeucht', 'Wassenberg', 'Wegberg'
+    ],
+    'DE-Viersen': [
+      'Viersen', 'Mönchengladbach', 'Krefeld', 'Kempen', 'Tönisvorst', 'Willich', 'Nettetal', 'Grefrath', 
+      'Schwalmtal', 'Niederkrüchten', 'Brüggen'
+    ],
+    'DE-Kleve': [
+      'Kleve', 'Emmerich am Rhein', 'Geldern', 'Goch', 'Kevelaer', 'Straelen', 'Bedburg-Hau', 
+      'Issum', 'Kalkar', 'Kerken', 'Kranenburg', 'Rees', 'Rheurdt', 'Uedem', 'Wachtendonk', 'Weeze'
+    ],
+    'DE-Aachen': [
+      'Aachen', 'Alsdorf', 'Baesweiler', 'Eschweiler', 'Herzogenrath', 'Monschau', 'Stolberg', 
+      'Würselen', 'Aldenhoven', 'Düren', 'Heimbach', 'Hürtgenwald', 'Inden', 'Jülich', 'Kreuzau', 
+      'Langerwehe', 'Linnich', 'Merzenich', 'Nideggen', 'Niederzier', 'Nörvenich', 'Simmerath', 
+      'Titz', 'Vettweiß'
+    ],
+    'DE-Mettmann': [
+      'Mettmann', 'Erkrath', 'Haan', 'Heiligenhaus', 'Hilden', 'Langenfeld', 'Monheim am Rhein', 
+      'Ratingen', 'Velbert', 'Wülfrath'
+    ],
+    // Belgium - Limburg & Liège
+    'BE-Limburg': [
+      'Alken', 'As', 'Beringen', 'Bilzen', 'Bocholt', 'Borgloon', 'Bree', 'Diepenbeek', 'Dilsen-Stokkem', 
+      'Genk', 'Geetbets', 'Gingelom', 'Halen', 'Ham', 'Hasselt', 'Hechtel-Eksel', 'Heers', 'Herk-de-Stad', 
+      'Heusden-Zolder', 'Hoeselt', 'Houthalen-Helchteren', 'Kinrooi', 'Kortessem', 'Lanaken', 'Leopoldsburg', 
+      'Lommel', 'Lummen', 'Maaseik', 'Maasmechelen', 'Meeuwen-Gruitrode', 'Nieuwerkerken', 'Opglabbeek', 
+      'Peer', 'Pelt', 'Riemst', 'Sint-Truiden', 'Tessenderlo', 'Tongeren', 'Voeren', 'Wellen', 'Zonhoven', 'Zutendaal'
+    ],
+    'BE-Liege': [
+      'Amay', 'Ans', 'Anthisnes', 'Awans', 'Aywaille', 'Baelen', 'Bassenge', 'Berloz', 'Beyne-Heusay', 
+      'Blegny', 'Braives', 'Burdinne', 'Chaudfontaine', 'Clavier', 'Comblain-au-Pont', 'Crisnée', 'Dalhem', 
+      'Donceel', 'Engis', 'Esneux', 'Eupen', 'Faimes', 'Ferrières', 'Fexhe-le-Haut-Clocher', 'Flémalle', 
+      'Fléron', 'Geer', 'Grâce-Hollogne', 'Hamoir', 'Hannut', 'Heron', 'Herstal', 'Herve', 'Huy', 
+      'Jalhay', 'Juprelle', 'Kelmis', 'Liège', 'Limbourg', 'Lincent', 'Lontzen', 'Malmedy', 'Marchin', 
+      'Modave', 'Nandrin', 'Neupré', 'Olne', 'Oreye', 'Ouffet', 'Oupeye', 'Pepinster', 'Plombières', 
+      'Raeren', 'Remicourt', 'Saint-Georges-sur-Meuse', 'Saint-Nicolas', 'Seraing', 'Soumagne', 'Spa', 
+      'Sprimont', 'Stavelot', 'Stoumont', 'Theux', 'Thimister-Clermont', 'Tinlot', 'Trois-Ponts', 
+      'Trooz', 'Verlaine', 'Verviers', 'Villers-le-Bouillet', 'Visé', 'Waimes', 'Wanze', 'Waremme', 'Welkenraedt'
+    ]
+  };
+
+  // Load municipalities using OpenStreetMap Overpass API
+  loadMunicipalitiesFromOverpass(regions);
+}
+
+async function loadMunicipalitiesFromOverpass(regions) {
+  try {
+    const overpassUrl = 'https://overpass-api.de/api/interpreter';
+    
+    // Build Overpass query for all municipalities
+    let query = '[out:json][timeout:30];(';
+    
+    Object.entries(regions).forEach(([regionKey, municipalities]) => {
+      const countryCode = regionKey.split('-')[0];
+      municipalities.forEach(municipality => {
+        if (countryCode === 'NL') {
+          query += `relation["admin_level"="8"]["name"="${municipality}"]["place"!="city"];`;
+        } else if (countryCode === 'DE') {
+          query += `relation["admin_level"="8"]["name"="${municipality}"]["place"!="city"];`;
+        } else if (countryCode === 'BE') {
+          query += `relation["admin_level"="8"]["name"="${municipality}"]["place"!="city"];`;
+        }
+      });
+    });
+    
+    query += ');out geom;';
+    
+    const response = await fetch(overpassUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `data=${encodeURIComponent(query)}`
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Process the response and create polygons
+    data.elements.forEach(element => {
+      if (element.type === 'relation' && element.geometry) {
+        const coordinates = convertOverpassGeometry(element.geometry);
+        if (coordinates.length > 0) {
+          const polygon = L.polygon(coordinates, {
+            color: 'rgb(38, 123, 41)',
+            weight: 1,
+            opacity: 0.7,
+            fillColor: 'rgb(38, 123, 41)',
+            fillOpacity: 0.1
+          }).addTo(municipalityLayer);
+          
+          // Add municipality name label
+          const center = polygon.getBounds().getCenter();
+          L.marker(center, {
+            icon: L.divIcon({
+              className: 'municipality-label',
+              html: `<div style="background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; color: rgb(38, 123, 41); border: 1px solid rgb(38, 123, 41);">${element.tags.name}</div>`,
+              iconSize: [100, 20],
+              iconAnchor: [50, 10]
+            })
+          }).addTo(municipalityLayer);
+        }
+      }
+    });
+    
+    console.log(`Loaded ${data.elements.length} municipalities from OpenStreetMap`);
+    
+  } catch (error) {
+    console.error('Error loading municipalities from Overpass API:', error);
+    
+    // Fallback to simplified hardcoded boundaries for major cities
+    loadFallbackMunicipalities();
+  }
+}
+
+function convertOverpassGeometry(geometry) {
+  const coordinates = [];
+  
+  geometry.forEach(member => {
+    if (member.type === 'way') {
+      const wayCoords = member.geometry.map(node => [node.lat, node.lon]);
+      if (wayCoords.length > 2) {
+        coordinates.push(wayCoords);
+      }
+    }
+  });
+  
+  return coordinates;
+}
+
+function loadFallbackMunicipalities() {
+  // Fallback to major cities with approximate boundaries
+  const majorCities = [
     {
       name: "Maastricht",
       bounds: [[50.82, 5.62], [50.88, 5.72], [50.90, 5.75], [50.85, 5.78], [50.82, 5.75], [50.80, 5.68], [50.82, 5.62]]
@@ -1033,6 +1192,10 @@ function loadMunicipalityBoundaries() {
     {
       name: "Aachen",
       bounds: [[50.72, 6.04], [50.78, 6.04], [50.82, 6.09], [50.81, 6.14], [50.77, 6.15], [50.73, 6.12], [50.72, 6.08], [50.72, 6.04]]
+    },
+    {
+      name: "Eindhoven",
+      bounds: [[51.40, 5.42], [51.46, 5.44], [51.50, 5.50], [51.48, 5.54], [51.44, 5.56], [51.40, 5.53], [51.38, 5.47], [51.40, 5.42]]
     },
     {
       name: "Venlo",
@@ -1053,10 +1216,26 @@ function loadMunicipalityBoundaries() {
     {
       name: "Heinsberg",
       bounds: [[51.04, 6.05], [51.08, 6.06], [51.11, 6.12], [51.10, 6.16], [51.06, 6.16], [51.03, 6.13], [51.02, 6.08], [51.04, 6.05]]
+    },
+    {
+      name: "Liège",
+      bounds: [[50.60, 5.52], [50.66, 5.54], [50.68, 5.60], [50.67, 5.64], [50.63, 5.65], [50.59, 5.62], [50.58, 5.56], [50.60, 5.52]]
+    },
+    {
+      name: "Hasselt",
+      bounds: [[50.91, 5.30], [50.97, 5.32], [50.99, 5.38], [50.98, 5.42], [50.94, 5.43], [50.90, 5.40], [50.89, 5.34], [50.91, 5.30]]
+    },
+    {
+      name: "Breda",
+      bounds: [[51.55, 4.74], [51.61, 4.76], [51.63, 4.82], [51.62, 4.86], [51.58, 4.87], [51.54, 4.84], [51.53, 4.78], [51.55, 4.74]]
+    },
+    {
+      name: "Tilburg",
+      bounds: [[51.53, 5.04], [51.59, 5.06], [51.61, 5.12], [51.60, 5.16], [51.56, 5.17], [51.52, 5.14], [51.51, 5.08], [51.53, 5.04]]
     }
   ];
   
-  municipalities.forEach(municipality => {
+  majorCities.forEach(municipality => {
     const polygon = L.polygon(municipality.bounds, {
       color: 'rgb(38, 123, 41)',
       weight: 2,
