@@ -965,11 +965,10 @@ function showLocationDetails(location, index = -1) {
   const nextDisabled = currentDetailIndex >= filteredData.length - 1;
   
   detailPanel.innerHTML = `
-    <a href="#" id="closeDetail" class="close-btn">
-      <img src="icons/close.svg" alt="${t('close')}" class="close-icon"/>
-    </a>
-    
     <div class="detail-content">
+      <a href="#" id="closeDetail" class="close-btn">
+        <img src="icons/close.svg" alt="${t('close')}" class="close-icon"/>
+      </a>
       ${imageHtml}
       <div class="detail-header">
         <h2>${locationName}</h2>
