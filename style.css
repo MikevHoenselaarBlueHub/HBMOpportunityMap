@@ -1580,6 +1580,25 @@ button {
   }
 }
 
+/* === Municipality Labels === */
+.municipality-label {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.municipality-label div {
+  background: rgba(255,255,255,0.95) !important;
+  border: 1px solid rgb(38, 123, 41) !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  color: rgb(38, 123, 41) !important;
+  white-space: nowrap !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+}
+
 /* === Print styles === */
 @media print {
 

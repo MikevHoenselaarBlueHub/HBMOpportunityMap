@@ -1024,6 +1024,11 @@ function createFilterCheckboxes() {
 }
 
 function loadMunicipalityBoundaries() {
+  // Initialize municipality layer first
+  if (!municipalityLayer) {
+    municipalityLayer = L.layerGroup();
+  }
+  
   // Define region boundaries for the Euregio Maas-Rijn
   const regions = {
     // Netherlands - Limburg
@@ -1034,17 +1039,9 @@ function loadMunicipalityBoundaries() {
       'Simpelveld', 'Sittard-Geleen', 'Stein', 'Vaals', 'Valkenburg aan de Geul', 'Venlo', 'Venray', 
       'Voerendaal', 'Weert'
     ],
-    // Netherlands - Noord-Brabant
+    // Netherlands - Noord-Brabant (select major cities)
     'NL-Noord-Brabant': [
-      'Aalburg', 'Alphen-Chaam', 'Asten', 'Baarle-Nassau', 'Bergen op Zoom', 'Bernheze', 'Best', 
-      'Bladel', 'Boekel', 'Boxmeer', 'Boxtel', 'Breda', 'Cranendonck', 'Cuijk', 'Deurne', 'Dongen', 
-      'Drimmelen', 'Eersel', 'Eindhoven', 'Etten-Leur', 'Geertruidenberg', 'Geldrop-Mierlo', 'Gemert-Bakel', 
-      'Gilze en Rijen', 'Goirle', 'Grave', 'Haaren', 'Halderberge', 'Heeze-Leende', 'Helmond', 
-      'Heusden', 'Hilvarenbeek', 'Laarbeek', 'Landerd', 'Loon op Zand', 'Meierijstad', 'Mill en Sint Hubert', 
-      'Moerdijk', 'Nuenen, Gerwen en Nederwetten', 'Oirschot', 'Oisterwijk', 'Oosterhout', 'Oss', 
-      'Reusel-De Mierden', 'Roosendaal', 'Rucphen', 'Sint-Michielsgestel', 'Someren', 'Son en Breugel', 
-      'Steenbergen', 'Tilburg', 'Uden', 'Valkenswaard', 'Veldhoven', 'Vught', 'Waalre', 'Waalwijk', 
-      'Woensdrecht', 'Woudrichem', 'Zundert'
+      'Breda', 'Eindhoven', 'Tilburg', 'Den Bosch', 'Helmond', 'Oss', 'Roosendaal', 'Bergen op Zoom'
     ],
     // Germany - NRW Kreise
     'DE-Heinsberg': [
@@ -1052,41 +1049,22 @@ function loadMunicipalityBoundaries() {
       'Waldfeucht', 'Wassenberg', 'Wegberg'
     ],
     'DE-Viersen': [
-      'Viersen', 'Mönchengladbach', 'Krefeld', 'Kempen', 'Tönisvorst', 'Willich', 'Nettetal', 'Grefrath', 
-      'Schwalmtal', 'Niederkrüchten', 'Brüggen'
+      'Viersen', 'Mönchengladbach', 'Krefeld', 'Kempen', 'Tönisvorst', 'Willich', 'Nettetal'
     ],
     'DE-Kleve': [
-      'Kleve', 'Emmerich am Rhein', 'Geldern', 'Goch', 'Kevelaer', 'Straelen', 'Bedburg-Hau', 
-      'Issum', 'Kalkar', 'Kerken', 'Kranenburg', 'Rees', 'Rheurdt', 'Uedem', 'Wachtendonk', 'Weeze'
+      'Kleve', 'Emmerich am Rhein', 'Geldern', 'Goch', 'Kevelaer', 'Straelen'
     ],
     'DE-Aachen': [
       'Aachen', 'Alsdorf', 'Baesweiler', 'Eschweiler', 'Herzogenrath', 'Monschau', 'Stolberg', 
-      'Würselen', 'Aldenhoven', 'Düren', 'Heimbach', 'Hürtgenwald', 'Inden', 'Jülich', 'Kreuzau', 
-      'Langerwehe', 'Linnich', 'Merzenich', 'Nideggen', 'Niederzier', 'Nörvenich', 'Simmerath', 
-      'Titz', 'Vettweiß'
+      'Würselen', 'Düren', 'Jülich'
     ],
-    'DE-Mettmann': [
-      'Mettmann', 'Erkrath', 'Haan', 'Heiligenhaus', 'Hilden', 'Langenfeld', 'Monheim am Rhein', 
-      'Ratingen', 'Velbert', 'Wülfrath'
-    ],
-    // Belgium - Limburg & Liège
+    // Belgium - Limburg & Liège (major cities)
     'BE-Limburg': [
-      'Alken', 'As', 'Beringen', 'Bilzen', 'Bocholt', 'Borgloon', 'Bree', 'Diepenbeek', 'Dilsen-Stokkem', 
-      'Genk', 'Geetbets', 'Gingelom', 'Halen', 'Ham', 'Hasselt', 'Hechtel-Eksel', 'Heers', 'Herk-de-Stad', 
-      'Heusden-Zolder', 'Hoeselt', 'Houthalen-Helchteren', 'Kinrooi', 'Kortessem', 'Lanaken', 'Leopoldsburg', 
-      'Lommel', 'Lummen', 'Maaseik', 'Maasmechelen', 'Meeuwen-Gruitrode', 'Nieuwerkerken', 'Opglabbeek', 
-      'Peer', 'Pelt', 'Riemst', 'Sint-Truiden', 'Tessenderlo', 'Tongeren', 'Voeren', 'Wellen', 'Zonhoven', 'Zutendaal'
+      'Hasselt', 'Genk', 'Sint-Truiden', 'Tongeren', 'Beringen', 'Bilzen', 'Diepenbeek', 'Lommel', 
+      'Maaseik', 'Maasmechelen', 'Peer', 'Tessenderlo'
     ],
     'BE-Liege': [
-      'Amay', 'Ans', 'Anthisnes', 'Awans', 'Aywaille', 'Baelen', 'Bassenge', 'Berloz', 'Beyne-Heusay', 
-      'Blegny', 'Braives', 'Burdinne', 'Chaudfontaine', 'Clavier', 'Comblain-au-Pont', 'Crisnée', 'Dalhem', 
-      'Donceel', 'Engis', 'Esneux', 'Eupen', 'Faimes', 'Ferrières', 'Fexhe-le-Haut-Clocher', 'Flémalle', 
-      'Fléron', 'Geer', 'Grâce-Hollogne', 'Hamoir', 'Hannut', 'Heron', 'Herstal', 'Herve', 'Huy', 
-      'Jalhay', 'Juprelle', 'Kelmis', 'Liège', 'Limbourg', 'Lincent', 'Lontzen', 'Malmedy', 'Marchin', 
-      'Modave', 'Nandrin', 'Neupré', 'Olne', 'Oreye', 'Ouffet', 'Oupeye', 'Pepinster', 'Plombières', 
-      'Raeren', 'Remicourt', 'Saint-Georges-sur-Meuse', 'Saint-Nicolas', 'Seraing', 'Soumagne', 'Spa', 
-      'Sprimont', 'Stavelot', 'Stoumont', 'Theux', 'Thimister-Clermont', 'Tinlot', 'Trois-Ponts', 
-      'Trooz', 'Verlaine', 'Verviers', 'Villers-le-Bouillet', 'Visé', 'Waimes', 'Wanze', 'Waremme', 'Welkenraedt'
+      'Liège', 'Verviers', 'Seraing', 'Herstal', 'Huy', 'Spa', 'Eupen', 'Malmedy', 'Waremme'
     ]
   };
 
@@ -1096,25 +1074,19 @@ function loadMunicipalityBoundaries() {
 
 async function loadMunicipalitiesFromOverpass(regions) {
   try {
+    console.log('Loading municipality boundaries...');
+    
+    // Use a simpler approach: load boundaries for the entire Euregio region
     const overpassUrl = 'https://overpass-api.de/api/interpreter';
     
-    // Build Overpass query for all municipalities
-    let query = '[out:json][timeout:30];(';
-    
-    Object.entries(regions).forEach(([regionKey, municipalities]) => {
-      const countryCode = regionKey.split('-')[0];
-      municipalities.forEach(municipality => {
-        if (countryCode === 'NL') {
-          query += `relation["admin_level"="8"]["name"="${municipality}"]["place"!="city"];`;
-        } else if (countryCode === 'DE') {
-          query += `relation["admin_level"="8"]["name"="${municipality}"]["place"!="city"];`;
-        } else if (countryCode === 'BE') {
-          query += `relation["admin_level"="8"]["name"="${municipality}"]["place"!="city"];`;
-        }
-      });
-    });
-    
-    query += ');out geom;';
+    // Simplified query for administrative boundaries in the region
+    const query = `
+      [out:json][timeout:60];
+      (
+        relation["admin_level"="8"]["place"!="city"](bbox:50.0,4.0,52.5,7.5);
+      );
+      out geom;
+    `;
     
     const response = await fetch(overpassUrl, {
       method: 'POST',
@@ -1129,35 +1101,42 @@ async function loadMunicipalitiesFromOverpass(regions) {
     }
     
     const data = await response.json();
+    let loadedCount = 0;
     
     // Process the response and create polygons
     data.elements.forEach(element => {
-      if (element.type === 'relation' && element.geometry) {
-        const coordinates = convertOverpassGeometry(element.geometry);
-        if (coordinates.length > 0) {
-          const polygon = L.polygon(coordinates, {
-            color: 'rgb(38, 123, 41)',
-            weight: 1,
-            opacity: 0.7,
-            fillColor: 'rgb(38, 123, 41)',
-            fillOpacity: 0.1
-          }).addTo(municipalityLayer);
-          
-          // Add municipality name label
-          const center = polygon.getBounds().getCenter();
-          L.marker(center, {
-            icon: L.divIcon({
-              className: 'municipality-label',
-              html: `<div style="background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; color: rgb(38, 123, 41); border: 1px solid rgb(38, 123, 41);">${element.tags.name}</div>`,
-              iconSize: [100, 20],
-              iconAnchor: [50, 10]
-            })
-          }).addTo(municipalityLayer);
+      if (element.type === 'relation' && element.members && element.tags && element.tags.name) {
+        try {
+          // Convert relation to GeoJSON-like structure
+          const coordinates = convertRelationToCoordinates(element);
+          if (coordinates && coordinates.length > 0) {
+            const polygon = L.polygon(coordinates, {
+              color: 'rgb(38, 123, 41)',
+              weight: 2,
+              opacity: 0.8,
+              fillColor: 'rgb(38, 123, 41)',
+              fillOpacity: 0.15,
+              smoothFactor: 1.0
+            });
+            
+            // Add popup with municipality name
+            polygon.bindPopup(`<strong>${element.tags.name}</strong>`);
+            
+            municipalityLayer.addLayer(polygon);
+            loadedCount++;
+          }
+        } catch (err) {
+          console.warn(`Error processing municipality ${element.tags.name}:`, err);
         }
       }
     });
     
-    console.log(`Loaded ${data.elements.length} municipalities from OpenStreetMap`);
+    console.log(`Loaded ${loadedCount} municipalities from OpenStreetMap`);
+    
+    // Make sure the layer is available in the layer control
+    if (loadedCount === 0) {
+      throw new Error('No municipalities loaded');
+    }
     
   } catch (error) {
     console.error('Error loading municipalities from Overpass API:', error);
@@ -1167,22 +1146,48 @@ async function loadMunicipalitiesFromOverpass(regions) {
   }
 }
 
-function convertOverpassGeometry(geometry) {
-  const coordinates = [];
-  
-  geometry.forEach(member => {
-    if (member.type === 'way') {
-      const wayCoords = member.geometry.map(node => [node.lat, node.lon]);
-      if (wayCoords.length > 2) {
-        coordinates.push(wayCoords);
+function convertRelationToCoordinates(element) {
+  try {
+    const coordinates = [];
+    
+    // Look for outer ways in the relation
+    const outerWays = element.members.filter(member => 
+      member.type === 'way' && member.role === 'outer'
+    );
+    
+    if (outerWays.length === 0) {
+      // If no explicit outer ways, use all ways
+      const allWays = element.members.filter(member => member.type === 'way');
+      if (allWays.length > 0) {
+        outerWays.push(...allWays);
       }
     }
-  });
-  
-  return coordinates;
+    
+    outerWays.forEach(wayMember => {
+      if (wayMember.geometry && wayMember.geometry.length > 2) {
+        const wayCoords = wayMember.geometry.map(node => [node.lat, node.lon]);
+        coordinates.push(wayCoords);
+      }
+    });
+    
+    // If we have multiple coordinate arrays, merge them into a single polygon
+    if (coordinates.length > 1) {
+      // For simplicity, just use the first (usually largest) polygon
+      return coordinates[0];
+    } else if (coordinates.length === 1) {
+      return coordinates[0];
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('Error converting relation coordinates:', error);
+    return null;
+  }
 }
 
 function loadFallbackMunicipalities() {
+  console.log('Loading fallback municipality boundaries...');
+  
   // Fallback to major cities with approximate boundaries
   const majorCities = [
     {
@@ -1190,7 +1195,7 @@ function loadFallbackMunicipalities() {
       bounds: [[50.82, 5.62], [50.88, 5.72], [50.90, 5.75], [50.85, 5.78], [50.82, 5.75], [50.80, 5.68], [50.82, 5.62]]
     },
     {
-      name: "Aachen",
+      name: "Aachen", 
       bounds: [[50.72, 6.04], [50.78, 6.04], [50.82, 6.09], [50.81, 6.14], [50.77, 6.15], [50.73, 6.12], [50.72, 6.08], [50.72, 6.04]]
     },
     {
@@ -1198,24 +1203,12 @@ function loadFallbackMunicipalities() {
       bounds: [[51.40, 5.42], [51.46, 5.44], [51.50, 5.50], [51.48, 5.54], [51.44, 5.56], [51.40, 5.53], [51.38, 5.47], [51.40, 5.42]]
     },
     {
-      name: "Venlo",
+      name: "Venlo", 
       bounds: [[51.32, 6.10], [51.38, 6.12], [51.42, 6.18], [51.40, 6.22], [51.36, 6.24], [51.32, 6.21], [51.30, 6.15], [51.32, 6.10]]
     },
     {
       name: "Roermond",
       bounds: [[51.14, 5.95], [51.20, 5.96], [51.24, 6.00], [51.25, 6.04], [51.22, 6.06], [51.18, 6.04], [51.15, 6.00], [51.14, 5.95]]
-    },
-    {
-      name: "Krefeld",
-      bounds: [[51.30, 6.52], [51.36, 6.53], [51.38, 6.58], [51.37, 6.62], [51.33, 6.62], [51.29, 6.58], [51.28, 6.54], [51.30, 6.52]]
-    },
-    {
-      name: "Mönchengladbach",
-      bounds: [[51.15, 6.38], [51.21, 6.39], [51.25, 6.44], [51.24, 6.48], [51.20, 6.49], [51.16, 6.47], [51.14, 6.42], [51.15, 6.38]]
-    },
-    {
-      name: "Heinsberg",
-      bounds: [[51.04, 6.05], [51.08, 6.06], [51.11, 6.12], [51.10, 6.16], [51.06, 6.16], [51.03, 6.13], [51.02, 6.08], [51.04, 6.05]]
     },
     {
       name: "Liège",
@@ -1226,12 +1219,8 @@ function loadFallbackMunicipalities() {
       bounds: [[50.91, 5.30], [50.97, 5.32], [50.99, 5.38], [50.98, 5.42], [50.94, 5.43], [50.90, 5.40], [50.89, 5.34], [50.91, 5.30]]
     },
     {
-      name: "Breda",
-      bounds: [[51.55, 4.74], [51.61, 4.76], [51.63, 4.82], [51.62, 4.86], [51.58, 4.87], [51.54, 4.84], [51.53, 4.78], [51.55, 4.74]]
-    },
-    {
-      name: "Tilburg",
-      bounds: [[51.53, 5.04], [51.59, 5.06], [51.61, 5.12], [51.60, 5.16], [51.56, 5.17], [51.52, 5.14], [51.51, 5.08], [51.53, 5.04]]
+      name: "Genk",
+      bounds: [[50.94, 5.45], [50.98, 5.47], [51.00, 5.52], [50.99, 5.55], [50.96, 5.56], [50.93, 5.53], [50.92, 5.48], [50.94, 5.45]]
     }
   ];
   
@@ -1241,20 +1230,17 @@ function loadFallbackMunicipalities() {
       weight: 2,
       opacity: 0.8,
       fillColor: 'rgb(38, 123, 41)',
-      fillOpacity: 0.1
-    }).addTo(municipalityLayer);
+      fillOpacity: 0.15,
+      smoothFactor: 1.0
+    });
     
-    // Add municipality name label
-    const center = polygon.getBounds().getCenter();
-    L.marker(center, {
-      icon: L.divIcon({
-        className: 'municipality-label',
-        html: `<div style="background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; font-size: 12px; font-weight: bold; color: rgb(38, 123, 41); border: 1px solid rgb(38, 123, 41);">${municipality.name}</div>`,
-        iconSize: [100, 20],
-        iconAnchor: [50, 10]
-      })
-    }).addTo(municipalityLayer);
+    // Add popup with municipality name
+    polygon.bindPopup(`<strong>${municipality.name}</strong>`);
+    
+    municipalityLayer.addLayer(polygon);
   });
+  
+  console.log(`Loaded ${majorCities.length} fallback municipalities`);
 }
 
 function updateFilterState() {
