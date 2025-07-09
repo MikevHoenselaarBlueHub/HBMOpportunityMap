@@ -1279,9 +1279,14 @@ button {
 
   .header-controls {
     flex-direction: row;
+    gap: 1rem;
   }
 
   .search-container {
     display: flex !important;
+  }
+
+  .language-selector {
+    display: block !important;
   }
 }
