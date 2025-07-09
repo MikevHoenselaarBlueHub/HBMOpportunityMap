@@ -34,24 +34,24 @@ if (document.getElementById('closeDetail')) {
 }
 
 // Kaart & markers
-let map = L.map('map').setView([51.5, 6.1], 8);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-const pIcon = L.icon({ iconUrl: 'icons/marker-project.svg', iconSize: [30,40] });
-const bIcon = L.icon({ iconUrl: 'icons/marker-company.svg', iconSize: [30,40] });
-let markers = [];
+let map, markers = [];
 
-fetch('opportunities.json')
-  .then(r => r.json())
-  .then(data => {
-    window.data = data;
-    createFilterCheckboxes();
-    updateMap();
-  })
-  .catch(error => {
-    console.error('Error loading data:', error);
-    const mapElement = document.getElementById('map');
-    mapElement.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Fout bij het laden van de data. Probeer de pagina te vernieuwen.</div>';
-  });
+// Initialize map only if we're on the map page
+if (document.getElementById('map')) {
+  // Data laden
+  fetch('opportunities.json')
+    .then(res => res.json())
+    .then(data => {
+      window.data = data;
+      createFilterCheckboxes();
+      updateMap();
+    })
+    .catch(error => {
+      console.error('Error loading data:', error);
+      const mapElement = document.getElementById('map');
+      mapElement.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Fout bij het laden van de data. Probeer de pagina te vernieuwen.</div>';
+    });
+}
 
 function createFilterCheckboxes() {
   const keys = ['ProjectType','OrganizationType','OrganizationField','HBMTopic','HBMCharacteristics','HBMSector'];
@@ -88,16 +88,25 @@ function showLocationDetails(location) {
       <button class="btn-secondary">Meer info</button>
     </div>
   `;
-  
+
   // Re-attach close event listener
   detailPanel.querySelector('#closeDetail').onclick = () => {
     detailPanel.classList.remove('open');
   };
-  
+
   detailPanel.classList.add('open');
 }
 
 function updateMap() {
+  if (!window.data || !document.getElementById('map')) return;
+
+  // Initialize map if needed
+  if (!map) {
+    map = L.map('map').setView([51.2, 6.1], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  }
+
+  // Clear markers
   markers.forEach(m => map.removeLayer(m));
   markers = [];
   const filters = {};

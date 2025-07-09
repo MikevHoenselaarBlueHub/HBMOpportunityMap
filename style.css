@@ -9,6 +9,134 @@ body {
   color: #333;
 }
 
+/* === Typography (based on HBM styling) === */
+h1, h2, h3, h4, h5, h6 {
+  margin: 1rem 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@media (max-width: 991px) {
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: 0;
+  }
+}
+
+h1 {
+  font-size: 8rem;
+  margin: 1rem 0;
+}
+
+@media (max-width: 991.98px) {
+  h1 {
+    font-size: 8rem !important;
+    line-height: 1 !important;
+    margin: 1rem 0;
+  }
+}
+
+@media (max-width: 767px) {
+  h1 {
+    font-size: 5rem !important;
+    margin: 1rem 0;
+  }
+}
+
+@media (max-width: 479px) {
+  h1 {
+    font-size: 3.5rem !important;
+    margin: 1rem 0;
+  }
+}
+
+h2 {
+  font-size: 3rem;
+}
+
+@media (max-width: 479px) {
+  h2 {
+    font-size: 2.5rem;
+    margin: 1rem 0;
+  }
+}
+
+h3 {
+  font-size: 2rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+h5 {
+  font-size: 1.5rem;
+  color: rgb(38, 123, 41);
+}
+
+h6 {
+  font-size: 1.25rem;
+}
+
+p, li, span {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+}
+
+a {
+  color: rgb(38, 123, 41);
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #267b29;
+}
+
+strong {
+  font-weight: 700;
+}
+
+em {
+  font-style: italic;
+}
+
+ul:not(.navbar-nav) li {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+.subheader {
+  font-size: 2rem;
+  font-weight: 400;
+  margin: 0;
+}
+
+@media (max-width: 479px) {
+  .subheader {
+    font-size: 1.25rem;
+  }
+}
+
+blockquote {
+  max-width: 44rem;
+  border-left: 0.75rem solid rgb(38, 123, 41);
+  padding-left: 1rem;
+  margin: 2rem 0;
+}
+
+blockquote p {
+  font-size: 2rem;
+  line-height: 1.2;
+  color: rgb(38, 123, 41);
+}
+
+@media (max-width: 575px) {
+  blockquote p {
+    font-size: 1.1rem;
+  }
+}
+
 /* === Links === */
 a { text-decoration: none; color: inherit; }
 #desktopNav a, #menuOverlay a { text-decoration: none; }
