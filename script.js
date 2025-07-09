@@ -617,7 +617,27 @@ function updateOpportunitiesList(data) {
   resultsCount.textContent = `${data.length} ${t('results') || 'resultaten'}`;
   
   if (data.length === 0) {
-    listContainer.innerHTML = `<div class="no-results">${t('noResults') || 'Geen resultaten gevonden'}</div>`;
+    listContainer.innerHTML = `
+      <div class="no-results-opportunity">
+        <h2>Geen kans gevonden?</h2>
+        <p><strong>Dan ligt hier een kans voor gezond bouwen!</strong></p>
+        
+        <p>In dit gebied zijn nog geen actieve projecten zichtbaar.<br>
+        Maar HBM kan je helpen met:</p>
+        
+        <ul>
+          <li><strong>Inzichten delen:</strong> Wat speelt er in deze regio?</li>
+          <li><strong>Netwerken verbinden:</strong> Wie werkt hier aan gezonde gebouwen?</li>
+          <li><strong>Startpunt maken:</strong> Samen ontdekken waar de kansen liggen.</li>
+        </ul>
+        
+        <p>📬 Wil je weten wat HBM nog meer voor jou kan betekenen?</p>
+        <div class="contact-cta">
+          <a href="contact.html" class="btn-primary">Neem contact op</a>
+          <span>voor een kennisscan en deel jouw behoefte.</span>
+        </div>
+      </div>
+    `;
     return;
   }
   

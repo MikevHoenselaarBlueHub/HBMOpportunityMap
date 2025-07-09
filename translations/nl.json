@@ -49,17 +49,6 @@
   "dataLoadError": "Fout bij het laden van gegevens. Probeer de pagina te vernieuwen.",
   "urlCopied": "URL gekopieerd naar klembord!",
   "urlCopyFailed": "Kon URL niet kopiëren. Kopieer handmatig uit de adresbalk.",
-  "advancedFilters": "Geavanceerde Filters",
-  "locationFilter": "Locatie Filter",
-  "useMyLocation": "📍 Mijn locatie gebruiken",
-  "maxDistance": "Maximale afstand:",
-  "textFilter": "Tekst Filter",
-  "combinationFilter": "Filter Combinatie",
-  "allFilters": "Alle filters moeten voldoen (EN)",
-  "anyFilter": "Minstens één filter moet voldoen (OF)",
-  "savedFilters": "Opgeslagen Filters",
-  "saveFilters": "Huidige filters opslaan",
-  "selectSavedFilter": "Selecteer opgeslagen filter...",
-  "deleteFilter": "Verwijder",
-  "share": "Deel"
+  "dataLoadError": "Fout bij het laden van data. Probeer de pagina te vernieuwen.",
+  "contact": "Contact"
 }

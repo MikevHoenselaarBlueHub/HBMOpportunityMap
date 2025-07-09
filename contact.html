@@ -1,0 +1,238 @@
+
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact - HBM Kansenkaart</title>
+    <link rel="icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div id="branding">
+        <a href="index.html" class="logo-link">
+          <img
+            src="https://healthybuildingmovement.com/resources/uploads/2023/11/Logo.svg"
+            alt="HBM Logo"
+            id="logo"
+            onerror="this.style.display='none'"
+          />
+          <span id="title">Contact</span>
+        </a>
+      </div>
+      <button id="hamburger">&#9776;</button>
+      <nav id="menuOverlay" class="overlay">
+        <a href="#" id="closeMenu" class="close-btn">
+          <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
+        </a>
+        <a href="index.html" data-i18n="opportunityMap">Kansenkaart</a>
+        <a href="info.html" data-i18n="moreInfo">Meer info</a>
+        <a href="over.html" data-i18n="aboutHBM">Over HBM</a>
+        <a href="contact.html" class="active" data-i18n="contact">Contact</a>
+      </nav>
+      <nav id="desktopNav">
+        <a href="index.html" data-i18n="opportunityMap">Kansenkaart</a>
+        <a href="info.html" data-i18n="moreInfo">Meer info</a>
+        <a href="over.html" data-i18n="aboutHBM">Over HBM</a>
+        <a href="contact.html" class="active" data-i18n="contact">Contact</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <div class="contact-page">
+        <h1>Contact HBM</h1>
+        <p class="subheader">
+          Ontdek de mogelijkheden voor gezond bouwen in jouw regio
+        </p>
+
+        <div class="contact-content">
+          <div class="contact-intro">
+            <h2>Hoe kunnen wij je helpen?</h2>
+            <p>
+              Het Healthy Building Movement (HBM) verbindt professionals, 
+              projecten en kennis in de Euregio Maas-Rijn. Of je nu op zoek 
+              bent naar partners, inspiratie wilt opdoen, of zelf een project 
+              wilt delen - wij helpen je graag verder.
+            </p>
+
+            <div class="contact-options">
+              <div class="contact-option">
+                <h3>🌱 Kennisscan</h3>
+                <p>
+                  Ontdek welke kansen er liggen in jouw regio en sector. 
+                  Wij analyseren samen met jou de mogelijkheden voor gezond bouwen.
+                </p>
+              </div>
+              
+              <div class="contact-option">
+                <h3>🤝 Netwerk verbinden</h3>
+                <p>
+                  Zoek je partners voor een project? Wij brengen je in contact 
+                  met de juiste mensen en organisaties in het HBM-netwerk.
+                </p>
+              </div>
+              
+              <div class="contact-option">
+                <h3>📢 Project delen</h3>
+                <p>
+                  Heb je een interessant project dat anderen kan inspireren? 
+                  Deel het via onze kansenkaart en vergroot de impact.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-form-section">
+            <h2>Neem contact op</h2>
+            <form id="contactForm" class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="firstName">Voornaam *</label>
+                  <input type="text" id="firstName" name="firstName" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="lastName">Achternaam *</label>
+                  <input type="text" id="lastName" name="lastName" required>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="email">E-mailadres *</label>
+                <input type="email" id="email" name="email" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="company">Organisatie</label>
+                <input type="text" id="company" name="company">
+              </div>
+              
+              <div class="form-group">
+                <label for="phone">Telefoonnummer</label>
+                <input type="tel" id="phone" name="phone">
+              </div>
+              
+              <div class="form-group">
+                <label for="subject">Onderwerp *</label>
+                <select id="subject" name="subject" required>
+                  <option value="">Selecteer een onderwerp</option>
+                  <option value="kennisscan">Kennisscan aanvragen</option>
+                  <option value="netwerk">Netwerk verbinden</option>
+                  <option value="project-delen">Project delen</option>
+                  <option value="partnerships">Partnerships</option>
+                  <option value="anders">Anders</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="region">Regio/Stad</label>
+                <input type="text" id="region" name="region" placeholder="Bijv. Maastricht, Aachen, Liège">
+              </div>
+              
+              <div class="form-group">
+                <label for="message">Bericht *</label>
+                <textarea id="message" name="message" rows="6" required placeholder="Vertel ons over je interesse, project of vraag..."></textarea>
+              </div>
+              
+              <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" name="newsletter" value="yes">
+                  <span class="checkmark"></span>
+                  Ja, ik wil graag updates ontvangen over HBM-activiteiten in mijn regio
+                </label>
+              </div>
+              
+              <div class="form-actions">
+                <button type="submit" class="btn-primary">Verstuur bericht</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="contact-info">
+          <h2>Direct contact</h2>
+          <div class="contact-details">
+            <div class="contact-detail">
+              <strong>📧 E-mail:</strong>
+              <a href="mailto:info@healthybuildingmovement.com">info@healthybuildingmovement.com</a>
+            </div>
+            
+            <div class="contact-detail">
+              <strong>🌐 Website:</strong>
+              <a href="https://healthybuildingmovement.com" target="_blank">healthybuildingmovement.com</a>
+            </div>
+            
+            <div class="contact-detail">
+              <strong>📍 Werkgebied:</strong>
+              <span>Euregio Maas-Rijn (Nederland, Duitsland, België)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // Basic functionality for contact page
+      let currentLanguage = "nl";
+      let translations = {};
+
+      async function loadTranslations() {
+        try {
+          const response = await fetch(`translations/${currentLanguage}.json`);
+          translations = await response.json();
+        } catch (error) {
+          console.error("Error loading translations:", error);
+        }
+      }
+
+      function t(key) {
+        return translations[key] || key;
+      }
+
+      function updateUI() {
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          const key = element.getAttribute("data-i18n");
+          if (translations[key]) {
+            element.textContent = t(key);
+          }
+        });
+        document.title = "Contact - HBM Kansenkaart";
+      }
+
+      // Hamburger menu functionality
+      document.getElementById("hamburger").onclick = () => {
+        document.getElementById("menuOverlay").classList.add("open");
+      };
+
+      document.getElementById("closeMenu").onclick = (e) => {
+        e.preventDefault();
+        document.getElementById("menuOverlay").classList.remove("open");
+      };
+
+      // Form submission
+      document.getElementById("contactForm").onsubmit = function(e) {
+        e.preventDefault();
+        
+        // Show success message
+        const formSection = document.querySelector('.contact-form-section');
+        formSection.innerHTML = `
+          <div class="form-success">
+            <h2>✅ Bericht verzonden!</h2>
+            <p>Bedankt voor je bericht. We nemen zo spoedig mogelijk contact met je op.</p>
+            <a href="index.html" class="btn-primary">Terug naar kansenkaart</a>
+          </div>
+        `;
+        
+        // In production, you would handle the actual form submission here
+        console.log("Form submitted");
+      };
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", async () => {
+        await loadTranslations();
+        updateUI();
+      });
+    </script>
+  </body>
+</html>
