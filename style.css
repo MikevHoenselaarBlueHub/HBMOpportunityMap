@@ -1042,9 +1042,17 @@ button {
 }
 
 /* === Navigation arrows === */
+.detail-navigation-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
 .detail-navigation {
-  position: absolute;
-  top: 2.5rem;
+  position: relative;
+  top: auto;
+  right: auto;
   background: #fff;
   color: #000;
   border: 2px solid #000;
@@ -1059,6 +1067,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .detail-navigation:hover {
@@ -1073,12 +1082,11 @@ button {
   cursor: not-allowed;
 }
 
-.detail-navigation.prev {
-  right: 140px;
-}
-
-.detail-navigation.next {
-  right: 100px;
+.detail-navigation-container h2 {
+  margin: 0;
+  color: rgb(38, 123, 41);
+  font-size: 1.5rem;
+  flex: 1;
 }
 
 #detailPanel.open {
@@ -1119,12 +1127,7 @@ button {
   padding-top: 1rem;
 }
 
-.detail-header h2 {
-  margin: 0;
-  color: rgb(38, 123, 41);
-  font-size: 1.5rem;
-  flex: 1;
-}
+
 
 .detail-header-right {
   display: flex;
@@ -1318,14 +1321,19 @@ button {
     width: 100%;
   }
 
-  .detail-navigation.prev {
-    right: auto;
-    position: static;
+  .detail-navigation-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 
+  .detail-navigation-container h2 {
+    order: 2;
+  }
+
+  .detail-navigation.prev,
   .detail-navigation.next {
-    right: auto;
-    position: static;
+    order: 1;
   }
 
   .detail-contact-btn {

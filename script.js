@@ -971,14 +971,16 @@ function showLocationDetails(location, index = -1) {
       </a>
       ${imageHtml}
       <div class="detail-header">
-        <h2>${locationName}</h2>
-        <div class="detail-header-right">
+        <div class="detail-navigation-container">
           <button class="detail-navigation prev" id="prevDetail" ${prevDisabled ? 'disabled' : ''}>
             ←
           </button>
           <button class="detail-navigation next" id="nextDetail" ${nextDisabled ? 'disabled' : ''}>
             →
           </button>
+          <h2>${locationName}</h2>
+        </div>
+        <div class="detail-header-right">
           <div class="detail-type-badge ${isProject ? 'project' : 'company'}">
             ${Array.isArray(location.HBMType) ? location.HBMType.join(', ') : location.HBMType}
           </div>
