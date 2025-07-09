@@ -1114,43 +1114,40 @@ button {
 
 /* === Advanced Filters === */
 .advanced-filters {
-  margin-top: 2rem;
-  background: #f0f8ff;
-  border-radius: 8px;
-  border: 2px solid #007bff;
+  margin-top: 1rem;
+  background: none;
+  border: none;
+  border-radius: 0;
 }
 
 .advanced-filters-header {
-  padding: 1rem 1.5rem;
-  background: #007bff;
-  color: white;
-  border-radius: 6px 6px 0 0;
+  padding: 0.5rem 0;
+  background: none;
+  color: inherit;
+  border-radius: 0;
   cursor: pointer;
   user-select: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background-color 0.2s ease;
+  display: block;
+  transition: none;
 }
 
 .advanced-filters-header:hover {
-  background: #0056b3;
+  background: none;
 }
 
-.advanced-filters-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: white;
+.advanced-filters-header a {
+  color: rgb(38, 123, 41);
+  text-decoration: underline;
+  font-size: 0.9rem;
+  font-weight: normal;
+}
+
+.advanced-filters-header a:hover {
+  color: #267b29;
 }
 
 .advanced-filters-toggle {
-  font-size: 1.2rem;
-  font-weight: bold;
-  transition: transform 0.2s ease;
-}
-
-.advanced-filters.open .advanced-filters-toggle {
-  transform: rotate(180deg);
+  display: none;
 }
 
 .advanced-filters-content {
@@ -1362,10 +1359,10 @@ button {
 }
 
 #applyFilters {
-  width: 100%;
+  width: auto;
   margin-top: 1rem;
-  padding: 1rem;
-  font-size: 1.1rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
 }
 
 @media (max-width: 768px) {
