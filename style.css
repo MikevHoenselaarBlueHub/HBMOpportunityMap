@@ -1,23 +1,43 @@
 /* === Basis reset en structuur === */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
-body { 
-  display: flex; 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
   flex-direction: column;
-  font-family: sans-serif; 
-  line-height: 1.5; 
+  font-family: sans-serif;
+  line-height: 1.5;
   color: #333;
 }
 
 /* === Typography (based on HBM styling) === */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin: 1rem 0;
   font-weight: 700;
   line-height: 1.2;
 }
 
 @media (max-width: 991px) {
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     letter-spacing: 0;
   }
 }
@@ -78,7 +98,9 @@ h6 {
   font-size: 1.25rem;
 }
 
-p, li, span {
+p,
+li,
+span {
   font-size: 1rem;
   line-height: 1.5;
   margin: 0.5rem 0;
@@ -138,32 +160,49 @@ blockquote p {
 }
 
 /* === Links === */
-a { text-decoration: none; color: inherit; }
-#desktopNav a, #menuOverlay a { text-decoration: none; }
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+#desktopNav a,
+#menuOverlay a {
+  text-decoration: none;
+}
 
 /* === Branding === */
-#branding { display: flex; align-items: center; gap: 1rem; }
-#branding #title { font-size: 1.25rem; font-weight: bold; }
-.logo-link { 
-  display: flex; 
-  align-items: center; 
-  gap: 1rem; 
-  text-decoration: none; 
-  color: inherit; 
+#branding {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+#branding #title {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: inherit;
   transition: opacity 0.2s;
 }
-.logo-link:hover { 
-  opacity: 0.8; 
+
+.logo-link:hover {
+  opacity: 0.8;
 }
 
 /* === Header === */
 header {
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  background: #fff; 
-  padding: 1rem; 
-  z-index: 40;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 1rem;
+  z-index: 1200;
   flex-wrap: wrap;
   gap: 1rem;
 }
@@ -173,31 +212,39 @@ header {
   align-items: center;
   gap: 1rem;
 }
-#hamburger { 
-  font-size: 2rem; 
-  background: none; 
-  border: none; 
-  cursor: pointer; 
-  color: #000; 
+
+#hamburger {
+  font-size: 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000;
 }
-#desktopNav { display: none; gap: 1rem; }
+
+#desktopNav {
+  display: none;
+  gap: 1rem;
+}
 
 #desktopNav a {
   padding: 0.5rem 1rem;
   border-radius: 4px;
   transition: background 0.2s, color 0.2s;
 }
+
 #desktopNav a:hover {
   background: rgba(38, 123, 41, 0.1);
   color: rgb(38, 123, 41);
 }
+
 #desktopNav a.active {
   background: rgb(38, 123, 41);
   color: #fff;
 }
 
 #menuOverlay {
-  padding-top: 4rem; /* Make room for close button */
+  padding-top: 4rem;
+  /* Make room for close button */
 }
 
 #menuOverlay a {
@@ -205,25 +252,51 @@ header {
   margin: 1rem 0;
   font-size: 1.2rem;
 }
-#menuOverlay a:hover { color: rgb(38, 123, 41); }
-#menuOverlay a.active { font-weight: bold; color: rgb(38, 123, 41); }
+
+#menuOverlay a:hover {
+  color: rgb(38, 123, 41);
+}
+
+#menuOverlay a.active {
+  font-weight: bold;
+  color: rgb(38, 123, 41);
+}
 
 /* === Overlay panels === */
 .overlay {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: #fff; transform: translateX(100%);
-  transition: 0.3s; overflow: auto; z-index: 9000; padding: 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  transform: translateX(100%);
+  transition: 0.3s;
+  overflow: auto;
+  z-index: 9000;
+  padding: 2rem;
 }
+
 #menuOverlay {
   z-index: 9100;
 }
-#menuOverlay.open { transform: translateX(0); }
-#filterOverlay { transform: translateX(-100%); z-index: 9000; }
-#filterOverlay.open { transform: translateX(0); }
+
+#menuOverlay.open {
+  transform: translateX(0);
+}
+
+#filterOverlay {
+  transform: translateX(-100%);
+  z-index: 9000;
+}
+
+#filterOverlay.open {
+  transform: translateX(0);
+}
 
 /* === Buttons === */
-button { 
-  cursor: pointer; 
+button {
+  cursor: pointer;
   border-radius: 4px;
   font-weight: bold;
   transition: all 0.2s ease;
@@ -324,17 +397,18 @@ button {
     align-items: flex-end;
     gap: 0.5rem;
   }
-  
+
   .search-container input {
     min-width: 150px;
   }
-  
+
   .search-container {
     display: none;
   }
 }
 
-#filterBtn, #exportBtn {
+#filterBtn,
+#exportBtn {
   background: rgb(38, 123, 41);
   color: #fff;
   border: none;
@@ -345,43 +419,49 @@ button {
   transition: background 0.2s;
 }
 
-#filterBtn:hover, #exportBtn:hover {
+#filterBtn:hover,
+#exportBtn:hover {
   background: #267b29;
 }
 
-.btn-primary, .cta-btn, #applyFilters {
-  background: rgb(38, 123, 41); 
-  color: #fff; 
+.btn-primary,
+.cta-btn,
+#applyFilters {
+  background: rgb(38, 123, 41);
+  color: #fff;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   font-weight: bold;
 }
 
-.btn-primary:hover, .cta-btn:hover, #applyFilters:hover {
+.btn-primary:hover,
+.cta-btn:hover,
+#applyFilters:hover {
   background: #267b29;
 }
 
 .btn-secondary {
-  background: #fff; 
-  color: #000; 
+  background: #fff;
+  color: #000;
   border: 1px solid #000;
-  padding: 0.75rem 1rem; 
+  padding: 0.75rem 1rem;
   margin-right: 0.5rem;
   border-radius: 4px;
   font-weight: bold;
 }
 
 .btn-secondary:hover {
-  background: #000; 
+  background: #000;
   color: #fff;
 }
 
-#selectAll, #selectNone {
-  background: #fff; 
-  color: #000; 
+#selectAll,
+#selectNone {
+  background: #fff;
+  color: #000;
   border: 1px solid #000;
-  padding: 0.75rem 1rem; 
+  padding: 0.75rem 1rem;
   margin-right: 0.5rem;
   border-radius: 4px;
   font-weight: bold;
@@ -389,35 +469,48 @@ button {
   text-decoration: none;
 }
 
-#selectAll:hover, #selectNone:hover {
-  background: #000; 
+#selectAll:hover,
+#selectNone:hover {
+  background: #000;
   color: #fff;
 }
 
 /* === Close icon === */
 .close-btn {
-  display: inline-flex; 
-  align-items: center; 
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  width: 36px; height: 36px;
-  border: 2px solid #000; 
-  border-radius: 50%; 
+  width: 36px;
+  height: 36px;
+  border: 2px solid #000;
+  border-radius: 50%;
   background: #fff;
   position: absolute;
   top: 1rem;
   right: 1rem;
   z-index: 9200;
 }
-.close-btn:hover { background: #000; }
-.close-btn:hover .close-icon { filter: invert(1); }
-.close-icon { width: 16px; height: 16px; }
+
+.close-btn:hover {
+  background: #000;
+}
+
+.close-btn:hover .close-icon {
+  filter: invert(1);
+}
+
+.close-icon {
+  width: 16px;
+  height: 16px;
+}
 
 /* === Map & panels === */
 #map {
   flex: 1;
   width: 100%;
   min-height: 400px;
-  height: calc(100vh - 80px); /* Header height compensation */
+  height: calc(100vh - 80px);
+  /* Header height compensation */
   z-index: 1;
 }
 
@@ -461,27 +554,36 @@ button {
 }
 
 #detailPanel {
-  position: fixed; 
-  bottom: -100%; 
-  left: 0; 
+  position: fixed;
+  bottom: -100%;
+  left: 0;
   width: 100%;
-  background: #f7f7f7; 
+  background: #f7f7f7;
   padding: 2rem;
-  transition: 0.3s; 
+  transition: 0.3s;
   z-index: 2000;
 }
-#detailPanel.open { bottom: 0; }
+
+#detailPanel.open {
+  bottom: 0;
+}
 
 #formOverlay {
-  position: fixed; 
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: #fff; 
-  display: none; 
-  z-index: 9300; 
-  padding: 2rem; 
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  display: none;
+  z-index: 9300;
+  padding: 2rem;
   overflow: auto;
 }
-#formOverlay.open { display: block; }
+
+#formOverlay.open {
+  display: block;
+}
 
 /* === Filter form styling === */
 #filtersForm {
@@ -497,7 +599,7 @@ button {
   padding-bottom: 0.5rem;
 }
 
-#filtersForm > div {
+#filtersForm>div {
   margin-bottom: 2rem;
   padding: 1rem;
   background: #f8f9fa;
@@ -505,7 +607,7 @@ button {
   border-left: 4px solid rgb(38, 123, 41);
 }
 
-#filtersForm > div > strong {
+#filtersForm>div>strong {
   display: block;
   color: rgb(38, 123, 41);
   font-size: 1.1rem;
@@ -513,7 +615,7 @@ button {
   font-weight: bold;
 }
 
-#filtersForm > div > div {
+#filtersForm>div>div {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0.5rem;
@@ -541,12 +643,16 @@ button {
 }
 
 /* === Filter actions === */
-.filter-actions { 
-  margin: 1.5rem 0; 
+.filter-actions,
+#filtersForm>div.filter-actions {
+  margin: 1.5rem 0;
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
   justify-content: center;
+  background: none;
+  border: 0px;
+  padding: 0;
 }
 
 #applyFilters {
@@ -557,15 +663,15 @@ button {
 }
 
 @media (max-width: 768px) {
-  #filtersForm > div > div {
+  #filtersForm>div>div {
     grid-template-columns: 1fr;
   }
 }
 
 /* === Container voor content === */
 .container {
-  max-width: 1000px; 
-  margin: 2rem auto; 
+  max-width: 1000px;
+  margin: 2rem auto;
   padding: 0 1.5rem;
 }
 
@@ -671,13 +777,13 @@ button {
 
 /* === Improved detail panel === */
 #detailPanel {
-  position: fixed; 
-  bottom: -100%; 
-  left: 0; 
+  position: fixed;
+  bottom: -100%;
+  left: 0;
   width: 100%;
-  background: #fff; 
+  background: #fff;
   padding: 0;
-  transition: 0.3s; 
+  transition: 0.3s;
   z-index: 8000;
   border-top: 3px solid rgb(38, 123, 41);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
@@ -685,8 +791,8 @@ button {
   overflow-y: auto;
 }
 
-#detailPanel.open { 
-  bottom: 0; 
+#detailPanel.open {
+  bottom: 0;
 }
 
 .detail-content {
@@ -720,7 +826,8 @@ button {
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
   gap: 1rem;
-  padding-right: 50px; /* Make room for close button */
+  padding-right: 50px;
+  /* Make room for close button */
 }
 
 .detail-header h2 {
@@ -888,28 +995,28 @@ button {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .detail-row {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .detail-label {
     min-width: auto;
   }
-  
+
   .detail-actions {
     flex-direction: column;
   }
-  
+
   .contact-form-container {
     margin: 1rem;
   }
-  
+
   .contact-form-content {
     padding: 1rem;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
@@ -968,21 +1075,21 @@ button {
     align-items: stretch;
     gap: 0.5rem;
   }
-  
+
   .header-controls {
     justify-content: center;
   }
-  
+
   .search-container {
     display: flex;
     max-width: 100%;
   }
-  
+
   .search-container input {
     min-width: 120px;
     flex: 1;
   }
-  
+
   .map-controls {
     flex-direction: row;
     bottom: 0.5rem;
@@ -991,12 +1098,13 @@ button {
     justify-content: space-between;
     position: fixed;
   }
-  
-  #filterBtn, #exportBtn {
+
+  #filterBtn,
+  #exportBtn {
     flex: 1;
     margin: 0 0.25rem;
   }
-  
+
   .detail-actions {
     position: sticky;
     bottom: 0;
@@ -1005,14 +1113,14 @@ button {
     border-top: 1px solid #eee;
     margin: 0 -2rem -2rem -2rem;
   }
-  
+
   .map-legend {
     bottom: 4rem;
     right: 0.5rem;
     left: 0.5rem;
     text-align: center;
   }
-  
+
   .legend-item {
     justify-content: center;
   }
@@ -1022,16 +1130,16 @@ button {
   .search-container input {
     min-width: 100px;
   }
-  
+
   .language-selector select {
     font-size: 0.8rem;
     padding: 0.4rem;
   }
-  
+
   h1 {
     font-size: 2.5rem !important;
   }
-  
+
   .detail-header h2 {
     font-size: 1.25rem;
   }
@@ -1039,16 +1147,19 @@ button {
 
 /* === Improved touch targets === */
 @media (hover: none) and (pointer: coarse) {
-  button, .close-btn, label {
+
+  button,
+  .close-btn,
+  label {
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   .search-container button {
     width: 44px;
     height: 44px;
   }
-  
+
   .marker-cluster {
     cursor: pointer;
   }
@@ -1059,11 +1170,15 @@ button {
   .search-container {
     border-width: 3px;
   }
-  
-  .btn-primary, .cta-btn, #applyFilters, #filterBtn, #exportBtn {
+
+  .btn-primary,
+  .cta-btn,
+  #applyFilters,
+  #filterBtn,
+  #exportBtn {
     border: 2px solid #000;
   }
-  
+
   .detail-type-badge {
     border: 2px solid #fff;
   }
@@ -1071,10 +1186,14 @@ button {
 
 /* === Reduced motion support === */
 @media (prefers-reduced-motion: reduce) {
-  .overlay, button, .close-btn, #detailPanel {
+
+  .overlay,
+  button,
+  .close-btn,
+  #detailPanel {
     transition: none;
   }
-  
+
   .marker-hover-label {
     transition: none;
   }
@@ -1086,38 +1205,38 @@ button {
     background-color: #1a1a1a;
     color: #fff;
   }
-  
+
   header {
     background: #2d2d2d;
   }
-  
+
   .search-container {
     background: #2d2d2d;
     border-color: #4a4a4a;
   }
-  
+
   .search-container input {
     color: #fff;
   }
-  
+
   .language-selector select {
     background: #2d2d2d;
     color: #fff;
     border-color: #4a4a4a;
   }
-  
+
   .overlay {
     background: #2d2d2d;
   }
-  
+
   #detailPanel {
     background: #2d2d2d;
   }
-  
+
   .detail-row {
     background: #3a3a3a;
   }
-  
+
   .map-legend {
     background: rgba(45, 45, 45, 0.95);
     border-color: #4a4a4a;
@@ -1126,14 +1245,18 @@ button {
 
 /* === Print styles === */
 @media print {
-  header, .map-controls, .map-legend, #detailPanel {
+
+  header,
+  .map-controls,
+  .map-legend,
+  #detailPanel {
     display: none !important;
   }
-  
+
   #map {
     height: 100vh !important;
   }
-  
+
   body {
     margin: 0;
     padding: 0;
@@ -1142,14 +1265,22 @@ button {
 
 /* === Responsive nav === */
 @media screen and (min-width: 768px) {
-  #hamburger { display: none; }
-  #menuOverlay { display: none; }
-  #desktopNav { display: flex; }
-  
+  #hamburger {
+    display: none;
+  }
+
+  #menuOverlay {
+    display: none;
+  }
+
+  #desktopNav {
+    display: flex;
+  }
+
   .header-controls {
     flex-direction: row;
   }
-  
+
   .search-container {
     display: flex !important;
   }
