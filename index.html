@@ -11,8 +11,10 @@
 <body>
   <header>
     <div id="branding">
-      <img src="https://healthybuildingmovement.com/resources/uploads/2023/11/Logo.svg" alt="HBM Logo" id="logo" onerror="this.style.display='none'"/>
-      <span id="title">Kansenkaart</span>
+      <a href="index.html" class="logo-link">
+        <img src="https://healthybuildingmovement.com/resources/uploads/2023/11/Logo.svg" alt="HBM Logo" id="logo" onerror="this.style.display='none'"/>
+        <span id="title">Kansenkaart</span>
+      </a>
     </div>
     <button id="hamburger">&#9776;</button>
     <nav id="menuOverlay" class="overlay">
@@ -64,6 +66,18 @@
   </div>
 
   <main id="map"></main>
+
+  <div id="mapLegend" class="map-legend">
+    <h4 data-i18n="legend">Legenda</h4>
+    <div class="legend-item">
+      <img src="icons/marker-company.svg" alt="Bedrijf marker" class="legend-icon">
+      <span data-i18n="companies">Bedrijven</span>
+    </div>
+    <div class="legend-item">
+      <img src="icons/marker-project.svg" alt="Project marker" class="legend-icon">
+      <span data-i18n="projects">Projecten</span>
+    </div>
+  </div>
 
   <div id="detailPanel">
     <a href="#" id="closeDetail" class="close-btn">

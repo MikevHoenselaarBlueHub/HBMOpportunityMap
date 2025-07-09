@@ -1,9 +1,8 @@
-
 {
   "selectAll": "Alle auswählen",
   "selectNone": "Keine auswählen",
   "apply": "Anwenden",
-  "noSelection": "Treffen Sie eine Auswahl aus einem der Filter",
+  "noSelection": "Wählen Sie aus einem der Filter",
   "projectType": "Projekttyp",
   "organizationType": "Organisationstyp",
   "organizationField": "Fachbereich",
@@ -38,5 +37,6 @@
   "required": "Pflichtfeld",
   "cancel": "Abbrechen",
   "interestedIn": "Interessiert an",
-  "subject": "Betreff"
+  "subject": "Betreff",
+  "legend": "Legende"
 }

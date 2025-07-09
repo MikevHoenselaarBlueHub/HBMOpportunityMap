@@ -38,5 +38,6 @@
   "required": "Required field",
   "cancel": "Cancel",
   "interestedIn": "Interested in",
-  "subject": "Subject"
+  "subject": "Subject",
+  "legend": "Legend"
 }

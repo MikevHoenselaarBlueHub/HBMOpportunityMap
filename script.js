@@ -377,11 +377,24 @@ function showLocationDetails(location) {
   const locationName = location.Name;
   const isProject = (Array.isArray(location.HBMType) ? location.HBMType.includes('Project') : location.HBMType === 'Project');
   
+  // Determine which image to show
+  let imageHtml = '';
+  if (isProject && location.ProjectImage) {
+    imageHtml = `<div class="detail-image">
+                   <img src="${location.ProjectImage}" alt="${locationName}" onerror="this.parentNode.style.display='none'">
+                 </div>`;
+  } else if (!isProject && location.Logo) {
+    imageHtml = `<div class="detail-logo">
+                   <img src="${location.Logo}" alt="${locationName} logo" onerror="this.parentNode.style.display='none'">
+                 </div>`;
+  }
+  
   detailPanel.innerHTML = `
     <a href="#" id="closeDetail" class="close-btn">
       <img src="icons/close.svg" alt="${t('close')}" class="close-icon"/>
     </a>
     <div class="detail-content">
+      ${imageHtml}
       <div class="detail-header">
         <h2>${locationName}</h2>
         <div class="detail-type-badge ${isProject ? 'project' : 'company'}">
@@ -478,8 +491,24 @@ function updateMap() {
   const bounds = [];
   filtered.forEach(loc => {
     const markerOptions = {};
-    if (pIcon && bIcon) {
-      markerOptions.icon = (Array.isArray(loc.HBMType) ? loc.HBMType.includes('Project') : loc.HBMType === 'Project') ? pIcon : bIcon;
+    const isProject = (Array.isArray(loc.HBMType) ? loc.HBMType.includes('Project') : loc.HBMType === 'Project');
+    
+    // Check if project has an image for custom marker
+    if (isProject && loc.ProjectImage) {
+      // Create custom photo marker
+      const photoIcon = L.divIcon({
+        className: 'photo-marker',
+        html: `<div class="photo-marker-container">
+                 <img src="${loc.ProjectImage}" alt="${loc.Name}" class="photo-marker-image" onerror="this.parentNode.style.display='none'">
+                 <div class="photo-marker-overlay"></div>
+               </div>`,
+        iconSize: [50, 50],
+        iconAnchor: [25, 50],
+        popupAnchor: [0, -50]
+      });
+      markerOptions.icon = photoIcon;
+    } else if (pIcon && bIcon) {
+      markerOptions.icon = isProject ? pIcon : bIcon;
     }
     
     const marker = L.marker([loc.Latitude, loc.Longitude], markerOptions).addTo(map);

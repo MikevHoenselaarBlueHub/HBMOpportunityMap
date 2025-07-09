@@ -10,8 +10,10 @@
 <body>
   <header>
     <div id="branding">
-      <img src="https://healthybuildingmovement.com/resources/uploads/2023/11/Logo.svg" alt="HBM Logo" id="logo" onerror="this.style.display='none'"/>
-      <span id="title">Kansenkaart</span>
+      <a href="index.html" class="logo-link">
+        <img src="https://healthybuildingmovement.com/resources/uploads/2023/11/Logo.svg" alt="HBM Logo" id="logo" onerror="this.style.display='none'"/>
+        <span id="title">Kansenkaart</span>
+      </a>
     </div>
     <button id="hamburger">&#9776;</button>
     <nav id="menuOverlay" class="overlay">
@@ -28,6 +30,14 @@
       <a href="over.html" data-i18n="aboutHBM">Over HBM</a>
     </nav>
   </header>
+
+  <div class="language-selector">
+    <select id="languageSelect" onchange="setLanguage(this.value)">
+      <option value="nl">Nederlands</option>
+      <option value="en">English</option>
+      <option value="de">Deutsch</option>
+    </select>
+  </div>
 
   <main class="container">
     <h1>Meer informatie</h1>

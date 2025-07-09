@@ -9,6 +9,7 @@
     "HBMSector": "Wonen",
     "HBMType": "Bedrijf",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Logo": "https://via.placeholder.com/150x75/267B29/FFFFFF?text=Demo+Bedrijf+1",
     "Latitude": 50.892254,
     "Longitude": 5.73002
   },
@@ -22,6 +23,7 @@
     "HBMSector": "Zorg",
     "HBMType": "Bedrijf",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Logo": "https://via.placeholder.com/150x75/267B29/FFFFFF?text=Demo+Bedrijf+2",
     "Latitude": 51.374155,
     "Longitude": 6.558629
   },
@@ -35,6 +37,7 @@
     "HBMSector": ["Onderwijs", "Wonen"],
     "HBMType": "Project",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "ProjectImage": "https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Project+Gebouw",
     "Latitude": 50.884107,
     "Longitude": 5.705507
   },
