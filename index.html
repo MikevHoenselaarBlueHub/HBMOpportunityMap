@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kansenkaart</title>
+  <link rel="icon" href="favicon.ico" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+  <header>
+    <div id="branding">
+      <img src="https://healthybuildingmovement.com/resources/uploads/2023/11/Logo.svg" alt="HBM Logo" id="logo"/>
+      <span id="title">Kansenkaart</span>
+    </div>
+    <button id="hamburger">&#9776;</button>
+    <nav id="menuOverlay" class="overlay">
+      <a href="#" id="closeMenu" class="close-btn">
+        <img src="icons/close.svg" alt="Sluiten" class="close-icon"/>
+      </a>
+      <a href="index.html" class="active">Kansenkaart</a>
+      <a href="info.html">Meer info</a>
+      <a href="over.html">Over HBM</a>
+    </nav>
+    <nav id="desktopNav">
+      <a href="index.html" class="active">Kansenkaart</a>
+      <a href="info.html">Meer info</a>
+      <a href="over.html">Over HBM</a>
+    </nav>
+  </header>
+
+  <button id="filterBtn">Filters</button>
+  <div id="filterOverlay" class="overlay">
+    <a href="#" id="closeFilters" class="close-btn">
+      <img src="icons/close.svg" alt="Sluiten" class="close-icon"/>
+    </a>
+    <form id="filtersForm">
+      <h2>Filters</h2>
+      <div class="filter-actions">
+        <button type="button" id="selectAll">Selecteer alles</button>
+        <button type="button" id="selectNone">Selecteer geen</button>
+      </div>
+      <div><strong>Type project</strong><div id="ProjectType"></div></div>
+      <div><strong>Organisatietype</strong><div id="OrganizationType"></div></div>
+      <div><strong>Vakgebied</strong><div id="OrganizationField"></div></div>
+      <div><strong>Thema</strong><div id="HBMTopic"></div></div>
+      <div><strong>Kenmerken</strong><div id="HBMCharacteristics"></div></div>
+      <div><strong>Sector</strong><div id="HBMSector"></div></div>
+      <div>
+        <label><input type="checkbox" name="HBMType" value="Project" checked/> Projecten</label>
+        <label><input type="checkbox" name="HBMType" value="Bedrijf" checked/> Bedrijven</label>
+      </div>
+      <button type="button" id="applyFilters">Toepassen</button>
+    </form>
+  </div>
+
+  <main id="map"></main>
+
+  <div id="detailPanel">
+    <a href="#" id="closeDetail" class="close-btn">
+      <img src="icons/close.svg" alt="Sluiten" class="close-icon"/>
+    </a>
+    <!-- detail content -->
+  </div>
+
+  <div id="formOverlay"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

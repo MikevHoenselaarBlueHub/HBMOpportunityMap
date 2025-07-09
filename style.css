@@ -1,0 +1,151 @@
+/* === Basis reset en structuur === */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { 
+  display: flex; 
+  flex-direction: column;
+  font-family: sans-serif; 
+  line-height: 1.5; 
+  color: #333;
+}
+
+/* === Links === */
+a { text-decoration: none; color: inherit; }
+#desktopNav a, #menuOverlay a { text-decoration: none; }
+
+/* === Branding === */
+#branding { display: flex; align-items: center; gap: 1rem; }
+#branding #title { font-size: 1.25rem; font-weight: bold; }
+
+/* === Header === */
+header {
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  background: #fff; 
+  padding: 1rem; 
+  z-index: 50;
+}
+#hamburger { 
+  font-size: 2rem; 
+  background: none; 
+  border: none; 
+  cursor: pointer; 
+  color: #000; 
+}
+#desktopNav { display: none; gap: 1rem; }
+
+#desktopNav a {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+#desktopNav a:hover {
+  background: rgba(38, 123, 41, 0.1);
+  color: rgb(38, 123, 41);
+}
+#desktopNav a.active {
+  background: rgb(38, 123, 41);
+  color: #fff;
+}
+
+#menuOverlay a {
+  display: block;
+  margin: 1rem 0;
+  font-size: 1.2rem;
+}
+#menuOverlay a:hover { color: rgb(38, 123, 41); }
+#menuOverlay a.active { font-weight: bold; color: rgb(38, 123, 41); }
+
+/* === Overlay panels === */
+.overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: #fff; transform: translateX(100%);
+  transition: 0.3s; overflow: auto; z-index: 9999; padding: 2rem;
+}
+#menuOverlay.open { transform: translateX(0); }
+#filterOverlay { transform: translateX(-100%); }
+#filterOverlay.open { transform: translateX(0); }
+
+/* === Buttons === */
+button { cursor: pointer; }
+
+.cta-btn, #applyFilters {
+  background: rgb(38, 123, 41); 
+  color: #fff; 
+  border: none;
+  padding: 0.75rem 1.5rem;
+}
+
+.btn-secondary {
+  background: #fff; 
+  color: #000; 
+  border: 1px solid #000;
+  padding: 0.5rem 1rem; 
+  margin-right: 0.5rem;
+}
+.btn-secondary:hover {
+  background: #000; 
+  color: #fff;
+}
+
+/* === Close icon === */
+.close-btn {
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center;
+  width: 36px; height: 36px;
+  border: 2px solid #000; 
+  border-radius: 50%; 
+  background: #fff;
+}
+.close-btn:hover { background: #000; }
+.close-btn:hover .close-icon { filter: invert(1); }
+.close-icon { width: 16px; height: 16px; }
+
+/* === Map & panels === */
+#map {
+  flex: 1;
+  width: 100%;
+  min-height: 400px; /* Fallback */
+}
+
+#detailPanel {
+  position: fixed; 
+  bottom: -100%; 
+  left: 0; 
+  width: 100%;
+  background: #f7f7f7; 
+  padding: 2rem;
+  transition: 0.3s; 
+  z-index: 2000;
+}
+#detailPanel.open { bottom: 0; }
+
+#formOverlay {
+  position: fixed; 
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: #fff; 
+  display: none; 
+  z-index: 3000; 
+  padding: 2rem; 
+  overflow: auto;
+}
+#formOverlay.open { display: block; }
+
+/* === Filter actions === */
+.filter-actions { margin: 1rem 0; }
+
+/* === Container voor content === */
+.container {
+  max-width: 1000px; 
+  margin: 2rem auto; 
+  padding: 0 1.5rem;
+}
+
+/* === Responsive nav === */
+@media screen and (min-width: 768px) {
+  #hamburger { display: none; }
+  #menuOverlay { display: none; }
+  #desktopNav { display: flex; }
+}
