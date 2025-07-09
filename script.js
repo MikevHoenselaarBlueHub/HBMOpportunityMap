@@ -606,6 +606,12 @@ function updateOpportunitiesList(data) {
         </div>
         
         <div class="card-description">${opportunity.Description}</div>
+        
+        <div class="card-actions">
+          <button class="card-contact-btn" onclick="showContactForm(${JSON.stringify(opportunity).replace(/"/g, '&quot;')}); event.stopPropagation();">
+            ${t('contact') || 'Contact'}
+          </button>
+        </div>
       </div>
     `;
   }).join('');

@@ -341,9 +341,11 @@ button {
 }
 
 .search-container button .search-icon {
-  width: 16px;
-  height: 16px;
-  fill: white;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: white;
+  margin: 1px;
 }
 
 .language-selector select {
@@ -660,6 +662,30 @@ button {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.card-contact-btn {
+  background: rgb(38, 123, 41);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex: 1;
+}
+
+.card-contact-btn:hover {
+  background: #267b29;
 }
 
 /* === Mobile responsiveness === */
@@ -737,7 +763,7 @@ button {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   border: 2px solid rgb(38, 123, 41);
-  z-index: 1100;
+  z-index: 1050;
   min-width: 150px;
 }
 
