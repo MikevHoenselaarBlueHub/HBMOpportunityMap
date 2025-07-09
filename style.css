@@ -968,6 +968,14 @@ button {
   min-width: 150px;
 }
 
+/* Hide legend when list is shown on mobile */
+@media (max-width: 768px) {
+  .list-container.show ~ #mapLegend,
+  .list-container.show + .map-legend {
+    display: none;
+  }
+}
+
 .map-legend h4 {
   margin: 0 0 0.75rem 0;
   color: rgb(38, 123, 41);

@@ -1729,6 +1729,7 @@ function saveCurrentFilters() {
   savedFiltersData.push(filterSet);
   localStorage.setItem('kansenkaart_saved_filters', JSON.stringify(savedFiltersData));
   updateSavedFiltersSelect();
+  updateSavedFiltersButtonText();
   
   trackEvent('filters_saved', {
     filter_name: name,
@@ -1798,6 +1799,7 @@ function deleteSavedFilter() {
     savedFiltersData = savedFiltersData.filter(f => f.id != filterId);
     localStorage.setItem('kansenkaart_saved_filters', JSON.stringify(savedFiltersData));
     updateSavedFiltersSelect();
+    updateSavedFiltersButtonText();
     
     trackEvent('filters_deleted', {
       filter_name: filterSet.name,
@@ -1818,6 +1820,21 @@ function updateSavedFiltersSelect() {
       option.textContent = `${filterSet.name} (${new Date(filterSet.saved).toLocaleDateString()})`;
       select.appendChild(option);
     });
+  }
+  
+  // Update the saved filters button text with count
+  updateSavedFiltersButtonText();
+}
+
+function updateSavedFiltersButtonText() {
+  const savedFiltersBtn = document.getElementById('loadSavedFiltersBtn');
+  if (savedFiltersBtn) {
+    const count = savedFiltersData.length;
+    if (count > 0) {
+      savedFiltersBtn.textContent = `Saved filters (${count})`;
+    } else {
+      savedFiltersBtn.textContent = 'Saved filters';
+    }
   }
 }
 
@@ -1876,6 +1893,7 @@ function deleteSavedFilterFromModal(filterId) {
   if (confirm(`Weet u zeker dat u "${filterSet.name}" wilt verwijderen?`)) {
     savedFiltersData = savedFiltersData.filter(f => f.id != filterId);
     localStorage.setItem('kansenkaart_saved_filters', JSON.stringify(savedFiltersData));
+    updateSavedFiltersButtonText();
     
     // Close and reopen modal to refresh the list
     closeSavedFiltersModal();
@@ -1895,6 +1913,7 @@ function loadSavedFiltersFromStorage() {
     if (saved) {
       savedFiltersData = JSON.parse(saved);
       updateSavedFiltersSelect();
+      updateSavedFiltersButtonText();
     }
   } catch (error) {
     console.error('Error loading saved filters:', error);
