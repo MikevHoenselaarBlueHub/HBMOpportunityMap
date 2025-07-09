@@ -80,7 +80,16 @@ if (document.getElementById('map')) {
 function createFilterCheckboxes() {
   const keys = ['ProjectType','OrganizationType','OrganizationField','HBMTopic','HBMCharacteristics','HBMSector'];
   keys.forEach(key => {
-    const values = [...new Set(window.data.map(d => d[key]).filter(Boolean))];
+    const allValues = [];
+    window.data.forEach(d => {
+      const value = d[key];
+      if (Array.isArray(value)) {
+        allValues.push(...value);
+      } else if (value) {
+        allValues.push(value);
+      }
+    });
+    const values = [...new Set(allValues)];
     const container = document.getElementById(key);
     if (container) {
       container.innerHTML = '';
@@ -99,16 +108,16 @@ function showLocationDetails(location) {
       <img src="icons/close.svg" alt="Sluiten" class="close-icon"/>
     </a>
     <h2>${location.Name}</h2>
-    <p><strong>Type:</strong> ${location.HBMType}</p>
-    <p><strong>Project type:</strong> ${location.ProjectType}</p>
-    <p><strong>Organisatie:</strong> ${location.OrganizationType}</p>
-    <p><strong>Vakgebied:</strong> ${location.OrganizationField}</p>
-    <p><strong>Thema:</strong> ${location.HBMTopic}</p>
-    <p><strong>Kenmerken:</strong> ${location.HBMCharacteristics}</p>
-    <p><strong>Sector:</strong> ${location.HBMSector}</p>
+    <p><strong>Type:</strong> ${Array.isArray(location.HBMType) ? location.HBMType.join(', ') : location.HBMType}</p>
+    <p><strong>Project type:</strong> ${Array.isArray(location.ProjectType) ? location.ProjectType.join(', ') : location.ProjectType}</p>
+    <p><strong>Organisatie:</strong> ${Array.isArray(location.OrganizationType) ? location.OrganizationType.join(', ') : location.OrganizationType}</p>
+    <p><strong>Vakgebied:</strong> ${Array.isArray(location.OrganizationField) ? location.OrganizationField.join(', ') : location.OrganizationField}</p>
+    <p><strong>Thema:</strong> ${Array.isArray(location.HBMTopic) ? location.HBMTopic.join(', ') : location.HBMTopic}</p>
+    <p><strong>Kenmerken:</strong> ${Array.isArray(location.HBMCharacteristics) ? location.HBMCharacteristics.join(', ') : location.HBMCharacteristics}</p>
+    <p><strong>Sector:</strong> ${Array.isArray(location.HBMSector) ? location.HBMSector.join(', ') : location.HBMSector}</p>
     <p><strong>Beschrijving:</strong> ${location.Description}</p>
     <div style="margin-top: 1rem;">
-      <button class="cta-btn">Contact opnemen</button>
+      <button class="btn-primary">Contact opnemen</button>
       <button class="btn-secondary">Meer info</button>
     </div>
   `;
@@ -141,7 +150,15 @@ function updateMap() {
   });
 
   const filtered = window.data.filter(d => {
-    return Object.keys(filters).every(k => !filters[k].length || filters[k].includes(d[k]));
+    return Object.keys(filters).every(k => {
+      if (!filters[k].length) return true;
+      const dataValue = d[k];
+      if (Array.isArray(dataValue)) {
+        return dataValue.some(val => filters[k].includes(val));
+      } else {
+        return filters[k].includes(dataValue);
+      }
+    });
   });
 
   const bounds = [];

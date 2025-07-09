@@ -196,7 +196,12 @@ header {
 #filterOverlay.open { transform: translateX(0); }
 
 /* === Buttons === */
-button { cursor: pointer; }
+button { 
+  cursor: pointer; 
+  border-radius: 4px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
 
 #filterBtn {
   position: fixed;
@@ -211,21 +216,30 @@ button { cursor: pointer; }
   font-weight: bold;
 }
 
-.cta-btn, #applyFilters {
+.btn-primary, .cta-btn, #applyFilters {
   background: rgb(38, 123, 41); 
   color: #fff; 
   border: none;
   padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: bold;
 }
 
-.btn-secondary {
+.btn-primary:hover, .cta-btn:hover, #applyFilters:hover {
+  background: #267b29;
+}
+
+.btn-secondary, #selectAll, #selectNone {
   background: #fff; 
   color: #000; 
   border: 1px solid #000;
-  padding: 0.5rem 1rem; 
+  padding: 0.75rem 1rem; 
   margin-right: 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
 }
-.btn-secondary:hover {
+
+.btn-secondary:hover, #selectAll:hover, #selectNone:hover {
   background: #000; 
   color: #fff;
 }
@@ -276,7 +290,12 @@ button { cursor: pointer; }
 #formOverlay.open { display: block; }
 
 /* === Filter actions === */
-.filter-actions { margin: 1rem 0; }
+.filter-actions { 
+  margin: 1rem 0; 
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
 
 /* === Container voor content === */
 .container {
