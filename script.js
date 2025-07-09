@@ -39,8 +39,8 @@ let pIcon, bIcon;
 
 // Initialize map only if we're on the map page
 if (document.getElementById('map')) {
-  // Wait for Leaflet to load before initializing
-  document.addEventListener('DOMContentLoaded', function() {
+  // Function to initialize everything when Leaflet is ready
+  function initializeApp() {
     if (typeof L !== 'undefined') {
       // Initialize icons
       pIcon = L.icon({ 
@@ -70,11 +70,17 @@ if (document.getElementById('map')) {
           mapElement.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Fout bij het laden van de data. Probeer de pagina te vernieuwen.</div>';
         });
     } else {
-      console.error('Leaflet library not loaded');
-      const mapElement = document.getElementById('map');
-      mapElement.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Kaart bibliotheek kon niet worden geladen.</div>';
+      // Retry after a short delay
+      setTimeout(initializeApp, 100);
     }
-  });
+  }
+
+  // Wait for DOM and then initialize
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+  } else {
+    initializeApp();
+  }
 }
 
 function createFilterCheckboxes() {
@@ -177,5 +183,20 @@ function updateMap() {
     bounds.push([loc.Latitude, loc.Longitude]);
   });
 
-  if (bounds.length) map.fitBounds(bounds);
+  // Zoom to show all markers with padding
+  if (bounds.length > 0) {
+    if (bounds.length === 1) {
+      // Single marker - center on it with reasonable zoom
+      map.setView(bounds[0], 12);
+    } else {
+      // Multiple markers - fit bounds with padding
+      map.fitBounds(bounds, {
+        padding: [20, 20],
+        maxZoom: 15
+      });
+    }
+  } else {
+    // No markers - show default view
+    map.setView([51.2, 6.1], 9);
+  }
 }
