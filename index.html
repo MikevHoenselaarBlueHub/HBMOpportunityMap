@@ -94,6 +94,20 @@
 
   <div id="formOverlay"></div>
 
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-2RMYQV239Q"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-2RMYQV239Q', {
+      page_title: 'HBM Kansenkaart',
+      custom_map: {
+        'custom_parameter_1': 'map_interaction'
+      }
+    });
+  </script>
+
   <script src="https://unpkg.com/leaflet/dist/leaflet.js" onload="console.log('Leaflet loaded successfully')" onerror="console.error('Failed to load Leaflet')"></script>
   <script src="script.js"></script>
 </body>

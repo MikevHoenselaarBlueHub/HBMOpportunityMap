@@ -7,6 +7,32 @@ let pIcon, bIcon;
 let hoverLabel;
 let municipalityLayer;
 
+// Google Analytics 4 Event Tracking
+function trackEvent(eventName, parameters = {}) {
+  if (typeof gtag === 'function') {
+    gtag('event', eventName, {
+      event_category: 'kansenkaart_interaction',
+      event_label: parameters.label || '',
+      value: parameters.value || 0,
+      custom_parameter_1: parameters.custom_parameter_1 || '',
+      ...parameters
+    });
+  }
+}
+
+// Track page views
+function trackPageView(pageName) {
+  if (typeof gtag === 'function') {
+    gtag('config', 'G-2RMYQV239Q', {
+      page_title: `HBM Kansenkaart - ${pageName}`,
+      page_location: window.location.href,
+      custom_map: {
+        'custom_parameter_1': 'page_view'
+      }
+    });
+  }
+}
+
 // Load translations
 async function loadTranslations() {
   try {
@@ -30,6 +56,14 @@ async function setLanguage(lang) {
   currentLanguage = lang;
   await loadTranslations();
   updateUI();
+  
+  // Track language change
+  trackEvent('language_change', {
+    label: lang,
+    custom_parameter_1: 'language_selection',
+    previous_language: currentLanguage,
+    new_language: lang
+  });
 }
 
 function updateUI() {
@@ -131,6 +165,14 @@ function hideHoverLabel() {
 
 // Contact form functions
 function showContactForm(location) {
+  // Track contact form open
+  trackEvent('contact_form_open', {
+    location_name: location.Name,
+    location_type: Array.isArray(location.HBMType) ? location.HBMType.join(', ') : location.HBMType,
+    label: `Contact form opened for: ${location.Name}`,
+    custom_parameter_1: 'lead_generation'
+  });
+  
   const formOverlay = document.getElementById('formOverlay');
   formOverlay.innerHTML = `
     <div class="contact-form-container">
@@ -193,6 +235,12 @@ function showContactForm(location) {
 }
 
 function closeContactForm() {
+  // Track contact form close
+  trackEvent('contact_form_close', {
+    label: 'Contact form closed',
+    custom_parameter_1: 'form_interaction'
+  });
+  
   document.getElementById('formOverlay').classList.remove('open');
 }
 
@@ -201,6 +249,15 @@ function handleContactSubmit(e) {
   
   // Get form data
   const formData = new FormData(e.target);
+  const interestedIn = formData.get('interested_in');
+  
+  // Track form submission attempt
+  trackEvent('contact_form_submit', {
+    location_name: interestedIn,
+    label: `Contact form submitted for: ${interestedIn}`,
+    custom_parameter_1: 'lead_conversion',
+    value: 1
+  });
   
   // You can implement your own email sending logic here
   // For now, we'll use Formspree (replace YOUR_FORM_ID with actual ID)
@@ -212,50 +269,125 @@ function handleContactSubmit(e) {
     }
   }).then(response => {
     if (response.ok) {
+      // Track successful submission
+      trackEvent('contact_form_success', {
+        location_name: interestedIn,
+        label: `Contact form successfully sent for: ${interestedIn}`,
+        custom_parameter_1: 'conversion_success',
+        value: 1
+      });
+      
       alert('Bericht succesvol verzonden!');
       closeContactForm();
     } else {
+      // Track failed submission
+      trackEvent('contact_form_error', {
+        location_name: interestedIn,
+        error_type: 'server_error',
+        label: `Contact form failed for: ${interestedIn}`,
+        custom_parameter_1: 'conversion_error'
+      });
+      
       alert('Er is een fout opgetreden. Probeer het opnieuw.');
     }
   }).catch(error => {
     console.error('Error:', error);
+    
+    // Track network error
+    trackEvent('contact_form_error', {
+      location_name: interestedIn,
+      error_type: 'network_error',
+      label: `Contact form network error for: ${interestedIn}`,
+      custom_parameter_1: 'conversion_error'
+    });
+    
     alert('Er is een fout opgetreden. Probeer het opnieuw.');
   });
 }
 
 // Hamburger en overlays
 if (document.getElementById('hamburger')) {
-  document.getElementById('hamburger').onclick = () => document.getElementById('menuOverlay').classList.add('open');
+  document.getElementById('hamburger').onclick = () => {
+    trackEvent('menu_open', {
+      label: 'Hamburger menu opened',
+      custom_parameter_1: 'navigation'
+    });
+    document.getElementById('menuOverlay').classList.add('open');
+  };
 }
 if (document.getElementById('closeMenu')) {
-  document.getElementById('closeMenu').onclick = () => document.getElementById('menuOverlay').classList.remove('open');
+  document.getElementById('closeMenu').onclick = () => {
+    trackEvent('menu_close', {
+      label: 'Menu closed',
+      custom_parameter_1: 'navigation'
+    });
+    document.getElementById('menuOverlay').classList.remove('open');
+  };
 }
 if (document.getElementById('filterBtn')) {
-  document.getElementById('filterBtn').onclick = () => document.getElementById('filterOverlay').classList.add('open');
+  document.getElementById('filterBtn').onclick = () => {
+    trackEvent('filter_open', {
+      label: 'Filter panel opened',
+      custom_parameter_1: 'filter_interaction'
+    });
+    document.getElementById('filterOverlay').classList.add('open');
+  };
 }
 if (document.getElementById('closeFilters')) {
-  document.getElementById('closeFilters').onclick = () => document.getElementById('filterOverlay').classList.remove('open');
+  document.getElementById('closeFilters').onclick = () => {
+    trackEvent('filter_close', {
+      label: 'Filter panel closed',
+      custom_parameter_1: 'filter_interaction'
+    });
+    document.getElementById('filterOverlay').classList.remove('open');
+  };
 }
 if (document.getElementById('applyFilters')) {
   document.getElementById('applyFilters').onclick = () => {
+    // Get active filters for tracking
+    const activeFilters = {};
+    document.querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
+      if (!activeFilters[cb.name]) activeFilters[cb.name] = [];
+      activeFilters[cb.name].push(cb.value);
+    });
+    
+    trackEvent('filter_apply', {
+      label: 'Filters applied',
+      custom_parameter_1: 'filter_interaction',
+      filter_count: Object.keys(activeFilters).length,
+      active_filters: JSON.stringify(activeFilters)
+    });
+    
     updateMap();
     document.getElementById('filterOverlay').classList.remove('open');
   };
 }
 if (document.getElementById('selectAll')) {
   document.getElementById('selectAll').onclick = () => {
+    trackEvent('filter_select_all', {
+      label: 'Select all filters',
+      custom_parameter_1: 'filter_interaction'
+    });
     document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => cb.checked = true);
     updateFilterState();
   };
 }
 if (document.getElementById('selectNone')) {
   document.getElementById('selectNone').onclick = () => {
+    trackEvent('filter_select_none', {
+      label: 'Select no filters',
+      custom_parameter_1: 'filter_interaction'
+    });
     document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => cb.checked = false);
     updateFilterState();
   };
 }
 if (document.getElementById('closeDetail')) {
   document.getElementById('closeDetail').onclick = () => {
+    trackEvent('detail_panel_close', {
+      label: 'Detail panel closed',
+      custom_parameter_1: 'content_interaction'
+    });
     document.getElementById('detailPanel').classList.remove('open');
   };
 }
@@ -278,6 +410,15 @@ if (document.getElementById('mapSearch')) {
              (loc.Description && loc.Description.toLowerCase().includes(searchTerm)) ||
              (Array.isArray(loc.HBMTopic) ? loc.HBMTopic.some(topic => topic.toLowerCase().includes(searchTerm)) : loc.HBMTopic.toLowerCase().includes(searchTerm)) ||
              (Array.isArray(loc.OrganizationType) ? loc.OrganizationType.some(type => type.toLowerCase().includes(searchTerm)) : loc.OrganizationType.toLowerCase().includes(searchTerm));
+    });
+    
+    // Track search
+    trackEvent('search', {
+      search_term: searchTerm,
+      results_count: searchResults.length,
+      label: `Search: ${searchTerm}`,
+      custom_parameter_1: 'map_search',
+      value: searchResults.length
     });
     
     // Update map with search results
@@ -395,17 +536,37 @@ if (document.getElementById('map')) {
       // Create hover label
       createHoverLabel();
       
+      // Track page view
+      trackPageView('Kansenkaart');
+      
       // Data laden
       fetch('opportunities.json')
         .then(res => res.json())
         .then(data => {
           window.data = data;
+          
+          // Track data load success
+          trackEvent('data_load_success', {
+            data_count: data.length,
+            label: `Successfully loaded ${data.length} opportunities`,
+            custom_parameter_1: 'data_interaction',
+            value: data.length
+          });
+          
           createFilterCheckboxes();
           updateMap();
           updateUI();
         })
         .catch(error => {
           console.error('Error loading data:', error);
+          
+          // Track data load error
+          trackEvent('data_load_error', {
+            error_message: error.message,
+            label: 'Failed to load opportunities data',
+            custom_parameter_1: 'data_error'
+          });
+          
           const mapElement = document.getElementById('map');
           mapElement.innerHTML = `<div style="padding: 2rem; text-align: center; color: #666;">${t('dataLoadError')}</div>`;
         });
@@ -539,9 +700,20 @@ function updateFilterState() {
 }
 
 function showLocationDetails(location) {
+  // Track location detail view
+  const isProject = (Array.isArray(location.HBMType) ? location.HBMType.includes('Project') : location.HBMType === 'Project');
+  trackEvent('location_detail_view', {
+    location_name: location.Name,
+    location_type: Array.isArray(location.HBMType) ? location.HBMType.join(', ') : location.HBMType,
+    organization_type: Array.isArray(location.OrganizationType) ? location.OrganizationType.join(', ') : location.OrganizationType,
+    hbm_sector: Array.isArray(location.HBMSector) ? location.HBMSector.join(', ') : location.HBMSector,
+    label: `Location detail viewed: ${location.Name}`,
+    custom_parameter_1: 'content_engagement',
+    is_project: isProject
+  });
+  
   const detailPanel = document.getElementById('detailPanel');
   const locationName = location.Name;
-  const isProject = (Array.isArray(location.HBMType) ? location.HBMType.includes('Project') : location.HBMType === 'Project');
   
   // Determine which image to show
   let imageHtml = '';
@@ -627,6 +799,13 @@ function updateMap() {
     map = L.map('map').setView([51.2, 6.1], 9);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     
+    // Track map initialization
+    trackEvent('map_initialize', {
+      label: 'Map initialized',
+      custom_parameter_1: 'map_interaction',
+      initial_zoom: 9
+    });
+    
     // Add municipality layer
     municipalityLayer = L.layerGroup();
     
@@ -643,6 +822,54 @@ function updateMap() {
       position: 'topright',
       collapsed: false
     }).addTo(map);
+    
+    // Track layer toggle events
+    map.on('overlayadd', (e) => {
+      trackEvent('layer_toggle', {
+        layer_name: e.name,
+        action: 'add',
+        label: `Layer added: ${e.name}`,
+        custom_parameter_1: 'map_interaction'
+      });
+    });
+    
+    map.on('overlayremove', (e) => {
+      trackEvent('layer_toggle', {
+        layer_name: e.name,
+        action: 'remove',
+        label: `Layer removed: ${e.name}`,
+        custom_parameter_1: 'map_interaction'
+      });
+    });
+    
+    // Track map movements (throttled)
+    let mapMoveTimeout;
+    map.on('moveend', () => {
+      clearTimeout(mapMoveTimeout);
+      mapMoveTimeout = setTimeout(() => {
+        const center = map.getCenter();
+        const zoom = map.getZoom();
+        trackEvent('map_move', {
+          zoom_level: zoom,
+          center_lat: Math.round(center.lat * 1000) / 1000,
+          center_lng: Math.round(center.lng * 1000) / 1000,
+          label: `Map moved to zoom ${zoom}`,
+          custom_parameter_1: 'map_interaction',
+          value: zoom
+        });
+      }, 1000);
+    });
+    
+    // Track zoom changes
+    map.on('zoomend', () => {
+      const zoom = map.getZoom();
+      trackEvent('map_zoom', {
+        zoom_level: zoom,
+        label: `Map zoomed to level ${zoom}`,
+        custom_parameter_1: 'map_interaction',
+        value: zoom
+      });
+    });
     
     // Load municipality boundaries
     loadMunicipalityBoundaries();
@@ -706,6 +933,16 @@ function updateMap() {
     
     // Add click event
     marker.on('click', () => {
+      // Track marker click
+      const isProject = (Array.isArray(loc.HBMType) ? loc.HBMType.includes('Project') : loc.HBMType === 'Project');
+      trackEvent('marker_click', {
+        location_name: loc.Name,
+        location_type: Array.isArray(loc.HBMType) ? loc.HBMType.join(', ') : loc.HBMType,
+        label: `Marker clicked: ${loc.Name}`,
+        custom_parameter_1: 'map_interaction',
+        is_project: isProject
+      });
+      
       showLocationDetails(loc);
     });
     
@@ -713,6 +950,16 @@ function updateMap() {
     marker.on('mouseover', (e) => {
       const domEvent = e.originalEvent;
       showHoverLabel(domEvent, loc.Name);
+      
+      // Track marker hover (with throttling to avoid spam)
+      if (!marker._hoverTracked || Date.now() - marker._hoverTracked > 5000) {
+        marker._hoverTracked = Date.now();
+        trackEvent('marker_hover', {
+          location_name: loc.Name,
+          label: `Marker hovered: ${loc.Name}`,
+          custom_parameter_1: 'map_interaction'
+        });
+      }
     });
     
     marker.on('mouseout', () => {
