@@ -39,5 +39,10 @@
   "interestedIn": "Interessiert an",
   "subject": "Betreff",
   "legend": "Legende",
-  "language": "Sprache"de"
+  "language": "Sprache",
+  "opportunities": "Chancen",
+  "results": "Ergebnisse",
+  "noResults": "Keine Ergebnisse gefunden",
+  "list": "Liste",
+  "map": "Karte"de"
 }

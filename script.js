@@ -7,6 +7,8 @@ let pIcon, bIcon;
 let hoverLabel;
 let municipalityLayer;
 let markerClusterGroup;
+let currentListView = false;
+let filteredData = [];
 
 // Google Analytics 4 Event Tracking
 function trackEvent(eventName, parameters = {}) {
@@ -391,6 +393,30 @@ if (document.getElementById('selectNone')) {
   };
 }
 
+// View toggle functionality
+if (document.getElementById('viewToggle')) {
+  document.getElementById('viewToggle').onclick = () => {
+    const listContainer = document.getElementById('listContainer');
+    const viewToggleText = document.getElementById('viewToggleText');
+    
+    currentListView = !currentListView;
+    
+    if (currentListView) {
+      listContainer.classList.add('show');
+      viewToggleText.textContent = t('map') || 'Kaart';
+    } else {
+      listContainer.classList.remove('show');
+      viewToggleText.textContent = t('list') || 'Lijst';
+    }
+    
+    trackEvent('view_toggle', {
+      view: currentListView ? 'list' : 'map',
+      label: `Switched to ${currentListView ? 'list' : 'map'} view`,
+      custom_parameter_1: 'navigation'
+    });
+  };
+}
+
 // Data export functionality
 if (document.getElementById('exportBtn')) {
   document.getElementById('exportBtn').onclick = () => {
@@ -467,6 +493,10 @@ function displaySearchResults(results) {
     return;
   }
   
+  // Store filtered results
+  filteredData = results;
+  updateOpportunitiesList(results);
+  
   // Add markers for search results
   const bounds = [];
   results.forEach(loc => {
@@ -524,6 +554,86 @@ function displaySearchResults(results) {
       });
     }
   }
+}
+
+function updateOpportunitiesList(data) {
+  const listContainer = document.getElementById('opportunitiesList');
+  const resultsCount = document.getElementById('resultsCount');
+  
+  if (!listContainer || !resultsCount) return;
+  
+  resultsCount.textContent = `${data.length} ${t('results') || 'resultaten'}`;
+  
+  if (data.length === 0) {
+    listContainer.innerHTML = `<div class="no-results">${t('noResults') || 'Geen resultaten gevonden'}</div>`;
+    return;
+  }
+  
+  listContainer.innerHTML = data.map((opportunity, index) => {
+    const isProject = (Array.isArray(opportunity.HBMType) ? opportunity.HBMType.includes('Project') : opportunity.HBMType === 'Project');
+    
+    let imageHtml = '';
+    if (isProject && opportunity.ProjectImage) {
+      imageHtml = `<img src="${opportunity.ProjectImage}" alt="${opportunity.Name}" class="card-image" onerror="this.style.display='none'">`;
+    } else if (!isProject && opportunity.Logo) {
+      imageHtml = `<img src="${opportunity.Logo}" alt="${opportunity.Name}" class="card-logo" onerror="this.style.display='none'">`;
+    }
+    
+    return `
+      <div class="opportunity-card" data-index="${index}" onclick="selectOpportunity(${index})">
+        <div class="card-header">
+          <h4 class="card-title">${opportunity.Name}</h4>
+          <span class="card-type-badge ${isProject ? 'project' : 'company'}">
+            ${Array.isArray(opportunity.HBMType) ? opportunity.HBMType.join(', ') : opportunity.HBMType}
+          </span>
+        </div>
+        
+        ${imageHtml}
+        
+        <div class="card-details">
+          <div class="card-detail-row">
+            <span class="card-detail-label">${t('organizationType')}:</span>
+            <span class="card-detail-value">${Array.isArray(opportunity.OrganizationType) ? opportunity.OrganizationType.join(', ') : opportunity.OrganizationType}</span>
+          </div>
+          <div class="card-detail-row">
+            <span class="card-detail-label">${t('hbmTopic')}:</span>
+            <span class="card-detail-value">${Array.isArray(opportunity.HBMTopic) ? opportunity.HBMTopic.join(', ') : opportunity.HBMTopic}</span>
+          </div>
+          <div class="card-detail-row">
+            <span class="card-detail-label">${t('hbmSector')}:</span>
+            <span class="card-detail-value">${Array.isArray(opportunity.HBMSector) ? opportunity.HBMSector.join(', ') : opportunity.HBMSector}</span>
+          </div>
+        </div>
+        
+        <div class="card-description">${opportunity.Description}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectOpportunity(index) {
+  const opportunity = filteredData[index];
+  if (!opportunity) return;
+  
+  // Highlight the card
+  document.querySelectorAll('.opportunity-card').forEach(card => card.classList.remove('highlighted'));
+  document.querySelector(`[data-index="${index}"]`).classList.add('highlighted');
+  
+  // Center map on the location
+  if (map) {
+    map.setView([opportunity.Latitude, opportunity.Longitude], 14);
+  }
+  
+  // Show location details
+  showLocationDetails(opportunity);
+  
+  // Track card click
+  trackEvent('list_item_click', {
+    location_name: opportunity.Name,
+    location_type: Array.isArray(opportunity.HBMType) ? opportunity.HBMType.join(', ') : opportunity.HBMType,
+    label: `List item clicked: ${opportunity.Name}`,
+    custom_parameter_1: 'list_interaction'
+  });
 }
 
 // Export data function
@@ -1001,6 +1111,10 @@ function updateMap() {
       }
     });
   });
+
+  // Store filtered data and update list
+  filteredData = filtered;
+  updateOpportunitiesList(filtered);
 
   // Add markers for filtered data with clustering
   const bounds = [];

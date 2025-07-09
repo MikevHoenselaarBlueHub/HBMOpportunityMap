@@ -40,5 +40,10 @@
   "interestedIn": "Interested in",
   "subject": "Subject",
   "legend": "Legend",
-  "language": "Language"
+  "language": "Language",
+  "opportunities": "Opportunities",
+  "results": "results",
+  "noResults": "No results found",
+  "list": "List",
+  "map": "Map"
 }

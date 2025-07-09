@@ -84,6 +84,9 @@
     <div class="map-controls">
       <button id="filterBtn">Filters</button>
       <button id="exportBtn">Export Data</button>
+      <button id="viewToggle" class="mobile-only">
+        <span id="viewToggleText">Lijst</span>
+      </button>
     </div>
     <div id="filterOverlay" class="overlay">
       <a href="#" id="closeFilters" class="close-btn">
@@ -145,7 +148,18 @@
       </form>
     </div>
 
-    <main id="map"></main>
+    <main class="main-content">
+      <div id="map" class="map-container"></div>
+      <div id="listContainer" class="list-container">
+        <div class="list-header">
+          <h3 data-i18n="opportunities">Kansen</h3>
+          <span id="resultsCount" class="results-count">0 resultaten</span>
+        </div>
+        <div id="opportunitiesList" class="opportunities-list">
+          <!-- List items will be populated by JavaScript -->
+        </div>
+      </div>
+    </main>
 
     <div id="mapLegend" class="map-legend">
       <h4 data-i18n="legend">Legenda</h4>

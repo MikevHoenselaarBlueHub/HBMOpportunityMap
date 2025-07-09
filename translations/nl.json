@@ -40,5 +40,10 @@
   "interestedIn": "Geïnteresseerd in",
   "subject": "Onderwerp",
   "legend": "Legenda",
-  "language": "Taal"
+  "language": "Taal",
+  "opportunities": "Kansen",
+  "results": "resultaten",
+  "noResults": "Geen resultaten gevonden",
+  "list": "Lijst",
+  "map": "Kaart"
 }
