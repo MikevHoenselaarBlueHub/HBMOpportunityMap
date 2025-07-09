@@ -67,6 +67,12 @@
   <div id="formOverlay"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Ensure Leaflet is loaded before our script
+    if (typeof L === 'undefined') {
+      console.error('Leaflet failed to load');
+    }
+  </script>
   <script src="script.js"></script>
 </body>
 </html>

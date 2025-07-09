@@ -35,22 +35,46 @@ if (document.getElementById('closeDetail')) {
 
 // Kaart & markers
 let map, markers = [];
+let pIcon, bIcon;
 
 // Initialize map only if we're on the map page
 if (document.getElementById('map')) {
-  // Data laden
-  fetch('opportunities.json')
-    .then(res => res.json())
-    .then(data => {
-      window.data = data;
-      createFilterCheckboxes();
-      updateMap();
-    })
-    .catch(error => {
-      console.error('Error loading data:', error);
+  // Wait for Leaflet to load before initializing
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof L !== 'undefined') {
+      // Initialize icons
+      pIcon = L.icon({ 
+        iconUrl: 'icons/marker-project.svg', 
+        iconSize: [30, 40],
+        iconAnchor: [15, 40],
+        popupAnchor: [0, -40]
+      });
+      bIcon = L.icon({ 
+        iconUrl: 'icons/marker-company.svg', 
+        iconSize: [30, 40],
+        iconAnchor: [15, 40],
+        popupAnchor: [0, -40]
+      });
+      
+      // Data laden
+      fetch('opportunities.json')
+        .then(res => res.json())
+        .then(data => {
+          window.data = data;
+          createFilterCheckboxes();
+          updateMap();
+        })
+        .catch(error => {
+          console.error('Error loading data:', error);
+          const mapElement = document.getElementById('map');
+          mapElement.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Fout bij het laden van de data. Probeer de pagina te vernieuwen.</div>';
+        });
+    } else {
+      console.error('Leaflet library not loaded');
       const mapElement = document.getElementById('map');
-      mapElement.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Fout bij het laden van de data. Probeer de pagina te vernieuwen.</div>';
-    });
+      mapElement.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Kaart bibliotheek kon niet worden geladen.</div>';
+    }
+  });
 }
 
 function createFilterCheckboxes() {
@@ -122,8 +146,13 @@ function updateMap() {
 
   const bounds = [];
   filtered.forEach(loc => {
-    const icon = loc.HBMType === 'Project' ? pIcon : bIcon;
-    const marker = L.marker([loc.Latitude, loc.Longitude], { icon }).addTo(map);
+    // Use default icon if custom icons not loaded
+    const markerOptions = {};
+    if (pIcon && bIcon) {
+      markerOptions.icon = loc.HBMType === 'Project' ? pIcon : bIcon;
+    }
+    
+    const marker = L.marker([loc.Latitude, loc.Longitude], markerOptions).addTo(map);
     marker.on('click', () => {
       showLocationDetails(loc);
     });
