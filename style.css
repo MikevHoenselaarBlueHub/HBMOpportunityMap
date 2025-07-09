@@ -214,19 +214,72 @@ button {
   transition: all 0.2s ease;
 }
 
-.language-selector {
+.top-controls {
   position: fixed;
   top: 20px;
   right: 1rem;
   z-index: 1000;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 2px solid rgb(38, 123, 41);
+  border-radius: 25px;
+  padding: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-container input {
+  border: none;
+  outline: none;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background: transparent;
+  min-width: 200px;
+}
+
+.search-container button {
+  background: rgb(38, 123, 41);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+
+.search-container button:hover {
+  background: #267b29;
 }
 
 .language-selector select {
   padding: 0.5rem;
-  border: 1px solid #ccc;
+  border: 2px solid rgb(38, 123, 41);
   border-radius: 4px;
   font-size: 0.9rem;
   background: #fff;
+}
+
+@media (max-width: 768px) {
+  .top-controls {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+  
+  .search-container input {
+    min-width: 150px;
+  }
 }
 
 #filterBtn {
@@ -354,12 +407,83 @@ button {
 }
 #formOverlay.open { display: block; }
 
+/* === Filter form styling === */
+#filtersForm {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+#filtersForm h2 {
+  text-align: center;
+  color: rgb(38, 123, 41);
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid rgb(38, 123, 41);
+  padding-bottom: 0.5rem;
+}
+
+#filtersForm > div {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid rgb(38, 123, 41);
+}
+
+#filtersForm > div > strong {
+  display: block;
+  color: rgb(38, 123, 41);
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  font-weight: bold;
+}
+
+#filtersForm > div > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+#filtersForm label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+}
+
+#filtersForm label:hover {
+  background: #e9ecef;
+}
+
+#filtersForm input[type="checkbox"] {
+  margin: 0;
+  transform: scale(1.1);
+}
+
 /* === Filter actions === */
 .filter-actions { 
-  margin: 1rem 0; 
+  margin: 1.5rem 0; 
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
+  justify-content: center;
+}
+
+#applyFilters {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 1rem;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  #filtersForm > div > div {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* === Container voor content === */

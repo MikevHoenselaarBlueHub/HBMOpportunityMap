@@ -9,7 +9,7 @@
     "HBMSector": "Wonen",
     "HBMType": "Bedrijf",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
-    "Logo": "https://via.placeholder.com/150x75/267B29/FFFFFF?text=Demo+Bedrijf+1",
+    "Logo": "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=150&h=75&fit=crop&crop=center",
     "Latitude": 50.892254,
     "Longitude": 5.73002
   },
@@ -23,7 +23,7 @@
     "HBMSector": "Zorg",
     "HBMType": "Bedrijf",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
-    "Logo": "https://via.placeholder.com/150x75/267B29/FFFFFF?text=Demo+Bedrijf+2",
+    "Logo": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=150&h=75&fit=crop&crop=center",
     "Latitude": 51.374155,
     "Longitude": 6.558629
   },
@@ -37,7 +37,7 @@
     "HBMSector": ["Onderwijs", "Wonen"],
     "HBMType": "Project",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
-    "ProjectImage": "https://via.placeholder.com/300x200/2196F3/FFFFFF?text=Project+Gebouw",
+    "ProjectImage": "https://images.unsplash.com/photo-1565182999561-18d7dc61c393?w=300&h=200&fit=crop&crop=center",
     "Latitude": 50.884107,
     "Longitude": 5.705507
   },
@@ -51,6 +51,7 @@
     "HBMSector": "Onderwijs",
     "HBMType": "Bedrijf",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Logo": "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=150&h=75&fit=crop&crop=center",
     "Latitude": 51.386779,
     "Longitude": 6.121537
   },
@@ -64,6 +65,7 @@
     "HBMSector": "Onderwijs",
     "HBMType": "Project",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "ProjectImage": "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=300&h=200&fit=crop&crop=center",
     "Latitude": 50.845022,
     "Longitude": 5.666746
   },
@@ -77,6 +79,7 @@
     "HBMSector": "Wonen",
     "HBMType": "Project",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "ProjectImage": "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=300&h=200&fit=crop&crop=center",
     "Latitude": 50.726617,
     "Longitude": 6.069603
   },
@@ -90,6 +93,7 @@
     "HBMSector": "Onderwijs",
     "HBMType": "Project",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "ProjectImage": "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=300&h=200&fit=crop&crop=center",
     "Latitude": 51.159561,
     "Longitude": 6.03597
   },
@@ -103,6 +107,7 @@
     "HBMSector": ["Wonen", "Zorg"],
     "HBMType": "Project",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "ProjectImage": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=300&h=200&fit=crop&crop=center",
     "Latitude": 51.209993,
     "Longitude": 5.963016
   },
@@ -116,6 +121,7 @@
     "HBMSector": "Zorg",
     "HBMType": "Project",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "ProjectImage": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=300&h=200&fit=crop&crop=center",
     "Latitude": 51.236595,
     "Longitude": 5.974328
   },
@@ -129,6 +135,7 @@
     "HBMSector": "Wonen",
     "HBMType": "Project",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "ProjectImage": "https://images.unsplash.com/photo-1448630360428-65456885c650?w=300&h=200&fit=crop&crop=center",
     "Latitude": 50.819617,
     "Longitude": 5.711404
   },
@@ -142,6 +149,7 @@
     "HBMSector": "Zorg",
     "HBMType": "Project",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "ProjectImage": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=300&h=200&fit=crop&crop=center",
     "Latitude": 50.747619,
     "Longitude": 6.113933
   },
@@ -155,11 +163,12 @@
     "HBMSector": "Zorg",
     "HBMType": "Project",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "ProjectImage": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&h=200&fit=crop&crop=center",
     "Latitude": 50.784781,
     "Longitude": 6.12114
   },
   {
-    "Name": "Demo Locatie 13 (M\u00f6nchengladbach)",
+    "Name": "Demo Locatie 13 (Mönchengladbach)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Architect",
     "OrganizationField": "Architectuur",
@@ -168,6 +177,7 @@
     "HBMSector": "Wonen",
     "HBMType": "Bedrijf",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Logo": "https://images.unsplash.com/photo-1554834477-fd2fbbeb2123?w=150&h=75&fit=crop&crop=center",
     "Latitude": 51.174761,
     "Longitude": 6.424759
   },
@@ -181,6 +191,7 @@
     "HBMSector": "Wonen",
     "HBMType": "Bedrijf",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Logo": "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=150&h=75&fit=crop&crop=center",
     "Latitude": 50.859216,
     "Longitude": 5.702385
   },
@@ -194,6 +205,7 @@
     "HBMSector": "Wonen",
     "HBMType": "Bedrijf",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Logo": "https://images.unsplash.com/photo-1486825586573-7131f7991bdd?w=150&h=75&fit=crop&crop=center",
     "Latitude": 50.816861,
     "Longitude": 6.09487
   },
@@ -207,6 +219,7 @@
     "HBMSector": "Onderwijs",
     "HBMType": "Bedrijf",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Logo": "https://images.unsplash.com/photo-1564069114553-7215e1ff1890?w=150&h=75&fit=crop&crop=center",
     "Latitude": 51.32144,
     "Longitude": 6.552673
   },
@@ -220,6 +233,7 @@
     "HBMSector": "Wonen",
     "HBMType": "Bedrijf",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Logo": "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=150&h=75&fit=crop&crop=center",
     "Latitude": 50.863229,
     "Longitude": 5.683335
   },
@@ -233,6 +247,7 @@
     "HBMSector": "Zorg",
     "HBMType": "Project",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "ProjectImage": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300&h=200&fit=crop&crop=center",
     "Latitude": 51.337054,
     "Longitude": 6.189959
   },
@@ -246,6 +261,7 @@
     "HBMSector": "Zorg",
     "HBMType": "Bedrijf",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Logo": "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=150&h=75&fit=crop&crop=center",
     "Latitude": 50.78042,
     "Longitude": 6.074293
   },
@@ -259,6 +275,7 @@
     "HBMSector": "Zorg",
     "HBMType": "Bedrijf",
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Logo": "https://images.unsplash.com/photo-1520637836862-4d197d17c47a?w=150&h=75&fit=crop&crop=center",
     "Latitude": 51.352388,
     "Longitude": 6.157186
   },
@@ -1227,8 +1244,7 @@
   {
     "Name": "Demo Locatie 95 (Aachen)",
     "ProjectType": "Renovatie",
-    "OrganizationType": "Installatiebedrijf",
-    "OrganizationField": "Modulair",
+    "OrganizationType": "Installatiebedrijf",    "OrganizationField": "Modulair",
     "HBMTopic": "Binnenluchtkwaliteit",
     "HBMCharacteristics": "Passiefhuis",
     "HBMSector": "Onderwijs",

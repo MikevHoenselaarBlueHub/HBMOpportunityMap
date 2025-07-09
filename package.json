@@ -1,0 +1,17 @@
+
+{
+  "name": "hbm-kansenkaart",
+  "version": "1.0.0",
+  "description": "HBM Kansenkaart - Opportunity Map",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve . -s -l 5000",
+    "dev": "npx serve . -s -l 5000"
+  },
+  "dependencies": {
+    "serve": "^14.2.4"
+  },
+  "keywords": ["map", "opportunities", "healthy-building"],
+  "author": "HBM",
+  "license": "MIT"
+}

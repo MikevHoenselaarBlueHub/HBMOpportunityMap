@@ -5,6 +5,7 @@ let translations = {};
 let map, markers = [];
 let pIcon, bIcon;
 let hoverLabel;
+let municipalityLayer;
 
 // Load translations
 async function loadTranslations() {
@@ -259,6 +260,116 @@ if (document.getElementById('closeDetail')) {
   };
 }
 
+// Search functionality
+if (document.getElementById('mapSearch')) {
+  const searchInput = document.getElementById('mapSearch');
+  const searchBtn = document.getElementById('searchBtn');
+  
+  function performSearch() {
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    if (!searchTerm) {
+      updateMap();
+      return;
+    }
+    
+    // Filter data based on search term
+    const searchResults = window.data.filter(loc => {
+      return loc.Name.toLowerCase().includes(searchTerm) ||
+             (loc.Description && loc.Description.toLowerCase().includes(searchTerm)) ||
+             (Array.isArray(loc.HBMTopic) ? loc.HBMTopic.some(topic => topic.toLowerCase().includes(searchTerm)) : loc.HBMTopic.toLowerCase().includes(searchTerm)) ||
+             (Array.isArray(loc.OrganizationType) ? loc.OrganizationType.some(type => type.toLowerCase().includes(searchTerm)) : loc.OrganizationType.toLowerCase().includes(searchTerm));
+    });
+    
+    // Update map with search results
+    displaySearchResults(searchResults);
+  }
+  
+  searchBtn.onclick = performSearch;
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      performSearch();
+    }
+  });
+  
+  // Clear search when input is empty
+  searchInput.addEventListener('input', (e) => {
+    if (!e.target.value.trim()) {
+      updateMap();
+    }
+  });
+}
+
+function displaySearchResults(results) {
+  if (!map) return;
+  
+  // Clear existing markers
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+  
+  if (results.length === 0) {
+    alert(t('noSearchResults') || 'Geen zoekresultaten gevonden');
+    return;
+  }
+  
+  // Add markers for search results
+  const bounds = [];
+  results.forEach(loc => {
+    const markerOptions = {};
+    const isProject = (Array.isArray(loc.HBMType) ? loc.HBMType.includes('Project') : loc.HBMType === 'Project');
+    
+    if (isProject && loc.ProjectImage) {
+      const photoIcon = L.divIcon({
+        className: 'photo-marker',
+        html: `<div class="photo-marker-container">
+                 <img src="${loc.ProjectImage}" alt="${loc.Name}" class="photo-marker-image" onerror="this.parentNode.style.display='none'">
+                 <div class="photo-marker-overlay"></div>
+               </div>`,
+        iconSize: [50, 50],
+        iconAnchor: [25, 50],
+        popupAnchor: [0, -50]
+      });
+      markerOptions.icon = photoIcon;
+    } else if (pIcon && bIcon) {
+      markerOptions.icon = isProject ? pIcon : bIcon;
+    }
+    
+    const marker = L.marker([loc.Latitude, loc.Longitude], markerOptions).addTo(map);
+    
+    marker.on('click', () => {
+      showLocationDetails(loc);
+    });
+    
+    marker.on('mouseover', (e) => {
+      const domEvent = e.originalEvent;
+      showHoverLabel(domEvent, loc.Name);
+    });
+    
+    marker.on('mouseout', () => {
+      hideHoverLabel();
+    });
+    
+    marker.on('mousemove', (e) => {
+      const domEvent = e.originalEvent;
+      showHoverLabel(domEvent, loc.Name);
+    });
+    
+    markers.push(marker);
+    bounds.push([loc.Latitude, loc.Longitude]);
+  });
+  
+  // Adjust map view to show search results
+  if (bounds.length > 0) {
+    if (bounds.length === 1) {
+      map.setView(bounds[0], 14);
+    } else {
+      map.fitBounds(bounds, {
+        padding: [20, 20],
+        maxZoom: 15
+      });
+    }
+  }
+}
+
 // Initialize map only if we're on the map page
 if (document.getElementById('map')) {
   // Function to initialize everything when Leaflet is ready
@@ -351,6 +462,61 @@ function createFilterCheckboxes() {
   });
   
   updateFilterState();
+}
+
+function loadMunicipalityBoundaries() {
+  // Define municipality boundaries for the main cities in the region
+  const municipalities = [
+    {
+      name: "Maastricht",
+      bounds: [[50.82, 5.62], [50.88, 5.72], [50.90, 5.75], [50.85, 5.78], [50.82, 5.75], [50.80, 5.68], [50.82, 5.62]]
+    },
+    {
+      name: "Aachen",
+      bounds: [[50.72, 6.04], [50.78, 6.04], [50.82, 6.09], [50.81, 6.14], [50.77, 6.15], [50.73, 6.12], [50.72, 6.08], [50.72, 6.04]]
+    },
+    {
+      name: "Venlo",
+      bounds: [[51.32, 6.10], [51.38, 6.12], [51.42, 6.18], [51.40, 6.22], [51.36, 6.24], [51.32, 6.21], [51.30, 6.15], [51.32, 6.10]]
+    },
+    {
+      name: "Roermond",
+      bounds: [[51.14, 5.95], [51.20, 5.96], [51.24, 6.00], [51.25, 6.04], [51.22, 6.06], [51.18, 6.04], [51.15, 6.00], [51.14, 5.95]]
+    },
+    {
+      name: "Krefeld",
+      bounds: [[51.30, 6.52], [51.36, 6.53], [51.38, 6.58], [51.37, 6.62], [51.33, 6.62], [51.29, 6.58], [51.28, 6.54], [51.30, 6.52]]
+    },
+    {
+      name: "Mönchengladbach",
+      bounds: [[51.15, 6.38], [51.21, 6.39], [51.25, 6.44], [51.24, 6.48], [51.20, 6.49], [51.16, 6.47], [51.14, 6.42], [51.15, 6.38]]
+    },
+    {
+      name: "Heinsberg",
+      bounds: [[51.04, 6.05], [51.08, 6.06], [51.11, 6.12], [51.10, 6.16], [51.06, 6.16], [51.03, 6.13], [51.02, 6.08], [51.04, 6.05]]
+    }
+  ];
+  
+  municipalities.forEach(municipality => {
+    const polygon = L.polygon(municipality.bounds, {
+      color: 'rgb(38, 123, 41)',
+      weight: 2,
+      opacity: 0.8,
+      fillColor: 'rgb(38, 123, 41)',
+      fillOpacity: 0.1
+    }).addTo(municipalityLayer);
+    
+    // Add municipality name label
+    const center = polygon.getBounds().getCenter();
+    L.marker(center, {
+      icon: L.divIcon({
+        className: 'municipality-label',
+        html: `<div style="background: rgba(255,255,255,0.9); padding: 2px 6px; border-radius: 3px; font-size: 12px; font-weight: bold; color: rgb(38, 123, 41); border: 1px solid rgb(38, 123, 41);">${municipality.name}</div>`,
+        iconSize: [100, 20],
+        iconAnchor: [50, 10]
+      })
+    }).addTo(municipalityLayer);
+  });
 }
 
 function updateFilterState() {
@@ -460,6 +626,26 @@ function updateMap() {
   if (!map) {
     map = L.map('map').setView([51.2, 6.1], 9);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    
+    // Add municipality layer
+    municipalityLayer = L.layerGroup();
+    
+    // Add layer control
+    const baseLayers = {
+      "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
+    };
+    
+    const overlayLayers = {
+      "Gemeenten": municipalityLayer
+    };
+    
+    L.control.layers(baseLayers, overlayLayers, {
+      position: 'topright',
+      collapsed: false
+    }).addTo(map);
+    
+    // Load municipality boundaries
+    loadMunicipalityBoundaries();
   }
 
   // Clear existing markers
@@ -487,8 +673,10 @@ function updateMap() {
     });
   });
 
-  // Add markers for filtered data
+  // Add markers for filtered data with clustering
   const bounds = [];
+  const markerGroup = L.featureGroup();
+  
   filtered.forEach(loc => {
     const markerOptions = {};
     const isProject = (Array.isArray(loc.HBMType) ? loc.HBMType.includes('Project') : loc.HBMType === 'Project');
@@ -511,7 +699,10 @@ function updateMap() {
       markerOptions.icon = isProject ? pIcon : bIcon;
     }
     
-    const marker = L.marker([loc.Latitude, loc.Longitude], markerOptions).addTo(map);
+    const marker = L.marker([loc.Latitude, loc.Longitude], markerOptions);
+    
+    // Add location data to marker
+    marker.locationData = loc;
     
     // Add click event
     marker.on('click', () => {
@@ -533,9 +724,13 @@ function updateMap() {
       showHoverLabel(domEvent, loc.Name);
     });
     
+    markerGroup.addLayer(marker);
     markers.push(marker);
     bounds.push([loc.Latitude, loc.Longitude]);
   });
+  
+  // Add marker group to map
+  map.addLayer(markerGroup);
 
   // Adjust map view to show all markers
   if (bounds.length > 0) {
