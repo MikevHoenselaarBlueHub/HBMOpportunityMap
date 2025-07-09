@@ -886,16 +886,12 @@ function updateMap() {
     // Add municipality layer
     municipalityLayer = L.layerGroup();
     
-    // Add layer control
-    const baseLayers = {
-      "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-    };
-    
+    // Add layer control for overlays only
     const overlayLayers = {
       "Gemeenten": municipalityLayer
     };
     
-    L.control.layers(baseLayers, overlayLayers, {
+    L.control.layers(null, overlayLayers, {
       position: 'topright',
       collapsed: false
     }).addTo(map);
@@ -1000,6 +996,19 @@ function updateMap() {
             className: 'marker-cluster ' + className,
             iconSize: L.point(40, 40)
           });
+        },
+        // Don't cluster markers with custom icons (photos/logos)
+        iconCreateFunction: function(cluster) {
+          const count = cluster.getChildCount();
+          let className = 'marker-cluster-small';
+          if (count > 10) className = 'marker-cluster-medium';
+          if (count > 100) className = 'marker-cluster-large';
+          
+          return L.divIcon({
+            html: `<div><span>${count}</span></div>`,
+            className: 'marker-cluster ' + className,
+            iconSize: L.point(40, 40)
+          });
         }
       });
     } else {
@@ -1020,7 +1029,7 @@ function updateMap() {
       const photoIcon = L.divIcon({
         className: 'photo-marker',
         html: `<div class="photo-marker-container">
-                 <img src="${loc.ProjectImage}" alt="${loc.Name}" class="photo-marker-image" onerror="this.parentNode.style.display='none'">
+                 <img src="${loc.ProjectImage}" alt="${loc.Name}" class="photo-marker-image" onerror="this.parentNode.parentNode.style.display='none'; this.parentNode.innerHTML='<div class=\\'fallback-marker\\'></div>';">
                  <div class="photo-marker-overlay"></div>
                </div>`,
         iconSize: [50, 50],
@@ -1028,6 +1037,19 @@ function updateMap() {
         popupAnchor: [0, -50]
       });
       markerOptions.icon = photoIcon;
+    } else if (!isProject && loc.Logo) {
+      // Create custom logo marker for companies
+      const logoIcon = L.divIcon({
+        className: 'logo-marker',
+        html: `<div class="logo-marker-container">
+                 <img src="${loc.Logo}" alt="${loc.Name}" class="logo-marker-image" onerror="this.parentNode.parentNode.style.display='none'; this.parentNode.innerHTML='<div class=\\'fallback-marker\\'></div>';">
+                 <div class="logo-marker-overlay"></div>
+               </div>`,
+        iconSize: [50, 50],
+        iconAnchor: [25, 50],
+        popupAnchor: [0, -50]
+      });
+      markerOptions.icon = logoIcon;
     } else if (pIcon && bIcon) {
       markerOptions.icon = isProject ? pIcon : bIcon;
     }

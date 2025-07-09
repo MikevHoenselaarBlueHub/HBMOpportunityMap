@@ -19,14 +19,11 @@
     <div class="header-controls">
       <div class="search-container">
         <input type="text" id="mapSearch" placeholder="Zoek locaties..." />
-        <button id="searchBtn">🔍</button>
-      </div>
-      <div class="language-selector">
-        <select id="languageSelect" onchange="setLanguage(this.value)">
-          <option value="nl">Nederlands</option>
-          <option value="en">English</option>
-          <option value="de">Deutsch</option>
-        </select>
+        <button id="searchBtn">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 21L16.514 16.506M19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
     </div>
     <button id="hamburger">&#9776;</button>
@@ -37,6 +34,14 @@
       <a href="index.html" class="active" data-i18n="opportunityMap">Kansenkaart</a>
       <a href="info.html" data-i18n="moreInfo">Meer info</a>
       <a href="over.html" data-i18n="aboutHBM">Over HBM</a>
+      <div class="menu-language-selector">
+        <strong data-i18n="language">Taal:</strong>
+        <select id="languageSelect" onchange="setLanguage(this.value)">
+          <option value="nl">Nederlands</option>
+          <option value="en">English</option>
+          <option value="de">Deutsch</option>
+        </select>
+      </div>
     </nav>
     <nav id="desktopNav">
       <a href="index.html" class="active" data-i18n="opportunityMap">Kansenkaart</a>

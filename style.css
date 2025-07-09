@@ -260,12 +260,45 @@ button {
   background: #267b29;
 }
 
+.search-container button .search-icon {
+  width: 16px;
+  height: 16px;
+  fill: white;
+}
+
 .language-selector select {
   padding: 0.5rem;
   border: 2px solid rgb(38, 123, 41);
   border-radius: 4px;
   font-size: 0.9rem;
   background: #fff;
+}
+
+.menu-language-selector {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.menu-language-selector strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: rgb(38, 123, 41);
+}
+
+.menu-language-selector select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid rgb(38, 123, 41);
+  border-radius: 4px;
+  font-size: 1rem;
+  background: #fff;
+  color: #333;
+}
+
+.menu-language-selector select:focus {
+  outline: none;
+  border-color: #267b29;
 }
 
 .map-controls {
@@ -322,7 +355,7 @@ button {
   background: #267b29;
 }
 
-.btn-secondary, #selectAll, #selectNone {
+.btn-secondary {
   background: #fff; 
   color: #000; 
   border: 1px solid #000;
@@ -332,9 +365,26 @@ button {
   font-weight: bold;
 }
 
-.btn-secondary:hover, #selectAll:hover, #selectNone:hover {
+.btn-secondary:hover {
   background: #000; 
   color: #fff;
+}
+
+#selectAll, #selectNone {
+  background: transparent; 
+  color: rgb(38, 123, 41); 
+  border: none;
+  padding: 0.5rem 1rem; 
+  margin-right: 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+#selectAll:hover, #selectNone:hover {
+  background: rgba(38, 123, 41, 0.1); 
+  text-decoration: none;
 }
 
 /* === Close icon === */
@@ -553,8 +603,58 @@ button {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(33, 150, 243, 0.2);
+  background: rgba(38, 123, 41, 0.2);
   border-radius: 50%;
+}
+
+/* === Logo Markers === */
+.logo-marker {
+  border: none !important;
+  background: transparent !important;
+}
+
+.logo-marker-container {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: #fff;
+}
+
+.logo-marker-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 5px;
+}
+
+.logo-marker-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(33, 150, 243, 0.1);
+  border-radius: 5px;
+}
+
+/* === Fallback markers === */
+.fallback-marker {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fallback-marker::before {
+  content: "📍";
+  font-size: 24px;
 }
 
 /* === Improved detail panel === */
