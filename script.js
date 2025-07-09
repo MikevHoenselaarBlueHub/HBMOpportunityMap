@@ -953,6 +953,18 @@ function exportData() {
   });
 }
 
+// Toggle advanced filters
+function toggleAdvancedFilters() {
+  const advancedFilters = document.getElementById('advancedFilters');
+  advancedFilters.classList.toggle('open');
+  
+  trackEvent('advanced_filters_toggle', {
+    action: advancedFilters.classList.contains('open') ? 'open' : 'close',
+    label: 'Advanced filters toggled',
+    custom_parameter_1: 'filter_interaction'
+  });
+}
+
 // Check if we're on the map page by looking for the map element
 const isMapPage = document.getElementById('map') !== null;
 

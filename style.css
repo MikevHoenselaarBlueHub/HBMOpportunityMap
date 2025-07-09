@@ -450,6 +450,9 @@ button {
   min-width: 160px;
   margin-bottom: 0.5rem;
   z-index: 1200;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.5rem 0;
 }
 
 .filter-dropdown.open .filter-dropdown-menu {
@@ -458,12 +461,22 @@ button {
   transform: translateY(0);
 }
 
+.filter-dropdown-menu li {
+  margin: 0;
+  padding: 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.filter-dropdown-menu li:last-child {
+  border-bottom: none;
+}
+
 .dropdown-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem 1rem;
   border: none;
   background: transparent;
   color: #333;
@@ -480,11 +493,11 @@ button {
   color: #333;
 }
 
-.dropdown-item:first-child {
+.filter-dropdown-menu li:first-child .dropdown-item {
   border-radius: 4px 4px 0 0;
 }
 
-.dropdown-item:last-child {
+.filter-dropdown-menu li:last-child .dropdown-item {
   border-radius: 0 0 4px 4px;
 }
 
@@ -1102,17 +1115,54 @@ button {
 /* === Advanced Filters === */
 .advanced-filters {
   margin-top: 2rem;
-  padding: 1.5rem;
   background: #f0f8ff;
   border-radius: 8px;
   border: 2px solid #007bff;
 }
 
-.advanced-filters h3 {
-  color: #007bff;
-  margin-bottom: 1rem;
+.advanced-filters-header {
+  padding: 1rem 1.5rem;
+  background: #007bff;
+  color: white;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.advanced-filters-header:hover {
+  background: #0056b3;
+}
+
+.advanced-filters-header h3 {
+  margin: 0;
   font-size: 1.1rem;
-  text-align: center;
+  color: white;
+}
+
+.advanced-filters-toggle {
+  font-size: 1.2rem;
+  font-weight: bold;
+  transition: transform 0.2s ease;
+}
+
+.advanced-filters.open .advanced-filters-toggle {
+  transform: rotate(180deg);
+}
+
+.advanced-filters-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding: 0 1.5rem;
+}
+
+.advanced-filters.open .advanced-filters-content {
+  max-height: 800px;
+  padding: 1.5rem;
 }
 
 .filter-group {
