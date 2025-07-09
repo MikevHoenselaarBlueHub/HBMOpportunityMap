@@ -220,7 +220,7 @@ button {
 
 #filterBtn {
   position: fixed;
-  top: 100px;
+  bottom: 1rem;
   left: 1rem;
   z-index: 1000;
   background: rgb(38, 123, 41);

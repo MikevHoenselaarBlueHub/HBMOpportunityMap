@@ -22,6 +22,7 @@ const translations = {
     description: 'Beschrijving',
     contact: 'Contact opnemen',
     moreInfo: 'Meer info',
+    aboutHBM: 'Over HBM',
     close: 'Sluiten',
     filters: 'Filters',
     opportunityMap: 'Kansenkaart',
@@ -50,6 +51,7 @@ const translations = {
     description: 'Description',
     contact: 'Contact',
     moreInfo: 'More info',
+    aboutHBM: 'About HBM',
     close: 'Close',
     filters: 'Filters',
     opportunityMap: 'Opportunity Map',
@@ -78,6 +80,7 @@ const translations = {
     description: 'Beschreibung',
     contact: 'Kontakt aufnehmen',
     moreInfo: 'Mehr Infos',
+    aboutHBM: 'Über HBM',
     close: 'Schließen',
     filters: 'Filter',
     opportunityMap: 'Chancenkarte',
@@ -109,22 +112,33 @@ function updateUI() {
   if (applyBtn) applyBtn.textContent = t('apply');
   if (filterBtn) filterBtn.textContent = t('filters');
   
-  // Update filter labels
-  const filterLabels = {
-    'ProjectType': t('projectType'),
-    'OrganizationType': t('organizationType'),
-    'OrganizationField': t('organizationField'),
-    'HBMTopic': t('hbmTopic'),
-    'HBMCharacteristics': t('hbmCharacteristics'),
-    'HBMSector': t('hbmSector')
-  };
-  
-  Object.keys(filterLabels).forEach(key => {
-    const container = document.getElementById(key);
-    if (container && container.previousElementSibling) {
-      container.previousElementSibling.textContent = filterLabels[key];
+  // Update all elements with data-i18n attributes
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    if (translations[currentLanguage][key]) {
+      element.textContent = t(key);
     }
   });
+  
+  // Update page title
+  document.title = t('opportunityMap');
+  
+  // Update no selection message if it exists
+  const noSelectionMessage = document.getElementById('noSelectionMessage');
+  if (noSelectionMessage) {
+    noSelectionMessage.innerHTML = `<p style="color: #666; font-style: italic; margin-top: 1rem;">${t('noSelection')}</p>`;
+  }
+  
+  // Update HBMType checkboxes labels
+  const projectCheckbox = document.querySelector('input[name="HBMType"][value="Project"]');
+  const companyCheckbox = document.querySelector('input[name="HBMType"][value="Bedrijf"]');
+  
+  if (projectCheckbox && projectCheckbox.nextElementSibling) {
+    projectCheckbox.nextElementSibling.textContent = t('projects');
+  }
+  if (companyCheckbox && companyCheckbox.nextElementSibling) {
+    companyCheckbox.nextElementSibling.textContent = t('companies');
+  }
 }
 
 // Hamburger en overlays
@@ -208,9 +222,13 @@ if (document.getElementById('map')) {
 
   // Wait for DOM and then initialize
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeApp();
+      updateUI();
+    });
   } else {
     initializeApp();
+    updateUI();
   }
 }
 
@@ -268,20 +286,20 @@ function showLocationDetails(location) {
   const detailPanel = document.getElementById('detailPanel');
   detailPanel.innerHTML = `
     <a href="#" id="closeDetail" class="close-btn">
-      <img src="icons/close.svg" alt="Sluiten" class="close-icon"/>
+      <img src="icons/close.svg" alt="${t('close')}" class="close-icon"/>
     </a>
     <h2>${location.Name}</h2>
-    <p><strong>Type:</strong> ${Array.isArray(location.HBMType) ? location.HBMType.join(', ') : location.HBMType}</p>
-    <p><strong>Project type:</strong> ${Array.isArray(location.ProjectType) ? location.ProjectType.join(', ') : location.ProjectType}</p>
-    <p><strong>Organisatie:</strong> ${Array.isArray(location.OrganizationType) ? location.OrganizationType.join(', ') : location.OrganizationType}</p>
-    <p><strong>Vakgebied:</strong> ${Array.isArray(location.OrganizationField) ? location.OrganizationField.join(', ') : location.OrganizationField}</p>
-    <p><strong>Thema:</strong> ${Array.isArray(location.HBMTopic) ? location.HBMTopic.join(', ') : location.HBMTopic}</p>
-    <p><strong>Kenmerken:</strong> ${Array.isArray(location.HBMCharacteristics) ? location.HBMCharacteristics.join(', ') : location.HBMCharacteristics}</p>
-    <p><strong>Sector:</strong> ${Array.isArray(location.HBMSector) ? location.HBMSector.join(', ') : location.HBMSector}</p>
-    <p><strong>Beschrijving:</strong> ${location.Description}</p>
+    <p><strong>${t('type')}:</strong> ${Array.isArray(location.HBMType) ? location.HBMType.join(', ') : location.HBMType}</p>
+    <p><strong>${t('projectType')}:</strong> ${Array.isArray(location.ProjectType) ? location.ProjectType.join(', ') : location.ProjectType}</p>
+    <p><strong>${t('organizationType')}:</strong> ${Array.isArray(location.OrganizationType) ? location.OrganizationType.join(', ') : location.OrganizationType}</p>
+    <p><strong>${t('organizationField')}:</strong> ${Array.isArray(location.OrganizationField) ? location.OrganizationField.join(', ') : location.OrganizationField}</p>
+    <p><strong>${t('hbmTopic')}:</strong> ${Array.isArray(location.HBMTopic) ? location.HBMTopic.join(', ') : location.HBMTopic}</p>
+    <p><strong>${t('hbmCharacteristics')}:</strong> ${Array.isArray(location.HBMCharacteristics) ? location.HBMCharacteristics.join(', ') : location.HBMCharacteristics}</p>
+    <p><strong>${t('hbmSector')}:</strong> ${Array.isArray(location.HBMSector) ? location.HBMSector.join(', ') : location.HBMSector}</p>
+    <p><strong>${t('description')}:</strong> ${location.Description}</p>
     <div style="margin-top: 1rem;">
-      <button class="btn-primary">Contact opnemen</button>
-      <button class="btn-secondary">Meer info</button>
+      <button class="btn-primary">${t('contact')}</button>
+      <button class="btn-secondary">${t('moreInfo')}</button>
     </div>
   `;
 
