@@ -1027,23 +1027,32 @@ button {
   z-index: 8000;
   border-top: 3px solid rgb(38, 123, 41);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-  max-height: 70vh;
+  max-height: 85vh;
   overflow-y: auto;
+}
+
+/* === Fixed close button === */
+#detailPanel .close-btn {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 8200;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(5px);
 }
 
 /* === Navigation arrows === */
 .detail-navigation {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 2.5rem;
   background: rgba(38, 123, 41, 0.9);
   color: white;
   border: none;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   transition: all 0.2s ease;
   z-index: 8100;
@@ -1051,21 +1060,21 @@ button {
 
 .detail-navigation:hover {
   background: rgb(38, 123, 41);
-  transform: translateY(-50%) scale(1.1);
+  transform: scale(1.1);
 }
 
 .detail-navigation:disabled {
   background: rgba(0, 0, 0, 0.3);
   cursor: not-allowed;
-  transform: translateY(-50%);
+  transform: none;
 }
 
 .detail-navigation.prev {
-  left: 10px;
+  right: 140px;
 }
 
 .detail-navigation.next {
-  right: 10px;
+  right: 100px;
 }
 
 #detailPanel.open {
@@ -1074,6 +1083,7 @@ button {
 
 .detail-content {
   padding: 2rem;
+  padding-top: 1rem;
 }
 
 .detail-image,
@@ -1101,16 +1111,22 @@ button {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding-right: 50px;
-  /* Make room for close button */
+  position: relative;
+  padding-top: 1rem;
 }
 
 .detail-header h2 {
   margin: 0;
   color: rgb(38, 123, 41);
   font-size: 1.5rem;
+  flex: 1;
+}
+
+.detail-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
 }
 
 .detail-type-badge {
@@ -1129,41 +1145,62 @@ button {
   background: #2196F3;
 }
 
+.detail-contact-btn {
+  background: rgb(38, 123, 41);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-left: 1rem;
+}
+
+.detail-contact-btn:hover {
+  background: #267b29;
+}
+
 .detail-info {
   display: grid;
-  gap: 1rem;
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
 
 .detail-row {
-  display: flex;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 140px 1fr;
   gap: 1rem;
-  padding: 0.75rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid rgb(38, 123, 41);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e0e0e0;
+  align-items: start;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
 }
 
 .detail-label {
   font-weight: bold;
   color: rgb(38, 123, 41);
-  min-width: 120px;
-  flex-shrink: 0;
+  font-size: 0.9rem;
 }
 
 .detail-value {
   color: #333;
-  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .detail-description {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .detail-description h3 {
   color: rgb(38, 123, 41);
   margin-bottom: 0.5rem;
+  font-size: 1.1rem;
 }
 
 .detail-description p {
@@ -1172,9 +1209,7 @@ button {
 }
 
 .detail-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
+  display: none;
 }
 
 /* === Contact form === */
@@ -1270,20 +1305,33 @@ button {
 @media (max-width: 768px) {
   .detail-header {
     flex-direction: column;
-    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .detail-header-right {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .detail-navigation.prev {
+    right: auto;
+    position: static;
+  }
+
+  .detail-navigation.next {
+    right: auto;
+    position: static;
+  }
+
+  .detail-contact-btn {
+    margin-left: 0;
+    flex: 1;
   }
 
   .detail-row {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .detail-label {
-    min-width: auto;
-  }
-
-  .detail-actions {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
   }
 
   .contact-form-container {

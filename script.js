@@ -969,19 +969,21 @@ function showLocationDetails(location, index = -1) {
       <img src="icons/close.svg" alt="${t('close')}" class="close-icon"/>
     </a>
     
-    <button class="detail-navigation prev" id="prevDetail" ${prevDisabled ? 'disabled' : ''}>
-      ←
-    </button>
-    <button class="detail-navigation next" id="nextDetail" ${nextDisabled ? 'disabled' : ''}>
-      →
-    </button>
-    
     <div class="detail-content">
       ${imageHtml}
       <div class="detail-header">
         <h2>${locationName}</h2>
-        <div class="detail-type-badge ${isProject ? 'project' : 'company'}">
-          ${Array.isArray(location.HBMType) ? location.HBMType.join(', ') : location.HBMType}
+        <div class="detail-header-right">
+          <button class="detail-navigation prev" id="prevDetail" ${prevDisabled ? 'disabled' : ''}>
+            ←
+          </button>
+          <button class="detail-navigation next" id="nextDetail" ${nextDisabled ? 'disabled' : ''}>
+            →
+          </button>
+          <div class="detail-type-badge ${isProject ? 'project' : 'company'}">
+            ${Array.isArray(location.HBMType) ? location.HBMType.join(', ') : location.HBMType}
+          </div>
+          <button class="detail-contact-btn" onclick="showContactForm(${JSON.stringify(location).replace(/"/g, '&quot;')})">${t('contact')}</button>
         </div>
       </div>
       
@@ -992,38 +994,34 @@ function showLocationDetails(location, index = -1) {
       
       <div class="detail-info">
         <div class="detail-row">
-          <span class="detail-label">${t('projectType')}:</span>
+          <span class="detail-label">${t('projectType')}</span>
           <span class="detail-value">${Array.isArray(location.ProjectType) ? location.ProjectType.join(', ') : location.ProjectType}</span>
         </div>
         
         <div class="detail-row">
-          <span class="detail-label">${t('organizationType')}:</span>
+          <span class="detail-label">${t('organizationType')}</span>
           <span class="detail-value">${Array.isArray(location.OrganizationType) ? location.OrganizationType.join(', ') : location.OrganizationType}</span>
         </div>
         
         <div class="detail-row">
-          <span class="detail-label">${t('organizationField')}:</span>
+          <span class="detail-label">${t('organizationField')}</span>
           <span class="detail-value">${Array.isArray(location.OrganizationField) ? location.OrganizationField.join(', ') : location.OrganizationField}</span>
         </div>
         
         <div class="detail-row">
-          <span class="detail-label">${t('hbmTopic')}:</span>
+          <span class="detail-label">${t('hbmTopic')}</span>
           <span class="detail-value">${Array.isArray(location.HBMTopic) ? location.HBMTopic.join(', ') : location.HBMTopic}</span>
         </div>
         
         <div class="detail-row">
-          <span class="detail-label">${t('hbmCharacteristics')}:</span>
+          <span class="detail-label">${t('hbmCharacteristics')}</span>
           <span class="detail-value">${Array.isArray(location.HBMCharacteristics) ? location.HBMCharacteristics.join(', ') : location.HBMCharacteristics}</span>
         </div>
         
         <div class="detail-row">
-          <span class="detail-label">${t('hbmSector')}:</span>
+          <span class="detail-label">${t('hbmSector')}</span>
           <span class="detail-value">${Array.isArray(location.HBMSector) ? location.HBMSector.join(', ') : location.HBMSector}</span>
         </div>
-      </div>
-      
-      <div class="detail-actions">
-        <button class="btn-primary" onclick="showContactForm(${JSON.stringify(location).replace(/"/g, '&quot;')})">${t('contact')}</button>
       </div>
     </div>
   `;
