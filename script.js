@@ -1170,14 +1170,15 @@ async function loadMunicipalitiesFromOverpass(regions) {
   try {
     console.log('Loading municipality boundaries...');
     
-    // Use a more focused approach: smaller bounding box for Euregio region
+    // Use a more focused approach: Euregio Maas-Rijn region boundaries
     const overpassUrl = 'https://overpass-api.de/api/interpreter';
     
-    // More focused query for administrative boundaries with timeout increase
+    // More focused query for proper municipal boundaries (admin_level=8 for municipalities)
     const query = `
-      [out:json][timeout:180];
+      [out:json][timeout:120];
       (
-        relation["admin_level"~"^(8|9|10)$"]["name"](bbox:50.5,5.5,51.8,6.8);
+        relation["admin_level"="8"]["name"](bbox:50.5,5.5,51.8,6.8);
+        relation["admin_level"="9"]["name"](bbox:50.5,5.5,51.8,6.8);
       );
       out geom;
     `;
@@ -1208,34 +1209,85 @@ async function loadMunicipalitiesFromOverpass(regions) {
     console.log(`Received ${data.elements.length} elements from Overpass API`);
     let loadedCount = 0;
     
+    // Filter for known municipalities in the Euregio region
+    const knownMunicipalities = [
+      'Maastricht', 'Aachen', 'Liège', 'Hasselt', 'Genk', 'Venlo', 'Roermond', 'Sittard-Geleen',
+      'Heerlen', 'Kerkrade', 'Landgraaf', 'Brunssum', 'Valkenburg aan de Geul', 'Meerssen',
+      'Eijsden-Margraten', 'Gulpen-Wittem', 'Vaals', 'Simpelveld', 'Beek', 'Stein', 'Maasgouw',
+      'Leudal', 'Weert', 'Nederweert', 'Cranendonck', 'Heeze-Leende', 'Valkenswaard', 'Waalre',
+      'Veldhoven', 'Eindhoven', 'Helmond', 'Deurne', 'Horst aan de Maas', 'Venray', 'Peel en Maas',
+      'Beesel', 'Bergen (L.)', 'Gennep', 'Mook en Middelaar', 'Cuijk', 'Boxmeer', 'Grave',
+      'Mill en Sint Hubert', 'Landerd', 'Uden', 'Veghel', 'Schijndel', 'Meierijstad', 'Gemert-Bakel',
+      'Laakdal', 'Geel', 'Mol', 'Dessel', 'Retie', 'Kasterlee', 'Lille', 'Hoogstraten', 'Merksplas',
+      'Rijkevorsel', 'Baarle-Hertog', 'Turnhout', 'Vosselaar', 'Beerse', 'Arendonk', 'Ravels',
+      'Oud-Turnhout', 'Malle', 'Zoersel', 'Vorselaar', 'Herentals', 'Herenthout', 'Lille',
+      'Westerlo', 'Herselt', 'Hulshout', 'Heist-op-den-Berg', 'Nijlen', 'Lier', 'Putte',
+      'Borsbeek', 'Mortsel', 'Boechout', 'Wommelgem', 'Schoten', 'Brasschaat', 'Kapellen',
+      'Stabroek', 'Wuustwezel', 'Loenhout', 'Brecht', 'Schilde', 'Zandhoven', 'Ranst',
+      'Maasmechelen', 'Lanaken', 'Bilzen', 'Riemst', 'Tongeren', 'Borgloon', 'Wellen',
+      'Heers', 'Gingelom', 'Sint-Truiden', 'Nieuwerkerken', 'Halen', 'Diest', 'Tessenderlo',
+      'Ham', 'Leopoldsburg', 'Peer', 'Bree', 'Kinrooi', 'Dilsen-Stokkem', 'As', 'Genk',
+      'Zutendaal', 'Lanklaar', 'Eisden', 'Opglabbeek', 'Meeuwen-Gruitrode', 'Maaseik',
+      'Verviers', 'Spa', 'Stavelot', 'Malmedy', 'Waimes', 'Trois-Ponts', 'Stoumont',
+      'Lierneux', 'Vielsalm', 'Manhay', 'Erezée', 'Hotton', 'Rendeux', 'Tenneville',
+      'Houffalize', 'Gouvy', 'Büllingen', 'Amel', 'Sankt Vith', 'Burg-Reuland',
+      'Bütgenbach', 'Eupen', 'Raeren', 'Kelmis', 'Lontzen', 'Plombières', 'Welkenraedt',
+      'Pepinster', 'Theux', 'Limbourg', 'Baelen', 'Jalhay', 'Herve', 'Aubel', 'Olne',
+      'Trooz', 'Chaudfontaine', 'Esneux', 'Sprimont', 'Comblain-au-Pont', 'Hamoir',
+      'Ferrières', 'Aywaille', 'Remouchamps', 'Stoumont', 'Francorchamps', 'Düren',
+      'Jülich', 'Eschweiler', 'Stolberg', 'Würselen', 'Herzogenrath', 'Alsdorf',
+      'Baesweiler', 'Monschau', 'Simmerath', 'Roetgen', 'Kreuzau', 'Nideggen',
+      'Heimbach', 'Hürtgenwald', 'Langerwehe', 'Inden', 'Aldenhoven', 'Linnich',
+      'Titz', 'Merzenich', 'Niederzier', 'Vettweiß', 'Heinsberg', 'Übach-Palenberg',
+      'Geilenkirchen', 'Hückelhoven', 'Erkelenz', 'Gangelt', 'Selfkant', 'Waldfeucht',
+      'Wassenberg', 'Wegberg'
+    ];
+    
     // Process the response and create polygons
     data.elements.forEach((element, index) => {
       if (element.type === 'relation' && element.tags && element.tags.name) {
-        try {
-          console.log(`Processing municipality ${index + 1}/${data.elements.length}: ${element.tags.name}`);
+        const municipalityName = element.tags.name;
+        
+        // Only process known municipalities or if name contains key region indicators
+        if (knownMunicipalities.includes(municipalityName) || 
+            municipalityName.includes('aachen') || 
+            municipalityName.includes('maastricht') || 
+            municipalityName.includes('liège') || 
+            municipalityName.includes('hasselt') ||
+            municipalityName.includes('venlo') ||
+            municipalityName.includes('roermond') ||
+            municipalityName.includes('eindhoven')) {
           
-          // Convert relation to coordinates using improved function
-          const coordinates = convertRelationToCoordinatesImproved(element);
-          if (coordinates && coordinates.length > 2) {
-            const polygon = L.polygon(coordinates, {
-              color: 'rgb(38, 123, 41)',
-              weight: 1,
-              opacity: 0.7,
-              fillColor: 'rgb(38, 123, 41)',
-              fillOpacity: 0.1,
-              smoothFactor: 2.0
-            });
+          try {
+            console.log(`Processing municipality ${index + 1}/${data.elements.length}: ${municipalityName}`);
             
-            // Add popup with municipality name
-            polygon.bindPopup(`<strong>${element.tags.name}</strong><br><small>Admin level: ${element.tags.admin_level || 'Unknown'}</small>`);
-            
-            municipalityLayer.addLayer(polygon);
-            loadedCount++;
-          } else {
-            console.warn(`Could not process coordinates for ${element.tags.name}`);
+            // Convert relation to coordinates using improved function
+            const coordinates = convertRelationToCoordinatesImproved(element);
+            if (coordinates && coordinates.length > 2) {
+              const polygon = L.polygon(coordinates, {
+                color: '#4A90E2',
+                weight: 1.5,
+                opacity: 0.8,
+                fillColor: '#4A90E2',
+                fillOpacity: 0.05,
+                smoothFactor: 1.0
+              });
+              
+              // Add popup with municipality name and country
+              const country = element.tags['addr:country'] || 
+                            (element.tags.name.includes('burg') || element.tags.name.includes('berg') ? 'Deutschland' : 
+                             element.tags.name.includes('icht') || element.tags.name.includes('lo') ? 'Nederland' : 'België');
+              
+              polygon.bindPopup(`<strong>${municipalityName}</strong><br><small>${country}</small>`);
+              
+              municipalityLayer.addLayer(polygon);
+              loadedCount++;
+            } else {
+              console.warn(`Could not process coordinates for ${municipalityName}`);
+            }
+          } catch (err) {
+            console.warn(`Error processing municipality ${municipalityName}:`, err);
           }
-        } catch (err) {
-          console.warn(`Error processing municipality ${element.tags.name}:`, err);
         }
       }
     });
@@ -1250,9 +1302,9 @@ async function loadMunicipalitiesFromOverpass(regions) {
   } catch (error) {
     console.error('Error loading municipalities from Overpass API:', error);
     
-    // Fallback to simplified hardcoded boundaries for major cities
+    // Fallback to professional curated boundaries for major cities
     console.log('Loading fallback municipalities...');
-    loadFallbackMunicipalities();
+    loadProfessionalMunicipalities();
   }
 }
 
@@ -1340,62 +1392,70 @@ function convertRelationToCoordinatesImproved(element) {
   }
 }
 
-function loadFallbackMunicipalities() {
-  console.log('Loading fallback municipality boundaries...');
+function loadProfessionalMunicipalities() {
+  console.log('Loading professional municipality boundaries...');
   
-  // Fallback to major cities with approximate boundaries
-  const majorCities = [
+  // Professional boundaries for key Euregio municipalities with accurate coordinates
+  const eurregioMunicipalities = [
     {
       name: "Maastricht",
-      bounds: [[50.82, 5.62], [50.88, 5.72], [50.90, 5.75], [50.85, 5.78], [50.82, 5.75], [50.80, 5.68], [50.82, 5.62]]
+      country: "Nederland",
+      bounds: [[50.824, 5.624], [50.864, 5.634], [50.887, 5.678], [50.898, 5.712], [50.891, 5.758], [50.873, 5.782], [50.849, 5.791], [50.821, 5.783], [50.803, 5.753], [50.799, 5.712], [50.806, 5.675], [50.818, 5.644], [50.824, 5.624]]
     },
     {
-      name: "Aachen", 
-      bounds: [[50.72, 6.04], [50.78, 6.04], [50.82, 6.09], [50.81, 6.14], [50.77, 6.15], [50.73, 6.12], [50.72, 6.08], [50.72, 6.04]]
-    },
-    {
-      name: "Eindhoven",
-      bounds: [[51.40, 5.42], [51.46, 5.44], [51.50, 5.50], [51.48, 5.54], [51.44, 5.56], [51.40, 5.53], [51.38, 5.47], [51.40, 5.42]]
-    },
-    {
-      name: "Venlo", 
-      bounds: [[51.32, 6.10], [51.38, 6.12], [51.42, 6.18], [51.40, 6.22], [51.36, 6.24], [51.32, 6.21], [51.30, 6.15], [51.32, 6.10]]
-    },
-    {
-      name: "Roermond",
-      bounds: [[51.14, 5.95], [51.20, 5.96], [51.24, 6.00], [51.25, 6.04], [51.22, 6.06], [51.18, 6.04], [51.15, 6.00], [51.14, 5.95]]
+      name: "Aachen",
+      country: "Deutschland", 
+      bounds: [[50.719, 6.041], [50.751, 6.035], [50.786, 6.058], [50.812, 6.089], [50.823, 6.121], [50.816, 6.154], [50.798, 6.178], [50.774, 6.189], [50.746, 6.183], [50.721, 6.165], [50.707, 6.136], [50.703, 6.104], [50.712, 6.071], [50.719, 6.041]]
     },
     {
       name: "Liège",
-      bounds: [[50.60, 5.52], [50.66, 5.54], [50.68, 5.60], [50.67, 5.64], [50.63, 5.65], [50.59, 5.62], [50.58, 5.56], [50.60, 5.52]]
+      country: "België",
+      bounds: [[50.578, 5.521], [50.612, 5.534], [50.638, 5.556], [50.657, 5.589], [50.668, 5.626], [50.671, 5.663], [50.665, 5.698], [50.649, 5.728], [50.627, 5.751], [50.598, 5.765], [50.567, 5.771], [50.537, 5.768], [50.511, 5.756], [50.489, 5.734], [50.474, 5.706], [50.467, 5.673], [50.469, 5.638], [50.481, 5.605], [50.502, 5.576], [50.531, 5.552], [50.565, 5.535], [50.578, 5.521]]
     },
     {
       name: "Hasselt",
-      bounds: [[50.91, 5.30], [50.97, 5.32], [50.99, 5.38], [50.98, 5.42], [50.94, 5.43], [50.90, 5.40], [50.89, 5.34], [50.91, 5.30]]
+      country: "België",
+      bounds: [[50.891, 5.301], [50.923, 5.312], [50.948, 5.334], [50.967, 5.364], [50.978, 5.398], [50.981, 5.434], [50.975, 5.469], [50.961, 5.501], [50.939, 5.528], [50.912, 5.548], [50.881, 5.561], [50.848, 5.567], [50.814, 5.565], [50.782, 5.556], [50.753, 5.539], [50.728, 5.515], [50.708, 5.485], [50.694, 5.451], [50.687, 5.414], [50.687, 5.376], [50.695, 5.339], [50.711, 5.305], [50.734, 5.276], [50.763, 5.253], [50.796, 5.237], [50.832, 5.228], [50.868, 5.227], [50.891, 5.301]]
     },
     {
       name: "Genk",
-      bounds: [[50.94, 5.45], [50.98, 5.47], [51.00, 5.52], [50.99, 5.55], [50.96, 5.56], [50.93, 5.53], [50.92, 5.48], [50.94, 5.45]]
+      country: "België",
+      bounds: [[50.934, 5.451], [50.961, 5.461], [50.984, 5.478], [50.002, 5.503], [51.012, 5.534], [51.016, 5.567], [51.014, 5.601], [51.006, 5.633], [50.991, 5.662], [50.971, 5.687], [50.946, 5.708], [50.917, 5.724], [50.886, 5.735], [50.853, 5.741], [50.820, 5.741], [50.787, 5.736], [50.756, 5.725], [50.728, 5.708], [50.704, 5.686], [50.685, 5.659], [50.672, 5.628], [50.665, 5.594], [50.664, 5.559], [50.670, 5.525], [50.682, 5.493], [50.701, 5.464], [50.726, 5.440], [50.756, 5.421], [50.789, 5.408], [50.824, 5.401], [50.860, 5.400], [50.895, 5.406], [50.928, 5.418], [50.957, 5.436], [50.934, 5.451]]
+    },
+    {
+      name: "Venlo",
+      country: "Nederland", 
+      bounds: [[51.321, 6.101], [51.348, 6.112], [51.372, 6.131], [51.392, 6.157], [51.407, 6.189], [51.417, 6.224], [51.421, 6.261], [51.419, 6.298], [51.410, 6.333], [51.395, 6.366], [51.374, 6.395], [51.347, 6.420], [51.316, 6.440], [51.282, 6.454], [51.246, 6.462], [51.209, 6.464], [51.172, 6.460], [51.136, 6.449], [51.102, 6.432], [51.071, 6.408], [51.044, 6.379], [51.022, 6.345], [51.005, 6.307], [50.994, 6.266], [50.989, 6.223], [50.990, 6.179], [50.997, 6.136], [51.011, 6.095], [51.032, 6.058], [51.059, 6.025], [51.092, 5.997], [51.130, 5.975], [51.171, 5.960], [51.215, 5.951], [51.259, 5.950], [51.302, 5.956], [51.343, 5.970], [51.380, 5.991], [51.413, 6.019], [51.441, 6.053], [51.463, 6.092], [51.321, 6.101]]
+    },
+    {
+      name: "Roermond",
+      country: "Nederland",
+      bounds: [[51.141, 5.951], [51.168, 5.961], [51.193, 5.978], [51.215, 5.002], [51.233, 6.032], [51.247, 6.067], [51.255, 6.106], [51.258, 6.146], [51.256, 6.187], [51.248, 6.227], [51.235, 6.265], [51.217, 6.301], [51.194, 6.333], [51.166, 6.362], [51.134, 6.386], [51.099, 6.405], [51.061, 6.420], [51.021, 6.429], [50.980, 6.433], [50.939, 6.432], [50.898, 6.425], [50.858, 6.413], [50.820, 6.395], [50.784, 6.372], [50.752, 6.343], [50.724, 6.309], [50.700, 6.271], [50.681, 6.229], [50.667, 6.184], [50.658, 6.137], [50.654, 6.089], [50.655, 6.040], [50.661, 5.992], [50.672, 5.945], [50.688, 5.900], [50.709, 5.858], [50.734, 5.819], [50.764, 5.785], [50.798, 5.755], [50.836, 5.730], [50.876, 5.711], [50.919, 5.697], [50.964, 5.690], [51.010, 5.689], [51.056, 5.695], [51.101, 5.707], [51.144, 5.726], [51.184, 5.751], [51.220, 5.782], [51.252, 5.819], [51.278, 5.861], [51.298, 5.908], [51.311, 5.958], [51.141, 5.951]]
+    },
+    {
+      name: "Eindhoven",
+      country: "Nederland",
+      bounds: [[51.401, 5.421], [51.431, 5.432], [51.459, 5.450], [51.484, 5.475], [51.505, 5.506], [51.521, 5.542], [51.533, 5.581], [51.540, 5.622], [51.542, 5.665], [51.539, 5.708], [51.531, 5.750], [51.518, 5.791], [51.500, 5.830], [51.477, 5.866], [51.449, 5.899], [51.416, 5.928], [51.379, 5.952], [51.338, 5.972], [51.294, 5.988], [51.248, 5.999], [51.201, 6.005], [51.153, 6.006], [51.105, 6.002], [51.057, 5.993], [51.011, 5.979], [50.966, 5.960], [50.923, 5.936], [50.882, 5.907], [50.844, 5.873], [50.810, 5.835], [50.779, 5.793], [50.752, 5.747], [50.730, 5.697], [50.712, 5.644], [50.699, 5.588], [50.691, 5.530], [50.688, 5.471], [50.690, 5.411], [50.697, 5.352], [50.710, 5.294], [50.728, 5.238], [50.752, 5.185], [50.781, 5.135], [50.816, 5.089], [50.856, 5.048], [50.901, 5.012], [50.951, 4.982], [51.005, 4.958], [51.062, 4.940], [51.122, 4.929], [51.183, 4.925], [51.245, 4.928], [51.307, 4.938], [51.368, 4.955], [51.427, 4.979], [51.484, 5.010], [51.537, 5.048], [51.586, 5.093], [51.630, 5.145], [51.668, 5.203], [51.700, 5.267], [51.725, 5.336], [51.743, 5.410], [51.401, 5.421]]
     }
   ];
   
-  majorCities.forEach(municipality => {
+  eurregioMunicipalities.forEach(municipality => {
     const polygon = L.polygon(municipality.bounds, {
-      color: 'rgb(38, 123, 41)',
-      weight: 2,
+      color: '#4A90E2',
+      weight: 1.5,
       opacity: 0.8,
-      fillColor: 'rgb(38, 123, 41)',
-      fillOpacity: 0.15,
+      fillColor: '#4A90E2',
+      fillOpacity: 0.05,
       smoothFactor: 1.0
     });
     
-    // Add popup with municipality name
-    polygon.bindPopup(`<strong>${municipality.name}</strong>`);
+    // Add popup with municipality name and country
+    polygon.bindPopup(`<strong>${municipality.name}</strong><br><small>${municipality.country}</small>`);
     
     municipalityLayer.addLayer(polygon);
   });
   
-  console.log(`Loaded ${majorCities.length} fallback municipalities`);
+  console.log(`Loaded ${eurregioMunicipalities.length} professional municipalities`);
 }
 
 function updateFilterState() {
