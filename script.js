@@ -456,6 +456,29 @@ if (document.getElementById('loadSavedFiltersBtn')) {
     showSavedFiltersModal();
   };
 }
+
+// Options dropdown toggle
+if (document.getElementById('optionsBtn')) {
+  document.getElementById('optionsBtn').onclick = (e) => {
+    e.stopPropagation();
+    const dropdown = document.querySelector('.filter-dropdown');
+    dropdown.classList.toggle('open');
+    
+    trackEvent('options_menu_toggle', {
+      action: dropdown.classList.contains('open') ? 'open' : 'close',
+      label: 'Options menu toggled',
+      custom_parameter_1: 'menu_interaction'
+    });
+  };
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  const dropdown = document.querySelector('.filter-dropdown');
+  if (dropdown && !dropdown.contains(e.target)) {
+    dropdown.classList.remove('open');
+  }
+});
 if (document.getElementById('closeDetail')) {
   document.getElementById('closeDetail').onclick = () => {
     trackEvent('detail_panel_close', {
