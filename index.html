@@ -213,11 +213,37 @@
       <div id="map" class="map-container"></div>
       <div id="listContainer" class="list-container">
         <div class="list-header">
-          <h3 data-i18n="opportunities">Kansen</h3>
+          <div class="list-tabs">
+            <button class="list-tab active" data-tab="buildings">Gezonde gebouwen</button>
+            <button class="list-tab" data-tab="companies">Bedrijven</button>
+            <button class="list-tab" data-tab="experts">Experts</button>
+          </div>
           <span id="resultsCount" class="results-count">0 resultaten</span>
         </div>
-        <div id="opportunitiesList" class="opportunities-list">
-          <!-- List items will be populated by JavaScript -->
+        
+        <div class="tab-content">
+          <div id="buildingsTab" class="tab-pane active">
+            <div id="opportunitiesList" class="opportunities-list">
+              <!-- List items will be populated by JavaScript -->
+            </div>
+          </div>
+          
+          <div id="companiesTab" class="tab-pane">
+            <div id="companiesList" class="opportunities-list">
+              <!-- Company items will be populated by JavaScript -->
+            </div>
+          </div>
+          
+          <div id="expertsTab" class="tab-pane">
+            <div class="experts-content">
+              <h2>Ben jij expert in bouwen of installeren? Dan zoeken we jou!</h2>
+              <p>Healthy Building Movement (HBM) brengt gezond bouwen naar de praktijk. Ons innovatieve karakter berust op de samenwerking tussen wetenschap en bedrijfsleven.</p>
+              <p>Door middel van bijeenkomsten waar experts uit de praktijk samen komen (expert pools) willen we bestaande kennis uit toegepast wetenschappelijk onderzoek toegankelijk maken voor de praktijk. In deze groepen met deskundigen ontwikkelen en optimaliseren we producten en diensten.</p>
+              <a href="https://healthybuildingmovement.com/expert-pools/" target="_blank" rel="noopener noreferrer" class="btn-primary experts-cta">
+                Wordt expert bij HBM
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </main>

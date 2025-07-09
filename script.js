@@ -645,18 +645,63 @@ function displaySearchResults(results) {
   }
 }
 
+// Tab functionality
+function initializeTabs() {
+  const tabs = document.querySelectorAll('.list-tab');
+  const tabPanes = document.querySelectorAll('.tab-pane');
+  
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetTab = tab.getAttribute('data-tab');
+      
+      // Remove active class from all tabs and panes
+      tabs.forEach(t => t.classList.remove('active'));
+      tabPanes.forEach(pane => pane.classList.remove('active'));
+      
+      // Add active class to clicked tab
+      tab.classList.add('active');
+      
+      // Show corresponding tab pane
+      const targetPane = document.getElementById(targetTab + 'Tab');
+      if (targetPane) {
+        targetPane.classList.add('active');
+      }
+      
+      // Track tab change
+      trackEvent('tab_change', {
+        tab: targetTab,
+        label: `Tab changed to: ${targetTab}`,
+        custom_parameter_1: 'navigation'
+      });
+    });
+  });
+}
+
 function updateOpportunitiesList(data) {
-  const listContainer = document.getElementById('opportunitiesList');
+  const buildingsContainer = document.getElementById('opportunitiesList');
+  const companiesContainer = document.getElementById('companiesList');
   const resultsCount = document.getElementById('resultsCount');
   
-  if (!listContainer || !resultsCount) return;
+  if (!buildingsContainer || !companiesContainer || !resultsCount) return;
   
-  resultsCount.textContent = `${data.length} ${t('results') || 'resultaten'}`;
+  // Separate projects and companies
+  const projects = data.filter(item => {
+    const type = Array.isArray(item.HBMType) ? item.HBMType : [item.HBMType];
+    return type.includes('Project');
+  });
   
-  if (data.length === 0) {
-    listContainer.innerHTML = `
+  const companies = data.filter(item => {
+    const type = Array.isArray(item.HBMType) ? item.HBMType : [item.HBMType];
+    return type.includes('Bedrijf');
+  });
+  
+  resultsCount.textContent = `${projects.length} gebouwen, ${companies.length} bedrijven`;
+  
+  // Update buildings list
+  if (projects.length === 0) {
+    buildingsContainer.innerHTML = `
       <div class="no-results-opportunity">
-        <h2>Geen kans gevonden?</h2>
+        <h2>Geen projecten gevonden?</h2>
         <p><strong>Dan ligt hier een kans voor gezond bouwen!</strong></p>
         
         <p>In dit gebied zijn nog geen actieve projecten zichtbaar.<br>
@@ -675,10 +720,8 @@ function updateOpportunitiesList(data) {
         </div>
       </div>
     `;
-    return;
-  }
-  
-  listContainer.innerHTML = data.map((opportunity, index) => {
+  } else {
+    buildingsContainer.innerHTML = projects.map((opportunity, index) => {
     const isProject = (Array.isArray(opportunity.HBMType) ? opportunity.HBMType.includes('Project') : opportunity.HBMType === 'Project');
     
     let imageHtml = '';
@@ -688,42 +731,110 @@ function updateOpportunitiesList(data) {
       imageHtml = `<img src="${opportunity.Logo}" alt="${opportunity.Name}" class="card-logo" onerror="this.style.display='none'">`;
     }
     
-    return `
-      <div class="opportunity-card" data-index="${index}" onclick="selectOpportunity(${index})">
-        <div class="card-header">
-          <h4 class="card-title">${opportunity.Name}</h4>
-          <span class="card-type-badge ${isProject ? 'project' : 'company'}">
-            ${Array.isArray(opportunity.HBMType) ? opportunity.HBMType.join(', ') : opportunity.HBMType}
-          </span>
+    const isProject = true; // For projects tab
+      let imageHtml = '';
+      if (opportunity.ProjectImage) {
+        imageHtml = `<img src="${opportunity.ProjectImage}" alt="${opportunity.Name}" class="card-image" onerror="this.style.display='none'">`;
+      }
+      
+      return `
+        <div class="opportunity-card" data-index="${index}" onclick="selectOpportunity(${index})">
+          <div class="card-header">
+            <h4 class="card-title">${opportunity.Name}</h4>
+            <span class="card-type-badge project">
+              Project
+            </span>
+          </div>
+          
+          ${imageHtml}
+          
+          <div class="card-details">
+            <div class="card-detail-row">
+              <span class="card-detail-label">${t('organizationType')}:</span>
+              <span class="card-detail-value">${Array.isArray(opportunity.OrganizationType) ? opportunity.OrganizationType.join(', ') : opportunity.OrganizationType}</span>
+            </div>
+            <div class="card-detail-row">
+              <span class="card-detail-label">${t('hbmTopic')}:</span>
+              <span class="card-detail-value">${Array.isArray(opportunity.HBMTopic) ? opportunity.HBMTopic.join(', ') : opportunity.HBMTopic}</span>
+            </div>
+            <div class="card-detail-row">
+              <span class="card-detail-label">${t('hbmSector')}:</span>
+              <span class="card-detail-value">${Array.isArray(opportunity.HBMSector) ? opportunity.HBMSector.join(', ') : opportunity.HBMSector}</span>
+            </div>
+          </div>
+          
+          <div class="card-description">${opportunity.Description}</div>
+          
+          <div class="card-actions">
+            <button class="card-contact-btn" onclick="showContactForm(${JSON.stringify(opportunity).replace(/"/g, '&quot;')}); event.stopPropagation();">
+              ${t('contact') || 'Contact'}
+            </button>
+          </div>
         </div>
+      `;
+    }).join('');
+  }
+  
+  // Update companies list
+  if (companies.length === 0) {
+    companiesContainer.innerHTML = `
+      <div class="no-results-opportunity">
+        <h2>Geen bedrijven gevonden?</h2>
+        <p><strong>Misschien ken jij bedrijven die actief zijn met gezond bouwen?</strong></p>
         
-        ${imageHtml}
+        <p>Help ons de kaart completer te maken door bedrijven aan te melden!</p>
         
-        <div class="card-details">
-          <div class="card-detail-row">
-            <span class="card-detail-label">${t('organizationType')}:</span>
-            <span class="card-detail-value">${Array.isArray(opportunity.OrganizationType) ? opportunity.OrganizationType.join(', ') : opportunity.OrganizationType}</span>
-          </div>
-          <div class="card-detail-row">
-            <span class="card-detail-label">${t('hbmTopic')}:</span>
-            <span class="card-detail-value">${Array.isArray(opportunity.HBMTopic) ? opportunity.HBMTopic.join(', ') : opportunity.HBMTopic}</span>
-          </div>
-          <div class="card-detail-row">
-            <span class="card-detail-label">${t('hbmSector')}:</span>
-            <span class="card-detail-value">${Array.isArray(opportunity.HBMSector) ? opportunity.HBMSector.join(', ') : opportunity.HBMSector}</span>
-          </div>
-        </div>
-        
-        <div class="card-description">${opportunity.Description}</div>
-        
-        <div class="card-actions">
-          <button class="card-contact-btn" onclick="showContactForm(${JSON.stringify(opportunity).replace(/"/g, '&quot;')}); event.stopPropagation();">
-            ${t('contact') || 'Contact'}
-          </button>
+        <div class="contact-cta">
+          <a href="contact.html" class="btn-primary">Meld een bedrijf aan</a>
+          <span>en help anderen deze experts te vinden.</span>
         </div>
       </div>
     `;
-  }).join('');
+  } else {
+    companiesContainer.innerHTML = companies.map((opportunity, index) => {
+      const companyIndex = projects.length + index; // Adjust index for companies
+      let imageHtml = '';
+      if (opportunity.Logo) {
+        imageHtml = `<img src="${opportunity.Logo}" alt="${opportunity.Name}" class="card-logo" onerror="this.style.display='none'">`;
+      }
+      
+      return `
+        <div class="opportunity-card" data-index="${companyIndex}" onclick="selectOpportunity(${companyIndex})">
+          <div class="card-header">
+            <h4 class="card-title">${opportunity.Name}</h4>
+            <span class="card-type-badge company">
+              Bedrijf
+            </span>
+          </div>
+          
+          ${imageHtml}
+          
+          <div class="card-details">
+            <div class="card-detail-row">
+              <span class="card-detail-label">${t('organizationType')}:</span>
+              <span class="card-detail-value">${Array.isArray(opportunity.OrganizationType) ? opportunity.OrganizationType.join(', ') : opportunity.OrganizationType}</span>
+            </div>
+            <div class="card-detail-row">
+              <span class="card-detail-label">${t('hbmTopic')}:</span>
+              <span class="card-detail-value">${Array.isArray(opportunity.HBMTopic) ? opportunity.HBMTopic.join(', ') : opportunity.HBMTopic}</span>
+            </div>
+            <div class="card-detail-row">
+              <span class="card-detail-label">${t('hbmSector')}:</span>
+              <span class="card-detail-value">${Array.isArray(opportunity.HBMSector) ? opportunity.HBMSector.join(', ') : opportunity.HBMSector}</span>
+            </div>
+          </div>
+          
+          <div class="card-description">${opportunity.Description}</div>
+          
+          <div class="card-actions">
+            <button class="card-contact-btn" onclick="showContactForm(${JSON.stringify(opportunity).replace(/"/g, '&quot;')}); event.stopPropagation();">
+              ${t('contact') || 'Contact'}
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 }
 
 function selectOpportunity(index) {
@@ -999,6 +1110,9 @@ if (isMapPage && !isInfoPage && !isOverPage) {
       
       // Create hover label
       createHoverLabel();
+      
+      // Initialize tabs
+      initializeTabs();
       
       // Track page view
       trackPageView('Kansenkaart');

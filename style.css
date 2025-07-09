@@ -768,6 +768,128 @@ button {
   }
 }
 
+/* === List Tabs === */
+.list-tabs {
+  display: flex;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 0;
+  gap: 0;
+}
+
+.list-tab {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: #f8f9fa;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.9rem;
+  border-bottom: 3px solid transparent;
+}
+
+.list-tab:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.list-tab.active {
+  background: #fff;
+  color: rgb(38, 123, 41);
+  border-bottom-color: rgb(38, 123, 41);
+  font-weight: bold;
+}
+
+.tab-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-pane {
+  display: none;
+  flex: 1;
+  overflow: hidden;
+}
+
+.tab-pane.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* === Experts Content === */
+.experts-content {
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9f7ef 100%);
+  border-radius: 0 0 12px 12px;
+  margin: 1rem;
+}
+
+.experts-content h2 {
+  color: rgb(38, 123, 41);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+.experts-content p {
+  color: #333;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  max-width: 500px;
+  text-align: left;
+}
+
+.experts-cta {
+  margin-top: 1.5rem;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.experts-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(38, 123, 41, 0.3);
+}
+
+@media (max-width: 768px) {
+  .list-tabs {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+  
+  .list-tab {
+    min-width: 120px;
+    flex: none;
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .experts-content {
+    padding: 1.5rem;
+    margin: 0.5rem;
+    min-height: 250px;
+  }
+  
+  .experts-content h2 {
+    font-size: 1.25rem;
+  }
+  
+  .experts-content p {
+    font-size: 0.9rem;
+  }
+}
+
 /* === Opportunity cards === */
 .opportunity-card {
   background: #fff;
