@@ -681,6 +681,8 @@ function updateOpportunitiesList(data) {
   const buildingsContainer = document.getElementById('opportunitiesList');
   const companiesContainer = document.getElementById('companiesList');
   const resultsCount = document.getElementById('resultsCount');
+  const buildingsCount = document.getElementById('buildingsCount');
+  const companiesCount = document.getElementById('companiesCount');
   
   if (!buildingsContainer || !companiesContainer || !resultsCount) return;
   
@@ -695,7 +697,9 @@ function updateOpportunitiesList(data) {
     return type.includes('Bedrijf');
   });
   
-  resultsCount.textContent = `${projects.length} gebouwen, ${companies.length} bedrijven`;
+  resultsCount.textContent = `${data.length} resultaten`;
+  if (buildingsCount) buildingsCount.textContent = `(${projects.length})`;
+  if (companiesCount) companiesCount.textContent = `(${companies.length})`;
   
   // Update buildings list
   if (projects.length === 0) {
@@ -722,16 +726,6 @@ function updateOpportunitiesList(data) {
     `;
   } else {
     buildingsContainer.innerHTML = projects.map((opportunity, index) => {
-    const isProject = (Array.isArray(opportunity.HBMType) ? opportunity.HBMType.includes('Project') : opportunity.HBMType === 'Project');
-    
-    let imageHtml = '';
-    if (isProject && opportunity.ProjectImage) {
-      imageHtml = `<img src="${opportunity.ProjectImage}" alt="${opportunity.Name}" class="card-image" onerror="this.style.display='none'">`;
-    } else if (!isProject && opportunity.Logo) {
-      imageHtml = `<img src="${opportunity.Logo}" alt="${opportunity.Name}" class="card-logo" onerror="this.style.display='none'">`;
-    }
-    
-    const isProject = true; // For projects tab
       let imageHtml = '';
       if (opportunity.ProjectImage) {
         imageHtml = `<img src="${opportunity.ProjectImage}" alt="${opportunity.Name}" class="card-image" onerror="this.style.display='none'">`;
