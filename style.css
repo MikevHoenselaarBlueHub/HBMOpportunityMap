@@ -447,7 +447,7 @@ button {
   visibility: hidden;
   transform: translateY(10px);
   transition: all 0.2s ease;
-  min-width: 160px;
+  min-width: 250px;
   margin-bottom: 0.5rem;
   z-index: 1200;
   list-style: none;
