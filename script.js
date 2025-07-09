@@ -1,3 +1,132 @@
+// Internationalization
+const translations = {
+  nl: {
+    selectAll: 'Selecteer alles',
+    selectNone: 'Selecteer geen',
+    apply: 'Toepassen',
+    noSelection: 'Maak een keuze uit een van de filters',
+    projectType: 'Type project',
+    organizationType: 'Organisatietype',
+    organizationField: 'Vakgebied',
+    hbmTopic: 'Thema',
+    hbmCharacteristics: 'Kenmerken',
+    hbmSector: 'Sector',
+    projects: 'Projecten',
+    companies: 'Bedrijven',
+    type: 'Type',
+    organization: 'Organisatie',
+    field: 'Vakgebied',
+    topic: 'Thema',
+    characteristics: 'Kenmerken',
+    sector: 'Sector',
+    description: 'Beschrijving',
+    contact: 'Contact opnemen',
+    moreInfo: 'Meer info',
+    close: 'Sluiten',
+    filters: 'Filters',
+    opportunityMap: 'Kansenkaart',
+    dataLoadError: 'Fout bij het laden van de data. Probeer de pagina te vernieuwen.',
+    leafletLoadError: 'Kaart bibliotheek kon niet worden geladen.'
+  },
+  en: {
+    selectAll: 'Select all',
+    selectNone: 'Select none',
+    apply: 'Apply',
+    noSelection: 'Make a choice from one of the filters',
+    projectType: 'Project type',
+    organizationType: 'Organization type',
+    organizationField: 'Field',
+    hbmTopic: 'Topic',
+    hbmCharacteristics: 'Characteristics',
+    hbmSector: 'Sector',
+    projects: 'Projects',
+    companies: 'Companies',
+    type: 'Type',
+    organization: 'Organization',
+    field: 'Field',
+    topic: 'Topic',
+    characteristics: 'Characteristics',
+    sector: 'Sector',
+    description: 'Description',
+    contact: 'Contact',
+    moreInfo: 'More info',
+    close: 'Close',
+    filters: 'Filters',
+    opportunityMap: 'Opportunity Map',
+    dataLoadError: 'Error loading data. Please refresh the page.',
+    leafletLoadError: 'Map library could not be loaded.'
+  },
+  de: {
+    selectAll: 'Alle auswählen',
+    selectNone: 'Keine auswählen',
+    apply: 'Anwenden',
+    noSelection: 'Treffen Sie eine Auswahl aus einem der Filter',
+    projectType: 'Projekttyp',
+    organizationType: 'Organisationstyp',
+    organizationField: 'Fachbereich',
+    hbmTopic: 'Thema',
+    hbmCharacteristics: 'Merkmale',
+    hbmSector: 'Sektor',
+    projects: 'Projekte',
+    companies: 'Unternehmen',
+    type: 'Typ',
+    organization: 'Organisation',
+    field: 'Fachbereich',
+    topic: 'Thema',
+    characteristics: 'Merkmale',
+    sector: 'Sektor',
+    description: 'Beschreibung',
+    contact: 'Kontakt aufnehmen',
+    moreInfo: 'Mehr Infos',
+    close: 'Schließen',
+    filters: 'Filter',
+    opportunityMap: 'Chancenkarte',
+    dataLoadError: 'Fehler beim Laden der Daten. Bitte aktualisieren Sie die Seite.',
+    leafletLoadError: 'Kartenbibliothek konnte nicht geladen werden.'
+  }
+};
+
+let currentLanguage = 'nl';
+
+function t(key) {
+  return translations[currentLanguage][key] || key;
+}
+
+function setLanguage(lang) {
+  currentLanguage = lang;
+  updateUI();
+}
+
+function updateUI() {
+  // Update button texts
+  const selectAllBtn = document.getElementById('selectAll');
+  const selectNoneBtn = document.getElementById('selectNone');
+  const applyBtn = document.getElementById('applyFilters');
+  const filterBtn = document.getElementById('filterBtn');
+  
+  if (selectAllBtn) selectAllBtn.textContent = t('selectAll');
+  if (selectNoneBtn) selectNoneBtn.textContent = t('selectNone');
+  if (applyBtn) applyBtn.textContent = t('apply');
+  if (filterBtn) filterBtn.textContent = t('filters');
+  
+  // Update filter labels
+  const filterLabels = {
+    'ProjectType': t('projectType'),
+    'OrganizationType': t('organizationType'),
+    'OrganizationField': t('organizationField'),
+    'HBMTopic': t('hbmTopic'),
+    'HBMCharacteristics': t('hbmCharacteristics'),
+    'HBMSector': t('hbmSector')
+  };
+  
+  Object.keys(filterLabels).forEach(key => {
+    const container = document.getElementById(key);
+    if (container && container.previousElementSibling) {
+      container.previousElementSibling.textContent = filterLabels[key];
+    }
+  });
+}
+
 // Hamburger en overlays
 if (document.getElementById('hamburger')) {
   document.getElementById('hamburger').onclick = () => document.getElementById('menuOverlay').classList.add('open');
@@ -20,11 +149,13 @@ if (document.getElementById('applyFilters')) {
 if (document.getElementById('selectAll')) {
   document.getElementById('selectAll').onclick = () => {
     document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => cb.checked = true);
+    updateFilterState();
   };
 }
 if (document.getElementById('selectNone')) {
   document.getElementById('selectNone').onclick = () => {
     document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => cb.checked = false);
+    updateFilterState();
   };
 }
 if (document.getElementById('closeDetail')) {
@@ -101,10 +232,36 @@ function createFilterCheckboxes() {
       container.innerHTML = '';
       values.forEach(val => {
         const id = `${key}-${val}`;
-        container.innerHTML += `<label><input type="checkbox" name="${key}" value="${val}" checked/> ${val}</label> `;
+        container.innerHTML += `<label><input type="checkbox" name="${key}" value="${val}" checked onchange="updateFilterState()"/> ${val}</label> `;
       });
     }
   });
+  
+  // Add change listeners to HBMType checkboxes
+  document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
+    cb.addEventListener('change', updateFilterState);
+  });
+  
+  updateFilterState();
+}
+
+function updateFilterState() {
+  const checkedFilters = document.querySelectorAll('#filtersForm input[type="checkbox"]:checked');
+  const applyButton = document.getElementById('applyFilters');
+  const noSelectionMessage = document.getElementById('noSelectionMessage');
+  
+  if (checkedFilters.length === 0) {
+    if (applyButton) applyButton.style.display = 'none';
+    if (!noSelectionMessage) {
+      const message = document.createElement('div');
+      message.id = 'noSelectionMessage';
+      message.innerHTML = `<p style="color: #666; font-style: italic; margin-top: 1rem;">${t('noSelection')}</p>`;
+      applyButton.parentNode.insertBefore(message, applyButton);
+    }
+  } else {
+    if (applyButton) applyButton.style.display = 'block';
+    if (noSelectionMessage) noSelectionMessage.remove();
+  }
 }
 
 function showLocationDetails(location) {
@@ -145,9 +302,11 @@ function updateMap() {
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
   }
 
-  // Clear markers
+  // Clear existing markers
   markers.forEach(m => map.removeLayer(m));
   markers = [];
+  
+  // Get all checked filters
   const filters = {};
   document.querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
     const name = cb.name;
@@ -155,9 +314,10 @@ function updateMap() {
     filters[name].push(cb.value);
   });
 
+  // Filter data based on selected filters
   const filtered = window.data.filter(d => {
     return Object.keys(filters).every(k => {
-      if (!filters[k].length) return true;
+      if (!filters[k] || filters[k].length === 0) return true;
       const dataValue = d[k];
       if (Array.isArray(dataValue)) {
         return dataValue.some(val => filters[k].includes(val));
@@ -167,12 +327,12 @@ function updateMap() {
     });
   });
 
+  // Add markers for filtered data
   const bounds = [];
   filtered.forEach(loc => {
-    // Use default icon if custom icons not loaded
     const markerOptions = {};
     if (pIcon && bIcon) {
-      markerOptions.icon = loc.HBMType === 'Project' ? pIcon : bIcon;
+      markerOptions.icon = (Array.isArray(loc.HBMType) ? loc.HBMType.includes('Project') : loc.HBMType === 'Project') ? pIcon : bIcon;
     }
     
     const marker = L.marker([loc.Latitude, loc.Longitude], markerOptions).addTo(map);
@@ -183,20 +343,17 @@ function updateMap() {
     bounds.push([loc.Latitude, loc.Longitude]);
   });
 
-  // Zoom to show all markers with padding
+  // Adjust map view to show all markers
   if (bounds.length > 0) {
     if (bounds.length === 1) {
-      // Single marker - center on it with reasonable zoom
       map.setView(bounds[0], 12);
     } else {
-      // Multiple markers - fit bounds with padding
       map.fitBounds(bounds, {
         padding: [20, 20],
         maxZoom: 15
       });
     }
   } else {
-    // No markers - show default view
     map.setView([51.2, 6.1], 9);
   }
 }

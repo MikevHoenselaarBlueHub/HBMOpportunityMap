@@ -203,6 +203,21 @@ button {
   transition: all 0.2s ease;
 }
 
+.language-selector {
+  position: fixed;
+  top: 20px;
+  right: 1rem;
+  z-index: 1000;
+}
+
+.language-selector select {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
 #filterBtn {
   position: fixed;
   top: 100px;

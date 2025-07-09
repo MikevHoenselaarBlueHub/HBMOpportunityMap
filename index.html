@@ -30,26 +30,34 @@
     </nav>
   </header>
 
+  <div class="language-selector">
+    <select id="languageSelect" onchange="setLanguage(this.value)">
+      <option value="nl">Nederlands</option>
+      <option value="en">English</option>
+      <option value="de">Deutsch</option>
+    </select>
+  </div>
+  
   <button id="filterBtn">Filters</button>
   <div id="filterOverlay" class="overlay">
     <a href="#" id="closeFilters" class="close-btn">
       <img src="icons/close.svg" alt="Sluiten" class="close-icon"/>
     </a>
     <form id="filtersForm">
-      <h2>Filters</h2>
+      <h2 data-i18n="filters">Filters</h2>
       <div class="filter-actions">
         <button type="button" id="selectAll">Selecteer alles</button>
         <button type="button" id="selectNone">Selecteer geen</button>
       </div>
-      <div><strong>Type project</strong><div id="ProjectType"></div></div>
-      <div><strong>Organisatietype</strong><div id="OrganizationType"></div></div>
-      <div><strong>Vakgebied</strong><div id="OrganizationField"></div></div>
-      <div><strong>Thema</strong><div id="HBMTopic"></div></div>
-      <div><strong>Kenmerken</strong><div id="HBMCharacteristics"></div></div>
-      <div><strong>Sector</strong><div id="HBMSector"></div></div>
+      <div><strong data-i18n="projectType">Type project</strong><div id="ProjectType"></div></div>
+      <div><strong data-i18n="organizationType">Organisatietype</strong><div id="OrganizationType"></div></div>
+      <div><strong data-i18n="organizationField">Vakgebied</strong><div id="OrganizationField"></div></div>
+      <div><strong data-i18n="hbmTopic">Thema</strong><div id="HBMTopic"></div></div>
+      <div><strong data-i18n="hbmCharacteristics">Kenmerken</strong><div id="HBMCharacteristics"></div></div>
+      <div><strong data-i18n="hbmSector">Sector</strong><div id="HBMSector"></div></div>
       <div>
-        <label><input type="checkbox" name="HBMType" value="Project" checked/> Projecten</label>
-        <label><input type="checkbox" name="HBMType" value="Bedrijf" checked/> Bedrijven</label>
+        <label><input type="checkbox" name="HBMType" value="Project" checked onchange="updateFilterState()"/> <span data-i18n="projects">Projecten</span></label>
+        <label><input type="checkbox" name="HBMType" value="Bedrijf" checked onchange="updateFilterState()"/> <span data-i18n="companies">Bedrijven</span></label>
       </div>
       <button type="button" id="applyFilters">Toepassen</button>
     </form>
