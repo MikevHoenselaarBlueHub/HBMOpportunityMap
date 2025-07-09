@@ -309,7 +309,6 @@ button {
   border: 2px solid rgb(38, 123, 41);
   border-radius: 25px;
   padding: 0.25rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .search-container input {
@@ -531,7 +530,6 @@ button {
 .list-container {
   flex: 0 0 400px;
   background: #fff;
-  border-left: 2px solid rgb(38, 123, 41);
   display: flex;
   flex-direction: column;
   overflow: hidden;
