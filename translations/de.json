@@ -24,7 +24,7 @@
   "close": "Schließen",
   "filters": "Filter",
   "opportunityMap": "Chancenkarte",
-  "dataLoadError": "Fehler beim Laden der Daten. Bitte aktualisieren Sie die Seite.",
+  "dataLoadError": "Fehler beim Laden der Daten. Bitte versuchen Sie, die Seite zu aktualisieren.",
   "leafletLoadError": "Kartenbibliothek konnte nicht geladen werden.",
   "contactForm": "Kontaktformular",
   "firstName": "Vorname",
@@ -44,5 +44,9 @@
   "results": "Ergebnisse",
   "noResults": "Keine Ergebnisse gefunden",
   "list": "Liste",
-  "map": "Karte"de"
+  "map": "Karte",
+  "noSearchResults": "Keine Suchergebnisse gefunden",
+  "urlCopied": "URL in die Zwischenablage kopiert!",
+  "urlCopyFailed": "URL konnte nicht kopiert werden. Bitte manuell aus der Adressleiste kopieren.",
+  "share": "Teilen"
 }

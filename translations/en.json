@@ -1,4 +1,3 @@
-
 {
   "selectAll": "Select all",
   "selectNone": "Select none",
@@ -45,5 +44,10 @@
   "results": "results",
   "noResults": "No results found",
   "list": "List",
-  "map": "Map"
+  "map": "Map",
+  "noSearchResults": "No search results found",
+  "dataLoadError": "Error loading data. Please try refreshing the page.",
+  "urlCopied": "URL copied to clipboard!",
+  "urlCopyFailed": "Could not copy URL. Please copy manually from the address bar.",
+  "share": "Share"
 }

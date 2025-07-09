@@ -410,7 +410,8 @@ button {
 }
 
 #filterBtn,
-#exportBtn {
+#exportBtn,
+#shareBtn {
   background: rgb(38, 123, 41);
   color: #fff;
   border: none;
@@ -422,7 +423,8 @@ button {
 }
 
 #filterBtn:hover,
-#exportBtn:hover {
+#exportBtn:hover,
+#shareBtn:hover {
   background: #267b29;
 }
 

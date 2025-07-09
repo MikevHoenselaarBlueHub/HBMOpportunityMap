@@ -9,6 +9,7 @@ let municipalityLayer;
 let markerClusterGroup;
 let currentListView = false;
 let filteredData = [];
+let isInitialLoad = true;
 
 // Google Analytics 4 Event Tracking
 function trackEvent(eventName, parameters = {}) {
@@ -75,11 +76,15 @@ function updateUI() {
   const selectNoneBtn = document.getElementById('selectNone');
   const applyBtn = document.getElementById('applyFilters');
   const filterBtn = document.getElementById('filterBtn');
+  const shareBtn = document.getElementById('shareBtn');
   
   if (selectAllBtn) selectAllBtn.textContent = t('selectAll');
   if (selectNoneBtn) selectNoneBtn.textContent = t('selectNone');
   if (applyBtn) applyBtn.textContent = t('apply');
-  if (filterBtn) filterBtn.textContent = t('filters');
+  if (shareBtn) shareBtn.textContent = t('share');
+  
+  // Update filter button with count
+  updateFilterButtonLabel();
   
   // Update all elements with data-i18n attributes
   document.querySelectorAll('[data-i18n]').forEach(element => {
@@ -355,11 +360,7 @@ if (document.getElementById('closeFilters')) {
 if (document.getElementById('applyFilters')) {
   document.getElementById('applyFilters').onclick = () => {
     // Get active filters for tracking
-    const activeFilters = {};
-    document.querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
-      if (!activeFilters[cb.name]) activeFilters[cb.name] = [];
-      activeFilters[cb.name].push(cb.value);
-    });
+    const activeFilters = getActiveFilters();
     
     trackEvent('filter_apply', {
       label: 'Filters applied',
@@ -367,6 +368,11 @@ if (document.getElementById('applyFilters')) {
       filter_count: Object.keys(activeFilters).length,
       active_filters: JSON.stringify(activeFilters)
     });
+    
+    // Save filters and update URL
+    saveFiltersToStorage();
+    updateURLWithFilters();
+    updateFilterButtonLabel();
     
     updateMap();
     document.getElementById('filterOverlay').classList.remove('open');
@@ -380,6 +386,7 @@ if (document.getElementById('selectAll')) {
     });
     document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => cb.checked = true);
     updateFilterState();
+    updateFilterButtonLabel();
   };
 }
 if (document.getElementById('selectNone')) {
@@ -390,6 +397,7 @@ if (document.getElementById('selectNone')) {
     });
     document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => cb.checked = false);
     updateFilterState();
+    updateFilterButtonLabel();
   };
 }
 
@@ -421,6 +429,14 @@ if (document.getElementById('viewToggle')) {
 if (document.getElementById('exportBtn')) {
   document.getElementById('exportBtn').onclick = () => {
     exportData();
+  };
+}
+
+// Share functionality
+if (document.getElementById('shareBtn')) {
+  document.getElementById('shareBtn').onclick = () => {
+    updateURLWithFilters();
+    copyURLToClipboard();
   };
 }
 if (document.getElementById('closeDetail')) {
@@ -642,6 +658,150 @@ function selectOpportunity(index) {
   });
 }
 
+// Filter state management functions
+function saveFiltersToStorage() {
+  const filters = getActiveFilters();
+  localStorage.setItem('kansenkaart_filters', JSON.stringify(filters));
+}
+
+function loadFiltersFromStorage() {
+  try {
+    const saved = localStorage.getItem('kansenkaart_filters');
+    return saved ? JSON.parse(saved) : null;
+  } catch (error) {
+    console.error('Error loading filters from storage:', error);
+    return null;
+  }
+}
+
+function getActiveFilters() {
+  const filters = {};
+  document.querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
+    const name = cb.name;
+    if (!filters[name]) filters[name] = [];
+    filters[name].push(cb.value);
+  });
+  return filters;
+}
+
+function setActiveFilters(filters) {
+  // First uncheck all
+  document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+  });
+  
+  // Then check the ones in the filter object
+  Object.keys(filters).forEach(filterName => {
+    if (filters[filterName] && filters[filterName].length > 0) {
+      filters[filterName].forEach(value => {
+        const checkbox = document.querySelector(`input[name="${filterName}"][value="${value}"]`);
+        if (checkbox) {
+          checkbox.checked = true;
+        }
+      });
+    }
+  });
+  
+  updateFilterState();
+}
+
+function updateURLWithFilters() {
+  const filters = getActiveFilters();
+  const url = new URL(window.location);
+  
+  // Clear existing filter parameters
+  Object.keys(Object.fromEntries(url.searchParams)).forEach(key => {
+    if (key.startsWith('filter_')) {
+      url.searchParams.delete(key);
+    }
+  });
+  
+  // Add current filters
+  Object.keys(filters).forEach(filterName => {
+    if (filters[filterName] && filters[filterName].length > 0) {
+      url.searchParams.set(`filter_${filterName}`, filters[filterName].join(','));
+    }
+  });
+  
+  // Update URL without reloading page
+  window.history.replaceState({}, '', url);
+}
+
+function loadFiltersFromURL() {
+  const url = new URL(window.location);
+  const filters = {};
+  
+  url.searchParams.forEach((value, key) => {
+    if (key.startsWith('filter_')) {
+      const filterName = key.replace('filter_', '');
+      filters[filterName] = value.split(',');
+    }
+  });
+  
+  return Object.keys(filters).length > 0 ? filters : null;
+}
+
+function updateFilterButtonLabel() {
+  const filterBtn = document.getElementById('filterBtn');
+  if (!filterBtn) return;
+  
+  const activeFilterCount = Object.values(getActiveFilters()).reduce((total, filterArray) => total + filterArray.length, 0);
+  
+  if (activeFilterCount > 0) {
+    filterBtn.textContent = `${t('filters')} (${activeFilterCount})`;
+  } else {
+    filterBtn.textContent = t('filters');
+  }
+}
+
+function copyURLToClipboard() {
+  const url = window.location.href;
+  
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(url).then(() => {
+      alert(t('urlCopied') || 'URL gekopieerd naar klembord!');
+    }).catch(err => {
+      console.error('Failed to copy URL:', err);
+      fallbackCopyTextToClipboard(url);
+    });
+  } else {
+    fallbackCopyTextToClipboard(url);
+  }
+  
+  // Track share action
+  trackEvent('url_share', {
+    label: 'URL shared to clipboard',
+    custom_parameter_1: 'sharing',
+    url: url
+  });
+}
+
+function fallbackCopyTextToClipboard(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.top = '0';
+  textArea.style.left = '0';
+  textArea.style.position = 'fixed';
+  
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  
+  try {
+    const successful = document.execCommand('copy');
+    if (successful) {
+      alert(t('urlCopied') || 'URL gekopieerd naar klembord!');
+    } else {
+      alert(t('urlCopyFailed') || 'Kon URL niet kopiëren. Kopieer handmatig uit de adresbalk.');
+    }
+  } catch (err) {
+    console.error('Fallback: Could not copy text: ', err);
+    alert(t('urlCopyFailed') || 'Kon URL niet kopiëren. Kopieer handmatig uit de adresbalk.');
+  }
+  
+  document.body.removeChild(textArea);
+}
+
 // Export data function
 function exportData() {
   if (!window.data) return;
@@ -834,17 +994,33 @@ function createFilterCheckboxes() {
       container.innerHTML = '';
       values.forEach(val => {
         const id = `${key}-${val}`;
-        container.innerHTML += `<label><input type="checkbox" name="${key}" value="${val}" checked onchange="updateFilterState()"/> ${val}</label> `;
+        container.innerHTML += `<label><input type="checkbox" name="${key}" value="${val}" checked onchange="updateFilterState(); updateFilterButtonLabel();"/> ${val}</label> `;
       });
     }
   });
   
   // Add change listeners to HBMType checkboxes
   document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
-    cb.addEventListener('change', updateFilterState);
+    cb.addEventListener('change', () => {
+      updateFilterState();
+      updateFilterButtonLabel();
+    });
   });
   
-  updateFilterState();
+  // Load filters from URL first, then from storage if no URL filters
+  const urlFilters = loadFiltersFromURL();
+  const storageFilters = loadFiltersFromStorage();
+  
+  if (urlFilters) {
+    setActiveFilters(urlFilters);
+  } else if (storageFilters && isInitialLoad) {
+    setActiveFilters(storageFilters);
+  } else {
+    updateFilterState();
+  }
+  
+  updateFilterButtonLabel();
+  isInitialLoad = false;
 }
 
 function loadMunicipalityBoundaries() {
@@ -919,6 +1095,8 @@ function updateFilterState() {
     if (applyButton) applyButton.style.display = 'block';
     if (noSelectionMessage) noSelectionMessage.remove();
   }
+  
+  updateFilterButtonLabel();
 }
 
 // Global variable for current detail index
@@ -1164,12 +1342,7 @@ function updateMap() {
   markers = [];
   
   // Get all checked filters
-  const filters = {};
-  document.querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
-    const name = cb.name;
-    if (!filters[name]) filters[name] = [];
-    filters[name].push(cb.value);
-  });
+  const filters = getActiveFilters();
 
   // Filter data based on selected filters
   const filtered = window.data.filter(d => {

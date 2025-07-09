@@ -1,4 +1,3 @@
-
 {
   "selectAll": "Selecteer alles",
   "selectNone": "Selecteer geen",
@@ -45,5 +44,10 @@
   "results": "resultaten",
   "noResults": "Geen resultaten gevonden",
   "list": "Lijst",
-  "map": "Kaart"
+  "map": "Kaart",
+  "noSearchResults": "Geen zoekresultaten gevonden",
+  "dataLoadError": "Fout bij het laden van gegevens. Probeer de pagina te vernieuwen.",
+  "urlCopied": "URL gekopieerd naar klembord!",
+  "urlCopyFailed": "Kon URL niet kopiëren. Kopieer handmatig uit de adresbalk.",
+  "share": "Deel"
 }
