@@ -1341,10 +1341,10 @@ function loadMunicipalityBoundaries() {
 
 async function loadMunicipalitiesFromOverpass() {
   try {
-    console.log('Loading municipality boundaries from Netherlands GeoJSON...');
+    console.log('Loading municipality boundaries from local Netherlands GeoJSON...');
 
-    // Load Netherlands townships GeoJSON data
-    const response = await fetch('https://www.webuildinternet.com/articles/2015-07-19-geojson-data-of-the-netherlands/townships.geojson');
+    // Load Netherlands townships GeoJSON data from local file
+    const response = await fetch('townships.geojson');
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -1359,58 +1359,46 @@ async function loadMunicipalitiesFromOverpass() {
     console.log(`Processing ${geojsonData.features.length} Dutch municipalities...`);
     let loadedCount = 0;
 
-    // Define regions of interest for the Euregio area
-    const eurregioMunicipalities = [
-      'Maastricht', 'Venlo', 'Roermond', 'Sittard-Geleen', 'Heerlen', 
-      'Kerkrade', 'Eindhoven', 'Helmond', 'Weert', 'Echt-Susteren',
-      'Beek', 'Valkenburg aan de Geul', 'Gulpen-Wittem', 'Vaals',
-      'Simpelveld', 'Onderbanken', 'Nuth', 'Schinnen', 'Brunssum',
-      'Landgraaf', 'Meerssen', 'Eijsden-Margraten'
-    ];
-
-    // Process GeoJSON features
+    // Process ALL GeoJSON features (no filtering by region)
     geojsonData.features.forEach((feature) => {
       if (feature.properties && feature.properties.name) {
         const municipalityName = feature.properties.name;
 
-        // Only load municipalities in the Euregio region for better performance
-        if (eurregioMunicipalities.includes(municipalityName)) {
-          try {
-            // Create Leaflet GeoJSON layer
-            const geoJsonLayer = L.geoJSON(feature, {
-              style: {
-                color: '#2E86AB',
-                weight: 2,
-                opacity: 0.9,
-                fillColor: '#A23B72',
-                fillOpacity: 0.08,
-                smoothFactor: 0.5,
-                dashArray: '3, 6'
-              }
-            });
+        try {
+          // Create Leaflet GeoJSON layer
+          const geoJsonLayer = L.geoJSON(feature, {
+            style: {
+              color: '#2E86AB',
+              weight: 1,
+              opacity: 0.7,
+              fillColor: '#A23B72',
+              fillOpacity: 0.05,
+              smoothFactor: 0.5,
+              dashArray: '3, 6'
+            }
+          });
 
-            // Add popup with municipality info
-            geoJsonLayer.bindPopup(`<strong>${municipalityName}</strong><br><small>Nederland</small>`);
-            
-            // Add to municipality layer
-            municipalityLayer.addLayer(geoJsonLayer);
-            loadedCount++;
+          // Add popup with municipality info
+          geoJsonLayer.bindPopup(`<strong>${municipalityName}</strong><br><small>Nederland</small>`);
+          
+          // Add to municipality layer
+          municipalityLayer.addLayer(geoJsonLayer);
+          loadedCount++;
 
-          } catch (err) {
-            console.warn(`Error processing ${municipalityName}:`, err);
-          }
+        } catch (err) {
+          console.warn(`Error processing ${municipalityName}:`, err);
         }
       }
     });
 
-    console.log(`Successfully loaded ${loadedCount} Dutch municipalities from GeoJSON`);
+    console.log(`Successfully loaded ${loadedCount} Dutch municipalities from local GeoJSON`);
 
     if (loadedCount === 0) {
       throw new Error('No municipalities could be processed from GeoJSON');
     }
 
   } catch (error) {
-    console.error('Error loading municipalities from GeoJSON:', error);
+    console.error('Error loading municipalities from local GeoJSON:', error);
     console.log('Loading fallback municipalities...');
     loadProfessionalMunicipalities();
   }
