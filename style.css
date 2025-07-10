@@ -1233,16 +1233,42 @@ button {
 }
 
 /* === Filter actions === */
-.filter-actions,
-#filtersForm>div.filter-actions {
+.filter-actions {
   margin: 1.5rem 0;
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
   justify-content: center;
   background: none;
-  border: 0px;
+  border: none;
   padding: 0;
+}
+
+#filtersForm .filter-actions {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.filter-actions button {
+  background: rgb(38, 123, 41);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.filter-actions button:hover {
+  background: #267b29;
+}
+
+.filter-actions button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+};
 }
 
 /* === Advanced Filters === */
