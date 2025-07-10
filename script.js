@@ -1341,10 +1341,25 @@ function loadMunicipalityBoundaries() {
 
 async function loadMunicipalitiesFromOverpass() {
   try {
-    console.log('Loading municipality boundaries from local Netherlands GeoJSON...');
+    console.log('Loading municipality boundaries from local GeoJSON files...');
 
-    // Load Netherlands townships GeoJSON data from local file
-    const response = await fetch('townships.geojson');
+    // Load both Dutch and German municipalities
+    await Promise.all([
+      loadDutchMunicipalities(),
+      loadGermanMunicipalities()
+    ]);
+
+  } catch (error) {
+    console.error('Error loading municipalities from local GeoJSON:', error);
+    console.log('Loading fallback municipalities...');
+    loadProfessionalMunicipalities();
+  }
+}
+
+async function loadDutchMunicipalities() {
+  try {
+    console.log('Loading Dutch municipalities...');
+    const response = await fetch('nl-gemeenten.geojson');
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -1353,19 +1368,17 @@ async function loadMunicipalitiesFromOverpass() {
     const geojsonData = await response.json();
 
     if (!geojsonData.features || geojsonData.features.length === 0) {
-      throw new Error('No GeoJSON features found');
+      throw new Error('No Dutch GeoJSON features found');
     }
 
     console.log(`Processing ${geojsonData.features.length} Dutch municipalities...`);
     let loadedCount = 0;
 
-    // Process ALL GeoJSON features (no filtering by region)
     geojsonData.features.forEach((feature) => {
       if (feature.properties && feature.properties.name) {
         const municipalityName = feature.properties.name;
 
         try {
-          // Create Leaflet GeoJSON layer
           const geoJsonLayer = L.geoJSON(feature, {
             style: {
               color: 'rgb(38, 123, 41)',
@@ -1376,7 +1389,6 @@ async function loadMunicipalitiesFromOverpass() {
               smoothFactor: 0.5,
               dashArray: '3, 6'
             },
-            // Add hover effects
             onEachFeature: function(feature, layer) {
               layer.on({
                 mouseover: function(e) {
@@ -1406,29 +1418,104 @@ async function loadMunicipalitiesFromOverpass() {
             }
           });
 
-          // Add popup with municipality info
           geoJsonLayer.bindPopup(`<strong>${municipalityName}</strong><br><small>Nederland</small>`);
-          
-          // Add to municipality layer
           municipalityLayer.addLayer(geoJsonLayer);
           loadedCount++;
 
         } catch (err) {
-          console.warn(`Error processing ${municipalityName}:`, err);
+          console.warn(`Error processing Dutch municipality ${municipalityName}:`, err);
         }
       }
     });
 
-    console.log(`Successfully loaded ${loadedCount} Dutch municipalities from local GeoJSON`);
-
-    if (loadedCount === 0) {
-      throw new Error('No municipalities could be processed from GeoJSON');
-    }
+    console.log(`Successfully loaded ${loadedCount} Dutch municipalities`);
 
   } catch (error) {
-    console.error('Error loading municipalities from local GeoJSON:', error);
-    console.log('Loading fallback municipalities...');
-    loadProfessionalMunicipalities();
+    console.error('Error loading Dutch municipalities:', error);
+    throw error;
+  }
+}
+
+async function loadGermanMunicipalities() {
+  try {
+    console.log('Loading German municipalities...');
+    const response = await fetch('de-gemeenten.geojson');
+    
+    if (!response.ok) {
+      console.warn('German municipalities file not found, skipping...');
+      return;
+    }
+
+    const geojsonData = await response.json();
+
+    if (!geojsonData.features || geojsonData.features.length === 0) {
+      console.warn('No German GeoJSON features found');
+      return;
+    }
+
+    console.log(`Processing ${geojsonData.features.length} German municipalities...`);
+    let loadedCount = 0;
+
+    geojsonData.features.forEach((feature) => {
+      // GADM format uses different property names
+      const municipalityName = feature.properties?.NAME_4 || feature.properties?.name || feature.properties?.NAME;
+
+      if (municipalityName) {
+        try {
+          const geoJsonLayer = L.geoJSON(feature, {
+            style: {
+              color: 'rgb(38, 123, 41)',
+              weight: 1,
+              opacity: 0.7,
+              fillColor: 'rgb(38, 123, 41)',
+              fillOpacity: 0.1,
+              smoothFactor: 0.5,
+              dashArray: '3, 6'
+            },
+            onEachFeature: function(feature, layer) {
+              layer.on({
+                mouseover: function(e) {
+                  const layer = e.target;
+                  layer.setStyle({
+                    color: 'rgb(38, 123, 41)',
+                    weight: 2,
+                    opacity: 1,
+                    fillColor: 'rgb(38, 123, 41)',
+                    fillOpacity: 0.3,
+                    dashArray: '3, 6'
+                  });
+                  layer.bringToFront();
+                },
+                mouseout: function(e) {
+                  const layer = e.target;
+                  layer.setStyle({
+                    color: 'rgb(38, 123, 41)',
+                    weight: 1,
+                    opacity: 0.7,
+                    fillColor: 'rgb(38, 123, 41)',
+                    fillOpacity: 0.1,
+                    dashArray: '3, 6'
+                  });
+                }
+              });
+            }
+          });
+
+          geoJsonLayer.bindPopup(`<strong>${municipalityName}</strong><br><small>Deutschland</small>`);
+          municipalityLayer.addLayer(geoJsonLayer);
+          loadedCount++;
+
+        } catch (err) {
+          console.warn(`Error processing German municipality ${municipalityName}:`, err);
+        }
+      }
+    });
+
+    console.log(`Successfully loaded ${loadedCount} German municipalities`);
+
+  } catch (error) {
+    console.error('Error loading German municipalities:', error);
+    // Don't throw error here, just log it as German data is optional
   }
 }
 
