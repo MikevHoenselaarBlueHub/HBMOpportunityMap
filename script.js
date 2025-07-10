@@ -618,17 +618,28 @@ if (document.getElementById('mapSearch')) {
     displaySearchResults(searchResults);
   }
 
+  // Debounced search for better performance
+  let searchTimeout;
+  function debouncedSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(performSearch, 300);
+  }
+
   searchBtn.onclick = performSearch;
   searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
+      clearTimeout(searchTimeout);
       performSearch();
     }
   });
 
-  // Clear search when input is empty
+  // Debounced search on input
   searchInput.addEventListener('input', (e) => {
     if (!e.target.value.trim()) {
+      clearTimeout(searchTimeout);
       updateMap();
+    } else {
+      debouncedSearch();
     }
   });
 }
@@ -1215,8 +1226,18 @@ if (isMapPage && !isInfoPage && !isOverPage) {
             custom_parameter_1: 'data_error'
           });
 
+          // Show user-friendly error with retry option
           const mapElement = document.getElementById('map');
-          mapElement.innerHTML = `<div style="padding: 2rem; text-align: center; color: #666;">${t('dataLoadError')}</div>`;
+          mapElement.innerHTML = `
+            <div style="padding: 2rem; text-align: center; color: #666; background: #f8f9fa; border-radius: 8px; margin: 2rem;">
+              <h3 style="color: rgb(38, 123, 41); margin-bottom: 1rem;">Gegevens kunnen niet geladen worden</h3>
+              <p>Er is een probleem opgetreden bij het laden van de kansenkaart gegevens.</p>
+              <p style="font-size: 0.9rem; color: #888;">Fout: ${error.message}</p>
+              <button onclick="location.reload()" style="background: rgb(38, 123, 41); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; margin-top: 1rem;">
+                Probeer opnieuw
+              </button>
+            </div>
+          `;
         });
     } else {
       // Retry after a short delay
@@ -2229,6 +2250,14 @@ function loadSavedFiltersFromStorage() {
   }
 }
 
+// Cache voor gefilterde resultaten
+let filterCache = new Map();
+let lastFilterHash = '';
+
+function generateFilterHash(filters, textFilter, userLocation, maxDistance) {
+  return JSON.stringify({filters, textFilter, userLocation, maxDistance});
+}
+
 function updateMap() {
   if (!window.data || !document.getElementById('map')) return;
 
@@ -2333,15 +2362,29 @@ function updateMap() {
       });
     });
 
-    // Load municipality boundaries
+    // Load municipality boundaries first (essential)
     loadMunicipalityBoundaries();
     
-    // Load additional data layers
-    loadAirQualityData();
-    loadEnergyLabelsData(); 
-    loadGreenSpacesData();
-    loadNoiseZonesData();
-    loadBuildingAgesData();
+    // Load additional data layers only when layer is activated
+    map.on('overlayadd', (e) => {
+      switch(e.name) {
+        case 'Luchtkwaliteit':
+          if (!airQualityLayer.getLayers().length) loadAirQualityData();
+          break;
+        case 'Energielabels':
+          if (!energyLabelsLayer.getLayers().length) loadEnergyLabelsData();
+          break;
+        case 'Groenvoorziening':
+          if (!greenSpacesLayer.getLayers().length) loadGreenSpacesData();
+          break;
+        case 'Geluidszones':
+          if (!noiseZonesLayer.getLayers().length) loadNoiseZonesData();
+          break;
+        case 'Bouwjaren':
+          if (!buildingAgesLayer.getLayers().length) loadBuildingAgesData();
+          break;
+      }
+    });
   }
 
   // Clear existing markers
@@ -2355,6 +2398,16 @@ function updateMap() {
   const textFilter = document.getElementById('advancedTextFilter')?.value.toLowerCase().trim() || '';
   const filterMode = document.querySelector('input[name="filterMode"]:checked')?.value || 'AND';
   const maxDistance = userLocation ? parseInt(document.getElementById('distanceRange')?.value || 25) : null;
+
+  // Check cache voor performance
+  const currentFilterHash = generateFilterHash(filters, textFilter, userLocation, maxDistance);
+  if (currentFilterHash === lastFilterHash && filterCache.has(currentFilterHash)) {
+    const cached = filterCache.get(currentFilterHash);
+    filteredData = cached;
+    updateOpportunitiesList(cached);
+    updateMapMarkers(cached);
+    return;
+  }
 
   // Filter data based on selected filters
   const filtered = window.data.filter(d => {
@@ -2403,9 +2456,22 @@ function updateMap() {
     }
   });
 
+  // Cache resultaten
+  filterCache.set(currentFilterHash, filtered);
+  lastFilterHash = currentFilterHash;
+  if (filterCache.size > 10) {
+    const firstKey = filterCache.keys().next().value;
+    filterCache.delete(firstKey);
+  }
+
   // Store filtered data and update list
   filteredData = filtered;
   updateOpportunitiesList(filtered);
+
+  updateMapMarkers(filtered);
+}
+
+function updateMapMarkers(filtered) {
 
   // Add markers for filtered data with clustering
   const bounds = [];

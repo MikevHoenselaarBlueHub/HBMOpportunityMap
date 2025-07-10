@@ -2142,6 +2142,37 @@ button {
   .marker-cluster {
     cursor: pointer;
   }
+
+  /* Improved filter checkboxes for touch */
+  #filtersForm input[type="checkbox"] {
+    transform: scale(1.5);
+    margin-right: 0.75rem;
+  }
+
+  /* Better spacing for mobile filter options */
+  #filtersForm label {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+  }
+
+  /* Larger map controls for mobile */
+  .map-controls > button,
+  .map-controls-row > button {
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+  }
+
+  /* Improved list card touch area */
+  .opportunity-card {
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .card-contact-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
 }
 
 /* === High contrast mode support === */
