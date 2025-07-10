@@ -12,6 +12,11 @@ let isInitialLoad = true;
 let userLocationMarker = null;
 let userLocation = null;
 let savedFiltersData = [];
+let airQualityLayer;
+let energyLabelsLayer;
+let greenSpacesLayer;
+let noiseZonesLayer;
+let buildingAgesLayer;
 
 // Geocoding functions
 async function geocodeAddress(street, zip, city) {
@@ -2288,11 +2293,11 @@ function updateMap() {
     municipalityLayer = L.layerGroup();
 
     // Initialize additional data layers
-    const airQualityLayer = L.layerGroup();
-    const energyLabelsLayer = L.layerGroup();
-    const greenSpacesLayer = L.layerGroup();
-    const noiseZonesLayer = L.layerGroup();
-    const buildingAgesLayer = L.layerGroup();
+    airQualityLayer = L.layerGroup();
+    energyLabelsLayer = L.layerGroup();
+    greenSpacesLayer = L.layerGroup();
+    noiseZonesLayer = L.layerGroup();
+    buildingAgesLayer = L.layerGroup();
 
     // Add layer control with base layers and overlays
     const baseLayers = {
@@ -2365,7 +2370,14 @@ function updateMap() {
     // Load municipality boundaries first (essential)
     loadMunicipalityBoundaries();
     
-    // Load additional data layers only when layer is activated
+    // Load all data layers immediately
+    loadAirQualityData();
+    loadEnergyLabelsData();
+    loadGreenSpacesData();
+    loadNoiseZonesData();
+    loadBuildingAgesData();
+    
+    // Load additional data layers when layer is activated (for lazy loading if needed)
     map.on('overlayadd', (e) => {
       switch(e.name) {
         case 'Luchtkwaliteit':
