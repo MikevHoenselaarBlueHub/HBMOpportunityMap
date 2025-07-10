@@ -1484,6 +1484,222 @@ function convertRelationToCoordinatesImproved(element) {
   }
 }
 
+// Load additional data layers
+async function loadAirQualityData() {
+  try {
+    console.log('Loading air quality data...');
+    
+    // Example air quality zones for the Euregio region
+    const airQualityZones = [
+      {
+        name: "Maastricht - Goed",
+        center: [50.845, 5.691],
+        radius: 3000,
+        quality: "good",
+        color: "#00ff00",
+        description: "Luchtkwaliteit: Goed (PM2.5: <15 μg/m³)"
+      },
+      {
+        name: "Aachen - Matig", 
+        center: [50.776, 6.084],
+        radius: 4000,
+        quality: "moderate",
+        color: "#ffff00",
+        description: "Luchtkwaliteit: Matig (PM2.5: 15-25 μg/m³)"
+      },
+      {
+        name: "Venlo - Goed",
+        center: [51.370, 6.168],
+        radius: 2500,
+        quality: "good", 
+        color: "#00ff00",
+        description: "Luchtkwaliteit: Goed (PM2.5: <15 μg/m³)"
+      }
+    ];
+
+    airQualityZones.forEach(zone => {
+      const circle = L.circle(zone.center, {
+        radius: zone.radius,
+        color: zone.color,
+        fillColor: zone.color,
+        fillOpacity: 0.3,
+        weight: 2
+      });
+      
+      circle.bindPopup(`<strong>${zone.name}</strong><br>${zone.description}`);
+      airQualityLayer.addLayer(circle);
+    });
+    
+    console.log(`Loaded ${airQualityZones.length} air quality zones`);
+  } catch (error) {
+    console.error('Error loading air quality data:', error);
+  }
+}
+
+async function loadEnergyLabelsData() {
+  try {
+    console.log('Loading energy labels data...');
+    
+    // Example energy efficiency zones
+    const energyZones = [
+      {
+        name: "Maastricht Centrum - A/B labels",
+        bounds: [[50.84, 5.68], [50.85, 5.69], [50.85, 5.70], [50.84, 5.70], [50.84, 5.68]],
+        label: "A-B",
+        color: "#00aa00"
+      },
+      {
+        name: "Aachen Altstadt - C/D labels", 
+        bounds: [[50.77, 6.08], [50.78, 6.08], [50.78, 6.09], [50.77, 6.09], [50.77, 6.08]],
+        label: "C-D",
+        color: "#ffaa00"
+      }
+    ];
+
+    energyZones.forEach(zone => {
+      const polygon = L.polygon(zone.bounds, {
+        color: zone.color,
+        fillColor: zone.color,
+        fillOpacity: 0.4,
+        weight: 2
+      });
+      
+      polygon.bindPopup(`<strong>${zone.name}</strong><br>Gemiddeld energielabel: ${zone.label}`);
+      energyLabelsLayer.addLayer(polygon);
+    });
+    
+    console.log(`Loaded ${energyZones.length} energy label zones`);
+  } catch (error) {
+    console.error('Error loading energy labels data:', error);
+  }
+}
+
+async function loadGreenSpacesData() {
+  try {
+    console.log('Loading green spaces data...');
+    
+    // Example green space markers
+    const greenSpaces = [
+      {
+        name: "Stadspark Maastricht",
+        coords: [50.851, 5.688],
+        type: "Park",
+        area: "15 hectare"
+      },
+      {
+        name: "Westpark Aachen",
+        coords: [50.782, 6.071], 
+        type: "Stadspark",
+        area: "8 hectare"
+      },
+      {
+        name: "De Maasplassen",
+        coords: [51.163, 5.998],
+        type: "Recreatiegebied", 
+        area: "1000 hectare"
+      }
+    ];
+
+    const greenIcon = L.divIcon({
+      className: 'green-space-marker',
+      html: '<div style="background: #00aa00; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+
+    greenSpaces.forEach(space => {
+      const marker = L.marker(space.coords, { icon: greenIcon });
+      marker.bindPopup(`<strong>${space.name}</strong><br>Type: ${space.type}<br>Oppervlakte: ${space.area}`);
+      greenSpacesLayer.addLayer(marker);
+    });
+    
+    console.log(`Loaded ${greenSpaces.length} green spaces`);
+  } catch (error) {
+    console.error('Error loading green spaces data:', error);
+  }
+}
+
+async function loadNoiseZonesData() {
+  try {
+    console.log('Loading noise zones data...');
+    
+    // Example noise pollution zones
+    const noiseZones = [
+      {
+        name: "A2 Snelweg - Hoog geluidsniveau",
+        path: [[50.82, 5.70], [50.85, 5.72], [50.88, 5.74]],
+        level: "70+ dB",
+        color: "#ff0000"
+      },
+      {
+        name: "Spoorlijn Maastricht-Aachen - Matig geluidsniveau", 
+        path: [[50.84, 5.69], [50.80, 6.05], [50.78, 6.08]],
+        level: "60-70 dB",
+        color: "#ff8800"
+      }
+    ];
+
+    noiseZones.forEach(zone => {
+      const polyline = L.polyline(zone.path, {
+        color: zone.color,
+        weight: 8,
+        opacity: 0.7
+      });
+      
+      polyline.bindPopup(`<strong>${zone.name}</strong><br>Geluidsniveau: ${zone.level}`);
+      noiseZonesLayer.addLayer(polyline);
+    });
+    
+    console.log(`Loaded ${noiseZones.length} noise zones`);
+  } catch (error) {
+    console.error('Error loading noise zones data:', error);
+  }
+}
+
+async function loadBuildingAgesData() {
+  try {
+    console.log('Loading building ages data...');
+    
+    // Example building age clusters
+    const buildingAges = [
+      {
+        name: "Voor 1945 - Maastricht Binnenstad",
+        bounds: [[50.845, 5.685], [50.850, 5.685], [50.850, 5.695], [50.845, 5.695], [50.845, 5.685]],
+        period: "Voor 1945",
+        color: "#8B4513"
+      },
+      {
+        name: "1970-1990 - Maastricht Zuid",
+        bounds: [[50.835, 5.690], [50.840, 5.690], [50.840, 5.700], [50.835, 5.700], [50.835, 5.690]], 
+        period: "1970-1990",
+        color: "#DAA520"
+      },
+      {
+        name: "Na 2000 - Ceramique",
+        bounds: [[50.848, 5.704], [50.852, 5.704], [50.852, 5.708], [50.848, 5.708], [50.848, 5.704]],
+        period: "Na 2000", 
+        color: "#32CD32"
+      }
+    ];
+
+    buildingAges.forEach(area => {
+      const polygon = L.polygon(area.bounds, {
+        color: area.color,
+        fillColor: area.color,
+        fillOpacity: 0.5,
+        weight: 2
+      });
+      
+      polygon.bindPopup(`<strong>${area.name}</strong><br>Bouwperiode: ${area.period}`);
+      buildingAgesLayer.addLayer(polygon);
+    });
+    
+    console.log(`Loaded ${buildingAges.length} building age areas`);
+  } catch (error) {
+    console.error('Error loading building ages data:', error);
+  }
+}
+
 function loadProfessionalMunicipalities() {
   console.log('Loading professional municipality boundaries...');
 
@@ -2042,6 +2258,13 @@ function updateMap() {
     // Add municipality layer
     municipalityLayer = L.layerGroup();
 
+    // Initialize additional data layers
+    const airQualityLayer = L.layerGroup();
+    const energyLabelsLayer = L.layerGroup();
+    const greenSpacesLayer = L.layerGroup();
+    const noiseZonesLayer = L.layerGroup();
+    const buildingAgesLayer = L.layerGroup();
+
     // Add layer control with base layers and overlays
     const baseLayers = {
       "Kaart": osmLayer,
@@ -2049,7 +2272,12 @@ function updateMap() {
     };
     
     const overlayLayers = {
-      "Gemeenten": municipalityLayer
+      "Gemeenten": municipalityLayer,
+      "Luchtkwaliteit": airQualityLayer,
+      "Energielabels": energyLabelsLayer,
+      "Groenvoorziening": greenSpacesLayer,
+      "Geluidszones": noiseZonesLayer,
+      "Bouwjaren": buildingAgesLayer
     };
 
     L.control.layers(baseLayers, overlayLayers, {
@@ -2107,6 +2335,13 @@ function updateMap() {
 
     // Load municipality boundaries
     loadMunicipalityBoundaries();
+    
+    // Load additional data layers
+    loadAirQualityData();
+    loadEnergyLabelsData(); 
+    loadGreenSpacesData();
+    loadNoiseZonesData();
+    loadBuildingAgesData();
   }
 
   // Clear existing markers
