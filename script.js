@@ -1368,13 +1368,41 @@ async function loadMunicipalitiesFromOverpass() {
           // Create Leaflet GeoJSON layer
           const geoJsonLayer = L.geoJSON(feature, {
             style: {
-              color: '#2E86AB',
+              color: 'rgb(38, 123, 41)',
               weight: 1,
               opacity: 0.7,
-              fillColor: '#A23B72',
-              fillOpacity: 0.05,
+              fillColor: 'rgb(38, 123, 41)',
+              fillOpacity: 0.1,
               smoothFactor: 0.5,
               dashArray: '3, 6'
+            },
+            // Add hover effects
+            onEachFeature: function(feature, layer) {
+              layer.on({
+                mouseover: function(e) {
+                  const layer = e.target;
+                  layer.setStyle({
+                    color: 'rgb(38, 123, 41)',
+                    weight: 2,
+                    opacity: 1,
+                    fillColor: 'rgb(38, 123, 41)',
+                    fillOpacity: 0.3,
+                    dashArray: '3, 6'
+                  });
+                  layer.bringToFront();
+                },
+                mouseout: function(e) {
+                  const layer = e.target;
+                  layer.setStyle({
+                    color: 'rgb(38, 123, 41)',
+                    weight: 1,
+                    opacity: 0.7,
+                    fillColor: 'rgb(38, 123, 41)',
+                    fillOpacity: 0.1,
+                    dashArray: '3, 6'
+                  });
+                }
+              });
             }
           });
 
@@ -1753,14 +1781,41 @@ function loadProfessionalMunicipalities() {
 
   eurregioMunicipalities.forEach(municipality => {
     const polygon = L.polygon(municipality.bounds, {
-              color: '#2E86AB',
-              weight: 2,
-              opacity: 0.9,
-              fillColor: '#A23B72',
-              fillOpacity: 0.08,
+              color: 'rgb(38, 123, 41)',
+              weight: 1,
+              opacity: 0.7,
+              fillColor: 'rgb(38, 123, 41)',
+              fillOpacity: 0.1,
               smoothFactor: 0.5,
               dashArray: '3, 6'
             });
+
+    // Add hover effects
+    polygon.on({
+      mouseover: function(e) {
+        const layer = e.target;
+        layer.setStyle({
+          color: 'rgb(38, 123, 41)',
+          weight: 2,
+          opacity: 1,
+          fillColor: 'rgb(38, 123, 41)',
+          fillOpacity: 0.3,
+          dashArray: '3, 6'
+        });
+        layer.bringToFront();
+      },
+      mouseout: function(e) {
+        const layer = e.target;
+        layer.setStyle({
+          color: 'rgb(38, 123, 41)',
+          weight: 1,
+          opacity: 0.7,
+          fillColor: 'rgb(38, 123, 41)',
+          fillOpacity: 0.1,
+          dashArray: '3, 6'
+        });
+      }
+    });
 
     // Add popup with municipality name and country
     polygon.bindPopup(`<strong>${municipality.name}</strong><br><small>${municipality.country}</small>`);
