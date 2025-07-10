@@ -659,7 +659,7 @@ button {
 }
 
 .list-container {
-  flex: 0 0 400px;
+  flex: 0 0 500px;
   background: #fff;
   display: flex;
   flex-direction: column;

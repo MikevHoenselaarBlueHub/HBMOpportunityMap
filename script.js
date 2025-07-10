@@ -942,7 +942,7 @@ function updateFilterButtonLabel() {
   const filterBtn = document.getElementById('filterBtn');
   if (!filterBtn) return;
 
-  const activeFilterCount = Object.values(getActiveFilters()).reduce((total, filterArray)total + filterArray.length, 0);
+  const activeFilterCount = Object.values(getActiveFilters()).reduce((total, filterArray) => total + filterArray.length, 0);
 
   if (activeFilterCount > 0) {
     filterBtn.textContent = `${t('filters')} (${activeFilterCount})`;
@@ -1244,67 +1244,23 @@ function loadMunicipalityBoundaries() {
     municipalityLayer = L.layerGroup();
   }
 
-  // Define region boundaries for the Euregio Maas-Rijn
-  const regions = {
-    // Netherlands - Limburg
-    'NL-Limburg': [
-      'Beek', 'Beekdaelen', 'Beesel', 'Bergen (L.)', 'Brunssum', 'Echt-Susteren', 'Eijsden-Margraten', 
-      'Gennep', 'Gulpen-Wittem', 'Heerlen', 'Horst aan de Maas', 'Kerkrade', 'Landgraaf', 'Leudal', 
-      'Maasgouw', 'Maastricht', 'Meerssen', 'Nederweert', 'Peel en Maas', 'Roerdalen', 'Roermond', 
-      'Simpelveld', 'Sittard-Geleen', 'Stein', 'Vaals', 'Valkenburg aan de Geul', 'Venlo', 'Venray', 
-      'Voerendaal', 'Weert'
-    ],
-    // Netherlands - Noord-Brabant (select major cities)
-    'NL-Noord-Brabant': [
-      'Breda', 'Eindhoven', 'Tilburg', 'Den Bosch', 'Helmond', 'Oss', 'Roosendaal', 'Bergen op Zoom'
-    ],
-    // Germany - NRW Kreise
-    'DE-Heinsberg': [
-      'Heinsberg', 'Erkelenz', 'Hückelhoven', 'Übach-Palenberg', 'Geilenkirchen', 'Gangelt', 'Selfkant', 
-      'Waldfeucht', 'Wassenberg', 'Wegberg'
-    ],
-    'DE-Viersen': [
-      'Viersen', 'Mönchengladbach', 'Krefeld', 'Kempen', 'Tönisvorst', 'Willich', 'Nettetal'
-    ],
-    'DE-Kleve': [
-      'Kleve', 'Emmerich am Rhein', 'Geldern', 'Goch', 'Kevelaer', 'Straelen'
-    ],
-    'DE-Aachen': [
-      'Aachen', 'Alsdorf', 'Baesweiler', 'Eschweiler', 'Herzogenrath', 'Monschau', 'Stolberg', 
-      'Würselen', 'Düren', 'Jülich'
-    ],
-    // Belgium - Limburg & Liège (major cities)
-    'BE-Limburg': [
-      'Hasselt', 'Genk', 'Sint-Truiden', 'Tongeren', 'Beringen', 'Bilzen', 'Diepenbeek', 'Lommel', 
-      'Maaseik', 'Maasmechelen', 'Peer', 'Tessenderlo'
-    ],
-    'BE-Liege': [
-      'Liège', 'Verviers', 'Seraing', 'Herstal', 'Huy', 'Spa', 'Eupen', 'Malmedy', 'Waremme'
-    ]
-  };
-
   // Load municipalities using OpenStreetMap Overpass API
-  loadMunicipalitiesFromOverpass(regions);
+  loadMunicipalitiesFromOverpass();
 }
 
-async function loadMunicipalitiesFromOverpass(regions) {
+async function loadMunicipalitiesFromOverpass() {
   try {
     console.log('Loading municipality boundaries...');
 
-    // Use a more focused approach: Euregio Maas-Rijn region boundaries
+    // Simplified and focused query for better performance
     const overpassUrl = 'https://overpass-api.de/api/interpreter';
-
-    // More focused query for proper municipal boundaries (admin_level=8 for municipalities)
     const query = `
-      [out:json][timeout:120];
+      [out:json][timeout:30];
       (
-        relation["admin_level"="8"]["name"](bbox:50.5,5.5,51.8,6.8);
-        relation["admin_level"="9"]["name"](bbox:50.5,5.5,51.8,6.8);
+        relation["admin_level"="8"]["place"~"city|town"](bbox:50.5,5.5,51.8,6.8);
       );
       out geom;
     `;
-
-    console.log('Sending query to Overpass API...');
 
     const response = await fetch(overpassUrl, {
       method: 'POST',
@@ -1315,116 +1271,65 @@ async function loadMunicipalitiesFromOverpass(regions) {
     });
 
     if (!response.ok) {
-      console.error(`Overpass API HTTP error! status: ${response.status}`);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    console.log('Parsing response from Overpass API...');
     const data = await response.json();
 
     if (!data.elements || data.elements.length === 0) {
-      console.warn('No elements received from Overpass API');
       throw new Error('No data received from Overpass API');
     }
 
-    console.log(`Received ${data.elements.length} elements from Overpass API`);
+    console.log(`Processing ${data.elements.length} municipalities...`);
     let loadedCount = 0;
 
-    // Filter for known municipalities in the Euregio region
-    const knownMunicipalities = [
-      'Maastricht', 'Aachen', 'Liège', 'Hasselt', 'Genk', 'Venlo', 'Roermond', 'Sittard-Geleen',
-      'Heerlen', 'Kerkrade', 'Landgraaf', 'Brunssum', 'Valkenburg aan de Geul', 'Meerssen',
-      'Eijsden-Margraten', 'Gulpen-Wittem', 'Vaals', 'Simpelveld', 'Beek', 'Stein', 'Maasgouw',
-      'Leudal', 'Weert', 'Nederweert', 'Cranendonck', 'Heeze-Leende', 'Valkenswaard', 'Waalre',
-      'Veldhoven', 'Eindhoven', 'Helmond', 'Deurne', 'Horst aan de Maas', 'Venray', 'Peel en Maas',
-      'Beesel', 'Bergen (L.)', 'Gennep', 'Mook en Middelaar', 'Cuijk', 'Boxmeer', 'Grave',
-      'Mill en Sint Hubert', 'Landerd', 'Uden', 'Veghel', 'Schijndel', 'Meierijstad', 'Gemert-Bakel',
-      'Laakdal', 'Geel', 'Mol', 'Dessel', 'Retie', 'Kasterlee', 'Lille', 'Hoogstraten', 'Merksplas',
-      'Rijkevorsel', 'Baarle-Hertog', 'Turnhout', 'Vosselaar', 'Beerse', 'Arendonk', 'Ravels',
-      'Oud-Turnhout', 'Malle', 'Zoersel', 'Vorselaar', 'Herentals', 'Herenthout', 'Lille',
-      'Westerlo', 'Herselt', 'Hulshout', 'Heist-op-den-Berg', 'Nijlen', 'Lier', 'Putte',
-      'Borsbeek', 'Mortsel', 'Boechout', 'Wommelgem', 'Schoten', 'Brasschaat', 'Kapellen',
-      'Stabroek', 'Wuustwezel', 'Loenhout', 'Brecht', 'Schilde', 'Zandhoven', 'Ranst',
-      'Maasmechelen', 'Lanaken', 'Bilzen', 'Riemst', 'Tongeren', 'Borgloon', 'Wellen',
-      'Heers', 'Gingelom', 'Sint-Truiden', 'Nieuwerkerken', 'Halen', 'Diest', 'Tessenderlo',
-      'Ham', 'Leopoldsburg', 'Peer', 'Bree', 'Kinrooi', 'Dilsen-Stokkem', 'As', 'Genk',
-      'Zutendaal', 'Lanklaar', 'Eisden', 'Opglabbeek', 'Meeuwen-Gruitrode', 'Maaseik',
-      'Verviers', 'Spa', 'Stavelot', 'Malmedy', 'Waimes', 'Trois-Ponts', 'Stoumont',
-      'Lierneux', 'Vielsalm', 'Manhay', 'Erezée', 'Hotton', 'Rendeux', 'Tenneville',
-      'Houffalize', 'Gouvy', 'Büllingen', 'Amel', 'Sankt Vith', 'Burg-Reuland',
-      'Bütgenbach', 'Eupen', 'Raeren', 'Kelmis', 'Lontzen', 'Plombières', 'Welkenraedt',
-      'Pepinster', 'Theux', 'Limbourg', 'Baelen', 'Jalhay', 'Herve', 'Aubel', 'Olne',
-      'Trooz', 'Chaudfontaine', 'Esneux', 'Sprimont', 'Comblain-au-Pont', 'Hamoir',
-      'Ferrières', 'Aywaille', 'Remouchamps', 'Stoumont', 'Francorchamps', 'Düren',
-      'Jülich', 'Eschweiler', 'Stolberg', 'Würselen', 'Herzogenrath', 'Alsdorf',
-      'Baesweiler', 'Monschau', 'Simmerath', 'Roetgen', 'Kreuzau', 'Nideggen',
-      'Heimbach', 'Hürtgenwald', 'Langerwehe', 'Inden', 'Aldenhoven', 'Linnich',
-      'Titz', 'Merzenich', 'Niederzier', 'Vettweiß', 'Heinsberg', 'Übach-Palenberg',
-      'Geilenkirchen', 'Hückelhoven', 'Erkelenz', 'Gangelt', 'Selfkant', 'Waldfeucht',
-      'Wassenberg', 'Wegberg'
+    // Key municipalities for the Euregio region
+    const keyMunicipalities = [
+      'Maastricht', 'Aachen', 'Liège', 'Hasselt', 'Genk', 'Venlo', 'Roermond', 
+      'Sittard-Geleen', 'Heerlen', 'Kerkrade', 'Eindhoven', 'Helmond'
     ];
 
-    // Process the response and create polygons
-    data.elements.forEach((element, index) => {
+    // Process only key municipalities for better performance
+    data.elements.forEach((element) => {
       if (element.type === 'relation' && element.tags && element.tags.name) {
         const municipalityName = element.tags.name;
 
-        // Only process known municipalities or if name contains key region indicators
-        if (knownMunicipalities.includes(municipalityName) || 
-            municipalityName.includes('aachen') || 
-            municipalityName.includes('maastricht') || 
-            municipalityName.includes('liège') || 
-            municipalityName.includes('hasselt') ||
-            municipalityName.includes('venlo') ||
-            municipalityName.includes('roermond') ||
-            municipalityName.includes('eindhoven')) {
-
+        if (keyMunicipalities.includes(municipalityName)) {
           try {
-            console.log(`Processing municipality ${index + 1}/${data.elements.length}: ${municipalityName}`);
-
-            // Convert relation to coordinates using improved function
             const coordinates = convertRelationToCoordinatesImproved(element);
             if (coordinates && coordinates.length > 2) {
               const polygon = L.polygon(coordinates, {
-              color: '#2E86AB',
-              weight: 2,
-              opacity: 0.9,
-              fillColor: '#A23B72',
-              fillOpacity: 0.08,
-              smoothFactor: 0.5,
-              dashArray: '3, 6'
-            });
+                color: '#2E86AB',
+                weight: 2,
+                opacity: 0.9,
+                fillColor: '#A23B72',
+                fillOpacity: 0.08,
+                smoothFactor: 0.5,
+                dashArray: '3, 6'
+              });
 
-              // Add popup with municipality name and country
-              const country = element.tags['addr:country'] || 
-                            (element.tags.name.includes('burg') || element.tags.name.includes('berg') ? 'Deutschland' : 
-                             element.tags.name.includes('icht') || element.tags.name.includes('lo') ? 'Nederland' : 'België');
+              const country = municipalityName.includes('aachen') ? 'Deutschland' : 
+                           municipalityName.includes('iège') ? 'België' : 'Nederland';
 
               polygon.bindPopup(`<strong>${municipalityName}</strong><br><small>${country}</small>`);
-
               municipalityLayer.addLayer(polygon);
               loadedCount++;
-            } else {
-              console.warn(`Could not process coordinates for ${municipalityName}`);
             }
           } catch (err) {
-            console.warn(`Error processing municipality ${municipalityName}:`, err);
+            console.warn(`Error processing ${municipalityName}:`, err);
           }
         }
       }
     });
 
-    console.log(`Successfully loaded ${loadedCount} municipalities from OpenStreetMap`);
+    console.log(`Successfully loaded ${loadedCount} key municipalities`);
 
-    // Make sure the layer is available in the layer control
     if (loadedCount === 0) {
       throw new Error('No municipalities could be processed');
     }
 
   } catch (error) {
-    console.error('Error loading municipalities from Overpass API:', error);
-
-    // Fallback to professional curated boundaries for major cities
+    console.error('Error loading municipalities:', error);
     console.log('Loading fallback municipalities...');
     loadProfessionalMunicipalities();
   }
@@ -2049,7 +1954,18 @@ function updateMap() {
   // Initialize map if needed
   if (!map) {
     map = L.map('map').setView([51.2, 6.1], 9);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    
+    // Define base layers
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    });
+    
+    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '© Esri'
+    });
+    
+    // Add default layer
+    osmLayer.addTo(map);
 
     // Track map initialization
     trackEvent('map_initialize', {
@@ -2061,12 +1977,17 @@ function updateMap() {
     // Add municipality layer
     municipalityLayer = L.layerGroup();
 
-    // Add layer control for overlays only
+    // Add layer control with base layers and overlays
+    const baseLayers = {
+      "Kaart": osmLayer,
+      "Satelliet": satelliteLayer
+    };
+    
     const overlayLayers = {
       "Gemeenten": municipalityLayer
     };
 
-    L.control.layers(null, overlayLayers, {
+    L.control.layers(baseLayers, overlayLayers, {
       position: 'topright',
       collapsed: false
     }).addTo(map);
@@ -2189,28 +2110,14 @@ function updateMap() {
   // Add markers for filtered data with clustering
   const bounds = [];
 
-  //// Initialize cluster group if not exists
+  // Initialize cluster group if not exists
   if (!markerClusterGroup) {
     // Try to use MarkerClusterGroup if available, fallback to regular group
     if (typeof L.markerClusterGroup === 'function') {
       markerClusterGroup = L.markerClusterGroup({
         chunkedLoading: true,
-        chunkProgress: function(processed, total) {
-          // Optional: show loading progress
-        },
-        iconCreateFunction: function(cluster) {
-          const count = cluster.getChildCount();
-          let className = 'marker-cluster-small';
-          if (count > 10) className = 'marker-cluster-medium';
-          if (count > 100) className = 'marker-cluster-large';
-
-          return L.divIcon({
-            html: `<div><span>${count}</span></div>`,
-            className: 'marker-cluster ' + className,
-            iconSize: L.point(40, 40)
-          });
-        },
-        // Don't cluster markers with custom icons (photos/logos)
+        maxClusterRadius: 60,
+        disableClusteringAtZoom: 15,
         iconCreateFunction: function(cluster) {
           const count = cluster.getChildCount();
           let className = 'marker-cluster-small';
