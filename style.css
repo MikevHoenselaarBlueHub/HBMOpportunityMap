@@ -421,8 +421,8 @@ button {
 }
 
 .filter-dropdown>button {
-  background: rgb(38, 123, 41);
-  color: #fff;
+  background: #fff;
+  color: #000;
   border: none;
   padding: 0.75rem 1rem;
   border-radius: 4px;
@@ -432,7 +432,8 @@ button {
 }
 
 .filter-dropdown>button:hover {
-  background: #267b29;
+  background: rgb(233, 242, 233);
+  color: rgb(38, 123, 41);
 }
 
 .filter-dropdown-menu {
@@ -1178,7 +1179,8 @@ button {
 
 /* === Filter form styling === */
 #filtersForm {
-  max-width: 500px;  margin: 0 auto;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 #filtersForm h2 {
@@ -2361,7 +2363,8 @@ button {
 }
 
 @media (max-width: 768px) {
-  .contact-content {    grid-template-columns: 1fr;
+  .contact-content {
+    grid-template-columns: 1fr;
     gap: 2rem;
   }
 
