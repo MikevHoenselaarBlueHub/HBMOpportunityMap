@@ -1178,8 +1178,7 @@ button {
 
 /* === Filter form styling === */
 #filtersForm {
-  max-width: 500px;
-  margin: 0 auto;
+  max-width: 500px;  margin: 0 auto;
 }
 
 #filtersForm h2 {
@@ -1234,24 +1233,18 @@ button {
 }
 
 /* === Filter actions === */
-.filter-actions {
+#filtersForm .filter-actions {
   margin: 1.5rem 0;
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
   justify-content: center;
-  background: none;
-  border: none;
-  padding: 0;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
 }
 
-#filtersForm .filter-actions {
-  background: none;
-  border: none;
-  padding: 0;
-}
-
-.filter-actions button {
+#filtersForm .filter-actions button {
   background: rgb(38, 123, 41);
   color: white;
   border: none;
@@ -1262,16 +1255,13 @@ button {
   transition: background 0.2s;
 }
 
-.filter-actions button:hover {
+#filtersForm .filter-actions button:hover {
   background: #267b29;
 }
 
-.filter-actions button:disabled {
+#filtersForm .filter-actions button:disabled {
   background: #6c757d;
   cursor: not-allowed;
-}
-
-;
 }
 
 /* === Advanced Filters === */
@@ -2359,8 +2349,7 @@ button {
 }
 
 @media (max-width: 768px) {
-  .contact-content {
-    grid-template-columns: 1fr;
+  .contact-content {    grid-template-columns: 1fr;
     gap: 2rem;
   }
 

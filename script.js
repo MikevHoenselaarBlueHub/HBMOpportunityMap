@@ -1,4 +1,3 @@
-
 // Global variables
 let currentLanguage = 'nl';
 let translations = {};
@@ -63,7 +62,7 @@ async function setLanguage(lang) {
   currentLanguage = lang;
   await loadTranslations();
   updateUI();
-  
+
   // Track language change
   trackEvent('language_change', {
     label: lang,
@@ -80,15 +79,15 @@ function updateUI() {
   const applyBtn = document.getElementById('applyFilters');
   const filterBtn = document.getElementById('filterBtn');
   const shareBtn = document.getElementById('shareBtn');
-  
+
   if (selectAllBtn) selectAllBtn.textContent = t('selectAll');
   if (selectNoneBtn) selectNoneBtn.textContent = t('selectNone');
   if (applyBtn) applyBtn.textContent = t('apply');
   if (shareBtn) shareBtn.textContent = t('share');
-  
+
   // Update filter button with count
   updateFilterButtonLabel();
-  
+
   // Update all elements with data-i18n attributes
   document.querySelectorAll('[data-i18n]').forEach(element => {
     const key = element.getAttribute('data-i18n');
@@ -96,20 +95,20 @@ function updateUI() {
       element.textContent = t(key);
     }
   });
-  
+
   // Update page title
   document.title = t('opportunityMap');
-  
+
   // Update no selection message if it exists
   const noSelectionMessage = document.getElementById('noSelectionMessage');
   if (noSelectionMessage) {
     noSelectionMessage.innerHTML = `<p style="color: #666; font-style: italic; margin-top: 1rem;">${t('noSelection')}</p>`;
   }
-  
+
   // Update HBMType checkboxes labels
   const projectCheckbox = document.querySelector('input[name="HBMType"][value="Project"]');
   const companyCheckbox = document.querySelector('input[name="HBMType"][value="Bedrijf"]');
-  
+
   if (projectCheckbox && projectCheckbox.nextElementSibling) {
     projectCheckbox.nextElementSibling.textContent = t('projects');
   }
@@ -145,17 +144,17 @@ function createHoverLabel() {
 
 function showHoverLabel(e, text) {
   if (!hoverLabel) createHoverLabel();
-  
+
   hoverLabel.textContent = text;
   hoverLabel.style.display = 'block';
-  
+
   // Position the label near the cursor but keep it in viewport
   const rect = document.documentElement.getBoundingClientRect();
   const labelRect = hoverLabel.getBoundingClientRect();
-  
+
   let x = e.clientX + 10;
   let y = e.clientY - 30;
-  
+
   // Adjust if label would go outside viewport
   if (x + labelRect.width > window.innerWidth) {
     x = e.clientX - labelRect.width - 10;
@@ -163,7 +162,7 @@ function showHoverLabel(e, text) {
   if (y < 0) {
     y = e.clientY + 10;
   }
-  
+
   hoverLabel.style.left = x + 'px';
   hoverLabel.style.top = y + 'px';
 }
@@ -183,7 +182,7 @@ function showContactForm(location) {
     label: `Contact form opened for: ${location.Name}`,
     custom_parameter_1: 'lead_generation'
   });
-  
+
   const formOverlay = document.getElementById('formOverlay');
   formOverlay.innerHTML = `
     <div class="contact-form-container">
@@ -198,37 +197,37 @@ function showContactForm(location) {
         <form id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
           <input type="hidden" name="subject" value="${t('interestedIn')}: ${location.Name}">
           <input type="hidden" name="interested_in" value="${location.Name}">
-          
+
           <div class="form-group">
             <label for="firstName">${t('firstName')} *</label>
             <input type="text" id="firstName" name="firstName" required>
           </div>
-          
+
           <div class="form-group">
             <label for="lastName">${t('lastName')} *</label>
             <input type="text" id="lastName" name="lastName" required>
           </div>
-          
+
           <div class="form-group">
             <label for="email">${t('email')} *</label>
             <input type="email" id="email" name="email" required>
           </div>
-          
+
           <div class="form-group">
             <label for="company">${t('company')}</label>
             <input type="text" id="company" name="company">
           </div>
-          
+
           <div class="form-group">
             <label for="phone">${t('phone')}</label>
             <input type="tel" id="phone" name="phone">
           </div>
-          
+
           <div class="form-group">
             <label for="message">${t('message')} *</label>
             <textarea id="message" name="message" rows="5" required></textarea>
           </div>
-          
+
           <div class="form-actions">
             <button type="button" class="btn-secondary" onclick="closeContactForm()">${t('cancel')}</button>
             <button type="submit" class="btn-primary">${t('send')}</button>
@@ -237,9 +236,9 @@ function showContactForm(location) {
       </div>
     </div>
   `;
-  
+
   formOverlay.classList.add('open');
-  
+
   // Add event listeners
   document.getElementById('closeContactForm').onclick = closeContactForm;
   document.getElementById('contactForm').onsubmit = handleContactSubmit;
@@ -251,17 +250,17 @@ function closeContactForm() {
     label: 'Contact form closed',
     custom_parameter_1: 'form_interaction'
   });
-  
+
   document.getElementById('formOverlay').classList.remove('open');
 }
 
 function handleContactSubmit(e) {
   e.preventDefault();
-  
+
   // Get form data
   const formData = new FormData(e.target);
   const interestedIn = formData.get('interested_in');
-  
+
   // Track form submission attempt
   trackEvent('contact_form_submit', {
     location_name: interestedIn,
@@ -269,7 +268,7 @@ function handleContactSubmit(e) {
     custom_parameter_1: 'lead_conversion',
     value: 1
   });
-  
+
   // You can implement your own email sending logic here
   // For now, we'll use Formspree (replace YOUR_FORM_ID with actual ID)
   fetch('https://formspree.io/f/YOUR_FORM_ID', {
@@ -287,7 +286,7 @@ function handleContactSubmit(e) {
         custom_parameter_1: 'conversion_success',
         value: 1
       });
-      
+
       alert('Bericht succesvol verzonden!');
       closeContactForm();
     } else {
@@ -298,12 +297,12 @@ function handleContactSubmit(e) {
         label: `Contact form failed for: ${interestedIn}`,
         custom_parameter_1: 'conversion_error'
       });
-      
+
       alert('Er is een fout opgetreden. Probeer het opnieuw.');
     }
   }).catch(error => {
     console.error('Error:', error);
-    
+
     // Track network error
     trackEvent('contact_form_error', {
       location_name: interestedIn,
@@ -311,7 +310,7 @@ function handleContactSubmit(e) {
       label: `Contact form network error for: ${interestedIn}`,
       custom_parameter_1: 'conversion_error'
     });
-    
+
     alert('Er is een fout opgetreden. Probeer het opnieuw.');
   });
 }
@@ -364,19 +363,19 @@ if (document.getElementById('applyFilters')) {
   document.getElementById('applyFilters').onclick = () => {
     // Get active filters for tracking
     const activeFilters = getActiveFilters();
-    
+
     trackEvent('filter_apply', {
       label: 'Filters applied',
       custom_parameter_1: 'filter_interaction',
       filter_count: Object.keys(activeFilters).length,
       active_filters: JSON.stringify(activeFilters)
     });
-    
+
     // Save filters and update URL
     saveFiltersToStorage();
     updateURLWithFilters();
     updateFilterButtonLabel();
-    
+
     updateMap();
     document.getElementById('filterOverlay').classList.remove('open');
   };
@@ -409,9 +408,9 @@ if (document.getElementById('viewToggle')) {
   document.getElementById('viewToggle').onclick = () => {
     const listContainer = document.getElementById('listContainer');
     const viewToggleText = document.getElementById('viewToggleText');
-    
+
     currentListView = !currentListView;
-    
+
     if (currentListView) {
       listContainer.classList.add('show');
       viewToggleText.textContent = t('map') || 'Kaart';
@@ -419,7 +418,7 @@ if (document.getElementById('viewToggle')) {
       listContainer.classList.remove('show');
       viewToggleText.textContent = t('list') || 'Lijst';
     }
-    
+
     trackEvent('view_toggle', {
       view: currentListView ? 'list' : 'map',
       label: `Switched to ${currentListView ? 'list' : 'map'} view`,
@@ -463,7 +462,7 @@ if (document.getElementById('optionsBtn')) {
     e.stopPropagation();
     const dropdown = document.querySelector('.filter-dropdown');
     dropdown.classList.toggle('open');
-    
+
     trackEvent('options_menu_toggle', {
       action: dropdown.classList.contains('open') ? 'open' : 'close',
       label: 'Options menu toggled',
@@ -526,14 +525,14 @@ if (document.getElementById('savedFiltersSelect')) {
 if (document.getElementById('mapSearch')) {
   const searchInput = document.getElementById('mapSearch');
   const searchBtn = document.getElementById('searchBtn');
-  
+
   function performSearch() {
     const searchTerm = searchInput.value.toLowerCase().trim();
     if (!searchTerm) {
       updateMap();
       return;
     }
-    
+
     // Filter data based on search term
     const searchResults = window.data.filter(loc => {
       return loc.Name.toLowerCase().includes(searchTerm) ||
@@ -541,7 +540,7 @@ if (document.getElementById('mapSearch')) {
              (Array.isArray(loc.HBMTopic) ? loc.HBMTopic.some(topic => topic.toLowerCase().includes(searchTerm)) : loc.HBMTopic.toLowerCase().includes(searchTerm)) ||
              (Array.isArray(loc.OrganizationType) ? loc.OrganizationType.some(type => type.toLowerCase().includes(searchTerm)) : loc.OrganizationType.toLowerCase().includes(searchTerm));
     });
-    
+
     // Track search
     trackEvent('search', {
       search_term: searchTerm,
@@ -550,18 +549,18 @@ if (document.getElementById('mapSearch')) {
       custom_parameter_1: 'map_search',
       value: searchResults.length
     });
-    
+
     // Update map with search results
     displaySearchResults(searchResults);
   }
-  
+
   searchBtn.onclick = performSearch;
   searchInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       performSearch();
     }
   });
-  
+
   // Clear search when input is empty
   searchInput.addEventListener('input', (e) => {
     if (!e.target.value.trim()) {
@@ -572,26 +571,26 @@ if (document.getElementById('mapSearch')) {
 
 function displaySearchResults(results) {
   if (!map) return;
-  
+
   // Clear existing markers
   markers.forEach(m => map.removeLayer(m));
   markers = [];
-  
+
   if (results.length === 0) {
     alert(t('noSearchResults') || 'Geen zoekresultaten gevonden');
     return;
   }
-  
+
   // Store filtered results
   filteredData = results;
   updateOpportunitiesList(results);
-  
+
   // Add markers for search results
   const bounds = [];
   results.forEach(loc => {
     const markerOptions = {};
     const isProject = (Array.isArray(loc.HBMType) ? loc.HBMType.includes('Project') : loc.HBMType === 'Project');
-    
+
     if (isProject && loc.ProjectImage) {
       const photoIcon = L.divIcon({
         className: 'photo-marker',
@@ -607,31 +606,31 @@ function displaySearchResults(results) {
     } else if (pIcon && bIcon) {
       markerOptions.icon = isProject ? pIcon : bIcon;
     }
-    
+
     const marker = L.marker([loc.Latitude, loc.Longitude], markerOptions).addTo(map);
-    
+
     marker.on('click', () => {
       showLocationDetails(loc);
     });
-    
+
     marker.on('mouseover', (e) => {
       const domEvent = e.originalEvent;
       showHoverLabel(domEvent, loc.Name);
     });
-    
+
     marker.on('mouseout', () => {
       hideHoverLabel();
     });
-    
+
     marker.on('mousemove', (e) => {
       const domEvent = e.originalEvent;
       showHoverLabel(domEvent, loc.Name);
     });
-    
+
     markers.push(marker);
     bounds.push([loc.Latitude, loc.Longitude]);
   });
-  
+
   // Adjust map view to show search results
   if (bounds.length > 0) {
     if (bounds.length === 1) {
@@ -649,24 +648,24 @@ function displaySearchResults(results) {
 function initializeTabs() {
   const tabs = document.querySelectorAll('.list-tab');
   const tabPanes = document.querySelectorAll('.tab-pane');
-  
+
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const targetTab = tab.getAttribute('data-tab');
-      
+
       // Remove active class from all tabs and panes
       tabs.forEach(t => t.classList.remove('active'));
       tabPanes.forEach(pane => pane.classList.remove('active'));
-      
+
       // Add active class to clicked tab
       tab.classList.add('active');
-      
+
       // Show corresponding tab pane
       const targetPane = document.getElementById(targetTab + 'Tab');
       if (targetPane) {
         targetPane.classList.add('active');
       }
-      
+
       // Track tab change
       trackEvent('tab_change', {
         tab: targetTab,
@@ -683,40 +682,40 @@ function updateOpportunitiesList(data) {
   const resultsCount = document.getElementById('resultsCount');
   const buildingsCount = document.getElementById('buildingsCount');
   const companiesCount = document.getElementById('companiesCount');
-  
+
   if (!buildingsContainer || !companiesContainer || !resultsCount) return;
-  
+
   // Separate projects and companies
   const projects = data.filter(item => {
     const type = Array.isArray(item.HBMType) ? item.HBMType : [item.HBMType];
     return type.includes('Project');
   });
-  
+
   const companies = data.filter(item => {
     const type = Array.isArray(item.HBMType) ? item.HBMType : [item.HBMType];
     return type.includes('Bedrijf');
   });
-  
+
   resultsCount.textContent = `${data.length} resultaten`;
   if (buildingsCount) buildingsCount.textContent = `(${projects.length})`;
   if (companiesCount) companiesCount.textContent = `(${companies.length})`;
-  
+
   // Update buildings list
   if (projects.length === 0) {
     buildingsContainer.innerHTML = `
       <div class="no-results-opportunity">
         <h2>Geen projecten gevonden?</h2>
         <p><strong>Dan ligt hier een kans voor gezond bouwen!</strong></p>
-        
+
         <p>In dit gebied zijn nog geen actieve projecten zichtbaar.<br>
         Maar HBM kan je helpen met:</p>
-        
+
         <ul>
           <li><strong>Inzichten delen:</strong> Wat speelt er in deze regio?</li>
           <li><strong>Netwerken verbinden:</strong> Wie werkt hier aan gezonde gebouwen?</li>
           <li><strong>Startpunt maken:</strong> Samen ontdekken waar de kansen liggen.</li>
         </ul>
-        
+
         <p>📬 Wil je weten wat HBM nog meer voor jou kan betekenen?</p>
         <div class="contact-cta">
           <a href="contact.html" class="btn-primary">Neem contact op</a>
@@ -730,7 +729,7 @@ function updateOpportunitiesList(data) {
       if (opportunity.ProjectImage) {
         imageHtml = `<img src="${opportunity.ProjectImage}" alt="${opportunity.Name}" class="card-image" onerror="this.style.display='none'">`;
       }
-      
+
       return `
         <div class="opportunity-card" data-index="${index}" onclick="selectOpportunity(${index})">
           <div class="card-header">
@@ -739,9 +738,9 @@ function updateOpportunitiesList(data) {
               Project
             </span>
           </div>
-          
+
           ${imageHtml}
-          
+
           <div class="card-details">
             <div class="card-detail-row">
               <span class="card-detail-label">${t('organizationType')}:</span>
@@ -756,9 +755,9 @@ function updateOpportunitiesList(data) {
               <span class="card-detail-value">${Array.isArray(opportunity.HBMSector) ? opportunity.HBMSector.join(', ') : opportunity.HBMSector}</span>
             </div>
           </div>
-          
+
           <div class="card-description">${opportunity.Description}</div>
-          
+
           <div class="card-actions">
             <button class="card-contact-btn" onclick="showContactForm(${JSON.stringify(opportunity).replace(/"/g, '&quot;')}); event.stopPropagation();">
               ${t('contact') || 'Contact'}
@@ -768,16 +767,16 @@ function updateOpportunitiesList(data) {
       `;
     }).join('');
   }
-  
+
   // Update companies list
   if (companies.length === 0) {
     companiesContainer.innerHTML = `
       <div class="no-results-opportunity">
         <h2>Geen bedrijven gevonden?</h2>
         <p><strong>Misschien ken jij bedrijven die actief zijn met gezond bouwen?</strong></p>
-        
+
         <p>Help ons de kaart completer te maken door bedrijven aan te melden!</p>
-        
+
         <div class="contact-cta">
           <a href="contact.html" class="btn-primary">Meld een bedrijf aan</a>
           <span>en help anderen deze experts te vinden.</span>
@@ -791,7 +790,7 @@ function updateOpportunitiesList(data) {
       if (opportunity.Logo) {
         imageHtml = `<img src="${opportunity.Logo}" alt="${opportunity.Name}" class="card-logo" onerror="this.style.display='none'">`;
       }
-      
+
       return `
         <div class="opportunity-card" data-index="${companyIndex}" onclick="selectOpportunity(${companyIndex})">
           <div class="card-header">
@@ -800,9 +799,9 @@ function updateOpportunitiesList(data) {
               Bedrijf
             </span>
           </div>
-          
+
           ${imageHtml}
-          
+
           <div class="card-details">
             <div class="card-detail-row">
               <span class="card-detail-label">${t('organizationType')}:</span>
@@ -817,9 +816,9 @@ function updateOpportunitiesList(data) {
               <span class="card-detail-value">${Array.isArray(opportunity.HBMSector) ? opportunity.HBMSector.join(', ') : opportunity.HBMSector}</span>
             </div>
           </div>
-          
+
           <div class="card-description">${opportunity.Description}</div>
-          
+
           <div class="card-actions">
             <button class="card-contact-btn" onclick="showContactForm(${JSON.stringify(opportunity).replace(/"/g, '&quot;')}); event.stopPropagation();">
               ${t('contact') || 'Contact'}
@@ -834,19 +833,19 @@ function updateOpportunitiesList(data) {
 function selectOpportunity(index) {
   const opportunity = filteredData[index];
   if (!opportunity) return;
-  
+
   // Highlight the card
   document.querySelectorAll('.opportunity-card').forEach(card => card.classList.remove('highlighted'));
   document.querySelector(`[data-index="${index}"]`).classList.add('highlighted');
-  
+
   // Center map on the location
   if (map) {
     map.setView([opportunity.Latitude, opportunity.Longitude], 14);
   }
-  
+
   // Show location details with index
   showLocationDetails(opportunity, index);
-  
+
   // Track card click
   trackEvent('list_item_click', {
     location_name: opportunity.Name,
@@ -887,7 +886,7 @@ function setActiveFilters(filters) {
   document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => {
     cb.checked = false;
   });
-  
+
   // Then check the ones in the filter object
   Object.keys(filters).forEach(filterName => {
     if (filters[filterName] && filters[filterName].length > 0) {
@@ -899,28 +898,28 @@ function setActiveFilters(filters) {
       });
     }
   });
-  
+
   updateFilterState();
 }
 
 function updateURLWithFilters() {
   const filters = getActiveFilters();
   const url = new URL(window.location);
-  
+
   // Clear existing filter parameters
   Object.keys(Object.fromEntries(url.searchParams)).forEach(key => {
     if (key.startsWith('filter_')) {
       url.searchParams.delete(key);
     }
   });
-  
+
   // Add current filters
   Object.keys(filters).forEach(filterName => {
     if (filters[filterName] && filters[filterName].length > 0) {
       url.searchParams.set(`filter_${filterName}`, filters[filterName].join(','));
     }
   });
-  
+
   // Update URL without reloading page
   window.history.replaceState({}, '', url);
 }
@@ -928,23 +927,23 @@ function updateURLWithFilters() {
 function loadFiltersFromURL() {
   const url = new URL(window.location);
   const filters = {};
-  
+
   url.searchParams.forEach((value, key) => {
     if (key.startsWith('filter_')) {
       const filterName = key.replace('filter_', '');
       filters[filterName] = value.split(',');
     }
   });
-  
+
   return Object.keys(filters).length > 0 ? filters : null;
 }
 
 function updateFilterButtonLabel() {
   const filterBtn = document.getElementById('filterBtn');
   if (!filterBtn) return;
-  
-  const activeFilterCount = Object.values(getActiveFilters()).reduce((total, filterArray) => total + filterArray.length, 0);
-  
+
+  const activeFilterCount = Object.values(getActiveFilters()).reduce((total, filterArray)total + filterArray.length, 0);
+
   if (activeFilterCount > 0) {
     filterBtn.textContent = `${t('filters')} (${activeFilterCount})`;
   } else {
@@ -954,7 +953,7 @@ function updateFilterButtonLabel() {
 
 function copyURLToClipboard() {
   const url = window.location.href;
-  
+
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(url).then(() => {
       alert(t('urlCopied') || 'URL gekopieerd naar klembord!');
@@ -965,7 +964,7 @@ function copyURLToClipboard() {
   } else {
     fallbackCopyTextToClipboard(url);
   }
-  
+
   // Track share action
   trackEvent('url_share', {
     label: 'URL shared to clipboard',
@@ -980,11 +979,11 @@ function fallbackCopyTextToClipboard(text) {
   textArea.style.top = '0';
   textArea.style.left = '0';
   textArea.style.position = 'fixed';
-  
+
   document.body.appendChild(textArea);
   textArea.focus();
   textArea.select();
-  
+
   try {
     const successful = document.execCommand('copy');
     if (successful) {
@@ -996,14 +995,14 @@ function fallbackCopyTextToClipboard(text) {
     console.error('Fallback: Could not copy text: ', err);
     alert(t('urlCopyFailed') || 'Kon URL niet kopiëren. Kopieer handmatig uit de adresbalk.');
   }
-  
+
   document.body.removeChild(textArea);
 }
 
 // Export data function
 function exportData() {
   if (!window.data) return;
-  
+
   // Get filtered data
   const filters = {};
   document.querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
@@ -1062,9 +1061,9 @@ function exportData() {
 function toggleAdvancedFilters() {
   const advancedFilters = document.getElementById('advancedFilters');
   const isOpening = !advancedFilters.classList.contains('open');
-  
+
   advancedFilters.classList.toggle('open');
-  
+
   trackEvent('advanced_filters_toggle', {
     action: isOpening ? 'open' : 'close',
     label: 'Advanced filters toggled',
@@ -1087,7 +1086,7 @@ if (isMapPage && !isInfoPage && !isOverPage) {
     if (typeof L !== 'undefined') {
       // Load translations first
       await loadTranslations();
-      
+
       // Initialize icons
       pIcon = L.icon({ 
         iconUrl: 'icons/marker-project.svg', 
@@ -1101,16 +1100,16 @@ if (isMapPage && !isInfoPage && !isOverPage) {
         iconAnchor: [15, 40],
         popupAnchor: [0, -40]
       });
-      
+
       // Create hover label
       createHoverLabel();
-      
+
       // Initialize tabs
       initializeTabs();
-      
+
       // Track page view
       trackPageView('Kansenkaart');
-      
+
       // Register service worker for offline support
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js')
@@ -1121,13 +1120,13 @@ if (isMapPage && !isInfoPage && !isOverPage) {
             console.log('Service Worker registration failed:', error);
           });
       }
-      
+
       // Data laden
       fetch('opportunities.json')
         .then(res => res.json())
         .then(data => {
           window.data = data;
-          
+
           // Track data load success
           trackEvent('data_load_success', {
             data_count: data.length,
@@ -1135,7 +1134,7 @@ if (isMapPage && !isInfoPage && !isOverPage) {
             custom_parameter_1: 'data_interaction',
             value: data.length
           });
-          
+
           createFilterCheckboxes();
           loadSavedFiltersFromStorage();
           updateMap();
@@ -1143,14 +1142,14 @@ if (isMapPage && !isInfoPage && !isOverPage) {
         })
         .catch(error => {
           console.error('Error loading data:', error);
-          
+
           // Track data load error
           trackEvent('data_load_error', {
             error_message: error.message,
             label: 'Failed to load opportunities data',
             custom_parameter_1: 'data_error'
           });
-          
+
           const mapElement = document.getElementById('map');
           mapElement.innerHTML = `<div style="padding: 2rem; text-align: center; color: #666;">${t('dataLoadError')}</div>`;
         });
@@ -1172,11 +1171,11 @@ if (isMapPage && !isInfoPage && !isOverPage) {
     document.addEventListener('DOMContentLoaded', async () => {
       await loadTranslations();
       updateUI();
-      
+
       // Track page view for non-map pages
       const pageName = document.title || 'Unknown Page';
       trackPageView(pageName);
-      
+
       // Don't load opportunities.json for info/over pages
       if (!isInfoPage && !isOverPage) {
         // Only load opportunities if not on info/over pages
@@ -1214,7 +1213,7 @@ function createFilterCheckboxes() {
       });
     }
   });
-  
+
   // Add change listeners to HBMType checkboxes
   document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
     cb.addEventListener('change', () => {
@@ -1222,11 +1221,11 @@ function createFilterCheckboxes() {
       updateFilterButtonLabel();
     });
   });
-  
+
   // Load filters from URL first, then from storage if no URL filters
   const urlFilters = loadFiltersFromURL();
   const storageFilters = loadFiltersFromStorage();
-  
+
   if (urlFilters) {
     setActiveFilters(urlFilters);
   } else if (storageFilters && isInitialLoad) {
@@ -1234,7 +1233,7 @@ function createFilterCheckboxes() {
   } else {
     updateFilterState();
   }
-  
+
   updateFilterButtonLabel();
   isInitialLoad = false;
 }
@@ -1244,7 +1243,7 @@ function loadMunicipalityBoundaries() {
   if (!municipalityLayer) {
     municipalityLayer = L.layerGroup();
   }
-  
+
   // Define region boundaries for the Euregio Maas-Rijn
   const regions = {
     // Netherlands - Limburg
@@ -1291,10 +1290,10 @@ function loadMunicipalityBoundaries() {
 async function loadMunicipalitiesFromOverpass(regions) {
   try {
     console.log('Loading municipality boundaries...');
-    
+
     // Use a more focused approach: Euregio Maas-Rijn region boundaries
     const overpassUrl = 'https://overpass-api.de/api/interpreter';
-    
+
     // More focused query for proper municipal boundaries (admin_level=8 for municipalities)
     const query = `
       [out:json][timeout:120];
@@ -1304,9 +1303,9 @@ async function loadMunicipalitiesFromOverpass(regions) {
       );
       out geom;
     `;
-    
+
     console.log('Sending query to Overpass API...');
-    
+
     const response = await fetch(overpassUrl, {
       method: 'POST',
       headers: {
@@ -1314,23 +1313,23 @@ async function loadMunicipalitiesFromOverpass(regions) {
       },
       body: `data=${encodeURIComponent(query)}`
     });
-    
+
     if (!response.ok) {
       console.error(`Overpass API HTTP error! status: ${response.status}`);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    
+
     console.log('Parsing response from Overpass API...');
     const data = await response.json();
-    
+
     if (!data.elements || data.elements.length === 0) {
       console.warn('No elements received from Overpass API');
       throw new Error('No data received from Overpass API');
     }
-    
+
     console.log(`Received ${data.elements.length} elements from Overpass API`);
     let loadedCount = 0;
-    
+
     // Filter for known municipalities in the Euregio region
     const knownMunicipalities = [
       'Maastricht', 'Aachen', 'Liège', 'Hasselt', 'Genk', 'Venlo', 'Roermond', 'Sittard-Geleen',
@@ -1364,12 +1363,12 @@ async function loadMunicipalitiesFromOverpass(regions) {
       'Geilenkirchen', 'Hückelhoven', 'Erkelenz', 'Gangelt', 'Selfkant', 'Waldfeucht',
       'Wassenberg', 'Wegberg'
     ];
-    
+
     // Process the response and create polygons
     data.elements.forEach((element, index) => {
       if (element.type === 'relation' && element.tags && element.tags.name) {
         const municipalityName = element.tags.name;
-        
+
         // Only process known municipalities or if name contains key region indicators
         if (knownMunicipalities.includes(municipalityName) || 
             municipalityName.includes('aachen') || 
@@ -1379,29 +1378,30 @@ async function loadMunicipalitiesFromOverpass(regions) {
             municipalityName.includes('venlo') ||
             municipalityName.includes('roermond') ||
             municipalityName.includes('eindhoven')) {
-          
+
           try {
             console.log(`Processing municipality ${index + 1}/${data.elements.length}: ${municipalityName}`);
-            
+
             // Convert relation to coordinates using improved function
             const coordinates = convertRelationToCoordinatesImproved(element);
             if (coordinates && coordinates.length > 2) {
               const polygon = L.polygon(coordinates, {
-                color: '#4A90E2',
-                weight: 1.5,
-                opacity: 0.8,
-                fillColor: '#4A90E2',
-                fillOpacity: 0.05,
-                smoothFactor: 1.0
-              });
-              
+              color: '#2E86AB',
+              weight: 2,
+              opacity: 0.9,
+              fillColor: '#A23B72',
+              fillOpacity: 0.08,
+              smoothFactor: 0.5,
+              dashArray: '3, 6'
+            });
+
               // Add popup with municipality name and country
               const country = element.tags['addr:country'] || 
                             (element.tags.name.includes('burg') || element.tags.name.includes('berg') ? 'Deutschland' : 
                              element.tags.name.includes('icht') || element.tags.name.includes('lo') ? 'Nederland' : 'België');
-              
+
               polygon.bindPopup(`<strong>${municipalityName}</strong><br><small>${country}</small>`);
-              
+
               municipalityLayer.addLayer(polygon);
               loadedCount++;
             } else {
@@ -1413,17 +1413,17 @@ async function loadMunicipalitiesFromOverpass(regions) {
         }
       }
     });
-    
+
     console.log(`Successfully loaded ${loadedCount} municipalities from OpenStreetMap`);
-    
+
     // Make sure the layer is available in the layer control
     if (loadedCount === 0) {
       throw new Error('No municipalities could be processed');
     }
-    
+
   } catch (error) {
     console.error('Error loading municipalities from Overpass API:', error);
-    
+
     // Fallback to professional curated boundaries for major cities
     console.log('Loading fallback municipalities...');
     loadProfessionalMunicipalities();
@@ -1433,12 +1433,12 @@ async function loadMunicipalitiesFromOverpass(regions) {
 function convertRelationToCoordinates(element) {
   try {
     const coordinates = [];
-    
+
     // Look for outer ways in the relation
     const outerWays = element.members.filter(member => 
       member.type === 'way' && member.role === 'outer'
     );
-    
+
     if (outerWays.length === 0) {
       // If no explicit outer ways, use all ways
       const allWays = element.members.filter(member => member.type === 'way');
@@ -1446,14 +1446,14 @@ function convertRelationToCoordinates(element) {
         outerWays.push(...allWays);
       }
     }
-    
+
     outerWays.forEach(wayMember => {
       if (wayMember.geometry && wayMember.geometry.length > 2) {
         const wayCoords = wayMember.geometry.map(node => [node.lat, node.lon]);
         coordinates.push(wayCoords);
       }
     });
-    
+
     // If we have multiple coordinate arrays, merge them into a single polygon
     if (coordinates.length > 1) {
       // For simplicity, just use the first (usually largest) polygon
@@ -1461,7 +1461,7 @@ function convertRelationToCoordinates(element) {
     } else if (coordinates.length === 1) {
       return coordinates[0];
     }
-    
+
     return null;
   } catch (error) {
     console.warn('Error converting relation coordinates:', error);
@@ -1475,17 +1475,17 @@ function convertRelationToCoordinatesImproved(element) {
       console.warn('No members found in relation');
       return null;
     }
-    
+
     // Look for ways with geometry data
     const waysWithGeometry = element.members.filter(member => 
       member.type === 'way' && member.geometry && member.geometry.length > 2
     );
-    
+
     if (waysWithGeometry.length === 0) {
       console.warn('No ways with geometry found');
       return null;
     }
-    
+
     // Find the longest way (likely the main boundary)
     let longestWay = waysWithGeometry[0];
     for (const way of waysWithGeometry) {
@@ -1493,10 +1493,10 @@ function convertRelationToCoordinatesImproved(element) {
         longestWay = way;
       }
     }
-    
+
     // Convert the longest way to coordinates
     const coordinates = longestWay.geometry.map(node => [node.lat, node.lon]);
-    
+
     // Ensure the polygon is closed
     if (coordinates.length > 2) {
       const first = coordinates[0];
@@ -1505,9 +1505,9 @@ function convertRelationToCoordinatesImproved(element) {
         coordinates.push([first[0], first[1]]);
       }
     }
-    
+
     return coordinates.length > 3 ? coordinates : null;
-    
+
   } catch (error) {
     console.warn('Error in improved coordinate conversion:', error);
     return null;
@@ -1516,7 +1516,7 @@ function convertRelationToCoordinatesImproved(element) {
 
 function loadProfessionalMunicipalities() {
   console.log('Loading professional municipality boundaries...');
-  
+
   // Professional boundaries for key Euregio municipalities with accurate coordinates
   const eurregioMunicipalities = [
     {
@@ -1552,7 +1552,7 @@ function loadProfessionalMunicipalities() {
     {
       name: "Roermond",
       country: "Nederland",
-      bounds: [[51.141, 5.951], [51.168, 5.961], [51.193, 5.978], [51.215, 5.002], [51.233, 6.032], [51.247, 6.067], [51.255, 6.106], [51.258, 6.146], [51.256, 6.187], [51.248, 6.227], [51.235, 6.265], [51.217, 6.301], [51.194, 6.333], [51.166, 6.362], [51.134, 6.386], [51.099, 6.405], [51.061, 6.420], [51.021, 6.429], [50.980, 6.433], [50.939, 6.432], [50.898, 6.425], [50.858, 6.413], [50.820, 6.395], [50.784, 6.372], [50.752, 6.343], [50.724, 6.309], [50.700, 6.271], [50.681, 6.229], [50.667, 6.184], [50.658, 6.137], [50.654, 6.089], [50.655, 6.040], [50.661, 5.992], [50.672, 5.945], [50.688, 5.900], [50.709, 5.858], [50.734, 5.819], [50.764, 5.785], [50.798, 5.755], [50.836, 5.730], [50.876, 5.711], [50.919, 5.697], [50.964, 5.690], [51.010, 5.689], [51.056, 5.695], [51.101, 5.707], [51.144, 5.726], [51.184, 5.751], [51.220, 5.782], [51.252, 5.819], [51.278, 5.861], [51.298, 5.908], [51.311, 5.958], [51.141, 5.951]]
+      bounds: [[51.141, 5.951], [51.168, 5.961], [51.193, 5.978], [51.215, 6.002], [51.233, 6.032], [51.247, 6.067], [51.255, 6.106], [51.258, 6.146], [51.256, 6.187], [51.248, 6.227], [51.235, 6.265], [51.217, 6.301], [51.194, 6.333], [51.166, 6.362], [51.134, 6.386], [51.099, 6.405], [51.061, 6.420], [51.021, 6.429], [50.980, 6.433], [50.939, 6.432], [50.898, 6.425], [50.858, 6.413], [50.820, 6.395], [50.784, 6.372], [50.752, 6.343], [50.724, 6.309], [50.700, 6.271], [50.681, 6.229], [50.667, 6.184], [50.658, 6.137], [50.654, 6.089], [50.655, 6.040], [50.661, 5.992], [50.672, 5.945], [50.688, 5.900], [50.709, 5.858], [50.734, 5.819], [50.764, 5.785], [50.798, 5.755], [50.836, 5.730], [50.876, 5.711], [50.919, 5.697], [50.964, 5.690], [51.010, 5.689], [51.056, 5.695], [51.101, 5.707], [51.144, 5.726], [51.184, 5.751], [51.220, 5.782], [51.252, 5.819], [51.278, 5.861], [51.298, 5.908], [51.311, 5.958], [51.141, 5.951]]
     },
     {
       name: "Eindhoven",
@@ -1560,23 +1560,24 @@ function loadProfessionalMunicipalities() {
       bounds: [[51.401, 5.421], [51.431, 5.432], [51.459, 5.450], [51.484, 5.475], [51.505, 5.506], [51.521, 5.542], [51.533, 5.581], [51.540, 5.622], [51.542, 5.665], [51.539, 5.708], [51.531, 5.750], [51.518, 5.791], [51.500, 5.830], [51.477, 5.866], [51.449, 5.899], [51.416, 5.928], [51.379, 5.952], [51.338, 5.972], [51.294, 5.988], [51.248, 5.999], [51.201, 6.005], [51.153, 6.006], [51.105, 6.002], [51.057, 5.993], [51.011, 5.979], [50.966, 5.960], [50.923, 5.936], [50.882, 5.907], [50.844, 5.873], [50.810, 5.835], [50.779, 5.793], [50.752, 5.747], [50.730, 5.697], [50.712, 5.644], [50.699, 5.588], [50.691, 5.530], [50.688, 5.471], [50.690, 5.411], [50.697, 5.352], [50.710, 5.294], [50.728, 5.238], [50.752, 5.185], [50.781, 5.135], [50.816, 5.089], [50.856, 5.048], [50.901, 5.012], [50.951, 4.982], [51.005, 4.958], [51.062, 4.940], [51.122, 4.929], [51.183, 4.925], [51.245, 4.928], [51.307, 4.938], [51.368, 4.955], [51.427, 4.979], [51.484, 5.010], [51.537, 5.048], [51.586, 5.093], [51.630, 5.145], [51.668, 5.203], [51.700, 5.267], [51.725, 5.336], [51.743, 5.410], [51.401, 5.421]]
     }
   ];
-  
+
   eurregioMunicipalities.forEach(municipality => {
     const polygon = L.polygon(municipality.bounds, {
-      color: '#4A90E2',
-      weight: 1.5,
-      opacity: 0.8,
-      fillColor: '#4A90E2',
-      fillOpacity: 0.05,
-      smoothFactor: 1.0
-    });
-    
+              color: '#2E86AB',
+              weight: 2,
+              opacity: 0.9,
+              fillColor: '#A23B72',
+              fillOpacity: 0.08,
+              smoothFactor: 0.5,
+              dashArray: '3, 6'
+            });
+
     // Add popup with municipality name and country
     polygon.bindPopup(`<strong>${municipality.name}</strong><br><small>${municipality.country}</small>`);
-    
+
     municipalityLayer.addLayer(polygon);
   });
-  
+
   console.log(`Loaded ${eurregioMunicipalities.length} professional municipalities`);
 }
 
@@ -1584,7 +1585,7 @@ function updateFilterState() {
   const checkedFilters = document.querySelectorAll('#filtersForm input[type="checkbox"]:checked');
   const applyButton = document.getElementById('applyFilters');
   const noSelectionMessage = document.getElementById('noSelectionMessage');
-  
+
   if (checkedFilters.length === 0) {
     if (applyButton) applyButton.style.display = 'none';
     if (!noSelectionMessage) {
@@ -1597,7 +1598,7 @@ function updateFilterState() {
     if (applyButton) applyButton.style.display = 'block';
     if (noSelectionMessage) noSelectionMessage.remove();
   }
-  
+
   updateFilterButtonLabel();
 }
 
@@ -1616,7 +1617,7 @@ function showLocationDetails(location, index = -1) {
     custom_parameter_1: 'content_engagement',
     is_project: isProject
   });
-  
+
   // Set current index for navigation
   if (index >= 0) {
     currentDetailIndex = index;
@@ -1624,10 +1625,10 @@ function showLocationDetails(location, index = -1) {
     // Find index in filteredData
     currentDetailIndex = filteredData.findIndex(item => item.Name === location.Name);
   }
-  
+
   const detailPanel = document.getElementById('detailPanel');
   const locationName = location.Name;
-  
+
   // Determine which image to show
   let imageHtml = '';
   if (isProject && location.ProjectImage) {
@@ -1639,11 +1640,11 @@ function showLocationDetails(location, index = -1) {
                    <img src="${location.Logo}" alt="${locationName} logo" onerror="this.parentNode.style.display='none'">
                  </div>`;
   }
-  
+
   // Navigation buttons
   const prevDisabled = currentDetailIndex <= 0;
   const nextDisabled = currentDetailIndex >= filteredData.length - 1;
-  
+
   detailPanel.innerHTML = `
     <div class="detail-content">
       <a href="#" id="closeDetail" class="close-btn">
@@ -1667,38 +1668,38 @@ function showLocationDetails(location, index = -1) {
           <button class="detail-contact-btn" onclick="showContactForm(${JSON.stringify(location).replace(/"/g, '&quot;')})">${t('contact')}</button>
         </div>
       </div>
-      
+
       <div class="detail-description">
         <h3>${t('description')}</h3>
         <p>${location.Description}</p>
       </div>
-      
+
       <div class="detail-info">
         <div class="detail-row">
           <span class="detail-label">${t('projectType')}</span>
           <span class="detail-value">${Array.isArray(location.ProjectType) ? location.ProjectType.join(', ') : location.ProjectType}</span>
         </div>
-        
+
         <div class="detail-row">
           <span class="detail-label">${t('organizationType')}</span>
           <span class="detail-value">${Array.isArray(location.OrganizationType) ? location.OrganizationType.join(', ') : location.OrganizationType}</span>
         </div>
-        
+
         <div class="detail-row">
           <span class="detail-label">${t('organizationField')}</span>
           <span class="detail-value">${Array.isArray(location.OrganizationField) ? location.OrganizationField.join(', ') : location.OrganizationField}</span>
         </div>
-        
+
         <div class="detail-row">
           <span class="detail-label">${t('hbmTopic')}</span>
           <span class="detail-value">${Array.isArray(location.HBMTopic) ? location.HBMTopic.join(', ') : location.HBMTopic}</span>
         </div>
-        
+
         <div class="detail-row">
           <span class="detail-label">${t('hbmCharacteristics')}</span>
           <span class="detail-value">${Array.isArray(location.HBMCharacteristics) ? location.HBMCharacteristics.join(', ') : location.HBMCharacteristics}</span>
         </div>
-        
+
         <div class="detail-row">
           <span class="detail-label">${t('hbmSector')}</span>
           <span class="detail-value">${Array.isArray(location.HBMSector) ? location.HBMSector.join(', ') : location.HBMSector}</span>
@@ -1711,15 +1712,15 @@ function showLocationDetails(location, index = -1) {
   detailPanel.querySelector('#closeDetail').onclick = () => {
     detailPanel.classList.remove('open');
   };
-  
+
   // Navigation event listeners
   const prevBtn = detailPanel.querySelector('#prevDetail');
   const nextBtn = detailPanel.querySelector('#nextDetail');
-  
+
   if (prevBtn && !prevDisabled) {
     prevBtn.onclick = () => navigateDetail(-1);
   }
-  
+
   if (nextBtn && !nextDisabled) {
     nextBtn.onclick = () => navigateDetail(1);
   }
@@ -1729,15 +1730,15 @@ function showLocationDetails(location, index = -1) {
 
 function navigateDetail(direction) {
   const newIndex = currentDetailIndex + direction;
-  
+
   if (newIndex >= 0 && newIndex < filteredData.length) {
     const nextLocation = filteredData[newIndex];
-    
+
     // Update map view
     if (map) {
       map.setView([nextLocation.Latitude, nextLocation.Longitude], 14);
     }
-    
+
     // Update list highlight
     document.querySelectorAll('.opportunity-card').forEach(card => card.classList.remove('highlighted'));
     const targetCard = document.querySelector(`[data-index="${newIndex}"]`);
@@ -1745,10 +1746,10 @@ function navigateDetail(direction) {
       targetCard.classList.add('highlighted');
       targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-    
+
     // Show new location details
     showLocationDetails(nextLocation, newIndex);
-    
+
     // Track navigation
     trackEvent('detail_navigation', {
       direction: direction > 0 ? 'next' : 'previous',
@@ -1763,27 +1764,27 @@ function navigateDetail(direction) {
 function getUserLocation() {
   const btn = document.getElementById('useMyLocation');
   const distanceFilter = document.getElementById('distanceFilter');
-  
+
   if (!navigator.geolocation) {
     alert('Geolocatie wordt niet ondersteund door deze browser.');
     return;
   }
-  
+
   btn.disabled = true;
   btn.textContent = 'Locatie ophalen...';
-  
+
   navigator.geolocation.getCurrentPosition(
     (position) => {
       userLocation = {
         lat: position.coords.latitude,
         lng: position.coords.longitude
       };
-      
+
       // Add user location marker
       if (userLocationMarker) {
         map.removeLayer(userLocationMarker);
       }
-      
+
       userLocationMarker = L.circleMarker([userLocation.lat, userLocation.lng], {
         className: 'user-location-marker',
         radius: 8,
@@ -1793,17 +1794,17 @@ function getUserLocation() {
         opacity: 1,
         fillOpacity: 0.8
       }).addTo(map);
-      
+
       userLocationMarker.bindPopup('Uw locatie');
-      
+
       // Show distance filter
       distanceFilter.style.display = 'flex';
       btn.textContent = '✓ Locatie ingesteld';
       btn.disabled = false;
-      
+
       // Update filters
       updateFilterButtonLabel();
-      
+
       trackEvent('user_location_set', {
         label: 'User location set',
         custom_parameter_1: 'location_interaction'
@@ -1833,10 +1834,10 @@ function saveCurrentFilters() {
   const filters = getActiveFilters();
   const textFilter = document.getElementById('advancedTextFilter').value;
   const filterMode = document.querySelector('input[name="filterMode"]:checked').value;
-  
+
   const name = prompt('Geef een naam op voor deze filterset:');
   if (!name) return;
-  
+
   const filterSet = {
     id: Date.now(),
     name: name,
@@ -1847,12 +1848,12 @@ function saveCurrentFilters() {
     maxDistance: userLocation ? document.getElementById('distanceRange').value : null,
     saved: new Date().toISOString()
   };
-  
+
   savedFiltersData.push(filterSet);
   localStorage.setItem('kansenkaart_saved_filters', JSON.stringify(savedFiltersData));
   updateSavedFiltersSelect();
   updateSavedFiltersButtonText();
-  
+
   trackEvent('filters_saved', {
     filter_name: name,
     label: `Filters saved: ${name}`,
@@ -1863,24 +1864,24 @@ function saveCurrentFilters() {
 function loadSavedFilter(filterId) {
   const filterSet = savedFiltersData.find(f => f.id == filterId);
   if (!filterSet) return;
-  
+
   // Load basic filters
   setActiveFilters(filterSet.filters);
-  
+
   // Load text filter
   document.getElementById('advancedTextFilter').value = filterSet.textFilter || '';
-  
+
   // Load filter mode
   document.querySelector(`input[name="filterMode"][value="${filterSet.filterMode}"]`).checked = true;
-  
+
   // Load user location if available
   if (filterSet.userLocation) {
     userLocation = filterSet.userLocation;
-    
+
     if (userLocationMarker) {
       map.removeLayer(userLocationMarker);
     }
-    
+
     userLocationMarker = L.circleMarker([userLocation.lat, userLocation.lng], {
       className: 'user-location-marker',
       radius: 8,
@@ -1890,17 +1891,17 @@ function loadSavedFilter(filterId) {
       opacity: 1,
       fillOpacity: 0.8
     }).addTo(map);
-    
+
     userLocationMarker.bindPopup('Uw locatie');
-    
+
     document.getElementById('distanceFilter').style.display = 'flex';
     document.getElementById('distanceRange').value = filterSet.maxDistance || 25;
     document.getElementById('distanceValue').textContent = (filterSet.maxDistance || 25) + ' km';
     document.getElementById('useMyLocation').textContent = '✓ Locatie ingesteld';
   }
-  
+
   updateFilterButtonLabel();
-  
+
   trackEvent('filters_loaded', {
     filter_name: filterSet.name,
     label: `Filters loaded: ${filterSet.name}`,
@@ -1911,18 +1912,18 @@ function loadSavedFilter(filterId) {
 function deleteSavedFilter() {
   const select = document.getElementById('savedFiltersSelect');
   const filterId = select.value;
-  
+
   if (!filterId) return;
-  
+
   const filterSet = savedFiltersData.find(f => f.id == filterId);
   if (!filterSet) return;
-  
+
   if (confirm(`Weet u zeker dat u "${filterSet.name}" wilt verwijderen?`)) {
     savedFiltersData = savedFiltersData.filter(f => f.id != filterId);
     localStorage.setItem('kansenkaart_saved_filters', JSON.stringify(savedFiltersData));
     updateSavedFiltersSelect();
     updateSavedFiltersButtonText();
-    
+
     trackEvent('filters_deleted', {
       filter_name: filterSet.name,
       label: `Filters deleted: ${filterSet.name}`,
@@ -1935,7 +1936,7 @@ function updateSavedFiltersSelect() {
   const select = document.getElementById('savedFiltersSelect');
   if (select) {
     select.innerHTML = '<option value="">Selecteer opgeslagen filter...</option>';
-    
+
     savedFiltersData.forEach(filterSet => {
       const option = document.createElement('option');
       option.value = filterSet.id;
@@ -1943,7 +1944,7 @@ function updateSavedFiltersSelect() {
       select.appendChild(option);
     });
   }
-  
+
   // Update the saved filters button text with count
   updateSavedFiltersButtonText();
 }
@@ -1965,14 +1966,14 @@ function showSavedFiltersModal() {
     alert('Geen opgeslagen filters gevonden. Sla eerst een filter op.');
     return;
   }
-  
+
   let modalHtml = `
     <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
       <div style="background: white; padding: 2rem; border-radius: 8px; max-width: 400px; width: 90%;">
         <h3 style="margin-bottom: 1rem; color: rgb(38, 123, 41);">Opgeslagen Filters</h3>
         <div style="margin-bottom: 1.5rem;">
   `;
-  
+
   savedFiltersData.forEach(filterSet => {
     modalHtml += `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border: 1px solid #ddd; margin-bottom: 0.5rem; border-radius: 4px;">
@@ -1987,14 +1988,14 @@ function showSavedFiltersModal() {
       </div>
     `;
   });
-  
+
   modalHtml += `
         </div>
         <button onclick="closeSavedFiltersModal()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Sluiten</button>
       </div>
     </div>
   `;
-  
+
   const modalElement = document.createElement('div');
   modalElement.id = 'savedFiltersModal';
   modalElement.innerHTML = modalHtml;
@@ -2011,16 +2012,16 @@ function closeSavedFiltersModal() {
 function deleteSavedFilterFromModal(filterId) {
   const filterSet = savedFiltersData.find(f => f.id == filterId);
   if (!filterSet) return;
-  
+
   if (confirm(`Weet u zeker dat u "${filterSet.name}" wilt verwijderen?`)) {
     savedFiltersData = savedFiltersData.filter(f => f.id != filterId);
     localStorage.setItem('kansenkaart_saved_filters', JSON.stringify(savedFiltersData));
     updateSavedFiltersButtonText();
-    
+
     // Close and reopen modal to refresh the list
     closeSavedFiltersModal();
     showSavedFiltersModal();
-    
+
     trackEvent('filters_deleted', {
       filter_name: filterSet.name,
       label: `Filters deleted: ${filterSet.name}`,
@@ -2049,27 +2050,27 @@ function updateMap() {
   if (!map) {
     map = L.map('map').setView([51.2, 6.1], 9);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    
+
     // Track map initialization
     trackEvent('map_initialize', {
       label: 'Map initialized',
       custom_parameter_1: 'map_interaction',
       initial_zoom: 9
     });
-    
+
     // Add municipality layer
     municipalityLayer = L.layerGroup();
-    
+
     // Add layer control for overlays only
     const overlayLayers = {
       "Gemeenten": municipalityLayer
     };
-    
+
     L.control.layers(null, overlayLayers, {
       position: 'topright',
       collapsed: false
     }).addTo(map);
-    
+
     // Track layer toggle events
     map.on('overlayadd', (e) => {
       trackEvent('layer_toggle', {
@@ -2079,7 +2080,7 @@ function updateMap() {
         custom_parameter_1: 'map_interaction'
       });
     });
-    
+
     map.on('overlayremove', (e) => {
       trackEvent('layer_toggle', {
         layer_name: e.name,
@@ -2088,7 +2089,7 @@ function updateMap() {
         custom_parameter_1: 'map_interaction'
       });
     });
-    
+
     // Track map movements (throttled)
     let mapMoveTimeout;
     map.on('moveend', () => {
@@ -2106,7 +2107,7 @@ function updateMap() {
         });
       }, 1000);
     });
-    
+
     // Track zoom changes
     map.on('zoomend', () => {
       const zoom = map.getZoom();
@@ -2117,7 +2118,7 @@ function updateMap() {
         value: zoom
       });
     });
-    
+
     // Load municipality boundaries
     loadMunicipalityBoundaries();
   }
@@ -2125,10 +2126,10 @@ function updateMap() {
   // Clear existing markers
   markers.forEach(m => map.removeLayer(m));
   markers = [];
-  
+
   // Get all checked filters
   const filters = getActiveFilters();
-  
+
   // Get advanced filter settings
   const textFilter = document.getElementById('advancedTextFilter')?.value.toLowerCase().trim() || '';
   const filterMode = document.querySelector('input[name="filterMode"]:checked')?.value || 'AND';
@@ -2146,7 +2147,7 @@ function updateMap() {
         return filters[k].includes(dataValue);
       }
     });
-    
+
     // Text filter
     let textMatch = true;
     if (textFilter) {
@@ -2157,10 +2158,10 @@ function updateMap() {
         Array.isArray(d.OrganizationType) ? d.OrganizationType.join(' ') : d.OrganizationType,
         Array.isArray(d.HBMSector) ? d.HBMSector.join(' ') : d.HBMSector
       ].join(' ').toLowerCase();
-      
+
       textMatch = searchableText.includes(textFilter);
     }
-    
+
     // Distance filter
     let distanceMatch = true;
     if (userLocation && maxDistance) {
@@ -2172,7 +2173,7 @@ function updateMap() {
       );
       distanceMatch = distance <= maxDistance;
     }
-    
+
     // Combine filters based on mode
     if (filterMode === 'OR') {
       return basicMatch || textMatch || distanceMatch;
@@ -2187,8 +2188,8 @@ function updateMap() {
 
   // Add markers for filtered data with clustering
   const bounds = [];
-  
-  // Initialize cluster group if not exists
+
+  //// Initialize cluster group if not exists
   if (!markerClusterGroup) {
     // Try to use MarkerClusterGroup if available, fallback to regular group
     if (typeof L.markerClusterGroup === 'function') {
@@ -2202,7 +2203,7 @@ function updateMap() {
           let className = 'marker-cluster-small';
           if (count > 10) className = 'marker-cluster-medium';
           if (count > 100) className = 'marker-cluster-large';
-          
+
           return L.divIcon({
             html: `<div><span>${count}</span></div>`,
             className: 'marker-cluster ' + className,
@@ -2215,7 +2216,7 @@ function updateMap() {
           let className = 'marker-cluster-small';
           if (count > 10) className = 'marker-cluster-medium';
           if (count > 100) className = 'marker-cluster-large';
-          
+
           return L.divIcon({
             html: `<div><span>${count}</span></div>`,
             className: 'marker-cluster ' + className,
@@ -2230,11 +2231,11 @@ function updateMap() {
     // Clear existing markers from cluster group
     markerClusterGroup.clearLayers();
   }
-  
+
   filtered.forEach(loc => {
     const markerOptions = {};
     const isProject = (Array.isArray(loc.HBMType) ? loc.HBMType.includes('Project') : loc.HBMType === 'Project');
-    
+
     // Check if project has an image for custom marker
     if (isProject && loc.ProjectImage) {
       // Create custom photo marker
@@ -2265,12 +2266,12 @@ function updateMap() {
     } else if (pIcon && bIcon) {
       markerOptions.icon = isProject ? pIcon : bIcon;
     }
-    
+
     const marker = L.marker([loc.Latitude, loc.Longitude], markerOptions);
-    
+
     // Add location data to marker
     marker.locationData = loc;
-    
+
     // Add click event
     marker.on('click', () => {
       // Track marker click
@@ -2282,10 +2283,10 @@ function updateMap() {
         custom_parameter_1: 'map_interaction',
         is_project: isProject
       });
-      
+
       // Find index in filtered data
       const locationIndex = filteredData.findIndex(item => item.Name === loc.Name);
-      
+
       // Highlight corresponding list item
       if (locationIndex >= 0) {
         document.querySelectorAll('.opportunity-card').forEach(card => card.classList.remove('highlighted'));
@@ -2295,15 +2296,15 @@ function updateMap() {
           targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }
-      
+
       showLocationDetails(loc, locationIndex);
     });
-    
+
     // Add hover events for label
     marker.on('mouseover', (e) => {
       const domEvent = e.originalEvent;
       showHoverLabel(domEvent, loc.Name);
-      
+
       // Track marker hover (with throttling to avoid spam)
       if (!marker._hoverTracked || Date.now() - marker._hoverTracked > 5000) {
         marker._hoverTracked = Date.now();
@@ -2314,21 +2315,21 @@ function updateMap() {
         });
       }
     });
-    
+
     marker.on('mouseout', () => {
       hideHoverLabel();
     });
-    
+
     marker.on('mousemove', (e) => {
       const domEvent = e.originalEvent;
       showHoverLabel(domEvent, loc.Name);
     });
-    
+
     markerClusterGroup.addLayer(marker);
     markers.push(marker);
     bounds.push([loc.Latitude, loc.Longitude]);
   });
-  
+
   // Add marker cluster group to map
   map.addLayer(markerClusterGroup);
 
