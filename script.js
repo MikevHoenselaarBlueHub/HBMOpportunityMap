@@ -1335,61 +1335,50 @@ function loadMunicipalityBoundaries() {
     municipalityLayer = L.layerGroup();
   }
 
-  // Load municipalities using OpenStreetMap Overpass API
+  // Load municipalities using Netherlands GeoJSON data
   loadMunicipalitiesFromOverpass();
 }
 
 async function loadMunicipalitiesFromOverpass() {
   try {
-    console.log('Loading municipality boundaries...');
+    console.log('Loading municipality boundaries from Netherlands GeoJSON...');
 
-    // Simplified and focused query for better performance
-    const overpassUrl = 'https://overpass-api.de/api/interpreter';
-    const query = `
-      [out:json][timeout:30];
-      (
-        relation["admin_level"="8"]["place"~"city|town"](bbox:50.5,5.5,51.8,6.8);
-      );
-      out geom;
-    `;
-
-    const response = await fetch(overpassUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: `data=${encodeURIComponent(query)}`
-    });
-
+    // Load Netherlands townships GeoJSON data
+    const response = await fetch('https://www.webuildinternet.com/articles/2015-07-19-geojson-data-of-the-netherlands/townships.geojson');
+    
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const geojsonData = await response.json();
 
-    if (!data.elements || data.elements.length === 0) {
-      throw new Error('No data received from Overpass API');
+    if (!geojsonData.features || geojsonData.features.length === 0) {
+      throw new Error('No GeoJSON features found');
     }
 
-    console.log(`Processing ${data.elements.length} municipalities...`);
+    console.log(`Processing ${geojsonData.features.length} Dutch municipalities...`);
     let loadedCount = 0;
 
-    // Key municipalities for the Euregio region
-    const keyMunicipalities = [
-      'Maastricht', 'Aachen', 'Liège', 'Hasselt', 'Genk', 'Venlo', 'Roermond', 
-      'Sittard-Geleen', 'Heerlen', 'Kerkrade', 'Eindhoven', 'Helmond'
+    // Define regions of interest for the Euregio area
+    const eurregioMunicipalities = [
+      'Maastricht', 'Venlo', 'Roermond', 'Sittard-Geleen', 'Heerlen', 
+      'Kerkrade', 'Eindhoven', 'Helmond', 'Weert', 'Echt-Susteren',
+      'Beek', 'Valkenburg aan de Geul', 'Gulpen-Wittem', 'Vaals',
+      'Simpelveld', 'Onderbanken', 'Nuth', 'Schinnen', 'Brunssum',
+      'Landgraaf', 'Meerssen', 'Eijsden-Margraten'
     ];
 
-    // Process only key municipalities for better performance
-    data.elements.forEach((element) => {
-      if (element.type === 'relation' && element.tags && element.tags.name) {
-        const municipalityName = element.tags.name;
+    // Process GeoJSON features
+    geojsonData.features.forEach((feature) => {
+      if (feature.properties && feature.properties.name) {
+        const municipalityName = feature.properties.name;
 
-        if (keyMunicipalities.includes(municipalityName)) {
+        // Only load municipalities in the Euregio region for better performance
+        if (eurregioMunicipalities.includes(municipalityName)) {
           try {
-            const coordinates = convertRelationToCoordinatesImproved(element);
-            if (coordinates && coordinates.length > 2) {
-              const polygon = L.polygon(coordinates, {
+            // Create Leaflet GeoJSON layer
+            const geoJsonLayer = L.geoJSON(feature, {
+              style: {
                 color: '#2E86AB',
                 weight: 2,
                 opacity: 0.9,
@@ -1397,15 +1386,16 @@ async function loadMunicipalitiesFromOverpass() {
                 fillOpacity: 0.08,
                 smoothFactor: 0.5,
                 dashArray: '3, 6'
-              });
+              }
+            });
 
-              const country = municipalityName.includes('aachen') ? 'Deutschland' : 
-                           municipalityName.includes('iège') ? 'België' : 'Nederland';
+            // Add popup with municipality info
+            geoJsonLayer.bindPopup(`<strong>${municipalityName}</strong><br><small>Nederland</small>`);
+            
+            // Add to municipality layer
+            municipalityLayer.addLayer(geoJsonLayer);
+            loadedCount++;
 
-              polygon.bindPopup(`<strong>${municipalityName}</strong><br><small>${country}</small>`);
-              municipalityLayer.addLayer(polygon);
-              loadedCount++;
-            }
           } catch (err) {
             console.warn(`Error processing ${municipalityName}:`, err);
           }
@@ -1413,14 +1403,14 @@ async function loadMunicipalitiesFromOverpass() {
       }
     });
 
-    console.log(`Successfully loaded ${loadedCount} key municipalities`);
+    console.log(`Successfully loaded ${loadedCount} Dutch municipalities from GeoJSON`);
 
     if (loadedCount === 0) {
-      throw new Error('No municipalities could be processed');
+      throw new Error('No municipalities could be processed from GeoJSON');
     }
 
   } catch (error) {
-    console.error('Error loading municipalities:', error);
+    console.error('Error loading municipalities from GeoJSON:', error);
     console.log('Loading fallback municipalities...');
     loadProfessionalMunicipalities();
   }
