@@ -783,7 +783,6 @@ button {
 /* === List Tabs === */
 .list-tabs {
   display: flex;
-  border-bottom: 2px solid #e0e0e0;
   margin-bottom: 0;
   gap: 0;
 }
@@ -796,6 +795,7 @@ button {
   cursor: pointer;
   transition: all 0.2s;
   font-weight: 500;
+  margin-right: 0.5em;
 }
 
 .list-tab:hover {
@@ -1173,7 +1173,8 @@ button {
 }
 
 #formOverlay.open {
-  display: block;}
+  display: block;
+}
 
 /* === Filter form styling === */
 #filtersForm {
@@ -1268,7 +1269,9 @@ button {
 .filter-actions button:disabled {
   background: #6c757d;
   cursor: not-allowed;
-};
+}
+
+;
 }
 
 /* === Advanced Filters === */
