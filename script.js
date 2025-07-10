@@ -13,6 +13,70 @@ let userLocationMarker = null;
 let userLocation = null;
 let savedFiltersData = [];
 
+// Geocoding functions
+async function geocodeAddress(street, zip, city) {
+  if (!street && !zip && !city) {
+    return null;
+  }
+
+  // Build address string
+  const addressParts = [];
+  if (street) addressParts.push(street);
+  if (zip) addressParts.push(zip);
+  if (city) addressParts.push(city);
+  
+  const address = addressParts.join(', ');
+  
+  try {
+    // Use Nominatim OpenStreetMap geocoding service
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
+    const results = await response.json();
+    
+    if (results && results.length > 0) {
+      return {
+        lat: parseFloat(results[0].lat),
+        lng: parseFloat(results[0].lon)
+      };
+    }
+  } catch (error) {
+    console.warn('Geocoding failed for address:', address, error);
+  }
+  
+  return null;
+}
+
+async function processDataWithGeocoding(data) {
+  const processedData = [];
+  
+  for (const item of data) {
+    const processedItem = { ...item };
+    
+    // Check if coordinates are missing or invalid
+    if (!processedItem.Latitude || !processedItem.Longitude || 
+        processedItem.Latitude === 0 || processedItem.Longitude === 0) {
+      
+      // Try to geocode from address fields
+      const coords = await geocodeAddress(
+        processedItem.Street,
+        processedItem.Zip,
+        processedItem.City
+      );
+      
+      if (coords) {
+        processedItem.Latitude = coords.lat;
+        processedItem.Longitude = coords.lng;
+        console.log(`Geocoded ${processedItem.Name}: ${coords.lat}, ${coords.lng}`);
+      } else {
+        console.warn(`Could not geocode ${processedItem.Name}`);
+      }
+    }
+    
+    processedData.push(processedItem);
+  }
+  
+  return processedData;
+}
+
 // Google Analytics 4 Event Tracking
 function trackEvent(eventName, parameters = {}) {
   if (typeof gtag === 'function') {
@@ -1124,8 +1188,9 @@ if (isMapPage && !isInfoPage && !isOverPage) {
       // Data laden
       fetch('opportunities.json')
         .then(res => res.json())
-        .then(data => {
-          window.data = data;
+        .then(async data => {
+          // Process data and geocode missing coordinates
+          window.data = await processDataWithGeocoding(data);
 
           // Track data load success
           trackEvent('data_load_success', {

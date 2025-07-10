@@ -1233,18 +1233,29 @@ button {
 }
 
 /* === Filter actions === */
-#filtersForm .filter-actions {
+.filter-actions {
   margin: 1.5rem 0;
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
   justify-content: center;
-  background: none !important;
-  border: none !important;
-  padding: 0 !important;
+  background: none;
+  border: none;
+  padding: 0;
+  position: relative;
+  width: 100%;
 }
 
-#filtersForm .filter-actions button {
+#filtersForm .filter-actions {
+  background: none;
+  border: none;
+  padding: 0;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.filter-actions button {
   background: rgb(38, 123, 41);
   color: white;
   border: none;
@@ -1253,13 +1264,14 @@ button {
   cursor: pointer;
   font-weight: bold;
   transition: background 0.2s;
+  position: relative;
 }
 
-#filtersForm .filter-actions button:hover {
+.filter-actions button:hover {
   background: #267b29;
 }
 
-#filtersForm .filter-actions button:disabled {
+.filter-actions button:disabled {
   background: #6c757d;
   cursor: not-allowed;
 }
