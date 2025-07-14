@@ -1337,8 +1337,6 @@ button {
   color: #333;
   font-weight: bold;
   font-size: 1.1rem;
-  border-bottom: 2px solid rgb(38, 123, 41);
-  padding-bottom: 0.25rem;
 }
 
 #filterOverlay label {
@@ -1358,4 +1356,61 @@ button {
 #filterOverlay input[type="checkbox"],
 #filterOverlay input[type="radio"] {
   margin-right: 0.5rem;
+}
+
+/* === Advanced Filters Accordion === */
+.advanced-filters {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-top: 1rem;
+}
+
+.advanced-filters-header {
+  background: #f8f9fa;
+  padding: 1rem;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.advanced-filters-header:hover {
+  background: #e9ecef;
+}
+
+.advanced-filters-header a {
+  color: rgb(38, 123, 41);
+  text-decoration: none;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.advanced-filters-header a::after {
+  content: '▼';
+  transition: transform 0.2s;
+  font-size: 0.8rem;
+}
+
+.advanced-filters.open .advanced-filters-header a::after {
+  transform: rotate(180deg);
+}
+
+.advanced-filters-content {
+  display: none;
+  padding: 1rem;
+  border-top: 1px solid #ddd;
+}
+
+.advanced-filters.open .advanced-filters-content {
+  display: block;
+}
+
+.filter-group {
+  margin-bottom: 1.5rem;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
 }

@@ -963,7 +963,12 @@ function getActiveFilters() {
   // Get municipality filter
   const municipalitySelect = document.getElementById('municipalitySelect');
   if (municipalitySelect && municipalitySelect.selectedOptions.length > 0) {
-    filters['Municipality'] = Array.from(municipalitySelect.selectedOptions).map(option => option.value);
+    const selectedValues = Array.from(municipalitySelect.selectedOptions)
+      .map(option => option.value)
+      .filter(value => value && value.trim()); // Only include non-empty values
+    if (selectedValues.length > 0) {
+      filters['Municipality'] = selectedValues;
+    }
   }
   
   return filters;
@@ -1571,7 +1576,15 @@ async function loadDutchMunicipalities() {
             }
           });
 
-          geoJsonLayer.bindPopup(`<strong>${municipalityName}</strong><br><small>Nederland</small>`);
+          // Optimized popup consistent with German municipalities
+          const popupContent = `
+            <div class="municipality-popup">
+              <h4>${municipalityName}</h4>
+              <hr>
+              <small>Klik voor meer details over gezond bouwen kansen in deze gemeente</small>
+            </div>
+          `;
+          geoJsonLayer.bindPopup(popupContent);
           municipalityLayer.addLayer(geoJsonLayer);
           loadedCount++;
 
@@ -2497,7 +2510,11 @@ function updateMap() {
     // Municipality filter - check against City field
     let municipalityMatch = true;
     if (filters['Municipality'] && filters['Municipality'].length > 0) {
-      municipalityMatch = filters['Municipality'].includes(d.City);
+      // Only apply municipality filter if municipalities are actually selected
+      const selectedMunicipalities = filters['Municipality'].filter(m => m && m.trim());
+      if (selectedMunicipalities.length > 0) {
+        municipalityMatch = selectedMunicipalities.includes(d.City);
+      }
     }
 
     // Text filter
