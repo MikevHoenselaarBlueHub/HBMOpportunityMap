@@ -1448,7 +1448,13 @@ async function loadGermanMunicipalities() {
 
     const geojsonData = await response.json();
 
-    if (!geojsonData.features || geojsonData.features.length === 0) {
+    // Handle GADM format which might have different structure
+    let features = geojsonData.features || geojsonData.geometry || [];
+    if (!Array.isArray(features) && geojsonData.type === "Feature") {
+      features = [geojsonData];
+    }
+
+    if (!features || features.length === 0) {
       console.warn('No German GeoJSON features found');
       return;
     }
@@ -2490,12 +2496,12 @@ function updateMap() {
     // Load municipality boundaries first (essential)
     loadMunicipalityBoundaries();
     
-    // Load all data layers immediately
-    loadAirQualityData();
-    loadEnergyLabelsData();
-    loadGreenSpacesData();
-    loadNoiseZonesData();
-    loadBuildingAgesData();
+    // Initialize layers as empty - load on demand
+    airQualityLayer = L.layerGroup();
+    energyLabelsLayer = L.layerGroup();
+    greenSpacesLayer = L.layerGroup();
+    noiseZonesLayer = L.layerGroup();
+    buildingAgesLayer = L.layerGroup();
     
     // Load additional data layers when layer is activated (for lazy loading if needed)
     map.on('overlayadd', (e) => {

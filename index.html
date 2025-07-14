@@ -27,6 +27,8 @@
             type="text"
             id="mapSearch"
             placeholder="Doorzoek de kansenkaart"
+            aria-label="Zoek in kansenkaart"
+            role="searchbox"
           />
           <button id="searchBtn">
             <svg
@@ -65,7 +67,7 @@
 
     <div class="map-controls">
       <div class="map-controls-row">
-        <button id="filterBtn">Filters</button>
+        <button id="filterBtn" aria-label="Open filter opties" aria-expanded="false">Filters</button>
         <div class="filter-dropdown">
           <button id="optionsBtn">⚙️ Opties</button>
           <div class="filter-dropdown-menu">
