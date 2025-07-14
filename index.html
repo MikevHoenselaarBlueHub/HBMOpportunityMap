@@ -233,20 +233,20 @@
             <button class="list-tab" data-tab="experts">Experts</button>
           </div>
         </div>
-        
+
         <div class="tab-content">
           <div id="buildingsTab" class="tab-pane active">
             <div id="opportunitiesList" class="opportunities-list">
               <!-- List items will be populated by JavaScript -->
             </div>
           </div>
-          
+
           <div id="companiesTab" class="tab-pane">
             <div id="companiesList" class="opportunities-list">
               <!-- Company items will be populated by JavaScript -->
             </div>
           </div>
-          
+
           <div id="expertsTab" class="tab-pane">
             <div class="experts-content">
               <h2>Ben jij expert in bouwen of installeren? Dan zoeken we jou!</h2>
@@ -330,3 +330,340 @@
     <script src="script.js"></script>
   </body>
 </html>
+```
+
+Final Answer:
+```html
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kansenkaart</title>
+    <link rel="icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  </head>
+  <body>
+    <header>
+      <div id="branding">
+        <a href="index.html" class="logo-link">
+          <img
+            src="logo-hbm.svg"
+            alt="HBM Logo"
+            id="logo"
+            onerror="this.style.display='none'"
+          />
+          <span id="title">Kansenkaart</span>
+        </a>
+      </div>
+      <div class="header-controls">
+        <div class="search-container">
+          <input
+            type="text"
+            id="mapSearch"
+            placeholder="Doorzoek de kansenkaart"
+            aria-label="Zoek in kansenkaart"
+            role="searchbox"
+          />
+          <button id="searchBtn">
+            <svg
+              class="search-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+              <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <button id="hamburger">&#9776;</button>
+      <nav id="menuOverlay" class="overlay">
+        <a href="#" id="closeMenu" class="close-btn">
+          <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
+        </a>
+        <a href="index.html" class="active" data-i18n="opportunityMap"
+          >Kansenkaart</a
+        >
+        <a href="info.html" data-i18n="moreInfo">Meer info</a>
+        <a href="over.html" data-i18n="aboutHBM">Over HBM</a>
+        <a href="contact.html" data-i18n="contact">Contact</a>
+      </nav>
+      <nav id="desktopNav">
+        <a href="index.html" class="active" data-i18n="opportunityMap"
+          >Kansenkaart</a
+        >
+        <a href="info.html" data-i18n="moreInfo">Meer info</a>
+        <a href="over.html" data-i18n="aboutHBM">Over HBM</a>
+        <a href="contact.html" data-i18n="contact">Contact</a>
+      </nav>
+    </header>
+
+    <div class="map-controls">
+      <div class="map-controls-row">
+        <button id="filterBtn" aria-label="Open filter opties" aria-expanded="false">Filters</button>
+        <div class="filter-dropdown">
+          <button id="optionsBtn">⚙️ Opties</button>
+          <div class="filter-dropdown-menu">
+            <button id="exportBtn" class="dropdown-item">
+              Exporteer resultaten
+            </button>
+            <button id="shareBtn" class="dropdown-item">
+              Deel
+            </button>
+            <button id="saveCurrentFiltersBtn" class="dropdown-item">
+              Huidige filter opslaan
+            </button>
+            <button id="loadSavedFiltersBtn" class="dropdown-item">
+              Opgeslagen filters
+            </button>
+          </div>
+        </div>
+      </div>
+      <button id="viewToggle" class="mobile-only">
+        <span id="viewToggleText">Lijst</span>
+      </button>
+    </div>
+    <div id="filterOverlay" class="overlay">
+      <a href="#" id="closeFilters" class="close-btn">
+        <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
+      </a>
+      <form id="filtersForm">
+        <h2 data-i18n="filters">Filters</h2>
+        <div class="filter-actions">
+          <button type="button" id="selectAll">Selecteer alles</button>
+          <button type="button" id="selectNone">Selecteer geen</button>
+        </div>
+        <div>
+          <strong data-i18n="projectType">Type project</strong>
+          <div id="ProjectType"></div>
+        </div>
+        <div>
+          <strong data-i18n="organizationType">Organisatietype</strong>
+          <div id="OrganizationType"></div>
+        </div>
+        <div>
+          <strong data-i18n="organizationField">Vakgebied</strong>
+          <div id="OrganizationField"></div>
+        </div>
+        <div>
+          <strong data-i18n="hbmTopic">Thema</strong>
+          <div id="HBMTopic"></div>
+        </div>
+        <div>
+          <strong data-i18n="hbmCharacteristics">Kenmerken</strong>
+          <div id="HBMCharacteristics"></div>
+        </div>
+        <div>
+          <strong data-i18n="hbmSector">Sector</strong>
+          <div id="HBMSector"></div>
+        </div>
+        <div>
+          <label
+            ><input
+              type="checkbox"
+              name="HBMType"
+              value="Project"
+              checked
+              onchange="updateFilterState()"
+            />
+            <span data-i18n="projects">Projecten</span></label
+          >
+          <label
+            ><input
+              type="checkbox"
+              name="HBMType"
+              value="Bedrijf"
+              checked
+              onchange="updateFilterState()"
+            />
+            <span data-i18n="companies">Bedrijven</span></label
+          >
+        </div>
+
+        <!-- Advanced Filters -->
+        <div class="advanced-filters" id="advancedFilters">
+          <div class="advanced-filters-header" onclick="toggleAdvancedFilters()">
+            <a href="#" data-i18n="advancedFilters">Geavanceerde filters</a>
+          </div>
+          <div class="advanced-filters-content">
+
+          <div class="filter-group">
+            <strong data-i18n="locationFilter">Locatie Filter</strong>
+            <div class="location-filter-controls">
+              <button type="button" id="useMyLocation" class="location-btn">
+                <span data-i18n="useMyLocation">📍 Mijn locatie gebruiken</span>
+              </button>
+              <div class="distance-filter" id="distanceFilter" style="display: none;">
+                <label for="distanceRange" data-i18n="maxDistance">Maximale afstand: </label>
+                <input type="range" id="distanceRange" min="1" max="100" value="25" />
+                <span id="distanceValue">25 km</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <strong data-i18n="textFilter">Tekst Filter</strong>
+            <input type="text" id="advancedTextFilter" placeholder="Zoek in alle velden..." />
+          </div>
+
+          <div class="filter-group">
+            <strong data-i18n="combinationFilter">Filter Combinatie</strong>
+            <div class="combination-controls">
+              <label>
+                <input type="radio" name="filterMode" value="AND" checked />
+                <span data-i18n="allFilters">Alle filters moeten voldoen (EN)</span>
+              </label>
+              <label>
+                <input type="radio" name="filterMode" value="OR" />
+                <span data-i18n="anyFilter">Minstens één filter moet voldoen (OF)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <strong data-i18n="municipalityFilter">Gemeente Filter</strong>
+            <div class="municipality-filter-controls">
+              <select id="municipalitySelect">
+                <option value="" data-i18n="selectMunicipality">Selecteer gemeente voor bouwjaren...</option>
+              </select>
+              <small data-i18n="municipalityFilterHelp">Selecteer een gemeente om de bouwjaren laag per wijk te activeren</small>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <strong data-i18n="savedFilters">Opgeslagen Filters</strong>
+            <div class="saved-filters-controls">
+              <button type="button" id="saveCurrentFilters" class="save-filters-btn">
+                <span data-i18n="saveFilters">Huidige filters opslaan</span>
+              </button>
+              <select id="savedFiltersSelect">
+                <option value="" data-i18n="selectSavedFilter">Selecteer opgeslagen filter...</option>
+              </select>
+              <button type="button" id="deleteSavedFilter" class="delete-filters-btn">
+                <span data-i18n="deleteFilter">Verwijder</span>
+              </button>
+            </div>
+          </div>
+        </div>
+          </div>
+        </div>
+
+        <div class="filter-actions">
+          <button type="button" id="applyFilters">Toepassen</button>
+        </div>
+      </form>
+    </div>
+
+    <main class="main-content">
+      <div id="map" class="map-container"></div>
+      <div id="listContainer" class="list-container">
+        <div class="list-header">
+          <h2>Kansen</h2>
+          <span id="resultsCount" class="results-count">0 resultaten</span>
+          <div class="list-tabs">
+            <button class="list-tab active" data-tab="buildings">Gezonde gebouwen <span id="buildingsCount">(0)</span></button>
+            <button class="list-tab" data-tab="companies">Bedrijven <span id="companiesCount">(0)</span></button>
+            <button class="list-tab" data-tab="experts">Experts</button>
+          </div>
+        </div>
+
+        <div class="tab-content">
+          <div id="buildingsTab" class="tab-pane active">
+            <div id="opportunitiesList" class="opportunities-list">
+              <!-- List items will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <div id="companiesTab" class="tab-pane">
+            <div id="companiesList" class="opportunities-list">
+              <!-- Company items will be populated by JavaScript -->
+            </div>
+          </div>
+
+          <div id="expertsTab" class="tab-pane">
+            <div class="experts-content">
+              <h2>Ben jij expert in bouwen of installeren? Dan zoeken we jou!</h2>
+              <p>Healthy Building Movement (HBM) brengt gezond bouwen naar de praktijk. Ons innovatieve karakter berust op de samenwerking tussen wetenschap en bedrijfsleven.</p>
+              <p>Door middel van bijeenkomsten waar experts uit de praktijk samen komen (expert pools) willen we bestaande kennis uit toegepast wetenschappelijk onderzoek toegankelijk maken voor de praktijk. In deze groepen met deskundigen ontwikkelen en optimaliseren we producten en diensten.</p>
+              <a href="https://healthybuildingmovement.com/expert-pools/" target="_blank" rel="noopener noreferrer" class="btn-primary experts-cta">
+                Wordt expert bij HBM
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <div id="mapLegend" class="map-legend">
+      <h4 data-i18n="legend">Legenda</h4>
+      <div class="legend-item">
+        <img
+          src="icons/marker-company.svg"
+          alt="Bedrijf marker"
+          class="legend-icon"
+        />
+        <span data-i18n="companies">Bedrijven</span>
+      </div>
+      <div class="legend-item">
+        <img
+          src="icons/marker-project.svg"
+          alt="Project marker"
+          class="legend-icon"
+        />
+        <span data-i18n="projects">Projecten</span>
+      </div>
+    </div>
+
+    <div id="detailPanel">
+      <a href="#" id="closeDetail" class="close-btn">
+        <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
+      </a>
+      <!-- detail content -->
+    </div>
+
+    <div id="formOverlay"></div>
+
+    <!-- Google Analytics 4 -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-2RMYQV239Q"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-2RMYQV239Q", {
+        page_title: "HBM Kansenkaart",
+        custom_map: {
+          custom_parameter_1: "map_interaction",
+        },
+      });
+    </script>
+
+    <script
+      src="https://unpkg.com/leaflet/dist/leaflet.js"
+      onload="console.log('Leaflet loaded successfully')"
+      onerror="console.error('Failed to load Leaflet')"
+    ></script>
+    <script
+      src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"
+      onload="console.log('MarkerCluster loaded successfully')"
+      onerror="console.warn('MarkerCluster not available')"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"
+    />
+    <script src="script.js"></script>
+  </body>
+</html>
+</replit_final_file>

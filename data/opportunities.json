@@ -1,0 +1,103 @@
+// project_root/data/opportunities.json
+[
+  {
+    "Name": "Demo Project Eindhoven",
+    "ProjectType": "Nieuwbouw",
+    "OrganizationType": "Architect",
+    "OrganizationField": "Architectuur",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Passiefhuis",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Professioneel voorbeeldproject met focus op gezond bouwen in Eindhoven.",
+    "Street": "Rachelsmolen 1",
+    "Zip": "5612MA",
+    "City": "Eindhoven",
+    "Latitude": 51.4516693,
+    "Longitude": 5.4808236
+  },
+  {
+    "Name": "Another Valid Project",
+    "ProjectType": "Renovatie",
+    "OrganizationType": "Developer",
+    "OrganizationField": "Bouw",
+    "HBMTopic": "Energiebesparing",
+    "HBMCharacteristics": "Hoog rendement",
+    "HBMSector": "Woningbouw",
+    "HBMType": "Project",
+    "Description": "Een ander voorbeeldproject gericht op energiebesparing.",
+    "Street": "Example Street 10",
+    "Zip": "1234AB",
+    "City": "Amsterdam",
+    "Latitude": 52.3667,
+    "Longitude": 4.8945
+  }
+]
+
+// project_root/data/nl-gemeenten/nl_gemeenten.geojson
+// Dummy GeoJSON data for Dutch municipalities
+
+// project_root/data/de-gemeenten/de_gemeenten.geojson
+// Dummy GeoJSON data for German municipalities
+
+// project_root/css/style.css
+/* Basic CSS styling */
+body {
+    font-family: sans-serif;
+}
+
+.municipality {
+    stroke: black;
+    stroke-width: 0.5px; /* Thinner lines by default */
+    fill: lightgray;
+}
+
+.highlighted {
+    stroke-width: 2px; /* Thicker lines when highlighted */
+}
+
+#map {
+    width: 800px;
+    height: 600px;
+    border: 1px solid black;
+}
+
+// project_root/js/script.js
+// Basic JavaScript for map interaction
+function initMap() {
+    console.log("Map initialized");
+}
+
+initMap();
+
+// project_root/config/app.config.json
+{
+  "appName": "Gezond Bouwen Dashboard",
+  "defaultLanguage": "nl",
+  "mapSettings": {
+    "center": [52.0, 5.0],
+    "zoom": 7
+  }
+}
+
+// project_root/utils/utils.js
+// Utility functions
+
+function logMessage(message) {
+    console.log("UTILITY: " + message);
+}
+
+// project_root/index.html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gezond Bouwen Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <h1>Gezond Bouwen</h1>
+    <div id="map"></div>
+    <script src="js/script.js"></script>
+    <script src="utils/utils.js"></script>
+</body>
+</html>

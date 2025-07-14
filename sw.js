@@ -1,108 +1,98 @@
 
-const CACHE_NAME = 'hbm-kansenkaart-v2';
-const STATIC_CACHE = 'static-v2';
-const DATA_CACHE = 'data-v2';
-
-const staticAssets = [
+const CACHE_NAME = 'hbm-kansenkaart-v1.2';
+const urlsToCache = [
   '/',
   '/index.html',
-  '/info.html',
-  '/over.html',
-  '/contact.html',
   '/style.css',
   '/script.js',
+  '/config/map-config.js',
+  '/config/utils.js',
+  '/icons/marker-project.svg',
+  '/icons/marker-company.svg',
+  '/icons/close.svg',
+  '/logo-hbm.svg',
+  '/data/opportunities.json',
   '/translations/nl.json',
   '/translations/en.json',
   '/translations/de.json',
-  '/icons/close.svg',
-  '/icons/marker-company.svg',
-  '/icons/marker-project.svg',
-  '/favicon.ico'
+  // External dependencies
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+  'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css',
+  'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css',
+  'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js'
 ];
 
-const externalAssets = [
-  'https://unpkg.com/leaflet/dist/leaflet.css',
-  'https://unpkg.com/leaflet/dist/leaflet.js',
-  'https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js',
-  'https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css',
-  'https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css',
-  'https://healthybuildingmovement.com/resources/uploads/2023/11/Logo.svg'
-];
-
-const dataAssets = [
-  '/opportunities.json'
-];
-
-self.addEventListener('install', event => {
+// Install event - cache resources
+self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
+      .then(function(cache) {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
+      })
+      .catch(function(error) {
+        console.error('Cache install failed:', error);
       })
   );
 });
 
-self.addEventListener('fetch', event => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Handle data requests (opportunities.json) with network-first strategy
-  if (dataAssets.some(asset => request.url.includes(asset))) {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          if (response.ok) {
-            const responseClone = response.clone();
-            caches.open(DATA_CACHE).then(cache => {
-              cache.put(request, responseClone);
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          return caches.match(request);
-        })
-    );
+// Fetch event - serve from cache when offline
+self.addEventListener('fetch', function(event) {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') {
     return;
   }
 
-  // Handle static assets with cache-first strategy
-  if (staticAssets.some(asset => request.url.endsWith(asset)) || 
-      externalAssets.some(asset => request.url.includes(asset))) {
-    event.respondWith(
-      caches.match(request)
-        .then(response => {
-          if (response) {
-            return response;
-          }
-          return fetch(request).then(response => {
-            if (response.ok) {
-              const responseClone = response.clone();
-              caches.open(STATIC_CACHE).then(cache => {
-                cache.put(request, responseClone);
-              });
-            }
-            return response;
-          });
-        })
-    );
+  // Skip external API calls (like geocoding)
+  if (event.request.url.includes('nominatim.openstreetmap.org')) {
     return;
   }
 
-  // Default strategy for other requests
   event.respondWith(
-    caches.match(request)
-      .then(response => response || fetch(request))
+    caches.match(event.request)
+      .then(function(response) {
+        // Return cached version or fetch from network
+        if (response) {
+          return response;
+        }
+
+        return fetch(event.request).then(
+          function(response) {
+            // Check if we received a valid response
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+
+            // Clone the response for caching
+            var responseToCache = response.clone();
+
+            caches.open(CACHE_NAME)
+              .then(function(cache) {
+                cache.put(event.request, responseToCache);
+              });
+
+            return response;
+          }
+        );
+      })
+      .catch(function() {
+        // Return offline fallback for navigation requests
+        if (event.request.destination === 'document') {
+          return caches.match('/index.html');
+        }
+      })
   );
 });
 
-self.addEventListener('activate', event => {
+// Activate event - clean up old caches
+self.addEventListener('activate', function(event) {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then(function(cacheNames) {
       return Promise.all(
-        cacheNames.map(cacheName => {
+        cacheNames.map(function(cacheName) {
           if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -110,3 +100,15 @@ self.addEventListener('activate', event => {
     })
   );
 });
+
+// Handle background sync for offline form submissions
+self.addEventListener('sync', function(event) {
+  if (event.tag === 'background-sync') {
+    event.waitUntil(doBackgroundSync());
+  }
+});
+
+function doBackgroundSync() {
+  // Handle any pending offline actions
+  return Promise.resolve();
+}

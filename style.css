@@ -1268,18 +1268,41 @@ button {
 
 /* === Municipality popup styling === */
 .municipality-popup {
-  font-family: Arial, sans-serif;
+  padding: 15px;
+  max-width: 250px;
 }
 
-.municipality-popup h4 {
+.municipality-popup h3 {
+  margin: 0 0 10px 0;
   color: rgb(38, 123, 41);
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .municipality-popup p {
-  margin: 0.25rem 0;
-  font-size: 0.9rem;
+  margin: 5px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.municipality-popup {
+  padding: 15px;
+  max-width: 250px;
+}
+
+.municipality-popup h3 {
+  margin: 0 0 10px 0;
+  color: rgb(38, 123, 41);
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.municipality-popup p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
 }
 
 .municipality-popup hr {
