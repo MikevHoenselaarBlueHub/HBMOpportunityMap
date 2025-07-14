@@ -1,5 +1,3 @@
-// Configuration and utilities will be loaded via script tags
-// These will be available as global variables
 
 // Global variables
 let map;
@@ -91,10 +89,7 @@ if (isMapPage && !isInfoPage && !isOverPage) {
           // Initialize map after data is loaded
           initMap();
 
-          // Load municipality boundaries
-          loadMunicipalityBoundaries();
-
-          // Create markers
+          // Create markers first
           createMarkers(window.data);
 
           // Populate filter dropdowns
@@ -111,6 +106,11 @@ if (isMapPage && !isInfoPage && !isOverPage) {
 
           // Initialize list view
           initializeListView();
+
+          // Show legend
+          showLegend();
+
+          console.log('Map initialization complete');
         })
         .catch(error => {
           console.error('Error loading data:', error);
@@ -118,7 +118,6 @@ if (isMapPage && !isInfoPage && !isOverPage) {
           window.data = [];
           // Initialize map even if data fails to load
           initMap();
-          loadMunicipalityBoundaries();
         });
     } else {
       console.error('Leaflet not loaded');
@@ -275,24 +274,34 @@ function initMap() {
   }).addTo(map);
 
   // Add simplified tile layer
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors © CARTO',
     maxZoom: 18
   }).addTo(map);
 
-  // Add municipality layer
-  municipalityLayer = L.layerGroup().addTo(map);
-
   // Add markers layer
   map.addLayer(markers);
+
+  // Add map controls
+  addMapControls();
+}
+
+function addMapControls() {
+  // Add layer control for municipalities
+  const layerControl = L.control.layers({}, {
+    'Gemeentegrenzen': municipalityLayer
+  }, {
+    position: 'topright'
+  }).addTo(map);
+
+  // Initialize municipality layer but don't add to map by default
+  municipalityLayer = L.layerGroup();
+  
+  // Load municipality boundaries
+  loadMunicipalityBoundaries();
 }
 
 function loadMunicipalityBoundaries() {
-  // Initialize municipality layer first
-  if (!municipalityLayer) {
-    municipalityLayer = L.layerGroup();
-  }
-
   // Load municipalities using Netherlands GeoJSON data
   loadMunicipalitiesFromOverpass();
 }
@@ -679,7 +688,6 @@ function createMarkers(data) {
 }
 
 function createPopupContent(item) {
-
   return `
     <div class="popup-content">
       <h3>${item.Name || 'Onbekend'}</h3>
@@ -766,9 +774,9 @@ function formatArray(value) {
 }
 
 function updateResultCount(count) {
-  const resultElement = document.querySelector('.filter-results');
+  const resultElement = document.getElementById('resultsCount');
   if (resultElement) {
-    resultElement.textContent = `${count} resultaten gevonden`;
+    resultElement.textContent = `${count} resultaten`;
   }
 }
 
@@ -792,10 +800,15 @@ function getCurrentLocation() {
       // Store user location
       currentFilter.userLocation = { lat: latitude, lng: longitude };
 
+      // Get current distance value
+      const distanceRange = document.getElementById('distanceRange');
+      const radius = distanceRange ? parseInt(distanceRange.value) * 1000 : 25000;
+      currentFilter.radius = radius;
+
       // Center map on user location
       map.setView([latitude, longitude], 12);
 
-      // Add user location marker
+      // Add user location marker and circle
       if (userLocationCircle) {
         map.removeLayer(userLocationCircle);
       }
@@ -804,13 +817,19 @@ function getCurrentLocation() {
         color: '#3388ff',
         fillColor: '#3388ff',
         fillOpacity: 0.2,
-        radius: currentFilter.radius || 5000
+        radius: radius
       }).addTo(map);
 
+      // Show distance filter
+      const distanceFilter = document.getElementById('distanceFilter');
+      if (distanceFilter) {
+        distanceFilter.style.display = 'block';
+      }
+
       // Update location button
-      const locationBtn = document.querySelector('.location-btn');
+      const locationBtn = document.getElementById('useMyLocation');
       if (locationBtn) {
-        locationBtn.textContent = 'Locatie gevonden';
+        locationBtn.innerHTML = '<span>📍 Locatie actief</span>';
         locationBtn.classList.add('active');
       }
 
@@ -851,9 +870,16 @@ function createHoverLabel() {
   });
 }
 
+function showLegend() {
+  const legend = document.getElementById('mapLegend');
+  if (legend) {
+    legend.style.display = 'block';
+  }
+}
+
 function initializeTabs() {
-  const tabButtons = document.querySelectorAll('.tab-btn');
-  const tabContents = document.querySelectorAll('.tab-content');
+  const tabButtons = document.querySelectorAll('.list-tab');
+  const tabContents = document.querySelectorAll('.tab-pane');
 
   tabButtons.forEach(button => {
     button.addEventListener('click', () => {
@@ -865,7 +891,10 @@ function initializeTabs() {
 
       // Add active class to clicked tab
       button.classList.add('active');
-      document.getElementById(target).classList.add('active');
+      const targetPane = document.getElementById(target + 'Tab');
+      if (targetPane) {
+        targetPane.classList.add('active');
+      }
 
       // Track tab switch
       trackEvent('tab_switch', { tab: target });
@@ -880,41 +909,55 @@ function populateFilters(data) {
   ).filter(Boolean))];
 
   const organizations = [...new Set(data.map(item => item.OrganizationType).filter(Boolean))];
+  const organizationFields = [...new Set(data.flatMap(item => 
+    Array.isArray(item.OrganizationField) ? item.OrganizationField : [item.OrganizationField]
+  ).filter(Boolean))];
   const topics = [...new Set(data.flatMap(item => 
     Array.isArray(item.HBMTopic) ? item.HBMTopic : [item.HBMTopic]
   ).filter(Boolean))];
+  const characteristics = [...new Set(data.flatMap(item => 
+    Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics : [item.HBMCharacteristics]
+  ).filter(Boolean))];
   const sectors = [...new Set(data.map(item => item.HBMSector).filter(Boolean))];
 
-  // Populate dropdowns
-  populateSelect('project-type-filter', projectTypes);
-  populateSelect('organization-filter', organizations);
-  populateSelect('topic-filter', topics);
-  populateSelect('sector-filter', sectors);
-  populateSelect('municipality-filter', municipalities.map(m => m.name));
+  // Populate filter sections
+  populateFilterSection('ProjectType', projectTypes);
+  populateFilterSection('OrganizationType', organizations);
+  populateFilterSection('OrganizationField', organizationFields);
+  populateFilterSection('HBMTopic', topics);
+  populateFilterSection('HBMCharacteristics', characteristics);
+  populateFilterSection('HBMSector', sectors);
+
+  // Populate municipality select
+  const municipalitySelect = document.getElementById('municipalitySelect');
+  if (municipalitySelect) {
+    municipalities.forEach(municipality => {
+      const option = document.createElement('option');
+      option.value = municipality.name;
+      option.textContent = `${municipality.name} (${municipality.country})`;
+      municipalitySelect.appendChild(option);
+    });
+  }
 }
 
-function populateSelect(selectId, options) {
-  const select = document.getElementById(selectId);
-  if (!select) return;
+function populateFilterSection(sectionId, options) {
+  const section = document.getElementById(sectionId);
+  if (!section) return;
 
-  // Clear existing options except "all"
-  const allOption = select.querySelector('option[value="all"]');
-  select.innerHTML = '';
-  if (allOption) {
-    select.appendChild(allOption);
-  }
+  section.innerHTML = ''; // Clear existing content
 
-  // Add new options
   options.forEach(option => {
-    const optionElement = document.createElement('option');
-    optionElement.value = option;
-    optionElement.textContent = option;
-    select.appendChild(optionElement);
+    const label = document.createElement('label');
+    label.innerHTML = `
+      <input type="checkbox" name="${sectionId}" value="${option}" onchange="updateFilterState()">
+      <span>${option}</span>
+    `;
+    section.appendChild(label);
   });
 }
 
 function initAutocomplete(data) {
-  const searchInput = document.getElementById('search-input');
+  const searchInput = document.getElementById('mapSearch');
   if (!searchInput) return;
 
   const suggestions = data.map(item => item.Name).filter(Boolean);
