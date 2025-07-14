@@ -54,8 +54,19 @@ if (isMapPage && !isInfoPage && !isOverPage) {
 
       // Data laden using config
       fetch(dataPaths.opportunities)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
         .then(async data => {
+          // Ensure data is an array
+          if (!Array.isArray(data)) {
+            console.error('Data is not an array:', data);
+            data = [];
+          }
+
           // Process data and geocode missing coordinates
           window.data = await processDataWithGeocoding(data);
 
@@ -76,6 +87,8 @@ if (isMapPage && !isInfoPage && !isOverPage) {
         })
         .catch(error => {
           console.error('Error loading data:', error);
+          // Initialize empty data array
+          window.data = [];
           // Initialize map even if data fails to load
           initMap();
           loadMunicipalityBoundaries();
@@ -927,7 +940,21 @@ function showDetails(itemName) {
   }
 }
 
+// Add missing functions
+function updateFilterState() {
+  applyFilters();
+}
+
+function toggleAdvancedFilters() {
+  const advancedFilters = document.getElementById('advancedFilters');
+  if (advancedFilters) {
+    advancedFilters.classList.toggle('open');
+  }
+}
+
 // Export for global access
 window.getCurrentLocation = getCurrentLocation;
 window.showDetails = showDetails;
 window.trackEvent = trackEvent;
+window.updateFilterState = updateFilterState;
+window.toggleAdvancedFilters = toggleAdvancedFilters;
