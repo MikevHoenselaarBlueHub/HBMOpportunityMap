@@ -1439,7 +1439,7 @@ async function loadDutchMunicipalities() {
 async function loadGermanMunicipalities() {
   try {
     console.log('Loading German municipalities...');
-    const response = await fetch('de-gemeenten.geojson');
+    const response = await fetch('gadm41_DEU_4.json');
     
     if (!response.ok) {
       console.warn('German municipalities file not found, skipping...');
@@ -1448,13 +1448,13 @@ async function loadGermanMunicipalities() {
 
     const geojsonData = await response.json();
 
-    // Handle GADM format which might have different structure
-    let features = geojsonData.features || geojsonData.geometry || [];
-    if (!Array.isArray(features) && geojsonData.type === "Feature") {
-      features = [geojsonData];
+    // GADM format check
+    if (!geojsonData.features || !Array.isArray(geojsonData.features)) {
+      console.warn('Invalid GADM format - no features array found');
+      return;
     }
 
-    if (!features || features.length === 0) {
+    if (geojsonData.features.length === 0) {
       console.warn('No German GeoJSON features found');
       return;
     }
@@ -1463,10 +1463,11 @@ async function loadGermanMunicipalities() {
     let loadedCount = 0;
 
     geojsonData.features.forEach((feature) => {
-      // GADM format uses different property names
-      const municipalityName = feature.properties?.NAME_4 || feature.properties?.name || feature.properties?.NAME;
+      // GADM format uses NAME_4 for municipality names
+      const municipalityName = feature.properties?.NAME_4;
+      const state = feature.properties?.NAME_1;
 
-      if (municipalityName) {
+      if (municipalityName && feature.geometry) {
         try {
           const geoJsonLayer = L.geoJSON(feature, {
             style: {
@@ -1507,7 +1508,8 @@ async function loadGermanMunicipalities() {
             }
           });
 
-          geoJsonLayer.bindPopup(`<strong>${municipalityName}</strong><br><small>Deutschland</small>`);
+          const popupContent = `<strong>${municipalityName}</strong><br><small>${state}, Deutschland</small>`;
+          geoJsonLayer.bindPopup(popupContent);
           municipalityLayer.addLayer(geoJsonLayer);
           loadedCount++;
 
