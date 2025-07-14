@@ -1661,13 +1661,10 @@ async function loadGermanMunicipalities() {
             }
           });
 
-          // Enhanced popup with more information
+          // Optimized popup consistent with Dutch municipalities
           const popupContent = `
             <div class="municipality-popup">
               <h4>${municipalityName}</h4>
-              <p><strong>Staat:</strong> ${state}</p>
-              <p><strong>Land:</strong> Deutschland</p>
-              <p><strong>Type:</strong> Gemeente</p>
               <hr>
               <small>Klik voor meer details over gezond bouwen kansen in deze gemeente</small>
             </div>
