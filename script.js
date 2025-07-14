@@ -4,7 +4,7 @@ import { calculateDistance, formatArray, debounce, isValidCoordinate, generateId
 
 // Global variables
 let map;
-let markers = L.markerClusterGroup(mapConfig.cluster);
+let markers;
 let municipalityLayer;
 let userLocationCircle;
 let currentFilter = {};
@@ -27,6 +27,9 @@ if (isMapPage && !isInfoPage && !isOverPage) {
     if (typeof L !== 'undefined') {
       // Load translations first
       await loadTranslations();
+
+      // Initialize marker cluster group
+      markers = L.markerClusterGroup(mapConfig.cluster);
 
       // Initialize icons using config
       pIcon = L.icon(mapConfig.markers.project);
@@ -79,11 +82,20 @@ if (isMapPage && !isInfoPage && !isOverPage) {
           // Create markers
           createMarkers(window.data);
 
+          // Populate filter dropdowns
+          populateFilters(window.data);
+
           // Apply initial filters
           applyFilters();
 
           // Initialize auto complete
           initAutocomplete(window.data);
+
+          // Initialize filter functionality
+          initializeFilters();
+
+          // Initialize list view
+          initializeListView();
         })
         .catch(error => {
           console.error('Error loading data:', error);
@@ -662,40 +674,20 @@ function createPopupContent(item) {
 
 // Filter functions
 function applyFilters() {
+  if (!window.data || !Array.isArray(window.data)) {
+    console.warn('No data available for filtering');
+    return;
+  }
+
   markers.clearLayers();
 
+  // Get filter values from form
+  const checkedTypes = Array.from(document.querySelectorAll('input[name="HBMType"]:checked')).map(cb => cb.value);
+  
   const filteredData = window.data.filter(item => {
-    // Type filter
-    if (currentFilter.type && currentFilter.type !== 'all') {
-      if (item.HBMType !== currentFilter.type) return false;
-    }
-
-    // Project type filter
-    if (currentFilter.projectType && currentFilter.projectType !== 'all') {
-      const projectTypes = Array.isArray(item.ProjectType) ? item.ProjectType : [item.ProjectType];
-      if (!projectTypes.includes(currentFilter.projectType)) return false;
-    }
-
-    // Organization filter
-    if (currentFilter.organization && currentFilter.organization !== 'all') {
-      if (item.OrganizationType !== currentFilter.organization) return false;
-    }
-
-    // Topic filter
-    if (currentFilter.topic && currentFilter.topic !== 'all') {
-      const topics = Array.isArray(item.HBMTopic) ? item.HBMTopic : [item.HBMTopic];
-      if (!topics.includes(currentFilter.topic)) return false;
-    }
-
-    // Sector filter
-    if (currentFilter.sector && currentFilter.sector !== 'all') {
-      if (item.HBMSector !== currentFilter.sector) return false;
-    }
-
-    // Municipality filter
-    if (currentFilter.municipality && currentFilter.municipality !== 'all') {
-      // This would need geocoding to work properly
-      // For now, we'll skip this filter
+    // Type filter (Project/Bedrijf checkboxes)
+    if (checkedTypes.length > 0 && !checkedTypes.includes(item.HBMType)) {
+      return false;
     }
 
     // Location filter (if user location is set)
@@ -713,6 +705,7 @@ function applyFilters() {
   });
 
   createMarkers(filteredData);
+  updateListView(filteredData);
   updateResultCount(filteredData.length);
 }
 
@@ -881,54 +874,219 @@ function initAutocomplete(data) {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', function() {
-  // Filter event listeners
-  const filterSelects = document.querySelectorAll('.filter-select');
-  filterSelects.forEach(select => {
-    select.addEventListener('change', function() {
-      const filterType = this.id.replace('-filter', '').replace('-', '');
-      currentFilter[filterType] = this.value === 'all' ? null : this.value;
-      applyFilters();
-
-      trackEvent('filter_change', {
-        filter_type: filterType,
-        filter_value: this.value
-      });
-    });
-  });
+  // Initialize UI components if not on map page
+  if (!isMapPage) {
+    initializeFilters();
+    initializeListView();
+    return;
+  }
 
   // Location button
-  const locationBtn = document.querySelector('.location-btn');
+  const locationBtn = document.getElementById('useMyLocation');
   if (locationBtn) {
     locationBtn.addEventListener('click', getCurrentLocation);
   }
 
-  // Radius slider
-  const radiusSlider = document.getElementById('radius-slider');
-  if (radiusSlider) {
-    radiusSlider.addEventListener('input', function() {
-      updateLocationRadius(parseInt(this.value));
-      document.getElementById('radius-value').textContent = this.value + ' km';
+  // Distance range slider
+  const distanceRange = document.getElementById('distanceRange');
+  const distanceValue = document.getElementById('distanceValue');
+  if (distanceRange && distanceValue) {
+    distanceRange.addEventListener('input', function() {
+      const value = parseInt(this.value);
+      distanceValue.textContent = value + ' km';
+      updateLocationRadius(value);
     });
   }
 
   // Search functionality
-  const searchInput = document.getElementById('search-input');
+  const searchInput = document.getElementById('mapSearch');
   if (searchInput) {
     searchInput.addEventListener('input', function() {
       const searchTerm = this.value.toLowerCase();
-      if (searchTerm) {
+      if (searchTerm && window.data) {
         const filteredData = window.data.filter(item => 
           item.Name?.toLowerCase().includes(searchTerm) ||
           item.Description?.toLowerCase().includes(searchTerm)
         );
         createMarkers(filteredData);
+        updateListView(filteredData);
         updateResultCount(filteredData.length);
       } else {
         applyFilters();
       }
     });
   }
+
+  // Initialize hamburger menu
+  const hamburger = document.getElementById('hamburger');
+  const menuOverlay = document.getElementById('menuOverlay');
+  const closeMenu = document.getElementById('closeMenu');
+
+  if (hamburger && menuOverlay) {
+    hamburger.addEventListener('click', function() {
+      menuOverlay.classList.add('open');
+    });
+  }
+
+  if (closeMenu && menuOverlay) {
+    closeMenu.addEventListener('click', function() {
+      menuOverlay.classList.remove('open');
+    });
+  }
 });
+
+// Filter UI initialization
+function initializeFilters() {
+  // Initialize filter overlay toggle
+  const filterBtn = document.getElementById('filterBtn');
+  const filterOverlay = document.getElementById('filterOverlay');
+  const closeFiltersBtn = document.getElementById('closeFilters');
+
+  if (filterBtn && filterOverlay) {
+    filterBtn.addEventListener('click', function() {
+      filterOverlay.classList.add('open');
+    });
+  }
+
+  if (closeFiltersBtn && filterOverlay) {
+    closeFiltersBtn.addEventListener('click', function() {
+      filterOverlay.classList.remove('open');
+    });
+  }
+
+  // Initialize filter form elements
+  const filterForm = document.getElementById('filtersForm');
+  if (filterForm) {
+    filterForm.addEventListener('change', function(e) {
+      if (e.target.type === 'checkbox' || e.target.type === 'radio') {
+        updateFilterState();
+      }
+    });
+  }
+
+  // Initialize advanced filters toggle
+  const advancedFiltersHeader = document.querySelector('.advanced-filters-header');
+  if (advancedFiltersHeader) {
+    advancedFiltersHeader.addEventListener('click', toggleAdvancedFilters);
+  }
+
+  // Initialize apply filters button
+  const applyFiltersBtn = document.getElementById('applyFilters');
+  if (applyFiltersBtn) {
+    applyFiltersBtn.addEventListener('click', function() {
+      applyFilters();
+      filterOverlay.classList.remove('open');
+    });
+  }
+}
+
+// List view functionality
+function initializeListView() {
+  const viewToggle = document.getElementById('viewToggle');
+  const listContainer = document.querySelector('.list-container');
+  
+  if (viewToggle && listContainer) {
+    viewToggle.addEventListener('click', function() {
+      listContainer.classList.toggle('show');
+      const isShowing = listContainer.classList.contains('show');
+      viewToggle.querySelector('#viewToggleText').textContent = isShowing ? 'Kaart' : 'Lijst';
+    });
+  }
+
+  // Initialize tab functionality
+  const tabButtons = document.querySelectorAll('.list-tab');
+  const tabPanes = document.querySelectorAll('.tab-pane');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const targetTab = this.getAttribute('data-tab');
+      
+      // Remove active from all tabs
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      tabPanes.forEach(pane => pane.classList.remove('active'));
+      
+      // Add active to clicked tab
+      this.classList.add('active');
+      const targetPane = document.getElementById(targetTab + 'Tab');
+      if (targetPane) {
+        targetPane.classList.add('active');
+      }
+    });
+  });
+}
+
+// Update list with filtered data
+function updateListView(data) {
+  const buildingsList = document.getElementById('opportunitiesList');
+  const companiesList = document.getElementById('companiesList');
+  const buildingsCount = document.getElementById('buildingsCount');
+  const companiesCount = document.getElementById('companiesCount');
+  const resultsCount = document.getElementById('resultsCount');
+
+  if (!buildingsList || !companiesList) return;
+
+  // Separate data by type
+  const projects = data.filter(item => item.HBMType === 'Project');
+  const companies = data.filter(item => item.HBMType === 'Bedrijf');
+
+  // Update counts
+  if (buildingsCount) buildingsCount.textContent = `(${projects.length})`;
+  if (companiesCount) companiesCount.textContent = `(${companies.length})`;
+  if (resultsCount) resultsCount.textContent = `${data.length} resultaten`;
+
+  // Clear existing content
+  buildingsList.innerHTML = '';
+  companiesList.innerHTML = '';
+
+  // Add projects to buildings list
+  if (projects.length === 0) {
+    buildingsList.innerHTML = '<div class="no-results-opportunity"><h2>Geen projecten gevonden</h2><p>Probeer andere filters om meer resultaten te vinden.</p></div>';
+  } else {
+    projects.forEach(item => {
+      buildingsList.appendChild(createListItem(item));
+    });
+  }
+
+  // Add companies to companies list
+  if (companies.length === 0) {
+    companiesList.innerHTML = '<div class="no-results-opportunity"><h2>Geen bedrijven gevonden</h2><p>Probeer andere filters om meer resultaten te vinden.</p></div>';
+  } else {
+    companies.forEach(item => {
+      companiesList.appendChild(createListItem(item));
+    });
+  }
+}
+
+// Create list item element
+function createListItem(item) {
+  const div = document.createElement('div');
+  div.className = 'opportunity-card';
+  div.innerHTML = `
+    <div class="card-header">
+      <h3 class="card-title">${item.Name || 'Onbekend'}</h3>
+      <span class="card-type-badge ${item.HBMType?.toLowerCase() || 'unknown'}">${item.HBMType || 'Onbekend'}</span>
+    </div>
+    ${item.Logo ? `<img src="${item.Logo}" alt="Logo" class="card-logo" onerror="this.style.display='none'">` : ''}
+    ${item.ProjectImage ? `<img src="${item.ProjectImage}" alt="Project" class="card-image" onerror="this.style.display='none'">` : ''}
+    <div class="card-details">
+      ${item.OrganizationType ? `<div class="card-detail-row"><span class="card-detail-label">Type:</span><span class="card-detail-value">${item.OrganizationType}</span></div>` : ''}
+      ${item.HBMSector ? `<div class="card-detail-row"><span class="card-detail-label">Sector:</span><span class="card-detail-value">${item.HBMSector}</span></div>` : ''}
+    </div>
+    ${item.Description ? `<p class="card-description">${item.Description}</p>` : ''}
+    <div class="card-actions">
+      <button class="card-contact-btn" onclick="showDetails('${item.Name}')">Meer info</button>
+    </div>
+  `;
+  
+  div.addEventListener('click', function() {
+    // Highlight corresponding marker on map
+    if (item.Latitude && item.Longitude) {
+      map.setView([item.Latitude, item.Longitude], 15);
+    }
+  });
+  
+  return div;
+}
 
 // Global functions for popup actions
 function showDetails(itemName) {
