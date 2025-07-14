@@ -948,14 +948,7 @@ function loadFiltersFromStorage() {
     console.error('Error loading filters from storage:', error);
     return null;
   }
-}
-
-function getActiveFilters() {
-  const filters = {};
-  document.querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
-    const name = cb.name;
-    if (!filters[name]) filters[name] = [];
-    filters[name].push(cb.value);
+```python
   });
   return filters;
 }
