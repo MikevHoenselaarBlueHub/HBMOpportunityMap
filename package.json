@@ -1,4 +1,3 @@
-
 {
   "name": "hbm-kansenkaart",
   "version": "1.0.0",
@@ -11,7 +10,11 @@
   "dependencies": {
     "serve": "^14.2.4"
   },
-  "keywords": ["map", "opportunities", "healthy-building"],
+  "keywords": [
+    "map",
+    "opportunities",
+    "healthy-building"
+  ],
   "author": "HBM",
   "license": "MIT"
 }
