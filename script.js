@@ -279,14 +279,9 @@ function initMap() {
     maxZoom: 18
   }).addTo(map);
 
-  // Add markers layer
-  map.addLayer(markers);
+  // Initialize municipality layer
+  municipalityLayer = L.layerGroup();
 
-  // Add map controls
-  addMapControls();
-}
-
-function addMapControls() {
   // Add layer control for municipalities
   const layerControl = L.control.layers({}, {
     'Gemeentegrenzen': municipalityLayer
@@ -294,11 +289,11 @@ function addMapControls() {
     position: 'topright'
   }).addTo(map);
 
-  // Initialize municipality layer but don't add to map by default
-  municipalityLayer = L.layerGroup();
-  
   // Load municipality boundaries
   loadMunicipalityBoundaries();
+
+  // Add markers layer to map
+  map.addLayer(markers);
 }
 
 function loadMunicipalityBoundaries() {

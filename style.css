@@ -1121,13 +1121,23 @@ button {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   z-index: 1050;
   min-width: 150px;
+  transition: right 0.3s ease;
+}
+
+/* Move legend when list is shown on desktop */
+@media (min-width: 769px) {
+  .list-container ~ .map-legend {
+    right: 520px; /* Adjust based on list container width (500px + 20px margin) */
+  }
+  
+  .list-container.show ~ .map-legend {
+    right: 520px;
+  }
 }
 
 /* Hide legend when list is shown on mobile */
 @media (max-width: 768px) {
-
-  .list-container.show~#mapLegend,
-  .list-container.show+.map-legend {
+  .list-container.show ~ .map-legend {
     display: none;
   }
 }
