@@ -1553,7 +1553,7 @@ async function loadDutchMunicipalities() {
                   const layer = e.target;
                   layer.setStyle({
                     color: 'rgb(38, 123, 41)',
-                    weight: 4,
+                    weight: 5,
                     opacity: 1,
                     fillColor: 'rgb(38, 123, 41)',
                     fillOpacity: 0.3,
@@ -1565,8 +1565,8 @@ async function loadDutchMunicipalities() {
                   const layer = e.target;
                   layer.setStyle({
                     color: 'rgb(38, 123, 41)',
-                    weight: 3,
-                    opacity: 0.8,
+                    weight: 4,
+                    opacity: 0.9,
                     fillColor: 'rgb(38, 123, 41)',
                     fillOpacity: 0.1,
                     dashArray: '5, 8'
@@ -1651,7 +1651,7 @@ async function loadGermanMunicipalities() {
                   const layer = e.target;
                   layer.setStyle({
                     color: 'rgb(38, 123, 41)',
-                    weight: 4,
+                    weight: 5,
                     opacity: 1,
                     fillColor: 'rgb(38, 123, 41)',
                     fillOpacity: 0.3,
@@ -1663,8 +1663,8 @@ async function loadGermanMunicipalities() {
                   const layer = e.target;
                   layer.setStyle({
                     color: 'rgb(38, 123, 41)',
-                    weight: 3,
-                    opacity: 0.8,
+                    weight: 4,
+                    opacity: 0.9,
                     fillColor: 'rgb(38, 123, 41)',
                     fillOpacity: 0.1,
                     dashArray: '5, 8'
@@ -1807,9 +1807,7 @@ function loadProfessionalMunicipalities() {
     {
       name: "Hasselt",
       country: "België",
-      bounds: [[50.891, 5.301], [50.923, 5.312], [50.948, 5.334], [50.967, 5.364], [50.978, 5.398], [50.981, 5.434], [50.975, 5.469], [50.961, 5.501], [50.939, 5.528], [50.912, 5.548], [50.881, 5.561], [50.848, 5.567], [50.814, 5.565], [50.782, 5.556], [50.753, 5.539], [50.728, 5.515], [50.708, 5.485], [50.694, 5.451], [50.687, 5.414], [50.687, 5.376], [50.695, 5.339], [50.711, 5.305], [50.734, 5.276], [50.763, 5.253], [50.796, 5.237], [50.832, 5.228], [50.868, 5.227], [50.891, 5.301]]
-    },
-    ```python
+      bounds: [[50.891, 5.301], [50.923, 5.312], [50.948, 5.334], [50.967, 5.364], [50.978, 5.398], [50.981, 5.434], [50.975, 5.469], [50.961, 5.501], [50.939, 5.528], [50.912, 5.548], [50.881, 5.561], [50.848, 5.567], [50.814, 5.565], [50.782, 5.556], [50.753, 5.539], [50.728, 5.515], [50.708, 5.485], [50.694, 5.451], [50.687, 5.414], [50.687, 5.376], [50.695, 5.339], [50.711, 5.305], [50.734, 5.276], [50.763, 5.253], [50.796, 5.237], [50.832, 5.228], [50.868, 5.227], [50.891, 5.301]]```python
     {
       name: "Genk",
       country: "België",
@@ -1849,7 +1847,7 @@ function loadProfessionalMunicipalities() {
         const layer = e.target;
         layer.setStyle({
           color: 'rgb(38, 123, 41)',
-          weight: 4,
+          weight: 5,
           opacity: 1,
           fillColor: 'rgb(38, 123, 41)',
           fillOpacity: 0.3,
@@ -1861,8 +1859,8 @@ function loadProfessionalMunicipalities() {
         const layer = e.target;
         layer.setStyle({
           color: 'rgb(38, 123, 41)',
-          weight: 3,
-          opacity: 0.8,
+          weight: 4,
+          opacity: 0.9,
           fillColor: 'rgb(38, 123, 41)',
           fillOpacity: 0.1,
           dashArray: '5, 8'
