@@ -1,6 +1,5 @@
-// Import configuration and utilities
-import { mapConfig, dataPaths, translationPaths } from './config/map-config.js';
-import { calculateDistance, formatArray, debounce, isValidCoordinate, generateId, sanitizeHtml } from './config/utils.js';
+// Configuration and utilities will be loaded via script tags
+// These will be available as global variables
 
 // Global variables
 let map;
@@ -29,11 +28,27 @@ if (isMapPage && !isInfoPage && !isOverPage) {
       await loadTranslations();
 
       // Initialize marker cluster group
-      markers = L.markerClusterGroup(mapConfig.cluster);
+      markers = L.markerClusterGroup({
+        disableClusteringAtZoom: 15,
+        maxClusterRadius: 50,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true
+      });
 
-      // Initialize icons using config
-      pIcon = L.icon(mapConfig.markers.project);
-      bIcon = L.icon(mapConfig.markers.company);
+      // Initialize icons
+      pIcon = L.icon({
+        iconUrl: 'icons/marker-project.svg',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      });
+      bIcon = L.icon({
+        iconUrl: 'icons/marker-company.svg',
+        iconSize: [32, 32], 
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      });
 
       // Create hover label
       createHoverLabel();
@@ -55,8 +70,8 @@ if (isMapPage && !isInfoPage && !isOverPage) {
           });
       }
 
-      // Data laden using config
-      fetch(dataPaths.opportunities)
+      // Data laden
+      fetch('data/opportunities.json')
         .then(res => {
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -213,7 +228,7 @@ function trackPageView(pageTitle) {
 // Language system
 async function loadTranslations() {
   try {
-    const translationPath = translationPaths[currentLanguage] || translationPaths.nl;
+    const translationPath = `translations/${currentLanguage}.json`;
     const response = await fetch(translationPath);
     translations = await response.json();
   } catch (error) {
@@ -244,10 +259,10 @@ function updatePageTexts() {
 
 // Map initialization
 function initMap() {
-  // Initialize map using config
+  // Initialize map
   map = L.map('map', {
-    center: mapConfig.defaultCenter,
-    zoom: mapConfig.defaultZoom,
+    center: [51.2, 6.0], // Euregio center
+    zoom: 8,
     zoomControl: false,
     scrollWheelZoom: true,
     doubleClickZoom: true,
@@ -259,10 +274,10 @@ function initMap() {
     position: 'bottomright'
   }).addTo(map);
 
-  // Use configured tile layer
-  L.tileLayer(mapConfig.tileLayer.url, {
-    attribution: mapConfig.tileLayer.attribution,
-    ...mapConfig.tileLayer.options
+  // Add simplified tile layer
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 18
   }).addTo(map);
 
   // Add municipality layer
@@ -302,7 +317,7 @@ async function loadMunicipalitiesFromOverpass() {
 async function loadDutchMunicipalities() {
   try {
     console.log('Loading Dutch municipalities...');
-    const response = await fetch(dataPaths.dutchMunicipalities);
+    const response = await fetch('data/geojson/nl-gemeenten.geojson');
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -324,17 +339,39 @@ async function loadDutchMunicipalities() {
         if (municipalityName && feature.geometry) {
           try {
             const geoJsonLayer = L.geoJSON(feature, {
-              style: mapConfig.municipalityStyle.default,
+              style: {
+                color: 'rgb(38, 123, 41)',
+                weight: 4,
+                opacity: 0.9,
+                fillColor: 'rgb(38, 123, 41)',
+                fillOpacity: 0.1,
+                smoothFactor: 0.5,
+                dashArray: '5, 8'
+              },
               onEachFeature: function(feature, layer) {
                 layer.on({
                   mouseover: function(e) {
                     const layer = e.target;
-                    layer.setStyle(mapConfig.municipalityStyle.hover);
+                    layer.setStyle({
+                      color: 'rgb(38, 123, 41)',
+                      weight: 6,
+                      opacity: 1,
+                      fillColor: 'rgb(38, 123, 41)',
+                      fillOpacity: 0.3,
+                      dashArray: '5, 8'
+                    });
                     layer.bringToFront();
                   },
                   mouseout: function(e) {
                     const layer = e.target;
-                    layer.setStyle(mapConfig.municipalityStyle.default);
+                    layer.setStyle({
+                      color: 'rgb(38, 123, 41)',
+                      weight: 4,
+                      opacity: 0.9,
+                      fillColor: 'rgb(38, 123, 41)',
+                      fillOpacity: 0.1,
+                      dashArray: '5, 8'
+                    });
                   },
                   click: function(e) {
                     // Zoom to municipality and filter
@@ -390,7 +427,7 @@ async function loadDutchMunicipalities() {
 async function loadGermanMunicipalities() {
   try {
     console.log('Loading German municipalities...');
-    const response = await fetch(dataPaths.germanMunicipalities);
+    const response = await fetch('data/geojson/de-gemeenten.geojson');
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -642,7 +679,6 @@ function createMarkers(data) {
 }
 
 function createPopupContent(item) {
-  // formatArray is now imported from utils.js
 
   return `
     <div class="popup-content">
@@ -709,7 +745,25 @@ function applyFilters() {
   updateResultCount(filteredData.length);
 }
 
-// calculateDistance is now imported from utils.js
+// Calculate distance between two coordinates using Haversine formula
+function calculateDistance(lat1, lng1, lat2, lng2) {
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+// Format array for display
+function formatArray(value) {
+  if (Array.isArray(value)) {
+    return value.join(', ');
+  }
+  return value || '';
+}
 
 function updateResultCount(count) {
   const resultElement = document.querySelector('.filter-results');
