@@ -230,7 +230,7 @@ header {
   #desktopNav {
     display: flex;
   }
-  
+
   #hamburger {
     display: none;
   }
@@ -1289,4 +1289,71 @@ button {
 .municipality-popup small {
   color: #666;
   font-size: 0.8rem;
+}
+
+/* === Filter Overlay === */
+#filterOverlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  padding: 2rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+#filterOverlay.open {
+  display: block;
+}
+
+#filterOverlay form {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+}
+
+#filterOverlay h2 {
+  margin-top: 0;
+  color: rgb(38, 123, 41);
+  font-weight: bold;
+}
+
+#filterOverlay > form > div {
+  margin-bottom: 1.5rem;
+}
+
+#filterOverlay strong {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: #333;
+  font-weight: bold;
+  font-size: 1.1rem;
+  border-bottom: 2px solid rgb(38, 123, 41);
+  padding-bottom: 0.25rem;
+}
+
+#filterOverlay label {
+  display: inline-block;
+  margin-right: 1rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+#filterOverlay label:hover {
+  background-color: #f0f8f0;
+}
+
+#filterOverlay input[type="checkbox"],
+#filterOverlay input[type="radio"] {
+  margin-right: 0.5rem;
 }

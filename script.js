@@ -952,29 +952,57 @@ function loadFiltersFromStorage() {
 
 function getActiveFilters() {
   const filters = {};
+  
+  // Get checkbox filters
   document.querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
     const name = cb.name;
     if (!filters[name]) filters[name] = [];
     filters[name].push(cb.value);
   });
+  
+  // Get municipality filter
+  const municipalitySelect = document.getElementById('municipalitySelect');
+  if (municipalitySelect && municipalitySelect.selectedOptions.length > 0) {
+    filters['Municipality'] = Array.from(municipalitySelect.selectedOptions).map(option => option.value);
+  }
+  
   return filters;
 }
 
 function setActiveFilters(filters) {
-  // First uncheck all
+  // First uncheck all checkboxes
   document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => {
     cb.checked = false;
   });
 
+  // Clear municipality selection
+  const municipalitySelect = document.getElementById('municipalitySelect');
+  if (municipalitySelect) {
+    Array.from(municipalitySelect.options).forEach(option => {
+      option.selected = false;
+    });
+  }
+
   // Then check the ones in the filter object
   Object.keys(filters).forEach(filterName => {
     if (filters[filterName] && filters[filterName].length > 0) {
-      filters[filterName].forEach(value => {
-        const checkbox = document.querySelector(`input[name="${filterName}"][value="${value}"]`);
-        if (checkbox) {
-          checkbox.checked = true;
-        }
-      });
+      if (filterName === 'Municipality' && municipalitySelect) {
+        // Handle municipality filter
+        filters[filterName].forEach(value => {
+          const option = municipalitySelect.querySelector(`option[value="${value}"]`);
+          if (option) {
+            option.selected = true;
+          }
+        });
+      } else {
+        // Handle checkbox filters
+        filters[filterName].forEach(value => {
+          const checkbox = document.querySelector(`input[name="${filterName}"][value="${value}"]`);
+          if (checkbox) {
+            checkbox.checked = true;
+          }
+        });
+      }
     }
   });
 
@@ -1304,6 +1332,9 @@ function createFilterCheckboxes() {
     }
   });
 
+  // Populate municipality filter with Euregio municipalities
+  populateMunicipalityFilter();
+
   // Add change listeners to HBMType checkboxes
   document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
     cb.addEventListener('change', () => {
@@ -1326,6 +1357,129 @@ function createFilterCheckboxes() {
 
   updateFilterButtonLabel();
   isInitialLoad = false;
+}
+
+function populateMunicipalityFilter() {
+  const eurregioMunicipalities = [
+    'Maastricht',
+    'Aachen',
+    'Liège',
+    'Hasselt',
+    'Genk',
+    'Venlo',
+    'Roermond',
+    'Eindhoven',
+    'Heerlen',
+    'Sittard-Geleen',
+    'Kerkrade',
+    'Brunssum',
+    'Landgraaf',
+    'Simpelveld',
+    'Vaals',
+    'Gulpen-Wittem',
+    'Valkenburg aan de Geul',
+    'Eijsden-Margraten',
+    'Meerssen',
+    'Stein',
+    'Beek',
+    'Maasgouw',
+    'Leudal',
+    'Echt-Susteren',
+    'Weert',
+    'Nederweert',
+    'Cranendonck',
+    'Heeze-Leende',
+    'Valkenswaard',
+    'Waalre',
+    'Veldhoven',
+    'Oirschot',
+    'Best',
+    'Son en Breugel',
+    'Nuenen',
+    'Geldrop-Mierlo',
+    'Helmond',
+    'Laakdal',
+    'Geel',
+    'Mol',
+    'Balen',
+    'Lommel',
+    'Hamont-Achel',
+    'Neerpelt',
+    'Overpelt',
+    'Pelt',
+    'Hechtel-Eksel',
+    'Leopoldsburg',
+    'Heusden-Zolder',
+    'Beringen',
+    'Ham',
+    'Tessenderlo',
+    'Diepenbeek',
+    'Lummen',
+    'Herk-de-Stad',
+    'Bilzen',
+    'Hoeselt',
+    'Riemst',
+    'Tongeren',
+    'Voeren',
+    'Aubel',
+    'Baelen',
+    'Plombières',
+    'Welkenraedt',
+    'Henri-Chapelle',
+    'Raeren',
+    'Eupen',
+    'Lontzen',
+    'Bütgenbach',
+    'Büllingen',
+    'Sankt Vith',
+    'Burg-Reuland',
+    'Amel',
+    'Malmedy',
+    'Waimes',
+    'Stavelot',
+    'Trois-Ponts',
+    'Vielsalm',
+    'Düren',
+    'Jülich',
+    'Stolberg',
+    'Eschweiler',
+    'Würselen',
+    'Alsdorf',
+    'Baesweiler',
+    'Herzogenrath',
+    'Übach-Palenberg',
+    'Geilenkirchen',
+    'Heinsberg',
+    'Erkelenz',
+    'Hückelhoven',
+    'Wegberg',
+    'Wassenberg'
+  ];
+
+  const municipalitySelect = document.getElementById('municipalitySelect');
+  if (municipalitySelect) {
+    // Clear existing options except the first one
+    municipalitySelect.innerHTML = '<option value="">Selecteer gemeente(n)...</option>';
+    
+    // Add municipalities as options
+    eurregioMunicipalities.sort().forEach(municipality => {
+      const option = document.createElement('option');
+      option.value = municipality;
+      option.textContent = municipality;
+      municipalitySelect.appendChild(option);
+    });
+
+    // Make it multi-select
+    municipalitySelect.multiple = true;
+    municipalitySelect.size = 5;
+    municipalitySelect.style.height = '120px';
+    
+    // Add change listener
+    municipalitySelect.addEventListener('change', () => {
+      updateFilterState();
+      updateFilterButtonLabel();
+    });
+  }
 }
 
 function loadMunicipalityBoundaries() {
@@ -2331,9 +2485,10 @@ function updateMap() {
 
   // Filter data based on selected filters
   const filtered = window.data.filter(d => {
-    // Basic filters
+    // Basic filters (excluding Municipality)
     const basicMatch = Object.keys(filters).every(k => {
-      if (!filters[k] || filters[k].length== 0) return true;
+      if (k === 'Municipality') return true; // Handle separately
+      if (!filters[k] || filters[k].length == 0) return true;
       const dataValue = d[k];
       if (Array.isArray(dataValue)) {
         return dataValue.some(val => filters[k].includes(val));
@@ -2342,12 +2497,19 @@ function updateMap() {
       }
     });
 
+    // Municipality filter - check against City field
+    let municipalityMatch = true;
+    if (filters['Municipality'] && filters['Municipality'].length > 0) {
+      municipalityMatch = filters['Municipality'].includes(d.City);
+    }
+
     // Text filter
     let textMatch = true;
     if (textFilter) {
       const searchableText = [
         d.Name,
         d.Description,
+        d.City,
         Array.isArray(d.HBMTopic) ? d.HBMTopic.join(' ') : d.HBMTopic,
         Array.isArray(d.OrganizationType) ? d.OrganizationType.join(' ') : d.OrganizationType,
         Array.isArray(d.HBMSector) ? d.HBMSector.join(' ') : d.HBMSector
@@ -2370,9 +2532,9 @@ function updateMap() {
 
     // Combine filters based on mode
     if (filterMode === 'OR') {
-      return basicMatch || textMatch || distanceMatch;
+      return basicMatch || municipalityMatch || textMatch || distanceMatch;
     } else {
-      return basicMatch && textMatch && distanceMatch;
+      return basicMatch && municipalityMatch && textMatch && distanceMatch;
     }
   });
 
