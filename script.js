@@ -952,8 +952,7 @@ function loadFiltersFromStorage() {
 
 function getActiveFilters() {
   const filters = {};
-  document.```python
-querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
+  document.querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
     const name = cb.name;
     if (!filters[name]) filters[name] = [];
     filters[name].push(cb.value);
