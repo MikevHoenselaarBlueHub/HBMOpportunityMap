@@ -1,9 +1,10 @@
+// Import configuration and utilities
+import { mapConfig, dataPaths, translationPaths } from './config/map-config.js';
+import { calculateDistance, formatArray, debounce, isValidCoordinate, generateId, sanitizeHtml } from './config/utils.js';
+
 // Global variables
 let map;
-let markers = L.markerClusterGroup({
-  maxClusterRadius: 50,
-  spiderfyOnMaxZoom: true
-});
+let markers = L.markerClusterGroup(mapConfig.cluster);
 let municipalityLayer;
 let userLocationCircle;
 let currentFilter = {};
@@ -27,19 +28,9 @@ if (isMapPage && !isInfoPage && !isOverPage) {
       // Load translations first
       await loadTranslations();
 
-      // Initialize icons
-      pIcon = L.icon({ 
-        iconUrl: 'icons/marker-project.svg', 
-        iconSize: [30, 40],
-        iconAnchor: [15, 40],
-        popupAnchor: [0, -40]
-      });
-      bIcon = L.icon({ 
-        iconUrl: 'icons/marker-company.svg', 
-        iconSize: [30, 40],
-        iconAnchor: [15, 40],
-        popupAnchor: [0, -40]
-      });
+      // Initialize icons using config
+      pIcon = L.icon(mapConfig.markers.project);
+      bIcon = L.icon(mapConfig.markers.company);
 
       // Create hover label
       createHoverLabel();
@@ -61,8 +52,8 @@ if (isMapPage && !isInfoPage && !isOverPage) {
           });
       }
 
-      // Data laden
-      fetch('data/opportunities.json')
+      // Data laden using config
+      fetch(dataPaths.opportunities)
         .then(res => res.json())
         .then(async data => {
           // Process data and geocode missing coordinates
@@ -197,7 +188,8 @@ function trackPageView(pageTitle) {
 // Language system
 async function loadTranslations() {
   try {
-    const response = await fetch(`translations/${currentLanguage}.json`);
+    const translationPath = translationPaths[currentLanguage] || translationPaths.nl;
+    const response = await fetch(translationPath);
     translations = await response.json();
   } catch (error) {
     console.warn('Failed to load translations:', error);
@@ -227,10 +219,10 @@ function updatePageTexts() {
 
 // Map initialization
 function initMap() {
-  // Initialize map
+  // Initialize map using config
   map = L.map('map', {
-    center: [51.2, 6.0],
-    zoom: 9,
+    center: mapConfig.defaultCenter,
+    zoom: mapConfig.defaultZoom,
     zoomControl: false,
     scrollWheelZoom: true,
     doubleClickZoom: true,
@@ -242,11 +234,10 @@ function initMap() {
     position: 'bottomright'
   }).addTo(map);
 
-  // Gebruik een eenvoudigere kaart stijl
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
-    maxZoom: 20
+  // Use configured tile layer
+  L.tileLayer(mapConfig.tileLayer.url, {
+    attribution: mapConfig.tileLayer.attribution,
+    ...mapConfig.tileLayer.options
   }).addTo(map);
 
   // Add municipality layer
@@ -286,7 +277,7 @@ async function loadMunicipalitiesFromOverpass() {
 async function loadDutchMunicipalities() {
   try {
     console.log('Loading Dutch municipalities...');
-    const response = await fetch('data/geojson/nl-gemeenten.geojson');
+    const response = await fetch(dataPaths.dutchMunicipalities);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -308,39 +299,17 @@ async function loadDutchMunicipalities() {
         if (municipalityName && feature.geometry) {
           try {
             const geoJsonLayer = L.geoJSON(feature, {
-              style: {
-                color: 'rgb(38, 123, 41)',
-                weight: 4,
-                opacity: 0.9,
-                fillColor: 'rgb(38, 123, 41)',
-                fillOpacity: 0.1,
-                smoothFactor: 0.5,
-                dashArray: '5, 8'
-              },
+              style: mapConfig.municipalityStyle.default,
               onEachFeature: function(feature, layer) {
                 layer.on({
                   mouseover: function(e) {
                     const layer = e.target;
-                    layer.setStyle({
-                      color: 'rgb(38, 123, 41)',
-                      weight: 6,
-                      opacity: 1,
-                      fillColor: 'rgb(38, 123, 41)',
-                      fillOpacity: 0.3,
-                      dashArray: '5, 8'
-                    });
+                    layer.setStyle(mapConfig.municipalityStyle.hover);
                     layer.bringToFront();
                   },
                   mouseout: function(e) {
                     const layer = e.target;
-                    layer.setStyle({
-                      color: 'rgb(38, 123, 41)',
-                      weight: 4,
-                      opacity: 0.9,
-                      fillColor: 'rgb(38, 123, 41)',
-                      fillOpacity: 0.1,
-                      dashArray: '5, 8'
-                    });
+                    layer.setStyle(mapConfig.municipalityStyle.default);
                   },
                   click: function(e) {
                     // Zoom to municipality and filter
@@ -396,7 +365,7 @@ async function loadDutchMunicipalities() {
 async function loadGermanMunicipalities() {
   try {
     console.log('Loading German municipalities...');
-    const response = await fetch('data/geojson/de-gemeenten.geojson');
+    const response = await fetch(dataPaths.germanMunicipalities);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -648,13 +617,7 @@ function createMarkers(data) {
 }
 
 function createPopupContent(item) {
-  // Ensure arrays are properly formatted
-  const formatArray = (value) => {
-    if (Array.isArray(value)) {
-      return value.join(', ');
-    }
-    return value || '';
-  };
+  // formatArray is now imported from utils.js
 
   return `
     <div class="popup-content">
@@ -740,17 +703,7 @@ function applyFilters() {
   updateResultCount(filteredData.length);
 }
 
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Radius of earth in kilometers
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  const d = R * c;
-  return d;
-}
+// calculateDistance is now imported from utils.js
 
 function updateResultCount(count) {
   const resultElement = document.querySelector('.filter-results');
