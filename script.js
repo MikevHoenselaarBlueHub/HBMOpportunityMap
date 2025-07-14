@@ -13,7 +13,6 @@ let userLocationMarker = null;
 let userLocation = null;
 let savedFiltersData = [];
 let airQualityLayer;
-let energyLabelsLayer;
 let greenSpacesLayer;
 let noiseZonesLayer;
 let buildingAgesLayer;
@@ -29,14 +28,14 @@ async function geocodeAddress(street, zip, city) {
   if (street) addressParts.push(street);
   if (zip) addressParts.push(zip);
   if (city) addressParts.push(city);
-  
+
   const address = addressParts.join(', ');
-  
+
   try {
     // Use Nominatim OpenStreetMap geocoding service
     const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
     const results = await response.json();
-    
+
     if (results && results.length > 0) {
       return {
         lat: parseFloat(results[0].lat),
@@ -46,27 +45,27 @@ async function geocodeAddress(street, zip, city) {
   } catch (error) {
     console.warn('Geocoding failed for address:', address, error);
   }
-  
+
   return null;
 }
 
 async function processDataWithGeocoding(data) {
   const processedData = [];
-  
+
   for (const item of data) {
     const processedItem = { ...item };
-    
+
     // Check if coordinates are missing or invalid
     if (!processedItem.Latitude || !processedItem.Longitude || 
         processedItem.Latitude === 0 || processedItem.Longitude === 0) {
-      
+
       // Try to geocode from address fields
       const coords = await geocodeAddress(
         processedItem.Street,
         processedItem.Zip,
         processedItem.City
       );
-      
+
       if (coords) {
         processedItem.Latitude = coords.lat;
         processedItem.Longitude = coords.lng;
@@ -75,10 +74,10 @@ async function processDataWithGeocoding(data) {
         console.warn(`Could not geocode ${processedItem.Name}`);
       }
     }
-    
+
     processedData.push(processedItem);
   }
-  
+
   return processedData;
 }
 
@@ -953,7 +952,8 @@ function loadFiltersFromStorage() {
 
 function getActiveFilters() {
   const filters = {};
-  document.querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
+  document.```python
+querySelectorAll('#filtersForm input[type="checkbox"]:checked').forEach(cb => {
     const name = cb.name;
     if (!filters[name]) filters[name] = [];
     filters[name].push(cb.value);
@@ -1360,7 +1360,7 @@ async function loadDutchMunicipalities() {
   try {
     console.log('Loading Dutch municipalities...');
     const response = await fetch('nl-gemeenten.geojson');
-    
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -1439,8 +1439,8 @@ async function loadDutchMunicipalities() {
 async function loadGermanMunicipalities() {
   try {
     console.log('Loading German municipalities...');
-    const response = await fetch('gadm41_DEU_4.json');
-    
+    const response = await fetch('de-gemeenten.geojson');
+
     if (!response.ok) {
       console.warn('German municipalities file not found, skipping...');
       return;
@@ -1508,7 +1508,17 @@ async function loadGermanMunicipalities() {
             }
           });
 
-          const popupContent = `<strong>${municipalityName}</strong><br><small>${state}, Deutschland</small>`;
+          // Enhanced popup with more information
+          const popupContent = `
+            <div class="municipality-popup">
+              <h4>${municipalityName}</h4>
+              <p><strong>Staat:</strong> ${state}</p>
+              <p><strong>Land:</strong> Deutschland</p>
+              <p><strong>Type:</strong> Gemeente</p>
+              <hr>
+              <small>Klik voor meer details over gezond bouwen kansen in deze gemeente</small>
+            </div>
+          `;
           geoJsonLayer.bindPopup(popupContent);
           municipalityLayer.addLayer(geoJsonLayer);
           loadedCount++;
@@ -1608,222 +1618,6 @@ function convertRelationToCoordinatesImproved(element) {
   } catch (error) {
     console.warn('Error in improved coordinate conversion:', error);
     return null;
-  }
-}
-
-// Load additional data layers
-async function loadAirQualityData() {
-  try {
-    console.log('Loading air quality data...');
-    
-    // Example air quality zones for the Euregio region
-    const airQualityZones = [
-      {
-        name: "Maastricht - Goed",
-        center: [50.845, 5.691],
-        radius: 3000,
-        quality: "good",
-        color: "#00ff00",
-        description: "Luchtkwaliteit: Goed (PM2.5: <15 μg/m³)"
-      },
-      {
-        name: "Aachen - Matig", 
-        center: [50.776, 6.084],
-        radius: 4000,
-        quality: "moderate",
-        color: "#ffff00",
-        description: "Luchtkwaliteit: Matig (PM2.5: 15-25 μg/m³)"
-      },
-      {
-        name: "Venlo - Goed",
-        center: [51.370, 6.168],
-        radius: 2500,
-        quality: "good", 
-        color: "#00ff00",
-        description: "Luchtkwaliteit: Goed (PM2.5: <15 μg/m³)"
-      }
-    ];
-
-    airQualityZones.forEach(zone => {
-      const circle = L.circle(zone.center, {
-        radius: zone.radius,
-        color: zone.color,
-        fillColor: zone.color,
-        fillOpacity: 0.3,
-        weight: 2
-      });
-      
-      circle.bindPopup(`<strong>${zone.name}</strong><br>${zone.description}`);
-      airQualityLayer.addLayer(circle);
-    });
-    
-    console.log(`Loaded ${airQualityZones.length} air quality zones`);
-  } catch (error) {
-    console.error('Error loading air quality data:', error);
-  }
-}
-
-async function loadEnergyLabelsData() {
-  try {
-    console.log('Loading energy labels data...');
-    
-    // Example energy efficiency zones
-    const energyZones = [
-      {
-        name: "Maastricht Centrum - A/B labels",
-        bounds: [[50.84, 5.68], [50.85, 5.69], [50.85, 5.70], [50.84, 5.70], [50.84, 5.68]],
-        label: "A-B",
-        color: "#00aa00"
-      },
-      {
-        name: "Aachen Altstadt - C/D labels", 
-        bounds: [[50.77, 6.08], [50.78, 6.08], [50.78, 6.09], [50.77, 6.09], [50.77, 6.08]],
-        label: "C-D",
-        color: "#ffaa00"
-      }
-    ];
-
-    energyZones.forEach(zone => {
-      const polygon = L.polygon(zone.bounds, {
-        color: zone.color,
-        fillColor: zone.color,
-        fillOpacity: 0.4,
-        weight: 2
-      });
-      
-      polygon.bindPopup(`<strong>${zone.name}</strong><br>Gemiddeld energielabel: ${zone.label}`);
-      energyLabelsLayer.addLayer(polygon);
-    });
-    
-    console.log(`Loaded ${energyZones.length} energy label zones`);
-  } catch (error) {
-    console.error('Error loading energy labels data:', error);
-  }
-}
-
-async function loadGreenSpacesData() {
-  try {
-    console.log('Loading green spaces data...');
-    
-    // Example green space markers
-    const greenSpaces = [
-      {
-        name: "Stadspark Maastricht",
-        coords: [50.851, 5.688],
-        type: "Park",
-        area: "15 hectare"
-      },
-      {
-        name: "Westpark Aachen",
-        coords: [50.782, 6.071], 
-        type: "Stadspark",
-        area: "8 hectare"
-      },
-      {
-        name: "De Maasplassen",
-        coords: [51.163, 5.998],
-        type: "Recreatiegebied", 
-        area: "1000 hectare"
-      }
-    ];
-
-    const greenIcon = L.divIcon({
-      className: 'green-space-marker',
-      html: '<div style="background: #00aa00; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>',
-      iconSize: [20, 20],
-      iconAnchor: [10, 10]
-    });
-
-    greenSpaces.forEach(space => {
-      const marker = L.marker(space.coords, { icon: greenIcon });
-      marker.bindPopup(`<strong>${space.name}</strong><br>Type: ${space.type}<br>Oppervlakte: ${space.area}`);
-      greenSpacesLayer.addLayer(marker);
-    });
-    
-    console.log(`Loaded ${greenSpaces.length} green spaces`);
-  } catch (error) {
-    console.error('Error loading green spaces data:', error);
-  }
-}
-
-async function loadNoiseZonesData() {
-  try {
-    console.log('Loading noise zones data...');
-    
-    // Example noise pollution zones
-    const noiseZones = [
-      {
-        name: "A2 Snelweg - Hoog geluidsniveau",
-        path: [[50.82, 5.70], [50.85, 5.72], [50.88, 5.74]],
-        level: "70+ dB",
-        color: "#ff0000"
-      },
-      {
-        name: "Spoorlijn Maastricht-Aachen - Matig geluidsniveau", 
-        path: [[50.84, 5.69], [50.80, 6.05], [50.78, 6.08]],
-        level: "60-70 dB",
-        color: "#ff8800"
-      }
-    ];
-
-    noiseZones.forEach(zone => {
-      const polyline = L.polyline(zone.path, {
-        color: zone.color,
-        weight: 8,
-        opacity: 0.7
-      });
-      
-      polyline.bindPopup(`<strong>${zone.name}</strong><br>Geluidsniveau: ${zone.level}`);
-      noiseZonesLayer.addLayer(polyline);
-    });
-    
-    console.log(`Loaded ${noiseZones.length} noise zones`);
-  } catch (error) {
-    console.error('Error loading noise zones data:', error);
-  }
-}
-
-async function loadBuildingAgesData() {
-  try {
-    console.log('Loading building ages data...');
-    
-    // Example building age clusters
-    const buildingAges = [
-      {
-        name: "Voor 1945 - Maastricht Binnenstad",
-        bounds: [[50.845, 5.685], [50.850, 5.685], [50.850, 5.695], [50.845, 5.695], [50.845, 5.685]],
-        period: "Voor 1945",
-        color: "#8B4513"
-      },
-      {
-        name: "1970-1990 - Maastricht Zuid",
-        bounds: [[50.835, 5.690], [50.840, 5.690], [50.840, 5.700], [50.835, 5.700], [50.835, 5.690]], 
-        period: "1970-1990",
-        color: "#DAA520"
-      },
-      {
-        name: "Na 2000 - Ceramique",
-        bounds: [[50.848, 5.704], [50.852, 5.704], [50.852, 5.708], [50.848, 5.708], [50.848, 5.704]],
-        period: "Na 2000", 
-        color: "#32CD32"
-      }
-    ];
-
-    buildingAges.forEach(area => {
-      const polygon = L.polygon(area.bounds, {
-        color: area.color,
-        fillColor: area.color,
-        fillOpacity: 0.5,
-        weight: 2
-      });
-      
-      polygon.bindPopup(`<strong>${area.name}</strong><br>Bouwperiode: ${area.period}`);
-      buildingAgesLayer.addLayer(polygon);
-    });
-    
-    console.log(`Loaded ${buildingAges.length} building age areas`);
-  } catch (error) {
-    console.error('Error loading building ages data:', error);
   }
 }
 
@@ -2397,16 +2191,16 @@ function updateMap() {
   // Initialize map if needed
   if (!map) {
     map = L.map('map').setView([51.2, 6.1], 9);
-    
+
     // Define base layers
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     });
-    
+
     const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       attribution: '© Esri'
     });
-    
+
     // Add default layer
     osmLayer.addTo(map);
 
@@ -2422,8 +2216,6 @@ function updateMap() {
 
     // Initialize additional data layers
     airQualityLayer = L.layerGroup();
-    energyLabelsLayer = L.layerGroup();
-    greenSpacesLayer = L.layerGroup();
     noiseZonesLayer = L.layerGroup();
     buildingAgesLayer = L.layerGroup();
 
@@ -2432,12 +2224,9 @@ function updateMap() {
       "Kaart": osmLayer,
       "Satelliet": satelliteLayer
     };
-    
+
     const overlayLayers = {
       "Gemeenten": municipalityLayer,
-      "Luchtkwaliteit": airQualityLayer,
-      "Energielabels": energyLabelsLayer,
-      "Groenvoorziening": greenSpacesLayer,
       "Geluidszones": noiseZonesLayer,
       "Bouwjaren": buildingAgesLayer
     };
@@ -2497,25 +2286,17 @@ function updateMap() {
 
     // Load municipality boundaries first (essential)
     loadMunicipalityBoundaries();
-    
+
     // Initialize layers as empty - load on demand
     airQualityLayer = L.layerGroup();
-    energyLabelsLayer = L.layerGroup();
-    greenSpacesLayer = L.layerGroup();
     noiseZonesLayer = L.layerGroup();
     buildingAgesLayer = L.layerGroup();
-    
+
     // Load additional data layers when layer is activated (for lazy loading if needed)
     map.on('overlayadd', (e) => {
       switch(e.name) {
         case 'Luchtkwaliteit':
           if (!airQualityLayer.getLayers().length) loadAirQualityData();
-          break;
-        case 'Energielabels':
-          if (!energyLabelsLayer.getLayers().length) loadEnergyLabelsData();
-          break;
-        case 'Groenvoorziening':
-          if (!greenSpacesLayer.getLayers().length) loadGreenSpacesData();
           break;
         case 'Geluidszones':
           if (!noiseZonesLayer.getLayers().length) loadNoiseZonesData();
@@ -2553,7 +2334,7 @@ function updateMap() {
   const filtered = window.data.filter(d => {
     // Basic filters
     const basicMatch = Object.keys(filters).every(k => {
-      if (!filters[k] || filters[k].length === 0) return true;
+      if (!filters[k] || filters[k].length== 0) return true;
       const dataValue = d[k];
       if (Array.isArray(dataValue)) {
         return dataValue.some(val => filters[k].includes(val));

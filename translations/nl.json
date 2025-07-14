@@ -63,5 +63,9 @@
   "anyFilter": "Minstens één filter moet voldoen (OF)",
   "saveFilters": "Huidige filters opslaan",
   "selectSavedFilter": "Selecteer opgeslagen filter...",
-  "deleteFilter": "Verwijder"
+  "deleteFilter": "Verwijder",
+  "noSelection": "Geen filters geselecteerd. Selecteer minstens één filter om resultaten te zien.",
+  "municipalityFilter": "Gemeente Filter",
+  "selectMunicipality": "Selecteer gemeente voor bouwjaren...",
+  "municipalityFilterHelp": "Selecteer een gemeente om de bouwjaren laag per wijk te activeren"
 }
