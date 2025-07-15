@@ -3,7 +3,7 @@
 importScripts('/config/version.js');
 
 // Use dynamic cache name from version config
-const CACHE_NAME = window.CACHE_VERSION || 'hbm-kansenkaart-v1.3.0';
+const CACHE_NAME = window.CACHE_VERSION || 'hbm-kansenkaart-v1.3.1';
 const CACHE_CONFIG = window.CACHE_CONFIG || {};
 
 const urlsToCache = [

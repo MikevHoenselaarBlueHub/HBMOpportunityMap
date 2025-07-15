@@ -1,6 +1,6 @@
 
 // Version configuration for cache management
-export const APP_VERSION = '1.3.0';
+export const APP_VERSION = '1.3.1';
 export const CACHE_VERSION = `hbm-kansenkaart-v${APP_VERSION}`;
 
 // Build timestamp for development cache busting

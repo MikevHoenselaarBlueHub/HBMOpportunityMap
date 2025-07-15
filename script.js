@@ -22,8 +22,11 @@ let filterState = {
   radius: 25
 };
 
-// Determine page type
-const isMapPage = window.location.pathname === '/' || window.location.pathname === '/index.html';
+// Determine page type - improved detection
+const isMapPage = window.location.pathname === '/' || 
+                  window.location.pathname === '/index.html' ||
+                  window.location.pathname.endsWith('/index.html') ||
+                  window.location.pathname.endsWith('/');
 const isInfoPage = window.location.pathname.includes('info.html');
 const isOverPage = window.location.pathname.includes('over.html');
 
@@ -51,6 +54,11 @@ if (isMapPage && !isInfoPage && !isOverPage) {
 // App update and cache management functions
 async function checkForUpdates() {
   try {
+    // Force clear all caches on every load in development
+    if (IS_DEVELOPMENT) {
+      await clearAllCaches();
+    }
+    
     // Check if localStorage cleanup is needed
     if (shouldRunCleanup()) {
       cleanupLocalStorage();
@@ -157,6 +165,29 @@ function showUpdateNotification() {
       setTimeout(() => notification.remove(), 300);
     }
   }, 5000);
+}
+
+// Clear all caches aggressively
+async function clearAllCaches() {
+  try {
+    if ('caches' in window) {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map(name => caches.delete(name)));
+      console.log('Cleared all caches:', cacheNames);
+    }
+    
+    // Clear localStorage app data
+    localStorage.removeItem('hbm_app_version');
+    
+    // Force service worker update
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map(reg => reg.unregister()));
+      console.log('Unregistered all service workers');
+    }
+  } catch (error) {
+    console.warn('Error clearing caches:', error);
+  }
 }
 
 // Force cache refresh for critical resources
@@ -295,8 +326,15 @@ function showServiceWorkerUpdate(registration) {
       // Register enhanced service worker for offline support
       await registerServiceWorker();
 
-      // Data laden with cache busting
-      fetch(`data/opportunities.json${getCacheBustParam()}`)
+      // Data laden with aggressive cache busting
+      fetch(`data/opportunities.json${getCacheBustParam()}`, {
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      })
         .then(res => {
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -317,6 +355,7 @@ function showServiceWorkerUpdate(registration) {
           initMap();
 
           // Create markers first
+          console.log('Creating markers for', window.data.length, 'items');
           createMarkers(window.data);
 
           // Populate filter dropdowns
@@ -888,10 +927,13 @@ function filterByMunicipality(municipalityName) {
 // Create markers
 function createMarkers(data) {
   markers.clearLayers();
+  console.log('Creating markers for data:', data);
 
+  let markerCount = 0;
   data.forEach(item => {
     if (item.Latitude && item.Longitude) {
       const icon = item.HBMType === 'Project' ? pIcon : bIcon;
+      markerCount++;
 
       const marker = L.marker([item.Latitude, item.Longitude], {
         icon: icon
@@ -910,6 +952,8 @@ function createMarkers(data) {
       markers.addLayer(marker);
     }
   });
+  
+  console.log(`Created ${markerCount} markers, total layers:`, markers.getLayers().length);
 }
 
 function createPopupContent(item) {
