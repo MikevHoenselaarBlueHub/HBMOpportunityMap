@@ -1339,7 +1339,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const exportBtn = document.getElementById('exportBtn');
   if (exportBtn) {
     exportBtn.addEventListener('click', function() {
-      alert('Export functionaliteit komt binnenkort beschikbaar.');
+      exportCurrentResults();
     });
   }
 
@@ -2203,13 +2203,23 @@ function loadSavedFilter(filterName) {
   filterState = { ...savedFilter };
   delete filterState.timestamp;
 
-  // Update UI
+  // Ensure checkedFilters exists
+  if (!filterState.checkedFilters) {
+    filterState.checkedFilters = {};
+  }
+
+  // Ensure checkedTypes exists and has default values
+  if (!filterState.checkedTypes) {
+    filterState.checkedTypes = ['Project', 'Bedrijf'];
+  }
+
+  // Update UI - HBMType checkboxes
   document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
     cb.checked = filterState.checkedTypes.includes(cb.value);
   });
 
   // Clear all other checkboxes first
-  const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector'];
+  const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector', 'Municipality'];
   filterSections.forEach(section => {
     document.querySelectorAll(`input[name="${section}"]`).forEach(cb => {
       cb.checked = false;
@@ -2218,12 +2228,14 @@ function loadSavedFilter(filterName) {
 
   // Set saved filter checkboxes
   Object.keys(filterState.checkedFilters).forEach(section => {
-    filterState.checkedFilters[section].forEach(value => {
-      const checkbox = document.querySelector(`input[name="${section}"][value="${value}"]`);
-      if (checkbox) {
-        checkbox.checked = true;
-      }
-    });
+    if (filterState.checkedFilters[section] && Array.isArray(filterState.checkedFilters[section])) {
+      filterState.checkedFilters[section].forEach(value => {
+        const checkbox = document.querySelector(`input[name="${section}"][value="${value}"]`);
+        if (checkbox) {
+          checkbox.checked = true;
+        }
+      });
+    }
   });
 
   // Load search term if saved
@@ -2232,6 +2244,13 @@ function loadSavedFilter(filterName) {
     const searchInput = document.getElementById('mapSearch');
     if (searchInput) {
       searchInput.value = filterState.searchTerm;
+    }
+  } else {
+    // Clear search if not in saved filter
+    currentFilter.searchTerm = '';
+    const searchInput = document.getElementById('mapSearch');
+    if (searchInput) {
+      searchInput.value = '';
     }
   }
 
@@ -2291,9 +2310,42 @@ function loadSavedFilter(filterName) {
         clearLocationBtn.style.display = 'block';
       }
     }
+  } else {
+    // Clear location if not in saved filter
+    currentFilter.userLocation = null;
+    currentFilter.radius = null;
+
+    // Remove user location marker and circle
+    if (userLocationCircle) {
+      map.removeLayer(userLocationCircle);
+      userLocationCircle = null;
+    }
+
+    // Update UI
+    const distanceFilter = document.getElementById('distanceFilter');
+    if (distanceFilter) {
+      distanceFilter.style.display = 'none';
+    }
+
+    const locationBtn = document.getElementById('useMyLocation');
+    if (locationBtn) {
+      locationBtn.innerHTML = '<span>📍 Gebruik mijn locatie</span>';
+      locationBtn.classList.remove('active');
+    }
+
+    // Hide clear location button
+    const clearLocationBtn = document.getElementById('clearLocation');
+    if (clearLocationBtn) {
+      clearLocationBtn.style.display = 'none';
+    }
   }
 
-  updateFilterState();
+  // Update URL immediately after loading filter
+  updateURL();
+
+  // Apply filters
+  applyFilters();
+
   alert(`Filter "${filterName}" geladen!`);
 }
 
@@ -2408,6 +2460,97 @@ function activateTab(tabName) {
   }, 100);
 }
 
+// CSV Export functionality
+function exportCurrentResults() {
+  const currentData = getCurrentFilteredData();
+  
+  if (currentData.length === 0) {
+    alert('Geen resultaten om te exporteren.');
+    return;
+  }
+
+  // Define CSV headers
+  const headers = [
+    'Naam',
+    'Type',
+    'Project Type',
+    'Organisatie Type',
+    'Vakgebied',
+    'HBM Onderwerp',
+    'Kenmerken',
+    'Sector',
+    'Beschrijving',
+    'Straat',
+    'Postcode',
+    'Stad',
+    'Gemeente',
+    'Land',
+    'Latitude',
+    'Longitude'
+  ];
+
+  // Convert data to CSV format
+  const csvData = currentData.map(item => [
+    escapeCsvValue(item.Name || ''),
+    escapeCsvValue(item.HBMType || ''),
+    escapeCsvValue(formatArray(item.ProjectType)),
+    escapeCsvValue(item.OrganizationType || ''),
+    escapeCsvValue(formatArray(item.OrganizationField)),
+    escapeCsvValue(formatArray(item.HBMTopic)),
+    escapeCsvValue(formatArray(item.HBMCharacteristics)),
+    escapeCsvValue(item.HBMSector || ''),
+    escapeCsvValue(item.Description || ''),
+    escapeCsvValue(item.Street || ''),
+    escapeCsvValue(item.Zip || ''),
+    escapeCsvValue(item.City || ''),
+    escapeCsvValue(item.Municipality || ''),
+    escapeCsvValue(item.Country || ''),
+    item.Latitude || '',
+    item.Longitude || ''
+  ]);
+
+  // Create CSV content
+  const csvContent = [
+    headers.join(','),
+    ...csvData.map(row => row.join(','))
+  ].join('\n');
+
+  // Create and download file
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  
+  if (link.download !== undefined) {
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `kansenkaart-resultaten-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Track export event
+  trackEvent('export_csv', {
+    result_count: currentData.length,
+    filter_types: filterState.checkedTypes
+  });
+}
+
+function escapeCsvValue(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+  
+  const stringValue = String(value);
+  
+  // If the value contains comma, newline, or double quote, wrap in quotes and escape quotes
+  if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
+    return '"' + stringValue.replace(/"/g, '""') + '"';
+  }
+  
+  return stringValue;
+}
+
 // Export for global access
 window.getCurrentLocation = getCurrentLocation;
 window.showDetails = showDetails;
@@ -2417,6 +2560,7 @@ window.updateFilterState = updateFilterState;
 window.toggleAdvancedFilters = toggleAdvancedFilters;
 window.synchronizeTabWithTypes = synchronizeTabWithTypes;
 window.activateTab = activateTab;
+window.exportCurrentResults = exportCurrentResults;
 
 // Function to update checkboxes based on filter state
 function updateCheckboxesFromFilterState() {
