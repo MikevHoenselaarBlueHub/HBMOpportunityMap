@@ -95,14 +95,14 @@ if (isMapPage && !isInfoPage && !isOverPage) {
           console.log('Creating markers for', window.data.length, 'items');
           createMarkers(window.data);
 
-          // Populate filter dropdowns
-          populateFilters(window.data);
+          // Populate filter dropdowns and wait for completion
+          await populateFilters(window.data);
+
+          // Load filters from URL (after filters are populated)
+          loadFromURL();
 
           // Apply initial filters
           applyFilters();
-
-          // Load filters from URL
-          loadFromURL();
 
           // Initialize auto complete
           initAutocomplete(window.data);
@@ -954,7 +954,7 @@ function applyFilters() {
 
   createMarkers(filteredData);
   updateListView(filteredData);
-  updateResultCount(filtereddata.length);
+  updateResultCount(filteredData.length);
 
   // Synchronize tab based on current filter types
   if (filterState.checkedTypes && filterState.checkedTypes.length === 1) {
@@ -1226,10 +1226,14 @@ async function populateFilters(data) {
     // Add municipality selection buttons
     addMunicipalitySelectionButtons(data);
 
+    // Return promise to indicate completion
+    return Promise.resolve();
+
   } catch (error) {
     console.error('Error loading filters:', error);
     // Fallback to generating from data
     populateFiltersFromData(data);
+    return Promise.resolve();
   }
 }
 
@@ -2094,12 +2098,10 @@ function loadFromURL() {
       const values = params.get(param).split(',');
       filterState.checkedFilters[section] = values;
 
-      // Update checkboxes when they exist
-      setTimeout(() => {
-        document.querySelectorAll(`input[name="${section}"]`).forEach(cb => {
-          cb.checked = values.includes(cb.value);
-        });
-      }, 100);
+      // Update checkboxes immediately
+      document.querySelectorAll(`input[name="${section}"]`).forEach(cb => {
+        cb.checked = values.includes(cb.value);
+      });
     }
   });
 
