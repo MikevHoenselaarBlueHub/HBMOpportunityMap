@@ -116,6 +116,11 @@ if (isMapPage && !isInfoPage && !isOverPage) {
           // Show legend
           showLegend();
 
+          // Force update checkboxes after filters are populated
+          setTimeout(() => {
+            updateCheckboxesFromFilterState();
+          }, 500);
+
           console.log('Map initialization complete');
         })
         .catch(error => {
@@ -347,7 +352,7 @@ async function loadDutchMunicipalities() {
     const response = await fetch('data/geojson/nl-gemeenten.geojson');
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${res.status}`);
     }
 
     const geojsonData = await response.json();
@@ -457,7 +462,7 @@ async function loadGermanMunicipalities() {
     const response = await fetch('data/geojson/de-gemeenten.geojson');
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${res.status}`);
     }
 
     const geojsonData = await response.json();
@@ -686,7 +691,7 @@ function createMarkers(data) {
   // Performance optimization: batch marker creation
   const markerBatch = [];
   let markerCount = 0;
-  
+
   data.forEach(item => {
     if (item.Latitude && item.Longitude) {
       let marker;
@@ -1853,6 +1858,7 @@ function getCurrentFilteredData() {
   // Get filter values from form
   const checkedTypes = Array.from(document.querySelectorAll('input[name="HBMType"]:checked')).map(cb => cb.value);
   const checkedProjectTypes = Array.from(document.querySelectorAll('input[name="ProjectType"]:checked')).map(cb => cb.value);
+  <previous_generation>
   const checkedOrganizationTypes = Array.from(document.querySelectorAll('input[name="OrganizationType"]:checked')).map(cb => cb.value);
   const checkedOrganizationFields = Array.from(document.querySelectorAll('input[name="OrganizationField"]:checked')).map(cb => cb.value);
   const checkedHBMTopics = Array.from(document.querySelectorAll('input[name="HBMTopic"]:checked')).map(cb => cb.value);
@@ -2371,7 +2377,7 @@ function loadSavedFilter(filterName) {
 
   // Apply filters first to ensure proper state
   applyFilters();
-  
+
   // Update URL immediately after loading filter
   updateURL();
 
@@ -2492,7 +2498,7 @@ function activateTab(tabName) {
 // CSV Export functionality
 function exportCurrentResults() {
   const currentData = getCurrentFilteredData();
-  
+
   if (currentData.length === 0) {
     alert('Geen resultaten om te exporteren.');
     return;
@@ -2547,7 +2553,7 @@ function exportCurrentResults() {
   // Create and download file
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
-  
+
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
@@ -2569,21 +2575,21 @@ function escapeCsvValue(value) {
   if (value === null || value === undefined) {
     return '';
   }
-  
+
   const stringValue = String(value);
-  
+
   // If the value contains comma, newline, or double quote, wrap in quotes and escape quotes
   if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
     return '"' + stringValue.replace(/"/g, '""') + '"';
   }
-  
+
   return stringValue;
 }
 
 // Show all results function
 function showAllResults() {
   const currentData = getCurrentFilteredData();
-  
+
   if (currentData.length === 0) {
     alert('Geen resultaten om te tonen.');
     return;

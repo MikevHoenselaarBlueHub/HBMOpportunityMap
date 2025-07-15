@@ -1,36 +1,86 @@
 
 {
   "ProjectType": [
-    "Circulair",
-    "Frisse Scholen",
-    "Nieuwbouw",
-    "Renovatie"
+    "Feasibility / Concept",
+    "Initiative & Vision Development",
+    "Design",
+    "Tendering & selection",
+    "Construction & Realisation",
+    "Fit-out & Commissioning",
+    "Use & Management",
+    "Post-occupancy / Monitoring",
+    "Renovation",
+    "Demolition & Redevelopment"
   ],
   "OrganizationType": [
-    "Aannemer",
     "Architect",
-    "Installatiebedrijf",
-    "Onderzoeksinstituut"
+    "Construction company",
+    "Employment expert",
+    "Engineering Consultancy",
+    "Government / non-profit",
+    "Installation company",
+    "Interior designer",
+    "Manufacturer",
+    "Research institution",
+    "Strategic advisor",
+    "Supplier"
   ],
   "OrganizationField": [
-    "Architectuur",
-    "Bouwservices",
-    "Modulair",
-    "Zonne-energie"
+    "Architecture",
+    "Building Automation",
+    "Building Services",
+    "Clay Construction",
+    "Electrical",
+    "Floor Systems",
+    "Innovation Hub",
+    "Modular Housing",
+    "Modular Timber Construction",
+    "Office interiors",
+    "Solar"
   ],
   "HBMTopic": [
-    "Akoestiek",
-    "Binnenluchtkwaliteit",
-    "Licht"
+    "Acoustics",
+    "Active Design",
+    "Indoor Air Quality",
+    "Light",
+    "Look & Feel",
+    "Thermal Comfort"
   ],
   "HBMCharacteristics": [
-    "Biobased materialen",
-    "Circulair",
-    "Passiefhuis"
+    "Bio-based materials",
+    "Biophilic design",
+    "BREEAM",
+    "Certification",
+    "Circular",
+    "Climate-adaptive",
+    "Cradle-to-Cradle",
+    "Data-driven",
+    "Design for disassembly",
+    "Education",
+    "Experience with Tendering",
+    "Green roofs",
+    "Inclusive design",
+    "Life-cycle assessment (LCA)",
+    "Low-carbon",
+    "Low-EMF",
+    "Low-VOC",
+    "Nature-inclusive",
+    "Net-zero energy",
+    "Passive House",
+    "Prefab & modular construction",
+    "Scientific",
+    "Sensors",
+    "WELL",
+    "HBM HealthScore"
   ],
   "HBMSector": [
-    "Onderwijs",
-    "Wonen",
-    "Zorg"
+    "Education",
+    "Government",
+    "Health",
+    "Hospitality",
+    "Housing",
+    "Leisure",
+    "Office",
+    "Retail"
   ]
 }
