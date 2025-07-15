@@ -2210,3 +2210,10 @@ button {
     gap: 0.5rem;
   }
 }
+            <button id="showAllResultsBtn" class="dropdown-item">
+              Toon alle resultaten
+            </button>
+            <button id="showAllOnMapBtn" class="dropdown-item">
+              Alles in beeld
+            </button>
+</media>

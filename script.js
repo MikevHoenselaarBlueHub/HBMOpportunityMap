@@ -974,7 +974,7 @@ function createPopupContent(item) {
 // Filter functions
 function applyFilters() {
   if (!window.data || !Array.isArray(window.data)) {
-    console.warn('No data available for filtering');```python
+    console.warn('No data available for filtering');
     return;
   }
 
@@ -1480,15 +1480,56 @@ document.addEventListener('DOMContentLoaded', function() {
     loadSavedFilters();
   });
 
+  // Show all results button
   const showAllResultsBtn = document.getElementById('showAllResultsBtn');
   if (showAllResultsBtn) {
     showAllResultsBtn.addEventListener('click', function() {
-      showAllResults();
-      // Close dropdown after action
-      const filterDropdown = document.querySelector('.filter-dropdown');
-      if (filterDropdown) {
-        filterDropdown.classList.remove('open');
+      // Clear all filters
+      clearAllFilters();
+
+      // Close dropdown
+      const dropdown = document.querySelector('.filter-dropdown');
+      if (dropdown) {
+        dropdown.classList.remove('open');
       }
+
+      // Apply empty filters (show all)
+      applyFilters();
+
+      // Show notification
+      showNotification('Alle resultaten worden getoond');
+    });
+  }
+
+  // Show all on map button (Alles in beeld)
+  const showAllOnMapBtn = document.getElementById('showAllOnMapBtn');
+  if (showAllOnMapBtn) {
+    showAllOnMapBtn.addEventListener('click', function() {
+      // Clear all filters
+      clearAllFilters();
+
+      // Close dropdown
+      const dropdown = document.querySelector('.filter-dropdown');
+      if (dropdown) {
+        dropdown.classList.remove('open');
+      }
+
+      // Apply empty filters (show all)
+      applyFilters();
+
+      // Fit map to show all markers
+      if (window.map && window.markers) {
+        // Ensure markers is a LayerGroup and has the getBounds method
+        if (markers.getLayers().length > 0) {
+          const bounds = markers.getBounds();
+          map.fitBounds(bounds, {
+            padding: [20, 20]
+          });
+        }
+      }
+
+      // Show notification
+      showNotification('Alle resultaten in beeld gebracht');
     });
   }
 
@@ -1854,8 +1895,7 @@ function showDetails(itemName) {
   }
 }
 
-function openContactForm(itemName) {
-  const decodedName = decodeURIComponent(itemName);
+function openContactForm(itemName) {  const decodedName = decodeURIComponent(itemName);
   const item = window.data.find(d => d.Name === decodedName);
   if (item) {
     alert(`Contact informatie voor ${decodedName} wordt binnenkort beschikbaar gesteld.`);
@@ -1879,7 +1919,7 @@ function openDetailPanel(item) {
     <div class="detail-navigation">
         <button id="prevDetail" class="nav-btn ${currentIndex === 0 ? 'disabled' : ''}" ${currentIndex === 0 ? 'disabled' : ''}>
           <img src="icons/arrow-left.svg" alt="Vorige" class="nav-icon nav-icon-left" />
-        </button>```python
+        </button>
         <span class="nav-counter">${currentIndex + 1} / ${totalItems}</span>
         <button id="nextDetail" class="nav-btn ${currentIndex === totalItems - 1 ? 'disabled' : ''}" ${currentIndex === totalItems - 1 ? 'disabled' : ''}>
           <img src="icons/arrow-right.svg" alt="Volgende" class="nav-icon nav-icon-right" />
