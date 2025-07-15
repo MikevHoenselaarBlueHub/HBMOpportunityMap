@@ -704,8 +704,8 @@ function createPopupContent(item) {
       </div>
 
       <div class="popup-actions">
-        <button onclick="showDetails('${item.Name}')" class="btn-details">Meer informatie</button>
-        <button onclick="trackEvent('contact_click', {name: '${item.Name}'})" class="btn-contact">Contact</button>
+        <button onclick="showDetails('${encodeURIComponent(item.Name || '')}')" class="card-contact-btn">Meer info</button>
+        <button onclick="openContactForm('${encodeURIComponent(item.Name || '')}')" class="card-contact-btn">Contact</button>
       </div>
     </div>
   `;
@@ -973,6 +973,26 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
+  // Initialize filter functionality first
+  initializeFilters();
+
+  // Initialize options dropdown
+  const optionsBtn = document.getElementById('optionsBtn');
+  const filterDropdown = optionsBtn?.parentElement;
+  if (optionsBtn && filterDropdown) {
+    optionsBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      filterDropdown.classList.toggle('open');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!filterDropdown.contains(e.target)) {
+        filterDropdown.classList.remove('open');
+      }
+    });
+  }
+
   // Location button
   const locationBtn = document.getElementById('useMyLocation');
   if (locationBtn) {
@@ -1182,11 +1202,72 @@ function createListItem(item) {
 
 // Global functions for popup actions
 function showDetails(itemName) {
-  const item = window.data.find(d => d.Name === itemName);
+  const decodedName = decodeURIComponent(itemName);
+  const item = window.data.find(d => d.Name === decodedName);
   if (item) {
-    // Create detail modal or navigate to detail page
-    console.log('Show details for:', item);
-    trackEvent('details_view', { name: itemName });
+    openDetailPanel(item);
+    trackEvent('details_view', { name: decodedName });
+  }
+}
+
+function openContactForm(itemName) {
+  const decodedName = decodeURIComponent(itemName);
+  const item = window.data.find(d => d.Name === decodedName);
+  if (item) {
+    alert(`Contact informatie voor ${decodedName} wordt binnenkort beschikbaar gesteld.`);
+    trackEvent('contact_click', { name: decodedName });
+  }
+}
+
+function openDetailPanel(item) {
+  const detailPanel = document.getElementById('detailPanel');
+  if (!detailPanel) return;
+
+  detailPanel.innerHTML = `
+    <a href="#" id="closeDetail" class="close-btn">
+      <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
+    </a>
+    <div class="detail-content">
+      <div class="detail-header">
+        <h2>${item.Name || 'Onbekend'}</h2>
+        <span class="detail-type-badge ${item.HBMType?.toLowerCase() || 'unknown'}">${item.HBMType || 'Onbekend'}</span>
+      </div>
+      
+      <div class="detail-images">
+        ${item.Logo ? `<img src="${item.Logo}" alt="Logo" class="detail-logo" onerror="this.style.display='none'">` : ''}
+        ${item.ProjectImage ? `<img src="${item.ProjectImage}" alt="Project" class="detail-image" onerror="this.style.display='none'">` : ''}
+      </div>
+
+      <div class="detail-info">
+        ${item.Description ? `<div class="detail-description"><h4>Beschrijving</h4><p>${item.Description}</p></div>` : ''}
+        
+        <div class="detail-specs">
+          ${item.ProjectType ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArray(item.ProjectType)}</div>` : ''}
+          ${item.OrganizationType ? `<div class="detail-row"><strong>Organisatie:</strong> ${item.OrganizationType}</div>` : ''}
+          ${item.OrganizationField ? `<div class="detail-row"><strong>Vakgebied:</strong> ${formatArray(item.OrganizationField)}</div>` : ''}
+          ${item.HBMTopic ? `<div class="detail-row"><strong>HBM Onderwerp:</strong> ${formatArray(item.HBMTopic)}</div>` : ''}
+          ${item.HBMCharacteristics ? `<div class="detail-row"><strong>Kenmerken:</strong> ${formatArray(item.HBMCharacteristics)}</div>` : ''}
+          ${item.HBMSector ? `<div class="detail-row"><strong>Sector:</strong> ${item.HBMSector}</div>` : ''}
+          ${item.Street || item.City ? `<div class="detail-row"><strong>Adres:</strong> ${[item.Street, item.Zip, item.City].filter(Boolean).join(', ')}</div>` : ''}
+        </div>
+      </div>
+
+      <div class="detail-actions">
+        <button onclick="openContactForm('${encodeURIComponent(item.Name || '')}')" class="card-contact-btn">Contact opnemen</button>
+      </div>
+    </div>
+  `;
+
+  // Show the panel
+  detailPanel.classList.add('open');
+
+  // Add close functionality
+  const closeBtn = detailPanel.querySelector('#closeDetail');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      detailPanel.classList.remove('open');
+    });
   }
 }
 
@@ -1205,6 +1286,7 @@ function toggleAdvancedFilters() {
 // Export for global access
 window.getCurrentLocation = getCurrentLocation;
 window.showDetails = showDetails;
+window.openContactForm = openContactForm;
 window.trackEvent = trackEvent;
 window.updateFilterState = updateFilterState;
 window.toggleAdvancedFilters = toggleAdvancedFilters;
