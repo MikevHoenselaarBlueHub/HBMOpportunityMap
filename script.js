@@ -331,7 +331,7 @@ function initMap() {
     'Kaart': streetLayer,
     'Satelliet': satelliteLayer
   }, {
-    'Interreg-gemeenten': municipalityLayer
+    '<img src="images/Interreg-logo-icon.png" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;">Interreg-gemeenten': municipalityLayer
   }, {
     position: 'topright'
   }).addTo(map);
@@ -2713,30 +2713,33 @@ function deleteSavedFilter() {
   alert(`Filter "${filterName}" verwijderd!`);
 }
 
-function updateSavedFiltersDropdown() {
-  const select = document.getElementById('savedFiltersSelect');
-  if (!select) return;
 
-  const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
-
-  select.innerHTML = '<option value="">Selecteer opgeslagen filter...</option>';
-
-  Object.keys(savedFilters).forEach(filterName => {
-    const option = document.createElement('option');
-    option.value = filterName;
-    option.textContent = filterName;
-    select.appendChild(option);
-  });
-
-  // Update saved filters text
-  updateSavedFiltersText(Object.keys(savedFilters).length);
-}
 
 function updateSavedFiltersText(count) {
   const savedFiltersText = document.getElementById('savedFiltersText');
   if (savedFiltersText) {
     savedFiltersText.textContent = `Opgeslagen filters${count > 0 ? ` (${count})` : ''}`;
   }
+}
+
+function updateSavedFiltersDropdown() {
+  const select = document.getElementById('savedFiltersSelect');
+  
+  const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
+
+  if (select) {
+    select.innerHTML = '<option value="">Selecteer opgeslagen filter...</option>';
+
+    Object.keys(savedFilters).forEach(filterName => {
+      const option = document.createElement('option');
+      option.value = filterName;
+      option.textContent = filterName;
+      select.appendChild(option);
+    });
+  }
+
+  // Update saved filters text with correct count
+  updateSavedFiltersText(Object.keys(savedFilters).length);
 }
 
 // Share functionality

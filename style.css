@@ -1193,8 +1193,7 @@ button {
 
 .list-tab span {
   font-weight: 600;
-  opacity: 0.8;
-}
+  opacity: 0.8;}
 
 .tab-content {
   flex: 1;
@@ -2493,4 +2492,9 @@ button {
   }
 }
 
-<button id="showAllResultsBtn" class="dropdown-item">Toon alle resultaten </button><button id="showAllOnMapBtn" class="dropdown-item">Alles in beeld </button></media>
+<button id="showAllResultsBtn" class="dropdown-item">Toon alle resultaten </button><button id="showAllOnMapBtn" class="dropdown-item">Alles in beeld </button>
+/* === Layer Control Styling === */
+.leaflet-control-layers label img {
+  vertical-align: middle;
+  margin-right: 5px;
+}

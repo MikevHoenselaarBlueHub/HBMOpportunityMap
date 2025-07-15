@@ -1,357 +1,149 @@
+# HBM Opportunity Map (Kansenkaart)
 
-# HBM Kansenkaart - Interactieve Kaart voor Gezond Bouwen
+Een interactieve kaart applicatie voor het Healthy Building Movement (HBM) project, ontwikkeld voor de Euregio grensoverschrijdende samenwerking tussen Nederlandse en Duitse gemeenten.
 
-Een interactieve kaart applicatie die kansen voor gezond bouwen in de Euregio (Nederland en Duitsland) visualiseert. Ontwikkeld voor Healthy Building Movement (HBM).
+## Features
 
-## 🌟 Nieuwste Updates (Januari 2025)
+### 🗺️ Kaart Functionaliteit
+- **Interactieve kaart** met Leaflet.js
+- **Verschillende kaartlagen**: Straat- en satellietweergave
+- **Marker clustering** voor optimale performance
+- **Hover labels** bij markers en gemeentegrenzen
+- **Gemeentegrenzen laag** (Interreg-gemeenten) met Nederlandse en Duitse gemeenten
+- **Custom markers** met projectspecifieke iconen en logo's
+- **Popup navigatie** tussen resultaten
+- **"Alles in beeld"** functie om alle gefilterde resultaten te tonen
+- **Zoom en pan** functionaliteit
 
-### Laatste Verbeteringen
-- ✅ **URL State Management**: Filters worden nu correct bijgewerkt in de URL
-- ✅ **Conversiegerichte content**: Geen resultaten scherm met contact opties
-- ✅ **Nederlandse filterwaarden**: Alle filters zijn volledig vertaald
-- ✅ **Verbeterde gebruikersinteractie**: Betere feedback bij lege resultaten
+### 🔍 Filter & Zoek Functionaliteit
+- **Geavanceerde filters** met categorieën:
+  - Type project (Haalbaarheidsstudie, Ontwerp, Renovatie, etc.)
+  - Organisatietype (Architect, Bouwbedrijf, Ingenieursbureau, etc.)
+  - Vakgebied (Architectuur, Bouwservices, Elektrotechniek, etc.)
+  - HBM Thema's (Akoestiek, Binnenluchtkwaliteit, Licht, etc.)
+  - HBM Kenmerken (Biobased materialen, Circulair, Passiefhuis, etc.)
+  - HBM Sectoren (Onderwijs, Zorg, Wonen, Kantoor, etc.)
+  - Gemeenten (Nederlandse en Duitse gemeenten)
 
-### Recente Functionaliteiten
-- ✅ **Hover labels**: Markers tonen nu de naam van bedrijf/project bij mouseover
-- ✅ **Slimme label positionering**: Labels blijven altijd zichtbaar binnen het kaartgebied
-- ✅ **Uniforme marker styling**: Alle markers (met en zonder foto) hebben nu consistente grootte
-- ✅ **Witte cirkel markers**: Markers zonder foto krijgen een wit rondje met icoon
-- ✅ **Satellietweergave**: Nieuwe kaartlaag met satellieten beelden (aan/uit schakelbaar)
+- **Object type filtering**: Projecten, Bedrijven, Experts
+- **Tekst zoekfunctie** in naam en beschrijving
+- **Locatie-gebaseerd filteren** met GPS functionaliteit
+- **Afstand filter** met instelbare radius (1-100 km)
+- **Filter combinatie modi**: EN/OF logica
+- **Selecteer alles/geen** knoppen voor snelle selectie
+- **Gemeente specifieke selectie knoppen** (NL/DE/Alle/Geen)
 
-### Filter Systeem Verbeteringen
-- ✅ **Externe filters.json**: Alle filteropties zijn nu gecentraliseerd in een apart bestand
-- ✅ **Klikbare filter links**: In detailpaneel kun je op waardes klikken om direct te filteren
-- ✅ **Intelligente filter links**: Links tonen juiste tekst ("bedrijven" of "projecten")
-- ✅ **Tab synchronisatie**: Tabs in zijbalk synchroniseren automatisch met URL parameters
-- ✅ **Opslaan en laden filters**: Bewaar favoriete filter combinaties lokaal
+### 💾 Filter Beheer
+- **Opslaan van filters** met custom namen
+- **Laden van opgeslagen filters**
+- **Verwijderen van opgeslagen filters**
+- **Filter teller** in options menu
+- **Laatste filter notificatie** bij terugkeer naar kaart
+- **URL state management** voor filter delen
+- **Filter geschiedenis** tracking
 
-### Navigatie Verbeteringen
-- ✅ **Popup navigatie**: Pijltjes in popups om naar volgende/vorige marker te gaan
-- ✅ **Detailpaneel navigatie**: Navigeer door gefilterde resultaten in detailpaneel
-- ✅ **Juiste pijl richting**: Links pijltje wijst naar links, rechts naar rechts
-- ✅ **Context-bewuste navigatie**: Navigatie werkt op basis van huidige filterresultaten
+### 📱 User Interface
+- **Responsive design** voor desktop, tablet en mobiel
+- **Hamburger menu** voor mobiele navigatie
+- **Tab interface** (Projecten, Bedrijven, Experts)
+- **List/kaart toggle** op mobiele apparaten
+- **Detail panels** met navigatie tussen items
+- **Export functionaliteit** naar CSV
+- **Deel functionaliteit** via URL
+- **Loading states** en error handling
 
-## 🚀 Volledige Functionaliteiten
+### 🌍 Meertaligheid & Toegankelijkheid
+- **Nederlandse interface** (primair)
+- **Aria labels** voor screen readers
+- **Keyboard navigatie** ondersteuning
+- **Error fallbacks** voor ontbrekende data
+- **Graceful degradation** bij API failures
 
-### Kaart Functionaliteiten
-- ✅ **Interactieve kaart**: Powered by Leaflet.js met clustering
-- ✅ **Dual country support**: Nederland en Duitsland markers
-- ✅ **Custom markers**: Onderscheid tussen projecten en bedrijven
-- ✅ **Photo markers**: Markers met logo's/afbeeldingen voor visuele herkenning
-- ✅ **Gemeente grenzen**: Nederland & Duitsland gemeentegrenzen (11.000+ gemeenten)
-- ✅ **Cluster functionaliteit**: Automatische groepering van markers bij inzoomen
-- ✅ **Responsive design**: Volledig geoptimaliseerd voor desktop, tablet en mobiel
-- ✅ **Detail panel**: Uitgebreide informatie met navigatie door resultaten
+### 📊 Data & Performance
+- **Geocoding** voor ontbrekende coördinaten via OpenStreetMap
+- **Caching** met versioning systeem
+- **Performance monitoring** met Google Analytics 4
+- **Batch marker creation** voor snelle rendering
+- **Lazy loading** van gemeente boundaries
+- **Client-side filtering** voor snelle response
 
-### Geavanceerde Filter Opties
-- ✅ **Type organisatie**: Project/Bedrijf toggle met realtime filtering
-- ✅ **Project types**: Haalbaarheidsstudie, Ontwerp, Constructie, Renovatie, etc.
-- ✅ **Organisatie types**: Architect, Bouwbedrijf, Ingenieursbureau, etc.
-- ✅ **Vakgebieden**: Architectuur, Gebouwautomatisering, Modulaire Houtbouw, etc.
-- ✅ **HBM onderwerpen**: Akoestiek, Binnenluchtkwaliteit, Licht, Thermisch Comfort
-- ✅ **Kenmerken**: Biobased materialen, Circulair, Passiefhuis, BREEAM, WELL
-- ✅ **Sectoren**: Onderwijs, Wonen, Zorg, Kantoor, Horeca, Recreatie
-- ✅ **Locatie + radius filter**: GPS-gebaseerde nabijheidsfiltering (1-100km)
-- ✅ **Tekst zoeken**: Realtime zoek in namen en beschrijvingen
-- ✅ **Gemeente filters**: Filter op 11.000+ Nederlandse en Duitse gemeenten
-- ✅ **Geavanceerde filters**: EN/OF logica, combinatiemogelijkheden
-- ✅ **Filter opslaan/laden**: Lokale opslag van favoriete filter combinaties
-- ✅ **URL state management**: Deel filters via URL, browser navigatie ondersteuning
+### 🏛️ Template Structuur
+- **Gedeelde header/footer** componenten
+- **Consistent styling** over alle pagina's
+- **Interreg branding** integratie
+- **Navigation consistency** tussen pagina's
 
-### Data Management & Performance
-- ✅ **JSON data structuur**: Flexibele, schaalbare data opslag
-- ✅ **GeoJSON gemeente data**: Accurate gemeente grenzen voor beide landen
-- ✅ **Automatische geocoding**: Coördinaten voor adressen via OpenStreetMap
-- ✅ **Meertalige ondersteuning**: NL/EN/DE support basis geïmplementeerd
-- ✅ **Aggressieve cache management**: Optimale laadtijden met versioning
-- ✅ **Performance optimalisatie**: Batch marker creation, lazy loading
-- ✅ **Error boundaries**: Graceful error handling voor ontbrekende data
-- ✅ **Progressive loading**: Data wordt incrementeel geladen
+## Technische Specificaties
 
-### Gebruikersinterface
-- ✅ **Mobile first design**: Prioriteit op mobiele gebruikservaring
-- ✅ **Lijst/kaart toggle**: Naadloos schakelen tussen weergaven
-- ✅ **Tab systeem**: Gescheiden weergave voor projecten en bedrijven
-- ✅ **Dropdown menu's**: Intuïtieve filter interface
-- ✅ **Hover feedback**: Directe feedback bij marker interactie
-- ✅ **Conversion-focused content**: Strategische call-to-actions bij lege resultaten
-- ✅ **Accessibility**: ARIA labels, keyboard navigation support
+### Frontend Stack
+- **HTML5/CSS3/JavaScript** (Vanilla)
+- **Leaflet.js** voor kaart functionaliteit
+- **Leaflet.markercluster** voor marker clustering
+- **OpenStreetMap** tiles en geocoding
+- **Google Analytics 4** voor tracking
 
-## ⚠️ Beperkt Werkende Functionaliteiten
+### Data Formaten
+- **GeoJSON** voor gemeente boundaries
+- **JSON** voor filter configuratie en data
+- **CSV export** functionaliteit
+- **LocalStorage** voor user preferences
 
-### Backend Integraties
-- ❌ **Contact formulieren**: Placeholder functionaliteit, geen backend
-- ❌ **Email verzending**: Vereist server-side implementatie
-- ❌ **User accounts**: Geen authenticatie systeem
-- ❌ **Admin panel**: Geen CMS voor data beheer
+### Performance Features
+- **Aggressive caching** met cache busting
+- **Version control** voor assets
+- **Batch operations** voor DOM manipulatie
+- **Debounced search** input
+- **Lazy loading** van niet-kritieke componenten
 
-### Analytics & Tracking
-- ⚠️ **Google Analytics 4**: Basis implementatie, configuratie vereist
-- ⚠️ **Event tracking**: Basis implementatie, niet volledig getest
-- ❌ **Conversion tracking**: Geen uitgebreide funnel tracking
-
-### Export & Sharing
-- ✅ **CSV Export**: Werkt voor gefilterde resultaten
-- ✅ **URL sharing**: Volledig werkend via URL parameters
-- ❌ **PDF Export**: Nog niet geïmplementeerd
-- ❌ **Social media sharing**: Basis URL delen alleen
-
-## 🛠️ Technische Stack
-
-### Frontend Technologies
-- **Core**: HTML5, CSS3, Vanilla JavaScript (ES6+)
-- **Mapping**: Leaflet.js v1.9+ met MarkerCluster plugin
-- **Geocoding**: OpenStreetMap Nominatim API
-- **Build**: Geen bundler - native ES modules voor snelheid
-- **Styling**: Custom CSS met CSS Grid/Flexbox
-- **Icons**: Optimized SVG icon set
-- **Performance**: Service Worker voor offline support
-
-### Data Formats
-- **Opportunities**: JSON format met gestructureerde velden
-- **Filters**: Centralized JSON configuration
-- **Boundaries**: GeoJSON voor Nederlandse en Duitse gemeenten
-- **Translations**: JSON-based i18n system
-
-### Development Tools
-- **Server**: npx serve voor development
-- **Versioning**: Automatic cache busting system
-- **Error Handling**: Comprehensive try/catch implementation
-- **Debugging**: Console logging met structured format
-
-## 📁 Project Structuur
+## Bestandsstructuur
 
 ```
-hbm-kansenkaart/
-├── config/                    # Configuratie bestanden
-│   ├── map-config.js         # Leaflet kaart instellingen
-│   ├── utils.js              # Herbruikbare utility functies
-│   └── version.js            # Versie en cache management
-├── data/                     # Data bestanden
-│   ├── geojson/              # Gemeente grenzen
-│   │   ├── nl-gemeenten.geojson  # Nederlandse gemeenten
-│   │   └── de-gemeenten.geojson  # Duitse gemeenten
-│   ├── filters.json          # Gecentraliseerde filter opties
-│   └── opportunities.json    # Kaart data (projecten/bedrijven)
-├── icons/                    # SVG iconen
-│   ├── arrow-left.svg        # Navigatie iconen
-│   ├── arrow-right.svg
-│   ├── close.svg
-│   ├── filter-setting.svg
-│   ├── marker-company.svg    # Kaart markers
-│   └── marker-project.svg
-├── translations/             # Meertalige ondersteuning
-│   ├── nl.json              # Nederlands (primair)
-│   ├── en.json              # Engels
-│   └── de.json              # Duits
-├── contact.html             # Contact pagina
-├── info.html                # Informatie pagina
-├── over.html                # Over HBM pagina
-├── index.html               # Hoofd applicatie
-├── script.js                # Hoofd JavaScript logica
-├── style.css                # Styling en responsive design
-└── sw.js                    # Service Worker
+├── config/
+│   ├── map-config.js    # Kaart configuratie
+│   ├── version.js       # Versie management
+│   └── utils.js         # Utility functies
+├── data/
+│   ├── geojson/         # Gemeente boundary data
+│   ├── filters.json     # Filter configuratie
+│   ├── municipalities.json # Gemeente informatie
+│   └── opportunities.json   # Project/bedrijf data
+├── icons/               # SVG iconen voor UI
+├── images/              # Logo's en afbeeldingen
+├── translations/        # Meertalige content
+├── index.html           # Hoofd kaart pagina
+├── info.html           # Informatie pagina
+├── over.html           # Over HBM pagina
+├── contact.html        # Contact pagina
+├── script.js           # Hoofd JavaScript functionaliteit
+└── style.css           # Styling en responsive design
 ```
 
-## 🔧 Installatie & Development
+## Browser Ondersteuning
+- **Chrome/Edge**: Volledig ondersteund
+- **Firefox**: Volledig ondersteund  
+- **Safari**: Volledig ondersteund
+- **Mobiele browsers**: Responsive design
 
-### Lokale Development
-```bash
-# Clone repository
-git clone [repository-url]
-cd hbm-kansenkaart
+## Development Setup
+1. Clone repository
+2. Gebruik `npx serve . -l 5000` voor local development
+3. Wijzig `config/version.js` voor cache busting bij updates
 
-# Start development server
-npx serve . -l 5000
+## Deployment
+- **Statische hosting** compatible
+- **Replit deployment** ready
+- **CDN friendly** met versioning
 
-# Open browser
-http://localhost:5000
-```
+## Maintenance
+- **Modulaire opbouw** voor eenvoudige updates
+- **Configuratie bestanden** voor data management
+- **Version tracking** voor change management
+- **Error logging** voor debugging
+- **Performance monitoring** ingebouwd
 
-### Data Updates
-```bash
-# Update opportunities
-vim data/opportunities.json
-
-# Update filters
-vim data/filters.json
-
-# Update translations
-vim translations/nl.json
-```
-
-### Deployment op Replit
-1. **Import project** naar Replit
-2. **Run** via "npx serve . -l 5000"
-3. **Deploy** via Replit Autoscale Deployments
-4. **Configure** domein en SSL via Replit
-
-## 📊 Data Structuur
-
-### Opportunities Format
-```json
-{
-  "Name": "Project/Bedrijf Naam",
-  "HBMType": "Project|Bedrijf",
-  "ProjectType": ["Renovatie", "Circulair"],
-  "OrganizationType": "Architect",
-  "OrganizationField": ["Architectuur", "Bouwservices"],
-  "HBMTopic": ["Binnenluchtkwaliteit", "Licht"],
-  "HBMCharacteristics": ["Passiefhuis", "Circulair"],
-  "HBMSector": "Wonen",
-  "Description": "Beschrijving...",
-  "Logo": "https://example.com/logo.jpg",
-  "ProjectImage": "https://example.com/project.jpg",
-  "Street": "Straatname 123",
-  "Zip": "1234AB",
-  "City": "Stad",
-  "Municipality": "Gemeente",
-  "Country": "Netherlands|Germany",
-  "Latitude": 51.2345,
-  "Longitude": 5.6789
-}
-```
-
-### Filter Configuration
-```json
-{
-  "ProjectType": ["Haalbaarheidsstudie / Concept", "Ontwerp"],
-  "OrganizationType": ["Architect", "Bouwbedrijf"],
-  "HBMTopic": ["Akoestiek", "Binnenluchtkwaliteit"],
-  "HBMCharacteristics": ["Biobased materialen", "Circulair"],
-  "HBMSector": ["Onderwijs", "Wonen", "Zorg"]
-}
-```
-
-## 🚀 Toekomstige Ontwikkelingen
-
-### Prioriteit Hoog
-- [ ] **Backend integratie**: Contact formulier met email verzending
-- [ ] **Analytics configuratie**: Volledige Google Analytics 4 setup
-- [ ] **Admin panel**: CMS voor eenvoudig data beheer
-- [ ] **User accounts**: Persoonlijke favorieten en instellingen
-
-### Prioriteit Medium
-- [ ] **Advanced search**: Fuzzy search, autocomplete verbetering
-- [ ] **Export uitbreiding**: PDF rapporten, advanced CSV opties
-- [ ] **Offline functionaliteit**: Volledige PWA implementatie
-- [ ] **Performance optimalisatie**: Lazy loading, virtual scrolling
-
-### Prioriteit Laag
-- [ ] **Mobile app**: PWA naar native app conversie
-- [ ] **API development**: REST API voor externe integraties
-- [ ] **Machine learning**: Slimme aanbevelingen op basis van gebruik
-- [ ] **Multi-tenant**: Ondersteuning voor meerdere organisaties
-
-## 🎯 Gebruiksscenario's
-
-### Voor Beleidsmakers
-- Overzicht van gezonde bouwprojecten in gemeente
-- Contact met lokale experts en bedrijven
-- Inzicht in beschikbare kennis en ervaring
-
-### Voor Bouwprofessionals
-- Netwerken met gelijkgesinde professionals
-- Inspiratie door succesvolle projecten
-- Vinden van samenwerkingspartners
-
-### Voor HBM Organisatie
-- Zichtbaarheid van eigen netwerk
-- Lead generation voor contact
-- Data-driven inzichten in markt
-
-## 🤝 Contributing
-
-### Development Workflow
-```bash
-# 1. Fork project
-git checkout -b feature/amazing-feature
-
-# 2. Make changes
-vim script.js
-vim style.css
-
-# 3. Test locally
-npx serve . -l 5000
-
-# 4. Commit changes
-git commit -m 'Add amazing feature'
-
-# 5. Push and PR
-git push origin feature/amazing-feature
-```
-
-### Code Standards
-- **ES6+ JavaScript**: Moderne syntax, geen transpilation
-- **Semantic HTML**: Accessibility first approach
-- **Mobile-first CSS**: Responsive design prioriteit
-- **Progressive Enhancement**: Basis functionaliteit werkt altijd
-
-## 📄 License & Credits
-
-- **Ontwikkeld voor**: Healthy Building Movement (HBM)
-- **Mapping**: Leaflet.js open source mapping library
-- **Geocoding**: OpenStreetMap Nominatim service
-- **Icons**: Custom SVG icon set
-- **Gemeente data**: Open data van Nederlandse en Duitse overheden
-
-## 🔧 Template Structuur & Maintenance
-
-### Header/Footer Consistentie
-**⚠️ Voor wijzigingen aan headers, footers en algemene elementen:**
-
-#### Huidige Structuur (Handmatige Updates)
-- **Interreg Logo**: Alle pagina's bevatten het Interreg logo in de header
-- **Navigatie**: Dezelfde navigatiestructuur op alle pagina's
-- **Logo's**: HBM en Interreg logo consistent gepositioneerd
-
-#### Bij wijzigingen aan gemeenschappelijke elementen:
-1. **Header wijzigingen**: Update de volgende bestanden:
-   - `index.html` (hoofdpagina)
-   - `info.html` (informatie pagina)
-   - `over.html` (over HBM pagina)
-   - `contact.html` (contact pagina)
-
-2. **CSS wijzigingen**: Alle stijlen staan in `style.css`
-   - Logo positionering: `#interreg-logo` en `#logo`
-   - Header layout: `header`, `#branding`, `#desktopNav`
-   - Responsive behavior: Media queries voor verschillende schermgroottes
-
-3. **Link wijzigingen**: Interreg logo linkt naar:
-   - URL: `https://www.interregeurope.eu/project-results`
-   - Target: `_blank` met `rel="noopener noreferrer"`
-
-#### Toekomstige Verbetering: Template Systeem
-Voor efficiëntere maintenance zou een template systeem nuttig zijn:
-- **Include bestanden**: Header/footer als aparte bestanden
-- **Build proces**: Automatische samenvoeging van templates
-- **Component systeem**: Herbruikbare header/footer componenten
-
-### Replit Deployment Notities
-
-#### Belangrijke Wijzigingen
-**⚠️ Bij belangrijke updates moet deze README.md bijgewerkt worden met:**
-- Nieuwe functionaliteiten en hun status
-- Wijzigingen in de technische architectuur
-- Updates in configuratie en deployment proces
-- Versienummer en laatste update datum
-
-### Replit Specifieke Configuratie
-- **Platform**: Replit Autoscale Deployment uitsluitend
-- **Port**: 5000 (automatisch doorgestuurd naar 80/443 in productie)
-- **Deployment**: Via Replit Deployments tool
-- **Updates**: Alle wijzigingen via Replit workspace
-
-## 🆘 Support & Contact
-
-- **Technical Issues**: GitHub Issues
-- **Feature Requests**: Contact HBM via website
-- **Documentation**: Deze README + inline code comments
-- **Status**: ✅ Production Ready op Replit
-
----
-
-**Laatste update**: 15 januari 2025  
-**Versie**: 2.3.0  
-**Platform**: Replit Autoscale Deployment  
-**Status**: ✅ Production Ready met volledige URL state management
+## Future Enhancements
+- Offline functionaliteit met Service Worker
+- Meer talen ondersteuning
+- Advanced filtering algoritmes
+- Real-time data updates
+- Enhanced accessibility features
