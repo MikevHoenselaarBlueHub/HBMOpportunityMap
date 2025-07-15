@@ -1,3 +1,6 @@
+// Import version configuration
+import { APP_VERSION, getCacheBustParam, cleanupLocalStorage, shouldRunCleanup } from './config/version.js';
+
 // Global variables
 let map;
 let markers;
@@ -29,6 +32,9 @@ if (isMapPage && !isInfoPage && !isOverPage) {
   // Function to initialize everything when Leaflet is ready
   async function initializeApp() {
     if (typeof L !== 'undefined') {
+      // Check for app updates and cleanup localStorage if needed
+      await checkForUpdates();
+      
       // Load translations first
       await loadTranslations();
 
@@ -40,6 +46,228 @@ if (isMapPage && !isInfoPage && !isOverPage) {
         showCoverageOnHover: false,
         zoomToBoundsOnClick: true
       });
+
+
+// App update and cache management functions
+async function checkForUpdates() {
+  try {
+    // Check if localStorage cleanup is needed
+    if (shouldRunCleanup()) {
+      cleanupLocalStorage();
+    }
+    
+    // Check for app version updates
+    const currentVersion = localStorage.getItem('hbm_app_version');
+    
+    if (currentVersion !== APP_VERSION) {
+      console.log(`App updated from ${currentVersion || 'unknown'} to ${APP_VERSION}`);
+      
+      // Clear old caches when app version changes
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        const oldCaches = cacheNames.filter(name => 
+          name.startsWith('hbm-kansenkaart-') && !name.includes(APP_VERSION)
+        );
+        
+        await Promise.all(oldCaches.map(name => caches.delete(name)));
+        console.log('Cleared old caches:', oldCaches);
+      }
+      
+      // Update stored version
+      localStorage.setItem('hbm_app_version', APP_VERSION);
+      
+      // Force service worker update
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration) {
+          registration.update();
+        }
+      }
+      
+      // Show update notification to user
+      showUpdateNotification();
+    }
+    
+    // Check service worker version
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('Service Worker updated, reloading page...');
+        window.location.reload();
+      });
+    }
+    
+  } catch (error) {
+    console.warn('Error checking for updates:', error);
+  }
+}
+
+function showUpdateNotification() {
+  // Create a subtle notification for app updates
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background: rgb(38, 123, 41);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10000;
+    font-size: 14px;
+    font-weight: 500;
+    max-width: 300px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+  `;
+  
+  notification.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span>🎉</span>
+      <div>
+        <div>App bijgewerkt naar v${APP_VERSION}</div>
+        <div style="font-size: 12px; opacity: 0.9; margin-top: 4px;">Nieuwe functies beschikbaar</div>
+      </div>
+      <button onclick="this.parentElement.parentElement.remove()" style="
+        background: none; 
+        border: none; 
+        color: white; 
+        cursor: pointer; 
+        font-size: 16px; 
+        padding: 0; 
+        margin-left: 10px;
+      ">✕</button>
+    </div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Animate in
+  setTimeout(() => {
+    notification.style.opacity = '1';
+    notification.style.transform = 'translateX(0)';
+  }, 100);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateX(100%)';
+      setTimeout(() => notification.remove(), 300);
+    }
+  }, 5000);
+}
+
+// Force cache refresh for critical resources
+async function forceCacheRefresh() {
+  const criticalResources = [
+    '/style.css',
+    '/script.js',
+    '/index.html'
+  ];
+  
+  for (const resource of criticalResources) {
+    try {
+      const response = await fetch(`${resource}${getCacheBustParam()}`, {
+        cache: 'no-cache'
+      });
+      
+      if (response.ok && 'caches' in window) {
+        const cache = await caches.open(`hbm-kansenkaart-v${APP_VERSION}`);
+        cache.put(resource, response.clone());
+      }
+    } catch (error) {
+      console.warn(`Failed to refresh cache for ${resource}:`, error);
+    }
+  }
+}
+
+// Enhanced service worker registration
+async function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      console.log('Service Worker registered:', registration.scope);
+      
+      // Listen for updates
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            console.log('New service worker installed, update available');
+            showServiceWorkerUpdate(registration);
+          }
+        });
+      });
+      
+      // Check for updates periodically
+      setInterval(() => {
+        registration.update();
+      }, 60000); // Check every minute in development
+      
+      return registration;
+    } catch (error) {
+      console.log('Service Worker registration failed:', error);
+    }
+  }
+}
+
+function showServiceWorkerUpdate(registration) {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgb(38, 123, 41);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    z-index: 10000;
+    text-align: center;
+    max-width: 400px;
+  `;
+  
+  notification.innerHTML = `
+    <div style="margin-bottom: 12px;">
+      <strong>Update beschikbaar</strong><br>
+      <small>Een nieuwe versie van de kaart is beschikbaar</small>
+    </div>
+    <button id="updateApp" style="
+      background: white; 
+      color: rgb(38, 123, 41); 
+      border: none; 
+      padding: 8px 16px; 
+      border-radius: 4px; 
+      cursor: pointer; 
+      font-weight: bold;
+      margin-right: 8px;
+    ">Update nu</button>
+    <button id="dismissUpdate" style="
+      background: transparent; 
+      color: white; 
+      border: 1px solid white; 
+      padding: 8px 16px; 
+      border-radius: 4px; 
+      cursor: pointer;
+    ">Later</button>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  document.getElementById('updateApp').onclick = () => {
+    if (registration.waiting) {
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    }
+    notification.remove();
+  };
+  
+  document.getElementById('dismissUpdate').onclick = () => {
+    notification.remove();
+  };
+}
 
       // Initialize icons
       pIcon = L.icon({
@@ -64,19 +292,11 @@ if (isMapPage && !isInfoPage && !isOverPage) {
       // Track page view
       trackPageView('Kansenkaart');
 
-      // Register service worker for offline support
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
-          .then(registration => {
-            console.log('Service Worker registered:', registration.scope);
-          })
-          .catch(error => {
-            console.log('Service Worker registration failed:', error);
-          });
-      }
+      // Register enhanced service worker for offline support
+      await registerServiceWorker();
 
-      // Data laden
-      fetch('data/opportunities.json')
+      // Data laden with cache busting
+      fetch(`data/opportunities.json${getCacheBustParam()}`)
         .then(res => {
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -237,7 +457,7 @@ function trackPageView(pageTitle) {
 // Language system
 async function loadTranslations() {
   try {
-    const translationPath = `translations/${currentLanguage}.json`;
+    const translationPath = `translations/${currentLanguage}.json${getCacheBustParam()}`;
     const response = await fetch(translationPath);
     translations = await response.json();
   } catch (error) {
