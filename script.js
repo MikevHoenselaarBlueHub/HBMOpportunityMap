@@ -238,13 +238,32 @@ function trackPageView(pageTitle) {
 // Language system
 async function loadTranslations() {
   try {
-    const translationPath = `translations/${currentLanguage}.json?nocache=${Date.now()}&v=${APP_VERSION}`;
+    const translationPath = `translations/${currentLanguage}.json`;
     const response = await fetch(translationPath);
+    if (!response.ok) {
+      console.warn(`Translation file not found: ${translationPath}`);
+      // Fallback to Dutch if current language fails
+      if (currentLanguage !== 'nl') {
+        const fallbackResponse = await fetch('translations/nl.json');
+        if (fallbackResponse.ok) {
+          translations = await fallbackResponse.json();
+          return;
+        }
+      }
+      throw new Error('No translation files available');
+    }
     translations = await response.json();
   } catch (error) {
-    console.warn('Failed to load translations:', error);
-    // Fallback to empty object
-    translations = {};
+    console.warn('Could not load translations, using defaults:', error);
+    translations = {
+      selectAll: "Selecteer alles",
+      selectNone: "Selecteer geen",
+      apply: "Toepassen",
+      filters: "Filters",
+      projects: "Projecten", 
+      companies: "Bedrijven",
+      results: "resultaten"
+    };
   }
 }
 
@@ -1352,41 +1371,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Initialize other dropdown buttons
-  const exportBtn = document.getElementById('exportBtn');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', function() {
-      exportCurrentResults();
-      // Close dropdown after export
-      const filterDropdown = document.querySelector('.filter-dropdown');
-      if (filterDropdown) {
-        filterDropdown.classList.remove('open');
-      }
-    });
-  }
+  // Export functionality
+  document.getElementById('exportBtn')?.addEventListener('click', () => {
+    exportResultsToCSV();
+  });
 
   const saveCurrentFiltersBtn = document.getElementById('saveCurrentFiltersBtn');
   if (saveCurrentFiltersBtn) {
     saveCurrentFiltersBtn.addEventListener('click', saveCurrentFilters);
   }
 
-  const loadSavedFiltersBtn = document.getElementById('loadSavedFiltersBtn');
-  if (loadSavedFiltersBtn) {
-    loadSavedFiltersBtn.addEventListener('click', function() {
-      const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
-      const filterNames = Object.keys(savedFilters);
-
-      if (filterNames.length === 0) {
-        alert('Geen opgeslagen filters gevonden.');
-        return;
-      }
-
-      const selectedFilter = prompt('Kies een opgeslagen filter:\n' + filterNames.map((name, i) => `${i + 1}. ${name}`).join('\n'));
-      if (selectedFilter && filterNames.includes(selectedFilter)) {
-        loadSavedFilter(selectedFilter);
-      }
-    });
-  }
+  // Load saved filters
+  document.getElementById('loadSavedFiltersBtn')?.addEventListener('click', () => {
+    loadSavedFilters();
+  });
 
   const showAllResultsBtn = document.getElementById('showAllResultsBtn');
   if (showAllResultsBtn) {
@@ -1858,10 +1856,10 @@ function getCurrentFilteredData() {
   // Get filter values from form
   const checkedTypes = Array.from(document.querySelectorAll('input[name="HBMType"]:checked')).map(cb => cb.value);
   const checkedProjectTypes = Array.from(document.querySelectorAll('input[name="ProjectType"]:checked')).map(cb => cb.value);
-  <previous_generation>
   const checkedOrganizationTypes = Array.from(document.querySelectorAll('input[name="OrganizationType"]:checked')).map(cb => cb.value);
   const checkedOrganizationFields = Array.from(document.querySelectorAll('input[name="OrganizationField"]:checked')).map(cb => cb.value);
-  const checkedHBMTopics = Array.from(document.querySelectorAll('input[name="HBMTopic"]:checked')).map(cb => cb.value);
+```tool_code
+const checkedHBMTopics = Array.from(document.querySelectorAll('input[name="HBMTopic"]:checked')).map(cb => cb.value);
   const checkedHBMCharacteristics = Array.from(document.querySelectorAll('input[name="HBMCharacteristics"]:checked')).map(cb => cb.value);
   const checkedHBMSectors = Array.from(document.querySelectorAll('input[name="HBMSector"]:checked')).map(cb => cb.value);
   const checkedMunicipalities = Array.from(document.querySelectorAll('input[name="Municipality"]:checked')).map(cb => cb.value);
@@ -2040,45 +2038,20 @@ function toggleAdvancedFilters() {
 
 // URL state management
 function updateURL() {
-  const params = new URLSearchParams();
+  try {
+    const params = new URLSearchParams();
 
-  // Add filter types
-  if (filterState.checkedTypes.length > 0 && filterState.checkedTypes.length < 2) {
-    params.set('types', filterState.checkedTypes.join(','));
+    Object.keys(currentFilter).forEach(key => {
+      if (currentFilter[key] && currentFilter[key].length > 0) {
+        params.set(key.toLowerCase(), currentFilter[key].join(','));
+      }
+    });
+
+    const newURL = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+    window.history.replaceState({}, '', newURL);
+  } catch (error) {
+    console.error('Error updating URL:', error);
   }
-
-  // Add search term
-  if (filterState.searchTerm && filterState.searchTerm.trim()) {
-    params.set('search', filterState.searchTerm.trim());
-  }
-
-  // Add other filters - mapping filter sections to URL parameters
-  const sectionToParam = {
-    'ProjectType': 'projecttype',
-    'OrganizationType': 'organizationtype', 
-    'OrganizationField': 'organizationfield',
-    'HBMTopic': 'hbmtopic',
-    'HBMCharacteristics': 'hbmcharacteristics',
-    'HBMSector': 'hbmsector',
-    'Municipality': 'municipality'
-  };
-
-  Object.keys(filterState.checkedFilters).forEach(section => {
-    if (filterState.checkedFilters[section].length > 0) {
-      const paramKey = sectionToParam[section] || section.toLowerCase();
-      params.set(paramKey, filterState.checkedFilters[section].join(','));
-    }
-  });
-
-  // Add location if set
-  if (filterState.userLocation) {
-    params.set('lat', filterState.userLocation.lat.toFixed(6));
-    params.set('lng', filterState.userLocation.lng.toFixed(6));
-    params.set('radius', filterState.radius);
-  }
-
-  const url = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-  window.history.replaceState({}, '', url);
 }
 
 function loadFromURL() {
@@ -2496,94 +2469,72 @@ function activateTab(tabName) {
 }
 
 // CSV Export functionality
-function exportCurrentResults() {
-  const currentData = getCurrentFilteredData();
+function exportResultsToCSV() {
+  try {
+    // Get current filtered data
+    const filteredData = getCurrentFilteredData();
 
-  if (currentData.length === 0) {
-    alert('Geen resultaten om te exporteren.');
-    return;
+    if (filteredData.length === 0) {
+      alert('Geen resultaten om te exporteren');
+      return;
+    }
+
+    // Define CSV headers
+    const headers = [
+      'Naam',
+      'Type Project', 
+      'Organisatietype',
+      'Vakgebied',
+      'Thema',
+      'Kenmerken', 
+      'Sector',
+      'Type',
+      'Beschrijving',
+      'Stad',
+      'Gemeente',
+      'Land',
+      'Latitude',
+      'Longitude'
+    ];
+
+    // Convert data to CSV format
+    const csvContent = [
+      headers.join(','),
+      ...filteredData.map(item => [
+        `"${item.Name || ''}"`,
+        `"${Array.isArray(item.ProjectType) ? item.ProjectType.join('; ') : item.ProjectType || ''}"`,
+        `"${item.OrganizationType || ''}"`,
+        `"${Array.isArray(item.OrganizationField) ? item.OrganizationField.join('; ') : item.OrganizationField || ''}"`,
+        `"${Array.isArray(item.HBMTopic) ? item.HBMTopic.join('; ') : item.HBMTopic || ''}"`,
+        `"${Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics.join('; ') : item.HBMCharacteristics || ''}"`,
+        `"${item.HBMSector || ''}"`,
+        `"${item.HBMType || ''}"`,
+        `"${item.Description || ''}"`,
+        `"${item.City || ''}"`,
+        `"${item.Municipality || ''}"`,
+        `"${item.Country || ''}"`,
+        item.Latitude || '',
+        item.Longitude || ''
+      ].join(','))
+    ].join('\n');
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `hbm-kansenkaart-resultaten-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  } catch (error) {
+    console.error('Error exporting CSV:', error);
+    alert('Er is een fout opgetreden bij het exporteren');
   }
-
-  // Define CSV headers
-  const headers = [
-    'Naam',
-    'Type',
-    'Project Type',
-    'Organisatie Type',
-    'Vakgebied',
-    'HBM Onderwerp',
-    'Kenmerken',
-    'Sector',
-    'Beschrijving',
-    'Straat',
-    'Postcode',
-    'Stad',
-    'Gemeente',
-    'Land',
-    'Latitude',
-    'Longitude'
-  ];
-
-  // Convert data to CSV format
-  const csvData = currentData.map(item => [
-    escapeCsvValue(item.Name || ''),
-    escapeCsvValue(item.HBMType || ''),
-    escapeCsvValue(formatArray(item.ProjectType)),
-    escapeCsvValue(item.OrganizationType || ''),
-    escapeCsvValue(formatArray(item.OrganizationField)),
-    escapeCsvValue(formatArray(item.HBMTopic)),
-    escapeCsvValue(formatArray(item.HBMCharacteristics)),
-    escapeCsvValue(item.HBMSector || ''),
-    escapeCsvValue(item.Description || ''),
-    escapeCsvValue(item.Street || ''),
-    escapeCsvValue(item.Zip || ''),
-    escapeCsvValue(item.City || ''),
-    escapeCsvValue(item.Municipality || ''),
-    escapeCsvValue(item.Country || ''),
-    item.Latitude || '',
-    item.Longitude || ''
-  ]);
-
-  // Create CSV content
-  const csvContent = [
-    headers.join(','),
-    ...csvData.map(row => row.join(','))
-  ].join('\n');
-
-  // Create and download file
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-
-  if (link.download !== undefined) {
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `kansenkaart-resultaten-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  // Track export event
-  trackEvent('export_csv', {
-    result_count: currentData.length,
-    filter_types: filterState.checkedTypes
-  });
-}
-
-function escapeCsvValue(value) {
-  if (value === null || value === undefined) {
-    return '';
-  }
-
-  const stringValue = String(value);
-
-  // If the value contains comma, newline, or double quote, wrap in quotes and escape quotes
-  if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
-    return '"' + stringValue.replace(/"/g, '""') + '"';
-  }
-
-  return stringValue;
 }
 
 // Show all results function
@@ -2624,6 +2575,122 @@ function showAllResults() {
   console.log(`Centered map to show all ${currentData.length} results`);
 }
 
+function closeAllOverlays() {
+  const filterOverlay = document.getElementById('filterOverlay');
+  if (filterOverlay && filterOverlay.classList.contains('open')) {
+    filterOverlay.classList.remove('open');
+  }
+
+  const detailPanel = document.getElementById('detailPanel');
+  if (detailPanel && detailPanel.classList.contains('open')) {
+    detailPanel.classList.remove('open');
+  }
+
+  const menuOverlay = document.getElementById('menuOverlay');
+  if (menuOverlay && menuOverlay.classList.contains('open')) {
+    menuOverlay.classList.remove('open');
+  }
+}
+
+function getFilteredData() {
+    // Get filter values from form
+    const checkedTypes = Array.from(document.querySelectorAll('input[name="HBMType"]:checked')).map(cb => cb.value);
+    const checkedProjectTypes = Array.from(document.querySelectorAll('input[name="ProjectType"]:checked')).map(cb => cb.value);
+    const checkedOrganizationTypes = Array.from(document.querySelectorAll('input[name="OrganizationType"]:checked')).map(cb => cb.value);
+    const checkedOrganizationFields = Array.from(document.querySelectorAll('input[name="OrganizationField"]:checked')).map(cb => cb.value);
+    const checkedHBMTopics = Array.from(document.querySelectorAll('input[name="HBMTopic"]:checked')).map(cb => cb.value);
+    const checkedHBMCharacteristics = Array.from(document.querySelectorAll('input[name="HBMCharacteristics"]:checked')).map(cb => cb.value);
+    const checkedHBMSectors = Array.from(document.querySelectorAll('input[name="HBMSector"]:checked')).map(cb => cb.value);
+    const checkedMunicipalities = Array.from(document.querySelectorAll('input[name="Municipality"]:checked')).map(cb => cb.value);
+  
+    return window.data.filter(item => {
+      // Type filter (Project/Bedrijf checkboxes)
+      if (checkedTypes.length > 0 && !checkedTypes.includes(item.HBMType)) {
+        return false;
+      }
+  
+      // ProjectType filter
+      if (checkedProjectTypes.length > 0) {
+        const itemProjectTypes = Array.isArray(item.ProjectType) ? item.ProjectType : [item.ProjectType].filter(Boolean);
+        if (!checkedProjectTypes.some(type => itemProjectTypes.includes(type))) {
+          return false;
+        }
+      }
+  
+      // OrganizationType filter
+      if (checkedOrganizationTypes.length > 0) {
+        const itemOrganizationTypes = Array.isArray(item.OrganizationType) ? item.OrganizationType : [item.OrganizationType].filter(Boolean);
+        if (!checkedOrganizationTypes.some(type => itemOrganizationTypes.includes(type))) {
+          return false;
+        }
+      }
+  
+      // OrganizationField filter
+      if (checkedOrganizationFields.length > 0) {
+        const itemFields = Array.isArray(item.OrganizationField) ? item.OrganizationField : [item.OrganizationField].filter(Boolean);
+        if (!checkedOrganizationFields.some(field => itemFields.includes(field))) {
+          return false;
+        }
+      }
+  
+      // HBMTopic filter - use filterState if form values are empty
+      const activeHBMTopics = checkedHBMTopics.length > 0 ? checkedHBMTopics : (filterState.checkedFilters['HBMTopic'] || []);
+      if (activeHBMTopics.length > 0) {
+        const itemTopics = Array.isArray(item.HBMTopic) ? item.HBMTopic : [item.HBMTopic].filter(Boolean);
+        if (!activeHBMTopics.some(topic => itemTopics.includes(topic))) {
+          return false;
+        }
+      }
+  
+      // HBMCharacteristics filter - use filterState if form values are empty
+      const activeHBMCharacteristics = checkedHBMCharacteristics.length > 0 ? checkedHBMCharacteristics : (filterState.checkedFilters['HBMCharacteristics'] || []);
+      if (activeHBMCharacteristics.length > 0) {
+        const itemCharacteristics = Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics : [item.HBMCharacteristics].filter(Boolean);
+        if (!activeHBMCharacteristics.some(characteristic => itemCharacteristics.includes(characteristic))) {
+          return false;
+        }
+      }
+  
+      // HBMSector filter - use filterState if form values are empty
+      const activeHBMSectors = checkedHBMSectors.length > 0 ? checkedHBMSectors : (filterState.checkedFilters['HBMSector'] || []);
+      if (activeHBMSectors.length > 0) {
+        const itemSectors = Array.isArray(item.HBMSector) ? item.HBMSector : [item.HBMSector].filter(Boolean);
+        if (!activeHBMSectors.some(sector => itemSectors.includes(sector))) {
+          return false;
+        }
+      }
+  
+      // Municipality filter - use filterState if form values are empty
+      const activeMunicipalities = checkedMunicipalities.length > 0 ? checkedMunicipalities : (filterState.checkedFilters['Municipality'] || []);
+      if (activeMunicipalities.length > 0 && !activeMunicipalities.includes(item.Municipality)) {
+        return false;
+      }
+  
+      // Search filter
+      if (currentFilter.searchTerm) {
+        const searchLower = currentFilter.searchTerm.toLowerCase();
+        const nameMatch = item.Name && item.Name.toLowerCase().includes(searchLower);
+        const descMatch = item.Description && item.Description.toLowerCase().includes(searchLower);
+        if (!nameMatch && !descMatch) {
+          return false;
+        }
+      }
+  
+      // Location filter (if user location is set)
+      if (currentFilter.userLocation && currentFilter.radius) {
+        const distance = calculateDistance(
+          currentFilter.userLocation.lat,
+          currentFilter.userLocation.lng,
+          item.Latitude,
+          item.Longitude
+        );
+        if (distance > currentFilter.radius) return false;
+      }
+  
+      return true;
+    });
+  }
+
 // Export for global access
 window.getCurrentLocation = getCurrentLocation;
 window.showDetails = showDetails;
@@ -2635,6 +2702,7 @@ window.synchronizeTabWithTypes = synchronizeTabWithTypes;
 window.activateTab = activateTab;
 window.exportCurrentResults = exportCurrentResults;
 window.showAllResults = showAllResults;
+window.closeAllOverlays = closeAllOverlays;
 
 // Function to update checkboxes based on filter state
 function updateCheckboxesFromFilterState() {
