@@ -18,7 +18,8 @@ let filterState = {
   checkedTypes: ['Project', 'Bedrijf'],
   checkedFilters: {},
   userLocation: null,
-  radius: 25
+  radius: 25,
+  searchTerm: ''
 };
 
 // Determine page type - improved detection
@@ -746,22 +747,25 @@ function applyFilters() {
       return false;
     }
 
-    // ProjectType filter (AND logic - all checked types must match)
+    // ProjectType filter
     if (checkedProjectTypes.length > 0) {
-      const itemProjectTypes = Array.isArray(item.ProjectType) ? item.ProjectType : [item.ProjectType];
+      const itemProjectTypes = Array.isArray(item.ProjectType) ? item.ProjectType : [item.ProjectType].filter(Boolean);
       if (!checkedProjectTypes.some(type => itemProjectTypes.includes(type))) {
         return false;
       }
     }
 
     // OrganizationType filter
-    if (checkedOrganizationTypes.length > 0 && !checkedOrganizationTypes.includes(item.OrganizationType)) {
-      return false;
+    if (checkedOrganizationTypes.length > 0) {
+      const itemOrganizationTypes = Array.isArray(item.OrganizationType) ? item.OrganizationType : [item.OrganizationType].filter(Boolean);
+      if (!checkedOrganizationTypes.some(type => itemOrganizationTypes.includes(type))) {
+        return false;
+      }
     }
 
     // OrganizationField filter
     if (checkedOrganizationFields.length > 0) {
-      const itemFields = Array.isArray(item.OrganizationField) ? item.OrganizationField : [item.OrganizationField];
+      const itemFields = Array.isArray(item.OrganizationField) ? item.OrganizationField : [item.OrganizationField].filter(Boolean);
       if (!checkedOrganizationFields.some(field => itemFields.includes(field))) {
         return false;
       }
@@ -769,7 +773,7 @@ function applyFilters() {
 
     // HBMTopic filter
     if (checkedHBMTopics.length > 0) {
-      const itemTopics = Array.isArray(item.HBMTopic) ? item.HBMTopic : [item.HBMTopic];
+      const itemTopics = Array.isArray(item.HBMTopic) ? item.HBMTopic : [item.HBMTopic].filter(Boolean);
       if (!checkedHBMTopics.some(topic => itemTopics.includes(topic))) {
         return false;
       }
@@ -777,20 +781,33 @@ function applyFilters() {
 
     // HBMCharacteristics filter
     if (checkedHBMCharacteristics.length > 0) {
-      const itemCharacteristics = Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics : [item.HBMCharacteristics];
+      const itemCharacteristics = Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics : [item.HBMCharacteristics].filter(Boolean);
       if (!checkedHBMCharacteristics.some(characteristic => itemCharacteristics.includes(characteristic))) {
         return false;
       }
     }
 
     // HBMSector filter
-    if (checkedHBMSectors.length > 0 && !checkedHBMSectors.includes(item.HBMSector)) {
-      return false;
+    if (checkedHBMSectors.length > 0) {
+      const itemSectors = Array.isArray(item.HBMSector) ? item.HBMSector : [item.HBMSector].filter(Boolean);
+      if (!checkedHBMSectors.some(sector => itemSectors.includes(sector))) {
+        return false;
+      }
     }
 
     // Municipality filter
     if (checkedMunicipalities.length > 0 && !checkedMunicipalities.includes(item.Municipality)) {
       return false;
+    }
+
+    // Search filter
+    if (currentFilter.searchTerm) {
+      const searchLower = currentFilter.searchTerm.toLowerCase();
+      const nameMatch = item.Name && item.Name.toLowerCase().includes(searchLower);
+      const descMatch = item.Description && item.Description.toLowerCase().includes(searchLower);
+      if (!nameMatch && !descMatch) {
+        return false;
+      }
     }
 
     // Location filter (if user location is set)
@@ -994,20 +1011,39 @@ function populateFilters(data) {
   // Get unique values for each filter
   const projectTypes = [...new Set(data.flatMap(item => 
     Array.isArray(item.ProjectType) ? item.ProjectType : [item.ProjectType]
-  ).filter(Boolean))];
+  ).filter(Boolean))].sort();
 
-  const organizations = [...new Set(data.map(item => item.OrganizationType).filter(Boolean))];
+  const organizations = [...new Set(data.flatMap(item => 
+    Array.isArray(item.OrganizationType) ? item.OrganizationType : [item.OrganizationType]
+  ).filter(Boolean))].sort();
+  
   const organizationFields = [...new Set(data.flatMap(item => 
     Array.isArray(item.OrganizationField) ? item.OrganizationField : [item.OrganizationField]
-  ).filter(Boolean))];
+  ).filter(Boolean))].sort();
+  
   const topics = [...new Set(data.flatMap(item => 
     Array.isArray(item.HBMTopic) ? item.HBMTopic : [item.HBMTopic]
-  ).filter(Boolean))];
+  ).filter(Boolean))].sort();
+  
   const characteristics = [...new Set(data.flatMap(item => 
     Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics : [item.HBMCharacteristics]
-  ).filter(Boolean))];
-  const sectors = [...new Set(data.map(item => item.HBMSector).filter(Boolean))];
+  ).filter(Boolean))].sort();
+  
+  const sectors = [...new Set(data.flatMap(item => 
+    Array.isArray(item.HBMSector) ? item.HBMSector : [item.HBMSector]
+  ).filter(Boolean))].sort();
+  
   const municipalities = [...new Set(data.map(item => item.Municipality).filter(Boolean))].sort();
+
+  console.log('Filter data:', {
+    projectTypes,
+    organizations,
+    organizationFields,
+    topics,
+    characteristics,
+    sectors,
+    municipalities
+  });
 
   // Populate filter sections
   populateFilterSection('ProjectType', projectTypes);
@@ -1168,18 +1204,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const searchInput = document.getElementById('mapSearch');
   if (searchInput) {
     searchInput.addEventListener('input', function() {
-      const searchTerm = this.value.toLowerCase();
-      if (searchTerm && window.data) {
-        const filteredData = window.data.filter(item => 
-          item.Name?.toLowerCase().includes(searchTerm) ||
-          item.Description?.toLowerCase().includes(searchTerm)
-        );
-        createMarkers(filteredData);
-        updateListView(filteredData);
-        updateResultCount(filteredData.length);
-      } else {
-        applyFilters();
-      }
+      const searchTerm = this.value.trim();
+      currentFilter.searchTerm = searchTerm;
+      filterState.searchTerm = searchTerm;
+      
+      updateURL();
+      applyFilters();
     });
   }
 
@@ -1648,6 +1678,11 @@ function updateURL() {
     params.set('types', filterState.checkedTypes.join(','));
   }
 
+  // Add search term
+  if (filterState.searchTerm && filterState.searchTerm.trim()) {
+    params.set('search', filterState.searchTerm.trim());
+  }
+
   // Add other filters
   Object.keys(filterState.checkedFilters).forEach(section => {
     if (filterState.checkedFilters[section].length > 0) {
@@ -1669,6 +1704,19 @@ function updateURL() {
 function loadFromURL() {
   const params = new URLSearchParams(window.location.search);
 
+  // Load search term
+  if (params.has('search')) {
+    const searchTerm = params.get('search');
+    filterState.searchTerm = searchTerm;
+    currentFilter.searchTerm = searchTerm;
+    
+    // Update search input
+    const searchInput = document.getElementById('mapSearch');
+    if (searchInput) {
+      searchInput.value = searchTerm;
+    }
+  }
+
   // Load filter types
   if (params.has('types')) {
     const types = params.get('types').split(',');
@@ -1681,7 +1729,7 @@ function loadFromURL() {
   }
 
   // Load other filters
-  const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector'];
+  const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector', 'Municipality'];
   filterSections.forEach(section => {
     const paramKey = section.toLowerCase();
     if (params.has(paramKey)) {
@@ -1768,6 +1816,12 @@ function saveCurrentFilters() {
   const filterName = prompt('Geef een naam voor deze filter configuratie:');
   if (!filterName) return;
 
+  // Update filter state with current search term
+  const searchInput = document.getElementById('mapSearch');
+  if (searchInput) {
+    filterState.searchTerm = searchInput.value.trim();
+  }
+
   const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
   savedFilters[filterName] = {
     ...filterState,
@@ -1811,6 +1865,15 @@ function loadSavedFilter(filterName) {
       }
     });
   });
+
+  // Load search term if saved
+  if (filterState.searchTerm) {
+    currentFilter.searchTerm = filterState.searchTerm;
+    const searchInput = document.getElementById('mapSearch');
+    if (searchInput) {
+      searchInput.value = filterState.searchTerm;
+    }
+  }
 
   // Load location if saved
   if (filterState.userLocation) {
