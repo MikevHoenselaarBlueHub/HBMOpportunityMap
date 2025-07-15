@@ -148,14 +148,60 @@ De applicatie is geoptimaliseerd voor Replit deployment:
 5. Verbeter gemeente filtering
 6. Voeg meer sample data toe
 
-## 🐛 Debugging
+## 🐛 Debugging & Logging
 
-Console logs zijn beschikbaar voor:
+### Console Logs
+De applicatie biedt uitgebreide logging voor debugging:
+
+**Data Loading:**
 - Data loading status
 - Geocoding results
-- Municipality loading
+- Municipality loading (Dutch & German)
+- GeoJSON file loading
+
+**Map & Markers:**
+- Leaflet initialization
+- MarkerCluster loading
+- Marker creation process
+- Map initialization completion
+
+**Versie Management:**
+- Version loading confirmations
+- Cache status checks
+- Update notifications
+
+**Filter & UI:**
 - Filter applications
-- Module loading errors
+- User location services
+- UI state changes
+
+**Errors:**
+- Module loading errors (ES6 import issues)
+- JavaScript syntax errors
+- Network request failures
+- Geocoding failures
+
+### Debug Functies
+Beschikbare debug commando's in browser console:
+
+```javascript
+// Controleer huidige versie
+window.checkVersion()
+
+// Cache status controleren  
+// Zie console voor cache status berichten
+
+// Filter state inspecteren
+console.log(filterState)
+
+// Marker data bekijken
+console.log(markers.getLayers())
+```
+
+### Bekende JavaScript Errors
+- `Cannot use import statement outside a module` - ES6 module configuratie
+- `Identifier 'distanceRange' has already been declared` - Variable redeclaration
+- `Unexpected token 'export'` - Module export zonder configuratie
 
 ## 📄 Licentie
 
