@@ -701,6 +701,288 @@ button {
   height: 16px;
 }
 
+/* === Container for content pages === */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+}
+
+/* === Content page layouts === */
+.info-page,
+.about-page,
+.contact-page {
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.info-page h1,
+.about-page h1,
+.contact-page h1 {
+  color: rgb(38, 123, 41);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.info-page .subheader,
+.about-page .subheader,
+.contact-page .subheader {
+  text-align: center;
+  color: #666;
+  margin-bottom: 3rem;
+}
+
+/* === Contact Form Styling === */
+.contact-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 768px) {
+  .contact-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+.contact-intro h2 {
+  color: rgb(38, 123, 41);
+  margin-bottom: 1rem;
+}
+
+.contact-options {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.contact-option {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid rgb(38, 123, 41);
+}
+
+.contact-option h3 {
+  color: rgb(38, 123, 41);
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+}
+
+.contact-option p {
+  margin: 0;
+  color: #333;
+}
+
+.contact-form {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.contact-form h2 {
+  color: rgb(38, 123, 41);
+  margin-bottom: 1.5rem;
+  margin-top: 0;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: rgb(38, 123, 41);
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.checkmark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 3px;
+  position: relative;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+  background: rgb(38, 123, 41);
+  border-color: rgb(38, 123, 41);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 2px;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.form-actions {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.form-success {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.form-success h2 {
+  color: rgb(38, 123, 41);
+  margin-bottom: 1rem;
+}
+
+.form-success p {
+  margin-bottom: 2rem;
+  color: #666;
+}
+
+.contact-info {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-top: 3rem;
+}
+
+.contact-info h2 {
+  color: rgb(38, 123, 41);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.contact-details {
+  display: grid;
+  gap: 1rem;
+}
+
+.contact-detail {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 6px;
+}
+
+.contact-detail strong {
+  min-width: 120px;
+  color: rgb(38, 123, 41);
+}
+
+.contact-detail a {
+  color: rgb(38, 123, 41);
+  text-decoration: none;
+}
+
+.contact-detail a:hover {
+  text-decoration: underline;
+}
+
+/* === Content sections for info and about pages === */
+.content-section {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.content-section h2 {
+  color: rgb(38, 123, 41);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+}
+
+.content-section h3 {
+  color: rgb(38, 123, 41);
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.content-section p {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.content-section ul {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.content-section li {
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.content-section li strong {
+  color: rgb(38, 123, 41);
+}
+
 /* === Main content layout === */
 .main-content {
   display: flex;

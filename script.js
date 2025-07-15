@@ -140,6 +140,9 @@ if (isMapPage && !isInfoPage && !isOverPage) {
 
   // Initialize the app
   document.addEventListener('DOMContentLoaded', function() {
+    // Initialize saved filters counter
+    updateSavedFiltersDropdown();
+    
     // Wait for Leaflet to load
     const checkLeaflet = setInterval(() => {
       if (typeof L !== 'undefined') {
@@ -2534,6 +2537,7 @@ function saveCurrentFilters() {
 
   localStorage.setItem('hbm_saved_filters', JSON.stringify(savedFilters));
   updateSavedFiltersDropdown();
+  updateSavedFiltersText(Object.keys(savedFilters).length);
   alert(`Filter "${filterName}" opgeslagen!`);
 }
 
@@ -2705,6 +2709,7 @@ function deleteSavedFilter() {
   localStorage.setItem('hbm_saved_filters', JSON.stringify(savedFilters));
 
   updateSavedFiltersDropdown();
+  updateSavedFiltersText(Object.keys(savedFilters).length);
   alert(`Filter "${filterName}" verwijderd!`);
 }
 
