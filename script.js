@@ -1033,7 +1033,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
 
-      const selectedFilter = prompt('Kies een opgeslagen filter:\n' + filterNames.map((name, i) => `${i + 1}. ${name}`).join('\n'));
+      const selectedFilter = prompt('Kies een opgeslagen filter:\n' + filterNames.map((name, i => `${i + 1}. ${name}`).join('\n'));
       if (selectedFilter && filterNames.includes(selectedFilter)) {
         loadSavedFilter(selectedFilter);
       }
@@ -1561,25 +1561,6 @@ function loadFromURL() {
         fillOpacity: 0.2,
         radius: radius * 1000
       }).addTo(map);
-
-      // Update UI
-      const distanceFilter = document.getElementById('distanceFilter');
-      if (distanceFilter) {
-        distanceFilter.style.display = 'block';
-      }
-
-      const distanceRange = document.getElementById('distanceRange');
-      const distanceValue = document.getElementById('distanceValue');
-      if (distanceRange && distanceValue) {
-        distanceRange.value = radius;
-        distanceValue.textContent = radius + ' km';
-      }
-
-      const locationBtn = document.getElementById('useMyLocation');
-      if (locationBtn) {
-        locationBtn.innerHTML = '<span>📍 Locatie actief</span>';
-        locationBtn.classList.add('active');
-      }
     }
   }
 }
