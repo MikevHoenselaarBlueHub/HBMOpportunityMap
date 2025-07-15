@@ -1480,56 +1480,51 @@ document.addEventListener('DOMContentLoaded', function() {
     loadSavedFilters();
   });
 
-  // Show all results button
-  const showAllResultsBtn = document.getElementById('showAllResultsBtn');
-  if (showAllResultsBtn) {
-    showAllResultsBtn.addEventListener('click', function() {
-      // Clear all filters
-      clearAllFilters();
-
-      // Close dropdown
-      const dropdown = document.querySelector('.filter-dropdown');
-      if (dropdown) {
-        dropdown.classList.remove('open');
-      }
-
-      // Apply empty filters (show all)
-      applyFilters();
-
-      // Show notification
-      showNotification('Alle resultaten worden getoond');
-    });
-  }
-
   // Show all on map button (Alles in beeld)
   const showAllOnMapBtn = document.getElementById('showAllOnMapBtn');
   if (showAllOnMapBtn) {
     showAllOnMapBtn.addEventListener('click', function() {
-      // Clear all filters
-      clearAllFilters();
-
       // Close dropdown
       const dropdown = document.querySelector('.filter-dropdown');
       if (dropdown) {
         dropdown.classList.remove('open');
       }
 
-      // Apply empty filters (show all)
-      applyFilters();
-
-      // Fit map to show all markers
-      if (window.map && window.markers) {
-        // Ensure markers is a LayerGroup and has the getBounds method
-        if (markers.getLayers().length > 0) {
-          const bounds = markers.getBounds();
-          map.fitBounds(bounds, {
-            padding: [20, 20]
-          });
-        }
+      // Get current filtered data
+      const currentData = getCurrentFilteredData();
+      
+      if (currentData.length === 0) {
+        alert('Geen resultaten om in beeld te brengen.');
+        return;
       }
 
-      // Show notification
-      showNotification('Alle resultaten in beeld gebracht');
+      // Get all coordinates from current filtered data
+      const validCoordinates = currentData
+        .filter(item => item.Latitude && item.Longitude)
+        .map(item => [item.Latitude, item.Longitude]);
+
+      if (validCoordinates.length === 0) {
+        alert('Geen geldige coördinaten gevonden voor huidige resultaten.');
+        return;
+      }
+
+      // Create a bounds object from all coordinates
+      const bounds = L.latLngBounds(validCoordinates);
+
+      // Fit the map to show all results with some padding
+      map.fitBounds(bounds, {
+        padding: [50, 50], // Add 50px padding on all sides
+        maxZoom: 15 // Don't zoom in too far
+      });
+
+      // Track the event
+      trackEvent('show_all_on_map', {
+        result_count: currentData.length,
+        bounds_northeast: bounds.getNorthEast(),
+        bounds_southwest: bounds.getSouthWest()
+      });
+
+      console.log(`Centered map to show all ${currentData.length} filtered results`);
     });
   }
 
