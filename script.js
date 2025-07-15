@@ -328,7 +328,7 @@ function initMap() {
     'Kaart': streetLayer,
     'Satelliet': satelliteLayer
   }, {
-    'Gemeenten': municipalityLayer
+    'Interreg-gemeenten': municipalityLayer
   }, {
     position: 'topright'
   }).addTo(map);
@@ -336,7 +336,7 @@ function initMap() {
   // Lazy load municipality boundaries when layer is added
   let municipalitiesLoaded = false;
   map.on('overlayadd', function(e) {
-    if (e.name === 'Gemeenten' && !municipalitiesLoaded) {
+    if (e.name === 'Interreg-gemeenten' && !municipalitiesLoaded) {
       municipalitiesLoaded = true;
       loadMunicipalityBoundaries();
     }
