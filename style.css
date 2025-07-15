@@ -178,9 +178,14 @@ a {
 }
 
 #interreg-logo {
-  height: 40px;
+  height: 150px;
   width: auto;
-  max-width: 120px;
+  object-fit: contain;
+  position: absolute;
+  right: 20px;
+  top: 0px;
+  background-color: rgb(244, 244, 244);
+  box-shadow: .4275rem .6875rem .75rem rgba(0, 0, 0, .098);
   object-fit: contain;
 }
 
@@ -189,11 +194,11 @@ a {
     height: 32px;
     max-width: 100px;
   }
-  
+
   #branding {
     flex-wrap: wrap;
   }
-  
+
   .logo-link {
     gap: 0.5rem;
   }
