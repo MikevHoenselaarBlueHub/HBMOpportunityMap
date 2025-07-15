@@ -386,11 +386,19 @@ async function loadDutchMunicipalities() {
     console.log(`Processing ${geojsonData.features.length} Dutch municipalities...`);
     let loadedCount = 0;
 
+    // Load municipalities configuration to filter which ones to show
+    const municipalitiesResponse = await fetch(`data/municipalities.json?nocache=${Date.now()}&v=${APP_VERSION}`);
+    const municipalitiesConfig = await municipalitiesResponse.json();
+    const allowedMunicipalities = municipalitiesConfig.municipalities
+      .filter(m => m.code === 'NL')
+      .map(m => m.name);
+
     geojsonData.features.forEach((feature) => {
       if (feature.properties && feature.properties.name) {
         const municipalityName = feature.properties.name;
 
-        if (municipalityName && feature.geometry) {
+        // Only show municipalities that are in our configuration
+        if (municipalityName && feature.geometry && allowedMunicipalities.includes(municipalityName)) {
           try {
             const geoJsonLayer = L.geoJSON(feature, {
               style: {
@@ -447,7 +455,7 @@ async function loadDutchMunicipalities() {
                 layer.bindPopup(`
                   <div class="municipality-popup">
                     <h3>${municipalityName}</h3>
-                    <p>Klik voor meer details over gezond bouwen kansen in deze gemeente</p>
+                    <p><a href="#" class="municipality-filter-link" onclick="filterByMunicipalityAndZoom('${municipalityName}'); return false;">Bekijk alle projecten en bedrijven in deze gemeente</a></p>
                   </div>
                 `);
               }
@@ -496,12 +504,20 @@ async function loadGermanMunicipalities() {
     console.log(`Processing ${geojsonData.features.length} German municipalities...`);
     let loadedCount = 0;
 
+    // Load municipalities configuration to filter which ones to show
+    const municipalitiesResponse = await fetch(`data/municipalities.json?nocache=${Date.now()}&v=${APP_VERSION}`);
+    const municipalitiesConfig = await municipalitiesResponse.json();
+    const allowedMunicipalities = municipalitiesConfig.municipalities
+      .filter(m => m.code === 'DE')
+      .map(m => m.name);
+
     geojsonData.features.forEach((feature) => {
       // GADM format uses NAME_4 for municipality names
       const municipalityName = feature.properties?.NAME_4;
       const state = feature.properties?.NAME_1;
 
-      if (municipalityName && feature.geometry) {
+      // Only show municipalities that are in our configuration
+      if (municipalityName && feature.geometry && allowedMunicipalities.includes(municipalityName)) {
         try {
           const geoJsonLayer = L.geoJSON(feature, {
             style: {
@@ -560,7 +576,7 @@ async function loadGermanMunicipalities() {
                 <div class="municipality-popup">
                   <h3>${municipalityName}</h3>
                   <p>${state}, Deutschland</p>
-                  <p>Klicken Sie für weitere Details zu gesunden Bauchancen in dieser Gemeinde</p>
+                  <p><a href="#" class="municipality-filter-link" onclick="filterByMunicipalityAndZoom('${municipalityName}'); return false;">Bekijk alle projecten en bedrijven in deze gemeente</a></p>
                 </div>
               `);
             }
@@ -703,6 +719,59 @@ function filterByMunicipality(municipalityName) {
 
   // Apply filters
   applyFilters();
+}
+
+function filterByMunicipalityAndZoom(municipalityName) {
+  // Clear all existing filters first
+  document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+  });
+
+  // Set both types (Project and Bedrijf) as selected
+  document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
+    cb.checked = true;
+  });
+
+  // Set the municipality filter
+  const municipalityCheckbox = document.querySelector(`input[name="Municipality"][value="${municipalityName}"]`);
+  if (municipalityCheckbox) {
+    municipalityCheckbox.checked = true;
+  }
+
+  // Update filter state
+  filterState.checkedTypes = ['Project', 'Bedrijf'];
+  filterState.checkedFilters = {
+    'Municipality': [municipalityName]
+  };
+
+  // Update current filter for URL state
+  currentFilter = {
+    checkedTypes: ['Project', 'Bedrijf'],
+    checkedFilters: filterState.checkedFilters
+  };
+
+  // Update URL
+  updateURL();
+
+  // Apply filters
+  applyFilters();
+
+  // Find municipality bounds and zoom to it
+  const municipality = municipalities.find(m => m.name === municipalityName);
+  if (municipality && municipality.bounds) {
+    map.fitBounds(municipality.bounds, {
+      padding: [20, 20],
+      maxZoom: 12
+    });
+  }
+
+  // Close popup
+  map.closePopup();
+
+  // Track event
+  trackEvent('municipality_filter_click', {
+    municipality: municipalityName
+  });
 }
 
 // Create markers with performance optimization
@@ -956,8 +1025,7 @@ function applyFilters() {
     const activeHBMSectors = checkedHBMSectors.length > 0 ? checkedHBMSectors : (filterState.checkedFilters['HBMSector'] || []);
     if (activeHBMSectors.length > 0) {
       const itemSectors = Array.isArray(item.HBMSector) ? item.HBMSector : [item.HBMSector].filter(Boolean);
-      if (!activeHBMSectors.some(```text
-sector => itemSectors.includes(sector))) {
+      if (!activeHBMSectors.some(sector => itemSectors.includes(sector))) {
         return false;
       }
     }
@@ -2905,9 +2973,10 @@ window.updateFilterState = updateFilterState;
 window.toggleAdvancedFilters = toggleAdvancedFilters;
 window.synchronizeTabWithTypes = synchronizeTabWithTypes;
 window.activateTab = activateTab;
-window.exportCurrentResults = exportCurrentResults;
+window.exportResultsToCSV = exportResultsToCSV;
 window.showAllResults = showAllResults;
 window.closeAllOverlays = closeAllOverlays;
+window.filterByMunicipalityAndZoom = filterByMunicipalityAndZoom;
 
 // Function to update checkboxes based on filter state
 function updateCheckboxesFromFilterState() {
