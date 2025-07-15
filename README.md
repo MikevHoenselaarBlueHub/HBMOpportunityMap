@@ -295,6 +295,21 @@ git push origin feature/amazing-feature
 - **Icons**: Custom SVG icon set
 - **Gemeente data**: Open data van Nederlandse en Duitse overheden
 
+## 🔧 Replit Deployment Notities
+
+### Belangrijke Wijzigingen
+**⚠️ Bij belangrijke updates moet deze README.md bijgewerkt worden met:**
+- Nieuwe functionaliteiten en hun status
+- Wijzigingen in de technische architectuur
+- Updates in configuratie en deployment proces
+- Versienummer en laatste update datum
+
+### Replit Specifieke Configuratie
+- **Platform**: Replit Autoscale Deployment uitsluitend
+- **Port**: 5000 (automatisch doorgestuurd naar 80/443 in productie)
+- **Deployment**: Via Replit Deployments tool
+- **Updates**: Alle wijzigingen via Replit workspace
+
 ## 🆘 Support & Contact
 
 - **Technical Issues**: GitHub Issues
@@ -305,6 +320,6 @@ git push origin feature/amazing-feature
 ---
 
 **Laatste update**: 15 januari 2025  
-**Versie**: 2.2.0  
+**Versie**: 2.3.0  
 **Platform**: Replit Autoscale Deployment  
 **Status**: ✅ Production Ready met volledige URL state management

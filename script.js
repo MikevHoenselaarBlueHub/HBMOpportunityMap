@@ -328,7 +328,7 @@ function initMap() {
     'Kaart': streetLayer,
     'Satelliet': satelliteLayer
   }, {
-    'Gemeentegrenzen': municipalityLayer
+    'Gemeenten': municipalityLayer
   }, {
     position: 'topright'
   }).addTo(map);
@@ -336,7 +336,7 @@ function initMap() {
   // Lazy load municipality boundaries when layer is added
   let municipalitiesLoaded = false;
   map.on('overlayadd', function(e) {
-    if (e.name === 'Gemeentegrenzen' && !municipalitiesLoaded) {
+    if (e.name === 'Gemeenten' && !municipalitiesLoaded) {
       municipalitiesLoaded = true;
       loadMunicipalityBoundaries();
     }
@@ -956,7 +956,8 @@ function applyFilters() {
     const activeHBMSectors = checkedHBMSectors.length > 0 ? checkedHBMSectors : (filterState.checkedFilters['HBMSector'] || []);
     if (activeHBMSectors.length > 0) {
       const itemSectors = Array.isArray(item.HBMSector) ? item.HBMSector : [item.HBMSector].filter(Boolean);
-      if (!activeHBMSectors.some(sector => itemSectors.includes(sector))) {
+      if (!activeHBMSectors.some(```text
+sector => itemSectors.includes(sector))) {
         return false;
       }
     }
@@ -1002,6 +1003,9 @@ function applyFilters() {
 
   // Update checkboxes after filters are populated
   updateCheckboxesFromFilterState();
+
+  // Save current filter for future use
+  saveCurrentFilterAsLast();
 }
 
 // Calculate distance between two coordinates using Haversine formula
@@ -1856,8 +1860,7 @@ function openDetailPanel(item) {
     });
   }
 
-  if (nextBtn && currentIndex < totalItems - 1) {
-    nextBtn.addEventListener('click', function() {
+  if (nextBtn && currentIndex < totalItems - 1) {    nextBtn.addEventListener('click', function() {
       const nextItem = currentData[currentIndex + 1];
       if (nextItem) {
         openDetailPanel(nextItem);
@@ -2740,110 +2743,128 @@ function getFilteredData() {
     });
   }
 
-// Check if user returned to map page and show notification
+// Function to check if user returned to map page and show notification
 function checkForReturnToMapPage() {
-  // Check if there's a stored filter state and user came from another page
-  const lastFilterState = localStorage.getItem('hbm_last_filter_state');
-  const lastPageVisit = localStorage.getItem('hbm_last_page_visit');
-  const currentTime = Date.now();
-  
-  // Only show notification if:
-  // 1. There's a stored filter state
-  // 2. User visited another page recently (within 30 minutes)
-  // 3. Current URL doesn't already have filters
-  if (lastFilterState && lastPageVisit && 
-      (currentTime - parseInt(lastPageVisit) < 30 * 60 * 1000) && 
-      !window.location.search) {
-    
-    // Show notification after a brief delay
-    setTimeout(() => {
-      showLastFilterNotification();
-    }, 1000);
+  const lastUsedFilter = localStorage.getItem('hbm_last_used_filter');
+  const currentURL = window.location.href;
+  const lastURL = localStorage.getItem('hbm_last_url');
+
+  // Check if user has returned from a different page and has a saved filter
+  if (lastUsedFilter && lastURL && lastURL !== currentURL) {
+    try {
+      const filterData = JSON.parse(lastUsedFilter);
+      showLastFilterNotification(filterData);
+    } catch (error) {
+      console.error('Error parsing last used filter:', error);
+    }
   }
+
+  // Update current URL
+  localStorage.setItem('hbm_last_url', currentURL);
 }
 
-function showLastFilterNotification() {
-  const notification = document.getElementById('lastFilterNotification');
-  const useLastFilterLink = document.getElementById('useLastFilterLink');
-  const closeNotification = document.getElementById('closeNotification');
-  
-  if (notification) {
-    notification.style.display = 'block';
-    
-    // Handle "Ja" click
-    useLastFilterLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      loadLastFilterState();
-      hideLastFilterNotification();
-    });
-    
-    // Handle close button
-    closeNotification.addEventListener('click', function() {
-      hideLastFilterNotification();
-    });
-    
+function showLastFilterNotification(filterData) {
+  // Remove any existing notification
+  const existingNotification = document.querySelector('.last-filter-notification');
+  if (existingNotification) {
+    existingNotification.remove();
+  }
+
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = 'last-filter-notification';
+  notification.innerHTML = `
+    <button class="close-notification" onclick="this.parentElement.remove()">×</button>
+    <div>Laatstgekozen filter gebruiken? <a href="#" onclick="applyLastUsedFilter(); return false;">Ja</a></div>
+  `;
+
+  // Find the options button and append notification
+  const optionsBtn = document.getElementById('optionsBtn');
+  if (optionsBtn && optionsBtn.parentElement) {
+    optionsBtn.parentElement.style.position = 'relative';
+    optionsBtn.parentElement.appendChild(notification);
+
     // Auto-hide after 10 seconds
     setTimeout(() => {
-      hideLastFilterNotification();
+      if (notification.parentElement) {
+        notification.remove();
+      }
     }, 10000);
   }
 }
 
-function hideLastFilterNotification() {
-  const notification = document.getElementById('lastFilterNotification');
-  if (notification) {
-    notification.style.display = 'none';
+function applyLastUsedFilter() {
+  const lastUsedFilter = localStorage.getItem('hbm_last_used_filter');
+
+  if (!lastUsedFilter) return;
+
+  try {
+    const filterData = JSON.parse(lastUsedFilter);
+
+    // Clear all existing filters first
+    document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => {
+      cb.checked = false;
+    });
+
+    // Apply saved filter state
+    if (filterData.checkedTypes && Array.isArray(filterData.checkedTypes)) {
+      filterData.checkedTypes.forEach(type => {
+        const checkbox = document.querySelector(`input[name="HBMType"][value="${type}"]`);
+        if (checkbox) checkbox.checked = true;
+      });
+    }
+
+    // Apply other filter categories
+    if (filterData.checkedFilters) {
+      Object.keys(filterData.checkedFilters).forEach(category => {
+        if (Array.isArray(filterData.checkedFilters[category])) {
+          filterData.checkedFilters[category].forEach(value => {
+            const checkbox = document.querySelector(`input[name="${category}"][value="${value}"]`);
+            if (checkbox) checkbox.checked = true;
+          });
+        }
+      });
+    }
+
+    // Apply search term if exists
+    if (filterData.searchTerm) {
+      const searchInput = document.getElementById('mapSearch');
+      if (searchInput) {
+        searchInput.value = filterData.searchTerm;
+        currentFilter.searchTerm = filterData.searchTerm;
+      }
+    }
+
+    // Update filter state and apply filters
+    updateFilterState();
+
+    // Remove notification
+    const notification = document.querySelector('.last-filter-notification');
+    if (notification) {
+      notification.remove();
+    }
+
+    // Track event
+    trackEvent('last_filter_applied', {
+      filter_categories: Object.keys(filterData.checkedFilters || {}),
+      filter_count: Object.values(filterData.checkedFilters || {}).flat().length
+    });
+
+  } catch (error) {
+    console.error('Error applying last used filter:', error);
   }
 }
 
-function loadLastFilterState() {
-  const lastFilterState = localStorage.getItem('hbm_last_filter_state');
-  if (lastFilterState) {
-    try {
-      const savedState = JSON.parse(lastFilterState);
-      
-      // Load the saved state
-      filterState = { ...savedState };
-      
-      // Ensure checkedFilters exists
-      if (!filterState.checkedFilters) {
-        filterState.checkedFilters = {};
-      }
-      
-      // Ensure checkedTypes exists and has default values
-      if (!filterState.checkedTypes) {
-        filterState.checkedTypes = ['Project', 'Bedrijf'];
-      }
-      
-      // Update current filter for URL
-      currentFilter = {
-        ...currentFilter,
-        checkedTypes: filterState.checkedTypes,
-        checkedFilters: filterState.checkedFilters,
-        searchTerm: filterState.searchTerm || ''
-      };
-      
-      // Update UI after filters are loaded
-      setTimeout(() => {
-        updateCheckboxesFromFilterState();
-        
-        // Update search input
-        if (filterState.searchTerm) {
-          const searchInput = document.getElementById('mapSearch');
-          if (searchInput) {
-            searchInput.value = filterState.searchTerm;
-          }
-        }
-        
-        // Update URL and apply filters
-        updateURL();
-        applyFilters();
-      }, 500);
-      
-    } catch (error) {
-      console.error('Error loading last filter state:', error);
-    }
-  }
+function saveCurrentFilterAsLast() {
+  // Save current filter state when user navigates away or applies filters
+  const currentFilterState = {
+    checkedTypes: filterState.checkedTypes || [],
+    checkedFilters: filterState.checkedFilters || {},
+    searchTerm: filterState.searchTerm || '',
+    timestamp: new Date().toISOString()
+  };
+
+  localStorage.setItem('hbm_last_used_filter', JSON.stringify(currentFilterState));
 }
 
 // Store filter state when leaving map page
@@ -2854,7 +2875,7 @@ function storeCurrentFilterState() {
     if (searchInput) {
       filterState.searchTerm = searchInput.value.trim();
     }
-    
+
     // Only store if there are actual filters applied
     if (filterState.checkedFilters && Object.keys(filterState.checkedFilters).length > 0 || 
         filterState.searchTerm || 

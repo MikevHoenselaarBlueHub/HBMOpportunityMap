@@ -1772,6 +1772,19 @@ border-radius: 4px;
   font-size: 0.8rem;
 }
 
+.municipality-filter-link {
+  color: rgb(38, 123, 41);
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.municipality-filter-link:hover {
+  border-bottom-color: rgb(38, 123, 41);
+  text-decoration: none;
+}
+
 /* === Filter Overlay === */
 #filterOverlay {
   position: fixed;
