@@ -655,21 +655,21 @@ button {
 
 #selectAll,
 #selectNone {
-  background: #fff;
-  color: #000;
-  border: 1px solid #000;
+  background: rgb(38, 123, 41);
+  color: white;
+  border: none;
   padding: 0.75rem 1rem;
   margin-right: 0.5rem;
   border-radius: 4px;
   font-weight: bold;
   cursor: pointer;
   text-decoration: none;
+  transition: background 0.2s;
 }
 
 #selectAll:hover,
 #selectNone:hover {
-  background: #000;
-  color: #fff;
+  background: rgb(28, 93, 31);
 }
 
 /* === Close icon === */
@@ -1452,6 +1452,7 @@ button {
 </media>@media (max-width: 768px) {
   .main-content {
     position: relative;
+    height: calc(100vh - 80px);
   }
 
   .map-container {
@@ -1462,6 +1463,7 @@ button {
     right: 0;
     bottom: 0;
     z-index: 1;
+    transition: transform 0.3s ease;
   }
 
   .list-container {
@@ -1476,10 +1478,15 @@ button {
     transition: transform 0.3s ease;
     border-left: none;
     border-top: 2px solid rgb(38, 123, 41);
+    background: #fff;
   }
 
   .list-container.show {
     transform: translateX(0);
+  }
+
+  .list-container.show ~ .map-container {
+    transform: translateX(-100%);
   }
 
   .mobile-only {
@@ -1502,10 +1509,23 @@ button {
     font-weight: bold;
     cursor: pointer;
     transition: background 0.2s;
+    z-index: 1150;
+    position: relative;
   }
 
   #viewToggle:hover {
     background: #267b29;
+  }
+
+  /* Hide map legend when list is shown on mobile */
+  .list-container.show ~ .map-legend {
+    display: none;
+  }
+
+  /* Ensure map controls are always visible */
+  .map-controls {
+    z-index: 1150;
+    position: fixed;
   }
 }
 
@@ -2170,13 +2190,14 @@ button {
 }
 
 .municipality-btn {
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   background: rgb(38, 123, 41);
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.875rem;
+  font-weight: bold;
   transition: background 0.2s;
 }
 
@@ -2446,18 +2467,22 @@ button {
   font-weight: bold;
   cursor: pointer;
   transition: background 0.2s;
+  display: inline-block;
+  width: auto;
+  max-width: 250px;
 }
 
 .location-btn:hover {
-  background: #267b29;
+  background: rgb(28, 93, 31);
 }
 
 .location-btn.active {
-  background: #267b29;
+  background: rgb(28, 93, 31);
 }
 
 .clear-location-btn {
   background: #dc3545;
+  max-width: 200px;
 }
 
 .clear-location-btn:hover {
