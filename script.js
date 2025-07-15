@@ -732,10 +732,64 @@ function applyFilters() {
 
   // Get filter values from form
   const checkedTypes = Array.from(document.querySelectorAll('input[name="HBMType"]:checked')).map(cb => cb.value);
+  const checkedProjectTypes = Array.from(document.querySelectorAll('input[name="ProjectType"]:checked')).map(cb => cb.value);
+  const checkedOrganizationTypes = Array.from(document.querySelectorAll('input[name="OrganizationType"]:checked')).map(cb => cb.value);
+  const checkedOrganizationFields = Array.from(document.querySelectorAll('input[name="OrganizationField"]:checked')).map(cb => cb.value);
+  const checkedHBMTopics = Array.from(document.querySelectorAll('input[name="HBMTopic"]:checked')).map(cb => cb.value);
+  const checkedHBMCharacteristics = Array.from(document.querySelectorAll('input[name="HBMCharacteristics"]:checked')).map(cb => cb.value);
+  const checkedHBMSectors = Array.from(document.querySelectorAll('input[name="HBMSector"]:checked')).map(cb => cb.value);
+  const checkedMunicipalities = Array.from(document.querySelectorAll('input[name="Municipality"]:checked')).map(cb => cb.value);
 
   const filteredData = window.data.filter(item => {
     // Type filter (Project/Bedrijf checkboxes)
     if (checkedTypes.length > 0 && !checkedTypes.includes(item.HBMType)) {
+      return false;
+    }
+
+    // ProjectType filter (AND logic - all checked types must match)
+    if (checkedProjectTypes.length > 0) {
+      const itemProjectTypes = Array.isArray(item.ProjectType) ? item.ProjectType : [item.ProjectType];
+      if (!checkedProjectTypes.some(type => itemProjectTypes.includes(type))) {
+        return false;
+      }
+    }
+
+    // OrganizationType filter
+    if (checkedOrganizationTypes.length > 0 && !checkedOrganizationTypes.includes(item.OrganizationType)) {
+      return false;
+    }
+
+    // OrganizationField filter
+    if (checkedOrganizationFields.length > 0) {
+      const itemFields = Array.isArray(item.OrganizationField) ? item.OrganizationField : [item.OrganizationField];
+      if (!checkedOrganizationFields.some(field => itemFields.includes(field))) {
+        return false;
+      }
+    }
+
+    // HBMTopic filter
+    if (checkedHBMTopics.length > 0) {
+      const itemTopics = Array.isArray(item.HBMTopic) ? item.HBMTopic : [item.HBMTopic];
+      if (!checkedHBMTopics.some(topic => itemTopics.includes(topic))) {
+        return false;
+      }
+    }
+
+    // HBMCharacteristics filter
+    if (checkedHBMCharacteristics.length > 0) {
+      const itemCharacteristics = Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics : [item.HBMCharacteristics];
+      if (!checkedHBMCharacteristics.some(characteristic => itemCharacteristics.includes(characteristic))) {
+        return false;
+      }
+    }
+
+    // HBMSector filter
+    if (checkedHBMSectors.length > 0 && !checkedHBMSectors.includes(item.HBMSector)) {
+      return false;
+    }
+
+    // Municipality filter
+    if (checkedMunicipalities.length > 0 && !checkedMunicipalities.includes(item.Municipality)) {
       return false;
     }
 
@@ -953,6 +1007,7 @@ function populateFilters(data) {
     Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics : [item.HBMCharacteristics]
   ).filter(Boolean))];
   const sectors = [...new Set(data.map(item => item.HBMSector).filter(Boolean))];
+  const municipalities = [...new Set(data.map(item => item.Municipality).filter(Boolean))].sort();
 
   // Populate filter sections
   populateFilterSection('ProjectType', projectTypes);
@@ -961,17 +1016,10 @@ function populateFilters(data) {
   populateFilterSection('HBMTopic', topics);
   populateFilterSection('HBMCharacteristics', characteristics);
   populateFilterSection('HBMSector', sectors);
+  populateFilterSection('Municipality', municipalities);
 
-  // Populate municipality select
-  const municipalitySelect = document.getElementById('municipalitySelect');
-  if (municipalitySelect) {
-    municipalities.forEach(municipality => {
-      const option = document.createElement('option');
-      option.value = municipality.name;
-      option.textContent = `${municipality.name} (${municipality.country})`;
-      municipalitySelect.appendChild(option);
-    });
-  }
+  // Add municipality selection buttons
+  addMunicipalitySelectionButtons(data);
 }
 
 function populateFilterSection(sectionId, options) {
@@ -1106,12 +1154,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Distance range slider
-  const distanceRangeSlider = document.getElementById('distanceRange');
-  const distanceValueDisplay = document.getElementById('distanceValue');
-  if (distanceRangeSlider && distanceValueDisplay) {
-    distanceRangeSlider.addEventListener('input', function() {
+  const distanceSlider = document.getElementById('distanceRange');
+  const distanceDisplay = document.getElementById('distanceValue');
+  if (distanceSlider && distanceDisplay) {
+    distanceSlider.addEventListener('input', function() {
       const value = parseInt(this.value);
-      distanceValueDisplay.textContent = value + ' km';
+      distanceDisplay.textContent = value + ' km';
       updateLocationRadius(value);
     });
   }
@@ -1514,7 +1562,7 @@ function updateFilterState() {
   filterState.checkedTypes = checkedTypes;
 
   // Get all other checked filters
-  const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector'];
+  const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector', 'Municipality'];
   filterState.checkedFilters = {};
 
   filterSections.forEach(section => {
@@ -1528,6 +1576,60 @@ function updateFilterState() {
   updateURL();
 
   applyFilters();
+}
+
+function addMunicipalitySelectionButtons(data) {
+  const municipalitySection = document.getElementById('Municipality');
+  if (!municipalitySection) return;
+
+  // Add selection buttons at the top
+  const buttonContainer = document.createElement('div');
+  buttonContainer.className = 'municipality-selection-buttons';
+  buttonContainer.innerHTML = `
+    <button type="button" id="selectNLMunicipalities" class="municipality-btn">Selecteer alleen Nederlandse gemeenten</button>
+    <button type="button" id="selectDEMunicipalities" class="municipality-btn">Selecteer alleen Duitse gemeenten</button>
+    <button type="button" id="selectAllMunicipalities" class="municipality-btn">Selecteer alle gemeenten</button>
+    <button type="button" id="clearAllMunicipalities" class="municipality-btn">Deselecteer alle gemeenten</button>
+  `;
+
+  municipalitySection.insertBefore(buttonContainer, municipalitySection.firstChild);
+
+  // Get municipalities by country
+  const nlMunicipalities = [...new Set(data.filter(item => item.Country === 'Netherlands').map(item => item.Municipality))];
+  const deMunicipalities = [...new Set(data.filter(item => item.Country === 'Germany').map(item => item.Municipality))];
+
+  // Add event listeners
+  document.getElementById('selectNLMunicipalities').addEventListener('click', () => {
+    // Uncheck all first
+    document.querySelectorAll('input[name="Municipality"]').forEach(cb => cb.checked = false);
+    // Check only Dutch municipalities
+    nlMunicipalities.forEach(municipality => {
+      const checkbox = document.querySelector(`input[name="Municipality"][value="${municipality}"]`);
+      if (checkbox) checkbox.checked = true;
+    });
+    updateFilterState();
+  });
+
+  document.getElementById('selectDEMunicipalities').addEventListener('click', () => {
+    // Uncheck all first
+    document.querySelectorAll('input[name="Municipality"]').forEach(cb => cb.checked = false);
+    // Check only German municipalities
+    deMunicipalities.forEach(municipality => {
+      const checkbox = document.querySelector(`input[name="Municipality"][value="${municipality}"]`);
+      if (checkbox) checkbox.checked = true;
+    });
+    updateFilterState();
+  });
+
+  document.getElementById('selectAllMunicipalities').addEventListener('click', () => {
+    document.querySelectorAll('input[name="Municipality"]').forEach(cb => cb.checked = true);
+    updateFilterState();
+  });
+
+  document.getElementById('clearAllMunicipalities').addEventListener('click', () => {
+    document.querySelectorAll('input[name="Municipality"]').forEach(cb => cb.checked = false);
+    updateFilterState();
+  });
 }
 
 function toggleAdvancedFilters() {

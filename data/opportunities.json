@@ -13,6 +13,8 @@
     "Street": "Markt 78",
     "Zip": "6211CL",
     "City": "Maastricht",
+    "Municipality": "Maastricht",
+    "Country": "Netherlands",
     "Latitude": 50.892254,
     "Longitude": 5.73002
   },
@@ -30,6 +32,8 @@
     "Street": "Rheinstraße 186",
     "Zip": "47798",
     "City": "Krefeld",
+    "Municipality": "Krefeld",
+    "Country": "Germany",
     "Latitude": 51.374155,
     "Longitude": 6.558629
   },
