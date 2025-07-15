@@ -1067,6 +1067,27 @@ button {
   display: none;
 }
 
+/* Touch improvements for mobile */
+@media (max-width: 768px) {
+  /* Larger touch targets */
+  button, .card-contact-btn, .nav-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Touch feedback */
+  button:active, .card-contact-btn:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+  
+  /* Smooth scrolling for mobile */
+  .opportunities-list {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+}</media>
+
 @media (max-width: 768px) {
   .main-content {
     position: relative;

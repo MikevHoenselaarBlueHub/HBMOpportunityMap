@@ -306,8 +306,14 @@ function initMap() {
     position: 'topright'
   }).addTo(map);
 
-  // Load municipality boundaries
-  loadMunicipalityBoundaries();
+  // Lazy load municipality boundaries when layer is added
+  let municipalitiesLoaded = false;
+  map.on('overlayadd', function(e) {
+    if (e.name === 'Gemeentegrenzen' && !municipalitiesLoaded) {
+      municipalitiesLoaded = true;
+      loadMunicipalityBoundaries();
+    }
+  });
 
   // Add markers layer to map
   map.addLayer(markers);
@@ -672,12 +678,15 @@ function filterByMunicipality(municipalityName) {
   applyFilters();
 }
 
-// Create markers
+// Create markers with performance optimization
 function createMarkers(data) {
   markers.clearLayers();
   console.log('Creating markers for data:', data);
 
+  // Performance optimization: batch marker creation
+  const markerBatch = [];
   let markerCount = 0;
+  
   data.forEach(item => {
     if (item.Latitude && item.Longitude) {
       let marker;
@@ -748,9 +757,12 @@ function createMarkers(data) {
       // Store item data for filtering
       marker.itemData = item;
 
-      markers.addLayer(marker);
+      markerBatch.push(marker);
     }
   });
+
+  // Add all markers in batch for better performance
+  markerBatch.forEach(marker => markers.addLayer(marker));
 
   console.log(`Created ${markerCount} markers, total layers:`, markers.getLayers().length);
 }
@@ -1340,6 +1352,11 @@ document.addEventListener('DOMContentLoaded', function() {
   if (exportBtn) {
     exportBtn.addEventListener('click', function() {
       exportCurrentResults();
+      // Close dropdown after export
+      const filterDropdown = document.querySelector('.filter-dropdown');
+      if (filterDropdown) {
+        filterDropdown.classList.remove('open');
+      }
     });
   }
 
@@ -2340,11 +2357,11 @@ function loadSavedFilter(filterName) {
     }
   }
 
+  // Apply filters first to ensure proper state
+  applyFilters();
+  
   // Update URL immediately after loading filter
   updateURL();
-
-  // Apply filters
-  applyFilters();
 
   alert(`Filter "${filterName}" geladen!`);
 }
