@@ -732,12 +732,15 @@ button {
 
 /* === No Results Opportunity === */
 .no-results-opportunity {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9f7ef 100%);
-  border: 2px solid rgb(38, 123, 41);
-  border-radius: 12px;
-  padding: 2rem;
-  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
   text-align: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin: 2rem 0;
 }
 
 .no-results-opportunity h2 {
@@ -747,9 +750,45 @@ button {
 }
 
 .no-results-opportunity p {
-  margin-bottom: 1rem;
+  color: #666;
+  margin-bottom: 1.5rem;
   line-height: 1.6;
-  color: #333;
+  max-width: 600px;
+}
+
+.no-results-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-primary {
+  display: inline-block;
+  background: rgb(38, 123, 41);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: rgb(33, 108, 36);
+  transform: translateY(-1px);
+}
+
+.text-link {
+  color: rgb(38, 123, 41);
+  text-decoration: underline;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.text-link:hover {
+  color: rgb(33, 108, 36);
 }
 
 .no-results-opportunity ul {
@@ -1074,13 +1113,13 @@ button {
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   /* Touch feedback */
   button:active, .card-contact-btn:active {
     transform: scale(0.95);
     transition: transform 0.1s ease;
   }
-  
+
   /* Smooth scrolling for mobile */
   .opportunities-list {
     scroll-behavior: smooth;
@@ -1137,7 +1176,7 @@ button {
     color: #fff;
     border: none;
     padding: 0.75rem 1rem;
-    border-radius: 4px;
+border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
     transition: background 0.2s;
@@ -1743,7 +1782,7 @@ button {
     flex-direction: column;
     gap: 0.25rem;
   }
-  
+
   .municipality-btn {
     width: 100%;
     text-align: center;
@@ -2038,4 +2077,4 @@ button {
   .location-filter-controls {
     gap: 0.5rem;
   }
-}ters;
+}

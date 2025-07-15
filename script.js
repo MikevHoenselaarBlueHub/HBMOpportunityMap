@@ -1644,7 +1644,16 @@ function updateListView(data) {
 
   // Add projects to buildings list
   if (projects.length === 0) {
-    buildingsList.innerHTML = '<div class="no-results-opportunity"><h2>Geen projecten gevonden</h2><p>Probeer andere filters om meer resultaten te vinden.</p></div>';
+    buildingsList.innerHTML = `
+      <div class="no-results-opportunity">
+        <h2>Geen projecten gevonden</h2>
+        <p>Er zijn nog geen resultaten voor deze selectie gevonden. Dit biedt kansen. HBM helpt graag bij het verbinden van de juiste partners voor de realisatie van gezonde gebouwen, beleidsmakers binnen gemeenten.</p>
+        <div class="no-results-actions">
+          <a href="contact.html" class="btn-primary">Contact opnemen</a>
+          <a href="over.html" class="text-link">Meer over HBM</a>
+        </div>
+      </div>
+    `;
   } else {
     projects.forEach(item => {
       buildingsList.appendChild(createListItem(item));
@@ -1653,7 +1662,16 @@ function updateListView(data) {
 
   // Add companies to companies list
   if (companies.length === 0) {
-    companiesList.innerHTML = '<div class="no-results-opportunity"><h2>Geen bedrijven gevonden</h2><p>Probeer andere filters om meer resultaten te vinden.</p></div>';
+    companiesList.innerHTML = `
+      <div class="no-results-opportunity">
+        <h2>Geen bedrijven gevonden</h2>
+        <p>Er zijn nog geen resultaten voor deze selectie gevonden. Dit biedt kansen. HBM helpt graag bij het verbinden van de juiste partners voor de realisatie van gezonde gebouwen, beleidsmakers binnen gemeenten.</p>
+        <div class="no-results-actions">
+          <a href="contact.html" class="btn-primary">Contact opnemen</a>
+          <a href="over.html" class="text-link">Meer over HBM</a>
+        </div>
+      </div>
+    `;
   } else {
     companies.forEach(item => {
       companiesList.appendChild(createListItem(item));
@@ -1968,6 +1986,13 @@ function updateFilterState() {
     }
   });
 
+  // Update current filter for URL state
+  currentFilter = {
+    ...currentFilter,
+    checkedTypes: checkedTypes,
+    checkedFilters: filterState.checkedFilters
+  };
+
   // Update URL
   updateURL();
 
@@ -2040,11 +2065,31 @@ function updateURL() {
   try {
     const params = new URLSearchParams();
 
-    Object.keys(currentFilter).forEach(key => {
-      if (currentFilter[key] && currentFilter[key].length > 0) {
-        params.set(key.toLowerCase(), currentFilter[key].join(','));
-      }
-    });
+    // Add search term
+    if (currentFilter.searchTerm) {
+      params.set('search', currentFilter.searchTerm);
+    }
+
+    // Add types
+    if (filterState.checkedTypes && filterState.checkedTypes.length > 0) {
+      params.set('types', filterState.checkedTypes.join(','));
+    }
+
+    // Add other filters
+    if (filterState.checkedFilters) {
+      Object.keys(filterState.checkedFilters).forEach(section => {
+        if (filterState.checkedFilters[section] && filterState.checkedFilters[section].length > 0) {
+          params.set(section.toLowerCase(), filterState.checkedFilters[section].join(','));
+        }
+      });
+    }
+
+    // Add location if set
+    if (currentFilter.userLocation) {
+      params.set('lat', currentFilter.userLocation.lat.toString());
+      params.set('lng', currentFilter.userLocation.lng.toString());
+      params.set('radius', (currentFilter.radius / 1000).toString());
+    }
 
     const newURL = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
     window.history.replaceState({}, '', newURL);
