@@ -1858,7 +1858,6 @@ function getCurrentFilteredData() {
   const checkedProjectTypes = Array.from(document.querySelectorAll('input[name="ProjectType"]:checked')).map(cb => cb.value);
   const checkedOrganizationTypes = Array.from(document.querySelectorAll('input[name="OrganizationType"]:checked')).map(cb => cb.value);
   const checkedOrganizationFields = Array.from(document.querySelectorAll('input[name="OrganizationField"]:checked')).map(cb => cb.value);
-  ```tool_code
   const checkedHBMTopics = Array.from(document.querySelectorAll('input[name="HBMTopic"]:checked')).map(cb => cb.value);
   const checkedHBMCharacteristics = Array.from(document.querySelectorAll('input[name="HBMCharacteristics"]:checked')).map(cb => cb.value);
   const checkedHBMSectors = Array.from(document.querySelectorAll('input[name="HBMSector"]:checked')).map(cb => cb.value);
