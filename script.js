@@ -2573,6 +2573,9 @@ function activateTab(tabName) {
     const tabPanes = document.querySelectorAll('.tab-pane');
 
     tabButtons.forEach(btn => btn.classList.remove('active'));
+    tabPanes = document.querySelectorAll(`.tab-pane');
+
+    tabButtons.forEach(btn => btn.classList.remove('active'));
     tabPanes.forEach(pane => pane.classList.remove('active'));
 
     // Add active class to specified tab
@@ -2814,36 +2817,26 @@ function getFilteredData() {
 // Function to check if user returned to map page and show notification
 function checkForReturnToMapPage() {
   const lastUsedFilter = localStorage.getItem('hbm_last_used_filter');
-  const lastPageVisit = localStorage.getItem('hbm_last_page_visit');
-  const currentTime = Date.now();
 
   console.log('Checking for return to map page:', {
-    hasLastUsedFilter: !!lastUsedFilter,
-    hasLastPageVisit: !!lastPageVisit,
-    timeSinceLastVisit: lastPageVisit ? (currentTime - parseInt(lastPageVisit)) / 1000 : 0
+    hasLastUsedFilter: !!lastUsedFilter
   });
 
-  // Check if user has returned from a different page and has a saved filter
-  // Show notification if user visited another page within last 30 minutes and has a filter
-  if (lastUsedFilter && lastPageVisit) {
-    const timeSinceLastVisit = currentTime - parseInt(lastPageVisit);
-    const thirtyMinutes = 30 * 60 * 1000; // 30 minutes in milliseconds
-    
-    if (timeSinceLastVisit < thirtyMinutes && timeSinceLastVisit > 1000) { // More than 1 second ago
-      try {
-        const filterData = JSON.parse(lastUsedFilter);
-        
-        // Only show if there are actual filters applied
-        if (filterData.checkedFilters && Object.keys(filterData.checkedFilters).length > 0 || 
-            filterData.searchTerm || 
-            (filterData.checkedTypes && filterData.checkedTypes.length < 2)) {
-          
-          console.log('Showing last filter notification');
-          showLastFilterNotification(filterData);
-        }
-      } catch (error) {
-        console.error('Error parsing last used filter:', error);
+  // Check if there's a saved filter and show notification
+  if (lastUsedFilter) {
+    try {
+      const filterData = JSON.parse(lastUsedFilter);
+
+      // Only show if there are actual filters applied
+      if (filterData.checkedFilters && Object.keys(filterData.checkedFilters).length > 0 || 
+          filterData.searchTerm || 
+          (filterData.checkedTypes && filterData.checkedTypes.length < 2)) {
+
+        console.log('Showing last filter notification');
+        showLastFilterNotification(filterData);
       }
+    } catch (error) {
+      console.error('Error parsing last used filter:', error);
     }
   }
 }
@@ -2853,7 +2846,7 @@ function showLastFilterNotification(filterData) {
   const notification = document.getElementById('lastFilterNotification');
   const useLastFilterLink = document.getElementById('useLastFilterLink');
   const closeNotificationBtn = document.getElementById('closeNotification');
-  
+
   if (notification && useLastFilterLink && closeNotificationBtn) {
     // Set up the click handlers
     useLastFilterLink.onclick = function(e) {
@@ -2862,14 +2855,14 @@ function showLastFilterNotification(filterData) {
       notification.style.display = 'none';
       return false;
     };
-    
+
     closeNotificationBtn.onclick = function() {
       notification.style.display = 'none';
     };
-    
+
     // Show the notification
     notification.style.display = 'block';
-    
+
     // Auto-hide after 15 seconds
     setTimeout(() => {
       notification.style.display = 'none';
@@ -2952,7 +2945,7 @@ function saveCurrentFilterAsLast() {
   if (Object.keys(currentFilterState.checkedFilters).length > 0 || 
       currentFilterState.searchTerm || 
       (currentFilterState.checkedTypes && currentFilterState.checkedTypes.length < 2)) {
-    
+
     localStorage.setItem('hbm_last_used_filter', JSON.stringify(currentFilterState));
     console.log('Saved current filter as last used:', currentFilterState);
   }
@@ -2976,18 +2969,10 @@ function storeCurrentFilterState() {
   }
 }
 
-// Store page visit time when leaving map page
-function storePageVisit() {
-  // Store visit time whenever we're NOT on the map page
-  if (!isMapPage || isInfoPage || isOverPage) {
-    localStorage.setItem('hbm_last_page_visit', Date.now().toString());
-    console.log('Stored page visit time for non-map page');
-  }
-}
-
 // Add event listeners for page navigation
-window.addEventListener('beforeunload', storeCurrentFilterState);
-document.addEventListener('DOMContentLoaded', storePageVisit);
+window.addEventListener('beforeunload', function() {
+  storeCurrentFilterState();
+});
 
 // Store page visit when user navigates away from map page
 document.addEventListener('visibilitychange', function() {
