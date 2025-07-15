@@ -1,6 +1,6 @@
 
 // Map Configuration
-export const mapConfig = {
+const mapConfig = {
   // Default map center (Euregio Maas-Rijn)
   defaultCenter: [51.2, 6.0],
   defaultZoom: 9,
@@ -60,7 +60,7 @@ export const mapConfig = {
 };
 
 // Data paths
-export const dataPaths = {
+const dataPaths = {
   opportunities: 'data/opportunities.json',
   dutchMunicipalities: 'data/geojson/nl-gemeenten.geojson',
   germanMunicipalities: 'data/geojson/de-gemeenten.geojson',
@@ -68,7 +68,7 @@ export const dataPaths = {
 };
 
 // Translation paths
-export const translationPaths = {
+const translationPaths = {
   nl: 'translations/nl.json',
   en: 'translations/en.json', 
   de: 'translations/de.json'

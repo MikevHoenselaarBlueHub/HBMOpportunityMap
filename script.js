@@ -1108,12 +1108,12 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Distance range slider
-  const distanceRange = document.getElementById('distanceRange');
-  const distanceValue = document.getElementById('distanceValue');
-  if (distanceRange && distanceValue) {
-    distanceRange.addEventListener('input', function() {
+  const distanceRangeSlider = document.getElementById('distanceRange');
+  const distanceValueDisplay = document.getElementById('distanceValue');
+  if (distanceRangeSlider && distanceValueDisplay) {
+    distanceRangeSlider.addEventListener('input', function() {
       const value = parseInt(this.value);
-      distanceValue.textContent = value + ' km';
+      distanceValueDisplay.textContent = value + ' km';
       updateLocationRadius(value);
     });
   }
