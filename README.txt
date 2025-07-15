@@ -1,34 +1,64 @@
 
-HBM Kansenkaart - Codex overdracht
+HBM Kansenkaart - Status Overzicht
 ----------------------------------
 
-In deze ZIP vind je alles wat je nodig hebt om direct verder te werken in een OpenAI Codex omgeving.
+WERKENDE FUNCTIONALITEITEN
+--------------------------
+✅ Interactieve kaart met markers
+✅ Type organisatie filter (Project/Bedrijf)
+✅ Locatie + radius filtering
+✅ Detail panel met navigatie
+✅ Lijst/kaart weergave toggle
+✅ Meertalige ondersteuning (NL/EN/DE)
+✅ Service Worker offline functionaliteit
+✅ Responsive design
+✅ Filter opslaan/laden
+✅ URL state management
+✅ Gemeente grenzen weergave
+✅ Marker clustering
 
-INHOUD
-------
-- index.html  : Kansenkaart met hamburger menu, fullscreen navigatie overlay, filter overlay met bold labels, slide-in detailcard met omschrijving (~50 woorden) en conversieknoppen.
-- info.html   : Meer info pagina met dezelfde navigatie.
-- over.html   : Over HBM pagina met dezelfde navigatie.
-- style.css   : Mobile-first styling, bold labels, overlay animaties, sticky knoppen, UX verbeteringen.
-- script.js   : 
-    * Logica voor toggles (menu/filter/detailcard)
-    * Vul filters met dummy data
-    * Multi-select checkboxes/radiobuttons
-    * Type organisatie toggle
-    * Slide-in detailcard met conversieknoppen
-    * Fullscreen formulier (Netlify Forms of Formspree)
-    * Basis GA4 events (vervang G-XXXXXXXXXX door jouw ID)
-- opportunities.json : 50 dummy items met alle velden en Description (~50 woorden)
-- favicon.ico : Plaats dit in je root
-- icons/marker-project.svg & icons/marker-company.svg : Marker iconen voor Leaflet
+BEPERKT WERKENDE FUNCTIONALITEITEN
+----------------------------------
+⚠️ Geavanceerde filters (project type, organisatie, etc.) - UI aanwezig maar beperkte data
+⚠️ Google Analytics - placeholder ID moet vervangen worden
+⚠️ Gemeente filtering - UI aanwezig maar niet volledig werkend
+⚠️ Zoekfunctionaliteit - basis implementatie
 
-AANBEVELINGEN
--------------
-1) Test lokaal met Live Server of `npx serve .`
-2) Koppel opportunities.json later aan een database of API met authenticatie.
-3) Zet je eigen Formspree of Netlify Forms endpoint in de form action voor verzenden naar info@healthybuildingmovement.com
-4) Vervang de GA4 ID in index.html door jouw werkelijke ID.
-5) Controleer cookie consent en privacyregels.
-6) Upload alles naar Netlify of een vergelijkbare statische host.
+NIET WERKENDE FUNCTIONALITEITEN
+-------------------------------
+❌ Contact formulieren - alleen placeholders
+❌ Email verzending - niet geïmplementeerd
+❌ Formspree/Netlify Forms - niet geconfigureerd
+❌ Export functionaliteit - placeholder
+❌ ES6 modules - syntax error door missing module config
 
-Alles is klaar om direct in Codex verder uit te breiden.
+CONFIGURATIE VEREIST
+--------------------
+1. Google Analytics ID vervangen (G-XXXXXXXXXX)
+2. Contact formulier endpoint configureren
+3. Email service instellen
+4. ES6 module support toevoegen
+
+BESTANDEN STRUCTUUR
+------------------
+- index.html     : Hoofdpagina met kaart
+- info.html      : Info pagina
+- over.html      : Over HBM pagina
+- contact.html   : Contact pagina (beperkt werkend)
+- style.css      : Styling
+- script.js      : Hoofdfunctionaliteit
+- config/        : Configuratie bestanden
+- data/          : JSON en GeoJSON data
+- icons/         : SVG iconen
+- translations/  : Meertalige bestanden
+
+AANBEVELINGEN VOOR PRODUCTIE
+----------------------------
+1. Fix ES6 import errors
+2. Implementeer werkende contact formulieren
+3. Configureer Google Analytics
+4. Voeg meer sample data toe voor filters
+5. Test alle functionaliteiten grondig
+6. Optimaliseer loading performance
+
+De applicatie is grotendeels functioneel maar heeft configuratie nodig voor productiegebruik.

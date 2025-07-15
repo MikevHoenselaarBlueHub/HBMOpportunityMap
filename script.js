@@ -1026,6 +1026,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Close dropdown when clicking outside
+```text
     document.addEventListener('click', function(e) {
       if (!filterDropdown.contains(e.target)) {
         filterDropdown.classList.remove('open');
@@ -1397,14 +1398,14 @@ function openDetailPanel(item) {
       <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
     </a>
     <div class="detail-navigation">
-      <button id="prevDetail" class="nav-btn ${currentIndex === 0 ? 'disabled' : ''}" ${currentIndex === 0 ? 'disabled' : ''}>
-        <img src="icons/close.svg" alt="Vorige" class="nav-icon nav-icon-left" />
-      </button>
-      <span class="nav-counter">${currentIndex + 1} / ${totalItems}</span>
-      <button id="nextDetail" class="nav-btn ${currentIndex === totalItems - 1 ? 'disabled' : ''}" ${currentIndex === totalItems - 1 ? 'disabled' : ''}>
-        <img src="icons/close.svg" alt="Volgende" class="nav-icon nav-icon-right" />
-      </button>
-    </div>
+        <button id="prevDetail" class="nav-btn ${currentIndex === 0 ? 'disabled' : ''}" ${currentIndex === 0 ? 'disabled' : ''}>
+          <img src="icons/arrow-left.svg" alt="Vorige" class="nav-icon nav-icon-left" />
+        </button>
+        <span class="nav-counter">${currentIndex + 1} / ${totalItems}</span>
+        <button id="nextDetail" class="nav-btn ${currentIndex === totalItems - 1 ? 'disabled' : ''}" ${currentIndex === totalItems - 1 ? 'disabled' : ''}>
+          <img src="icons/arrow-right.svg" alt="Volgende" class="nav-icon nav-icon-right" />
+        </button>
+      </div>
     <div class="detail-content">
       <div class="detail-header">
         <h2>${item.Name || 'Onbekend'}</h2>
