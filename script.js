@@ -12,6 +12,14 @@ let municipalities = [];
 let translations = {};
 let currentLanguage = 'nl';
 
+// Filter state management
+let filterState = {
+  checkedTypes: ['Project', 'Bedrijf'],
+  checkedFilters: {},
+  userLocation: null,
+  radius: 25
+};
+
 // Determine page type
 const isMapPage = window.location.pathname === '/' || window.location.pathname === '/index.html';
 const isInfoPage = window.location.pathname.includes('info.html');
@@ -97,6 +105,9 @@ if (isMapPage && !isInfoPage && !isOverPage) {
 
           // Apply initial filters
           applyFilters();
+
+          // Load filters from URL
+          loadFromURL();
 
           // Initialize auto complete
           initAutocomplete(window.data);
@@ -794,11 +805,13 @@ function getCurrentLocation() {
 
       // Store user location
       currentFilter.userLocation = { lat: latitude, lng: longitude };
+      filterState.userLocation = { lat: latitude, lng: longitude };
 
       // Get current distance value
       const distanceRange = document.getElementById('distanceRange');
-      const radius = distanceRange ? parseInt(distanceRange.value) * 1000 : 25000;
-      currentFilter.radius = radius;
+      const radius = distanceRange ? parseInt(distanceRange.value) : 25;
+      currentFilter.radius = radius * 1000;
+      filterState.radius = radius;
 
       // Center map on user location
       map.setView([latitude, longitude], 12);
@@ -846,11 +859,15 @@ function getCurrentLocation() {
 
 function updateLocationRadius(radius) {
   currentFilter.radius = radius * 1000; // Convert to meters
+  filterState.radius = radius;
 
   // Update circle if exists
   if (userLocationCircle && currentFilter.userLocation) {
     userLocationCircle.setRadius(currentFilter.radius);
   }
+
+  // Update URL
+  updateURL();
 
   // Apply filters
   applyFilters();
@@ -993,6 +1010,37 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Initialize other dropdown buttons
+  const exportBtn = document.getElementById('exportBtn');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', function() {
+      alert('Export functionaliteit komt binnenkort beschikbaar.');
+    });
+  }
+
+  const saveCurrentFiltersBtn = document.getElementById('saveCurrentFiltersBtn');
+  if (saveCurrentFiltersBtn) {
+    saveCurrentFiltersBtn.addEventListener('click', saveCurrentFilters);
+  }
+
+  const loadSavedFiltersBtn = document.getElementById('loadSavedFiltersBtn');
+  if (loadSavedFiltersBtn) {
+    loadSavedFiltersBtn.addEventListener('click', function() {
+      const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
+      const filterNames = Object.keys(savedFilters);
+      
+      if (filterNames.length === 0) {
+        alert('Geen opgeslagen filters gevonden.');
+        return;
+      }
+      
+      const selectedFilter = prompt('Kies een opgeslagen filter:\n' + filterNames.map((name, i) => `${i + 1}. ${name}`).join('\n'));
+      if (selectedFilter && filterNames.includes(selectedFilter)) {
+        loadSavedFilter(selectedFilter);
+      }
+    });
+  }
+
   // Location button
   const locationBtn = document.getElementById('useMyLocation');
   if (locationBtn) {
@@ -1103,7 +1151,10 @@ function initializeFilters() {
   // Initialize advanced filters toggle
   const advancedFiltersHeader = document.querySelector('.advanced-filters-header');
   if (advancedFiltersHeader) {
-    advancedFiltersHeader.addEventListener('click', toggleAdvancedFilters);
+    advancedFiltersHeader.addEventListener('click', function(e) {
+      e.preventDefault();
+      toggleAdvancedFilters();
+    });
   }
 
   // Initialize apply filters button
@@ -1114,6 +1165,35 @@ function initializeFilters() {
       filterOverlay.classList.remove('open');
     });
   }
+
+  // Initialize saved filters functionality
+  const saveCurrentFiltersBtn = document.getElementById('saveCurrentFilters');
+  if (saveCurrentFiltersBtn) {
+    saveCurrentFiltersBtn.addEventListener('click', saveCurrentFilters);
+  }
+
+  const savedFiltersSelect = document.getElementById('savedFiltersSelect');
+  if (savedFiltersSelect) {
+    savedFiltersSelect.addEventListener('change', function() {
+      if (this.value) {
+        loadSavedFilter(this.value);
+      }
+    });
+  }
+
+  const deleteSavedFilterBtn = document.getElementById('deleteSavedFilter');
+  if (deleteSavedFilterBtn) {
+    deleteSavedFilterBtn.addEventListener('click', deleteSavedFilter);
+  }
+
+  // Initialize share functionality
+  const shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', shareCurrentFilters);
+  }
+
+  // Load saved filters dropdown
+  updateSavedFiltersDropdown();
 }
 
 // List view functionality
@@ -1371,6 +1451,24 @@ function getCurrentFilteredData() {
 
 // Add missing functions
 function updateFilterState() {
+  // Update filter state object
+  const checkedTypes = Array.from(document.querySelectorAll('input[name="HBMType"]:checked')).map(cb => cb.value);
+  filterState.checkedTypes = checkedTypes;
+  
+  // Get all other checked filters
+  const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector'];
+  filterState.checkedFilters = {};
+  
+  filterSections.forEach(section => {
+    const checked = Array.from(document.querySelectorAll(`input[name="${section}"]:checked`)).map(cb => cb.value);
+    if (checked.length > 0) {
+      filterState.checkedFilters[section] = checked;
+    }
+  });
+  
+  // Update URL
+  updateURL();
+  
   applyFilters();
 }
 
@@ -1379,6 +1477,252 @@ function toggleAdvancedFilters() {
   if (advancedFilters) {
     advancedFilters.classList.toggle('open');
   }
+}
+
+// URL state management
+function updateURL() {
+  const params = new URLSearchParams();
+  
+  // Add filter types
+  if (filterState.checkedTypes.length > 0 && filterState.checkedTypes.length < 2) {
+    params.set('types', filterState.checkedTypes.join(','));
+  }
+  
+  // Add other filters
+  Object.keys(filterState.checkedFilters).forEach(section => {
+    if (filterState.checkedFilters[section].length > 0) {
+      params.set(section.toLowerCase(), filterState.checkedFilters[section].join(','));
+    }
+  });
+  
+  // Add location if set
+  if (filterState.userLocation) {
+    params.set('lat', filterState.userLocation.lat.toFixed(6));
+    params.set('lng', filterState.userLocation.lng.toFixed(6));
+    params.set('radius', filterState.radius);
+  }
+  
+  const url = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+  window.history.replaceState({}, '', url);
+}
+
+function loadFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  
+  // Load filter types
+  if (params.has('types')) {
+    const types = params.get('types').split(',');
+    filterState.checkedTypes = types;
+    
+    // Update checkboxes
+    document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
+      cb.checked = types.includes(cb.value);
+    });
+  }
+  
+  // Load other filters
+  const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector'];
+  filterSections.forEach(section => {
+    const paramKey = section.toLowerCase();
+    if (params.has(paramKey)) {
+      const values = params.get(paramKey).split(',');
+      filterState.checkedFilters[section] = values;
+      
+      // Update checkboxes when they exist
+      setTimeout(() => {
+        document.querySelectorAll(`input[name="${section}"]`).forEach(cb => {
+          cb.checked = values.includes(cb.value);
+        });
+      }, 100);
+    }
+  });
+  
+  // Load location
+  if (params.has('lat') && params.has('lng')) {
+    const lat = parseFloat(params.get('lat'));
+    const lng = parseFloat(params.get('lng'));
+    const radius = params.has('radius') ? parseInt(params.get('radius')) : 25;
+    
+    filterState.userLocation = { lat, lng };
+    filterState.radius = radius;
+    currentFilter.userLocation = { lat, lng };
+    currentFilter.radius = radius * 1000;
+    
+    // Show location on map
+    if (map) {
+      map.setView([lat, lng], 12);
+      
+      if (userLocationCircle) {
+        map.removeLayer(userLocationCircle);
+      }
+      
+      userLocationCircle = L.circle([lat, lng], {
+        color: '#3388ff',
+        fillColor: '#3388ff',
+        fillOpacity: 0.2,
+        radius: radius * 1000
+      }).addTo(map);
+      
+      // Update UI
+      const distanceFilter = document.getElementById('distanceFilter');
+      if (distanceFilter) {
+        distanceFilter.style.display = 'block';
+      }
+      
+      const distanceRange = document.getElementById('distanceRange');
+      const distanceValue = document.getElementById('distanceValue');
+      if (distanceRange && distanceValue) {
+        distanceRange.value = radius;
+        distanceValue.textContent = radius + ' km';
+      }
+      
+      const locationBtn = document.getElementById('useMyLocation');
+      if (locationBtn) {
+        locationBtn.innerHTML = '<span>📍 Locatie actief</span>';
+        locationBtn.classList.add('active');
+      }
+    }
+  }
+}
+
+// Filter saving/loading functions
+function saveCurrentFilters() {
+  const filterName = prompt('Geef een naam voor deze filter configuratie:');
+  if (!filterName) return;
+  
+  const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
+  savedFilters[filterName] = {
+    ...filterState,
+    timestamp: new Date().toISOString()
+  };
+  
+  localStorage.setItem('hbm_saved_filters', JSON.stringify(savedFilters));
+  updateSavedFiltersDropdown();
+  alert(`Filter "${filterName}" opgeslagen!`);
+}
+
+function loadSavedFilter(filterName) {
+  const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
+  if (!savedFilters[filterName]) return;
+  
+  const savedFilter = savedFilters[filterName];
+  
+  // Load filter state
+  filterState = { ...savedFilter };
+  delete filterState.timestamp;
+  
+  // Update UI
+  document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
+    cb.checked = filterState.checkedTypes.includes(cb.value);
+  });
+  
+  // Clear all other checkboxes first
+  const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector'];
+  filterSections.forEach(section => {
+    document.querySelectorAll(`input[name="${section}"]`).forEach(cb => {
+      cb.checked = false;
+    });
+  });
+  
+  // Set saved filter checkboxes
+  Object.keys(filterState.checkedFilters).forEach(section => {
+    filterState.checkedFilters[section].forEach(value => {
+      const checkbox = document.querySelector(`input[name="${section}"][value="${value}"]`);
+      if (checkbox) {
+        checkbox.checked = true;
+      }
+    });
+  });
+  
+  // Load location if saved
+  if (filterState.userLocation) {
+    currentFilter.userLocation = filterState.userLocation;
+    currentFilter.radius = filterState.radius * 1000;
+    
+    if (map) {
+      map.setView([filterState.userLocation.lat, filterState.userLocation.lng], 12);
+      
+      if (userLocationCircle) {
+        map.removeLayer(userLocationCircle);
+      }
+      
+      userLocationCircle = L.circle([filterState.userLocation.lat, filterState.userLocation.lng], {
+        color: '#3388ff',
+        fillColor: '#3388ff',
+        fillOpacity: 0.2,
+        radius: filterState.radius * 1000
+      }).addTo(map);
+    }
+  }
+  
+  updateFilterState();
+  alert(`Filter "${filterName}" geladen!`);
+}
+
+function deleteSavedFilter() {
+  const select = document.getElementById('savedFiltersSelect');
+  const filterName = select.value;
+  if (!filterName) return;
+  
+  if (!confirm(`Weet je zeker dat je filter "${filterName}" wilt verwijderen?`)) return;
+  
+  const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
+  delete savedFilters[filterName];
+  localStorage.setItem('hbm_saved_filters', JSON.stringify(savedFilters));
+  
+  updateSavedFiltersDropdown();
+  alert(`Filter "${filterName}" verwijderd!`);
+}
+
+function updateSavedFiltersDropdown() {
+  const select = document.getElementById('savedFiltersSelect');
+  if (!select) return;
+  
+  const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
+  
+  select.innerHTML = '<option value="">Selecteer opgeslagen filter...</option>';
+  
+  Object.keys(savedFilters).forEach(filterName => {
+    const option = document.createElement('option');
+    option.value = filterName;
+    option.textContent = filterName;
+    select.appendChild(option);
+  });
+}
+
+// Share functionality
+function shareCurrentFilters() {
+  const url = window.location.href;
+  
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(url).then(() => {
+      alert('URL gekopieerd naar klembord!');
+    }).catch(() => {
+      fallbackCopyToClipboard(url);
+    });
+  } else {
+    fallbackCopyToClipboard(url);
+  }
+}
+
+function fallbackCopyToClipboard(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-999999px';
+  textArea.style.top = '-999999px';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  
+  try {
+    document.execCommand('copy');
+    alert('URL gekopieerd naar klembord!');
+  } catch (err) {
+    alert('Kon URL niet kopiëren. URL: ' + text);
+  }
+  
+  document.body.removeChild(textArea);
 }
 
 // Export for global access

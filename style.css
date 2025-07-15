@@ -568,10 +568,10 @@ button {
   gap: 0.5rem;
 }
 
-#filterBtn svg {
+.filter-icon {
   width: 16px;
   height: 16px;
-  stroke: white;
+  filter: invert(1);
 }
 
 #filterBtn:hover {
