@@ -1246,11 +1246,11 @@ button {
 }
 
 .nav-icon-left {
-  transform: rotate(90deg);
+  transform: rotate(180deg);
 }
 
 .nav-icon-right {
-  transform: rotate(-90deg);
+  transform: rotate(0deg);
 }
 
 .nav-counter {
@@ -1405,6 +1405,32 @@ button {
   display: block;
 }
 
+/* === Default Markers === */
+.default-marker {
+  background: transparent !important;
+  border: none !important;
+}
+
+.default-marker-container {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  border: 3px solid;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.default-marker-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
 /* === Photo Markers === */
 .photo-marker {
   background: transparent !important;
@@ -1545,11 +1571,11 @@ button {
 }
 
 .popup-content .nav-icon-left {
-  transform: rotate(90deg);
+  transform: rotate(180deg);
 }
 
 .popup-content .nav-icon-right {
-  transform: rotate(-90deg);
+  transform: rotate(0deg);
 }
 
 .popup-content .nav-counter {

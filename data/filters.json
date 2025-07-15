@@ -1,0 +1,36 @@
+
+{
+  "ProjectType": [
+    "Circulair",
+    "Frisse Scholen",
+    "Nieuwbouw",
+    "Renovatie"
+  ],
+  "OrganizationType": [
+    "Aannemer",
+    "Architect",
+    "Installatiebedrijf",
+    "Onderzoeksinstituut"
+  ],
+  "OrganizationField": [
+    "Architectuur",
+    "Bouwservices",
+    "Modulair",
+    "Zonne-energie"
+  ],
+  "HBMTopic": [
+    "Akoestiek",
+    "Binnenluchtkwaliteit",
+    "Licht"
+  ],
+  "HBMCharacteristics": [
+    "Biobased materialen",
+    "Circulair",
+    "Passiefhuis"
+  ],
+  "HBMSector": [
+    "Onderwijs",
+    "Wonen",
+    "Zorg"
+  ]
+}

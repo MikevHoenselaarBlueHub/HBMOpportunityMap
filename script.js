@@ -708,10 +708,24 @@ function createMarkers(data) {
           icon: customIcon
         });
       } else {
-        // Use default SVG icon
-        const icon = item.HBMType === 'Project' ? pIcon : bIcon;
+        // Create white circle marker with icon
+        const iconUrl = item.HBMType === 'Project' ? 'icons/marker-project.svg' : 'icons/marker-company.svg';
+        const borderColor = item.HBMType === 'Project' ? 'rgb(255, 107, 53)' : 'rgb(33, 150, 243)';
+        
+        const customIcon = L.divIcon({
+          className: 'default-marker',
+          html: `
+            <div class="default-marker-container" style="border-color: ${borderColor};">
+              <img src="${iconUrl}" alt="${item.Name}" class="default-marker-icon">
+            </div>
+          `,
+          iconSize: [50, 50],
+          iconAnchor: [25, 25],
+          popupAnchor: [0, -25]
+        });
+        
         marker = L.marker([item.Latitude, item.Longitude], {
-          icon: icon
+          icon: customIcon
         });
       }
 
@@ -1117,8 +1131,41 @@ function initializeTabs() {
   });
 }
 
-function populateFilters(data) {
-  // Get unique values for each filter
+async function populateFilters(data) {
+  try {
+    // Load filter options from filters.json
+    const response = await fetch(`data/filters.json?nocache=${Date.now()}&v=${APP_VERSION}`);
+    const filterOptions = await response.json();
+    
+    // Get municipalities from data
+    const municipalities = [...new Set(data.map(item => item.Municipality).filter(Boolean))].sort();
+
+    console.log('Filter data:', {
+      ...filterOptions,
+      municipalities
+    });
+
+    // Populate filter sections
+    populateFilterSection('ProjectType', filterOptions.ProjectType);
+    populateFilterSection('OrganizationType', filterOptions.OrganizationType);
+    populateFilterSection('OrganizationField', filterOptions.OrganizationField);
+    populateFilterSection('HBMTopic', filterOptions.HBMTopic);
+    populateFilterSection('HBMCharacteristics', filterOptions.HBMCharacteristics);
+    populateFilterSection('HBMSector', filterOptions.HBMSector);
+    populateFilterSection('Municipality', municipalities);
+
+    // Add municipality selection buttons
+    addMunicipalitySelectionButtons(data);
+    
+  } catch (error) {
+    console.error('Error loading filters:', error);
+    // Fallback to generating from data
+    populateFiltersFromData(data);
+  }
+}
+
+function populateFiltersFromData(data) {
+  // Get unique values for each filter as fallback
   const projectTypes = [...new Set(data.flatMap(item => 
     Array.isArray(item.ProjectType) ? item.ProjectType : [item.ProjectType]
   ).filter(Boolean))].sort();
@@ -1144,16 +1191,6 @@ function populateFilters(data) {
   ).filter(Boolean))].sort();
   
   const municipalities = [...new Set(data.map(item => item.Municipality).filter(Boolean))].sort();
-
-  console.log('Filter data:', {
-    projectTypes,
-    organizations,
-    organizationFields,
-    topics,
-    characteristics,
-    sectors,
-    municipalities
-  });
 
   // Populate filter sections
   populateFilterSection('ProjectType', projectTypes);
@@ -1567,21 +1604,26 @@ function navigatePopup(currentItemName, direction) {
   
   const newItem = currentData[newIndex];
   if (newItem && newItem.Latitude && newItem.Longitude) {
-    // Close current popup and open new one
+    // Close current popup
     map.closePopup();
     
-    // Find the marker for the new item
+    // Find the marker for the new item in the current visible markers
+    let targetMarker = null;
     markers.eachLayer(function(marker) {
       if (marker.itemData && marker.itemData.Name === newItem.Name) {
-        // Center map on new marker
-        map.setView([newItem.Latitude, newItem.Longitude], map.getZoom());
-        
-        // Open popup for new marker
-        setTimeout(() => {
-          marker.openPopup();
-        }, 100);
+        targetMarker = marker;
       }
     });
+    
+    if (targetMarker) {
+      // Center map on new marker
+      map.setView([newItem.Latitude, newItem.Longitude], map.getZoom());
+      
+      // Open popup for new marker
+      setTimeout(() => {
+        targetMarker.openPopup();
+      }, 100);
+    }
   }
 }
 
