@@ -1,0 +1,210 @@
+
+{
+  "municipalities": [
+    {
+      "name": "Aken",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Beek",
+      "country": "Netherlands", 
+      "code": "NL"
+    },
+    {
+      "name": "Beesel",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Bergen",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Brüggen",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Echt-Susteren",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Eijsden-Margraten",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Gangelt",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Geilenkirchen",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Gennep",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Gulpen-Wittem",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Heerlen",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Heinsberg",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Herzogenrath",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Höngen",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Horst aan de Maas",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Kerkrade",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Kranenburg",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Landgraaf",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Leudal",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Maastricht",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Meerssen",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Mönchengladbach",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Mook en Middelaar",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Nederweert",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Peel en Maas",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Roermond",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Selfkant",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Simpelveld",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Sittard-Geleen",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Stein",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Übach-Palenberg",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Vaals",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Valkenburg aan de Geul",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Venlo",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Venray",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Voerendaal",
+      "country": "Netherlands",
+      "code": "NL"
+    },
+    {
+      "name": "Waldfeucht",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Wassenberg",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Wegberg",
+      "country": "Germany",
+      "code": "DE"
+    },
+    {
+      "name": "Weert",
+      "country": "Netherlands",
+      "code": "NL"
+    }
+  ]
+}

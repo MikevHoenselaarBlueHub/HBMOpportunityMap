@@ -1658,6 +1658,70 @@ border-radius: 4px;
   text-align: center;
 }
 
+/* Last filter notification */
+.last-filter-notification {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: rgb(38, 123, 41);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  margin-top: 0.5rem;
+  min-width: 280px;
+  animation: slideIn 0.3s ease-out;
+}
+
+.last-filter-notification a {
+  color: white;
+  text-decoration: underline;
+  font-weight: bold;
+  margin-left: 0.25rem;
+}
+
+.last-filter-notification a:hover {
+  text-decoration: none;
+}
+
+.close-notification {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-notification:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.map-controls-row {
+  position: relative;
+}
+
 /* === Municipality popup styling === */
 .municipality-popup {
   padding: 15px;

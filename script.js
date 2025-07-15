@@ -32,6 +32,9 @@ const isOverPage = window.location.pathname.includes('over.html');
 
 // Only initialize map on the main page
 if (isMapPage && !isInfoPage && !isOverPage) {
+  // Check if user returned to map page and show notification
+  checkForReturnToMapPage();
+
   // Function to initialize everything when Leaflet is ready
   async function initializeApp() {
     if (typeof L !== 'undefined') {
@@ -1239,11 +1242,13 @@ function initializeTabs() {
 async function populateFilters(data) {
   try {
     // Load filter options from filters.json
-    const response = await fetch(`data/filters.json?nocache=${Date.now()}&v=${APP_VERSION}`);
-    const filterOptions = await response.json();
+    const filtersResponse = await fetch(`data/filters.json?nocache=${Date.now()}&v=${APP_VERSION}`);
+    const filterOptions = await filtersResponse.json();
 
-    // Get municipalities from data
-    const municipalities = [...new Set(data.map(item => item.Municipality).filter(Boolean))].sort();
+    // Load municipalities from municipalities.json
+    const municipalitiesResponse = await fetch(`data/municipalities.json?nocache=${Date.now()}&v=${APP_VERSION}`);
+    const municipalitiesData = await municipalitiesResponse.json();
+    const municipalities = municipalitiesData.municipalities.map(m => m.name).sort();
 
     console.log('Filter data:', {
       ...filterOptions,
@@ -1259,8 +1264,8 @@ async function populateFilters(data) {
     populateFilterSection('HBMSector', filterOptions.HBMSector);
     populateFilterSection('Municipality', municipalities);
 
-    // Add municipality selection buttons
-    addMunicipalitySelectionButtons(data);
+    // Add municipality selection buttons with config data
+    addMunicipalitySelectionButtons(municipalitiesData.municipalities);
 
     // Return promise to indicate completion
     return Promise.resolve();
@@ -1999,7 +2004,7 @@ function updateFilterState() {
   applyFilters();
 }
 
-function addMunicipalitySelectionButtons(data) {
+function addMunicipalitySelectionButtons(municipalitiesConfig) {
   const municipalitySection = document.getElementById('Municipality');
   if (!municipalitySection) return;
 
@@ -2015,9 +2020,9 @@ function addMunicipalitySelectionButtons(data) {
 
   municipalitySection.insertBefore(buttonContainer, municipalitySection.firstChild);
 
-  // Get municipalities by country
-  const nlMunicipalities = [...new Set(data.filter(item => item.Country === 'Netherlands').map(item => item.Municipality))];
-  const deMunicipalities = [...new Set(data.filter(item => item.Country === 'Germany').map(item => item.Municipality))];
+  // Get municipalities by country from config
+  const nlMunicipalities = municipalitiesConfig.filter(m => m.code === 'NL').map(m => m.name);
+  const deMunicipalities = municipalitiesConfig.filter(m => m.code === 'DE').map(m => m.name);
 
   // Add event listeners
   document.getElementById('selectNLMunicipalities').addEventListener('click', () => {
@@ -2734,6 +2739,141 @@ function getFilteredData() {
       return true;
     });
   }
+
+// Check if user returned to map page and show notification
+function checkForReturnToMapPage() {
+  // Check if there's a stored filter state and user came from another page
+  const lastFilterState = localStorage.getItem('hbm_last_filter_state');
+  const lastPageVisit = localStorage.getItem('hbm_last_page_visit');
+  const currentTime = Date.now();
+  
+  // Only show notification if:
+  // 1. There's a stored filter state
+  // 2. User visited another page recently (within 30 minutes)
+  // 3. Current URL doesn't already have filters
+  if (lastFilterState && lastPageVisit && 
+      (currentTime - parseInt(lastPageVisit) < 30 * 60 * 1000) && 
+      !window.location.search) {
+    
+    // Show notification after a brief delay
+    setTimeout(() => {
+      showLastFilterNotification();
+    }, 1000);
+  }
+}
+
+function showLastFilterNotification() {
+  const notification = document.getElementById('lastFilterNotification');
+  const useLastFilterLink = document.getElementById('useLastFilterLink');
+  const closeNotification = document.getElementById('closeNotification');
+  
+  if (notification) {
+    notification.style.display = 'block';
+    
+    // Handle "Ja" click
+    useLastFilterLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      loadLastFilterState();
+      hideLastFilterNotification();
+    });
+    
+    // Handle close button
+    closeNotification.addEventListener('click', function() {
+      hideLastFilterNotification();
+    });
+    
+    // Auto-hide after 10 seconds
+    setTimeout(() => {
+      hideLastFilterNotification();
+    }, 10000);
+  }
+}
+
+function hideLastFilterNotification() {
+  const notification = document.getElementById('lastFilterNotification');
+  if (notification) {
+    notification.style.display = 'none';
+  }
+}
+
+function loadLastFilterState() {
+  const lastFilterState = localStorage.getItem('hbm_last_filter_state');
+  if (lastFilterState) {
+    try {
+      const savedState = JSON.parse(lastFilterState);
+      
+      // Load the saved state
+      filterState = { ...savedState };
+      
+      // Ensure checkedFilters exists
+      if (!filterState.checkedFilters) {
+        filterState.checkedFilters = {};
+      }
+      
+      // Ensure checkedTypes exists and has default values
+      if (!filterState.checkedTypes) {
+        filterState.checkedTypes = ['Project', 'Bedrijf'];
+      }
+      
+      // Update current filter for URL
+      currentFilter = {
+        ...currentFilter,
+        checkedTypes: filterState.checkedTypes,
+        checkedFilters: filterState.checkedFilters,
+        searchTerm: filterState.searchTerm || ''
+      };
+      
+      // Update UI after filters are loaded
+      setTimeout(() => {
+        updateCheckboxesFromFilterState();
+        
+        // Update search input
+        if (filterState.searchTerm) {
+          const searchInput = document.getElementById('mapSearch');
+          if (searchInput) {
+            searchInput.value = filterState.searchTerm;
+          }
+        }
+        
+        // Update URL and apply filters
+        updateURL();
+        applyFilters();
+      }, 500);
+      
+    } catch (error) {
+      console.error('Error loading last filter state:', error);
+    }
+  }
+}
+
+// Store filter state when leaving map page
+function storeCurrentFilterState() {
+  if (isMapPage && !isInfoPage && !isOverPage) {
+    // Update filter state with current search term
+    const searchInput = document.getElementById('mapSearch');
+    if (searchInput) {
+      filterState.searchTerm = searchInput.value.trim();
+    }
+    
+    // Only store if there are actual filters applied
+    if (filterState.checkedFilters && Object.keys(filterState.checkedFilters).length > 0 || 
+        filterState.searchTerm || 
+        (filterState.checkedTypes && filterState.checkedTypes.length < 2)) {
+      localStorage.setItem('hbm_last_filter_state', JSON.stringify(filterState));
+    }
+  }
+}
+
+// Store page visit time when leaving map page
+function storePageVisit() {
+  if (!isMapPage || isInfoPage || isOverPage) {
+    localStorage.setItem('hbm_last_page_visit', Date.now().toString());
+  }
+}
+
+// Add event listeners for page navigation
+window.addEventListener('beforeunload', storeCurrentFilterState);
+document.addEventListener('DOMContentLoaded', storePageVisit);
 
 // Export for global access
 window.getCurrentLocation = getCurrentLocation;
