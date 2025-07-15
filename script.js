@@ -1858,8 +1858,8 @@ function getCurrentFilteredData() {
   const checkedProjectTypes = Array.from(document.querySelectorAll('input[name="ProjectType"]:checked')).map(cb => cb.value);
   const checkedOrganizationTypes = Array.from(document.querySelectorAll('input[name="OrganizationType"]:checked')).map(cb => cb.value);
   const checkedOrganizationFields = Array.from(document.querySelectorAll('input[name="OrganizationField"]:checked')).map(cb => cb.value);
-```tool_code
-const checkedHBMTopics = Array.from(document.querySelectorAll('input[name="HBMTopic"]:checked')).map(cb => cb.value);
+  ```tool_code
+  const checkedHBMTopics = Array.from(document.querySelectorAll('input[name="HBMTopic"]:checked')).map(cb => cb.value);
   const checkedHBMCharacteristics = Array.from(document.querySelectorAll('input[name="HBMCharacteristics"]:checked')).map(cb => cb.value);
   const checkedHBMSectors = Array.from(document.querySelectorAll('input[name="HBMSector"]:checked')).map(cb => cb.value);
   const checkedMunicipalities = Array.from(document.querySelectorAll('input[name="Municipality"]:checked')).map(cb => cb.value);
@@ -2602,13 +2602,13 @@ function getFilteredData() {
     const checkedHBMCharacteristics = Array.from(document.querySelectorAll('input[name="HBMCharacteristics"]:checked')).map(cb => cb.value);
     const checkedHBMSectors = Array.from(document.querySelectorAll('input[name="HBMSector"]:checked')).map(cb => cb.value);
     const checkedMunicipalities = Array.from(document.querySelectorAll('input[name="Municipality"]:checked')).map(cb => cb.value);
-  
+
     return window.data.filter(item => {
       // Type filter (Project/Bedrijf checkboxes)
       if (checkedTypes.length > 0 && !checkedTypes.includes(item.HBMType)) {
         return false;
       }
-  
+
       // ProjectType filter
       if (checkedProjectTypes.length > 0) {
         const itemProjectTypes = Array.isArray(item.ProjectType) ? item.ProjectType : [item.ProjectType].filter(Boolean);
@@ -2616,7 +2616,7 @@ function getFilteredData() {
           return false;
         }
       }
-  
+
       // OrganizationType filter
       if (checkedOrganizationTypes.length > 0) {
         const itemOrganizationTypes = Array.isArray(item.OrganizationType) ? item.OrganizationType : [item.OrganizationType].filter(Boolean);
@@ -2624,7 +2624,7 @@ function getFilteredData() {
           return false;
         }
       }
-  
+
       // OrganizationField filter
       if (checkedOrganizationFields.length > 0) {
         const itemFields = Array.isArray(item.OrganizationField) ? item.OrganizationField : [item.OrganizationField].filter(Boolean);
@@ -2632,7 +2632,7 @@ function getFilteredData() {
           return false;
         }
       }
-  
+
       // HBMTopic filter - use filterState if form values are empty
       const activeHBMTopics = checkedHBMTopics.length > 0 ? checkedHBMTopics : (filterState.checkedFilters['HBMTopic'] || []);
       if (activeHBMTopics.length > 0) {
@@ -2641,7 +2641,7 @@ function getFilteredData() {
           return false;
         }
       }
-  
+
       // HBMCharacteristics filter - use filterState if form values are empty
       const activeHBMCharacteristics = checkedHBMCharacteristics.length > 0 ? checkedHBMCharacteristics : (filterState.checkedFilters['HBMCharacteristics'] || []);
       if (activeHBMCharacteristics.length > 0) {
@@ -2650,7 +2650,7 @@ function getFilteredData() {
           return false;
         }
       }
-  
+
       // HBMSector filter - use filterState if form values are empty
       const activeHBMSectors = checkedHBMSectors.length > 0 ? checkedHBMSectors : (filterState.checkedFilters['HBMSector'] || []);
       if (activeHBMSectors.length > 0) {
@@ -2659,13 +2659,13 @@ function getFilteredData() {
           return false;
         }
       }
-  
+
       // Municipality filter - use filterState if form values are empty
       const activeMunicipalities = checkedMunicipalities.length > 0 ? checkedMunicipalities : (filterState.checkedFilters['Municipality'] || []);
       if (activeMunicipalities.length > 0 && !activeMunicipalities.includes(item.Municipality)) {
         return false;
       }
-  
+
       // Search filter
       if (currentFilter.searchTerm) {
         const searchLower = currentFilter.searchTerm.toLowerCase();
@@ -2675,7 +2675,7 @@ function getFilteredData() {
           return false;
         }
       }
-  
+
       // Location filter (if user location is set)
       if (currentFilter.userLocation && currentFilter.radius) {
         const distance = calculateDistance(
@@ -2686,7 +2686,7 @@ function getFilteredData() {
         );
         if (distance > currentFilter.radius) return false;
       }
-  
+
       return true;
     });
   }
@@ -2717,5 +2717,177 @@ function updateCheckboxesFromFilterState() {
     document.querySelectorAll(`input[name="${section}"]`).forEach(cb => {
       cb.checked = filterState.checkedFilters[section]?.includes(cb.value) || false;
     });
+  });
+}
+
+function loadSavedFilters() {
+  const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
+  if (Object.keys(savedFilters).length === 0) {
+    alert('Geen opgeslagen filters gevonden.');
+    return;
+  }
+
+  // Create popup HTML
+  const popupHTML = `
+    <div class="saved-filters-popup">
+      <div class="saved-filters-popup-content">
+        <div class="saved-filters-header">
+          <h3>Opgeslagen Filters</h3>
+          <button class="close-popup-btn" onclick="closeSavedFiltersPopup()">
+            <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
+          </button>
+        </div>
+        <div class="saved-filters-list">
+          ${Object.entries(savedFilters).map(([name, filter]) => `
+            <div class="saved-filter-item">
+              <div class="saved-filter-info">
+                <div class="saved-filter-name">${name}</div>
+                <div class="saved-filter-date">${new Date(filter.timestamp).toLocaleDateString('nl-NL')}</div>
+              </div>
+              <div class="saved-filter-actions">
+                <button class="load-filter-btn" onclick="loadSavedFilter('${name}'); closeSavedFiltersPopup();">Laden</button>
+                <button class="delete-filter-btn" onclick="deleteSavedFilterFromPopup('${name}');">Verwijderen</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Add popup to body
+  document.body.insertAdjacentHTML('beforeend', popupHTML);
+
+  // Close dropdown
+  const filterDropdown = document.querySelector('.filter-dropdown');
+  if (filterDropdown) {
+    filterDropdown.classList.remove('open');
+  }
+}
+
+function closeSavedFiltersPopup() {
+  const popup = document.querySelector('.saved-filters-popup');
+  if (popup) {
+    popup.remove();
+  }
+}
+
+function deleteSavedFilterFromPopup(filterName) {
+  if (!confirm(`Weet je zeker dat je filter "${filterName}" wilt verwijderen?`)) return;
+
+  const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
+  delete savedFilters[filterName];
+  localStorage.setItem('hbm_saved_filters', JSON.stringify(savedFilters));
+
+  // Refresh popup content
+  closeSavedFiltersPopup();
+  loadSavedFilters();
+
+  // Update dropdown
+  updateSavedFiltersDropdown();
+
+  alert(`Filter "${filterName}" verwijderd!`);
+}
+
+function getCurrentFilteredData() {
+  if (!window.data || !Array.isArray(window.data)) {
+    return [];
+  }
+
+  // Get filter values from form
+  const checkedTypes = Array.from(document.querySelectorAll('input[name="HBMType"]:checked')).map(cb => cb.value);
+  const checkedProjectTypes = Array.from(document.querySelectorAll('input[name="ProjectType"]:checked')).map(cb => cb.value);
+  const checkedOrganizationTypes = Array.from(document.querySelectorAll('input[name="OrganizationType"]:checked')).map(cb => cb.value);
+  const checkedOrganizationFields = Array.from(document.querySelectorAll('input[name="OrganizationField"]:checked')).map(cb => cb.value);
+  const checkedHBMTopics = Array.from(document.querySelectorAll('input[name="HBMTopic"]:checked')).map(cb => cb.value);
+  const checkedHBMCharacteristics = Array.from(document.querySelectorAll('input[name="HBMCharacteristics"]:checked')).map(cb => cb.value);
+  const checkedHBMSectors = Array.from(document.querySelectorAll('input[name="HBMSector"]:checked')).map(cb => cb.value);
+  const checkedMunicipalities = Array.from(document.querySelectorAll('input[name="Municipality"]:checked')).map(cb => cb.value);
+
+  return window.data.filter(item => {
+    // Type filter (Project/Bedrijf checkboxes)
+    if (checkedTypes.length > 0 && !checkedTypes.includes(item.HBMType)) {
+      return false;
+    }
+
+    // ProjectType filter
+    if (checkedProjectTypes.length > 0) {
+      const itemProjectTypes = Array.isArray(item.ProjectType) ? item.ProjectType : [item.ProjectType].filter(Boolean);
+      if (!checkedProjectTypes.some(type => itemProjectTypes.includes(type))) {
+        return false;
+      }
+    }
+
+    // OrganizationType filter
+    if (checkedOrganizationTypes.length > 0) {
+      const itemOrganizationTypes = Array.isArray(item.OrganizationType) ? item.OrganizationType : [item.OrganizationType].filter(Boolean);
+      if (!checkedOrganizationTypes.some(type => itemOrganizationTypes.includes(type))) {
+        return false;
+      }
+    }
+
+    // OrganizationField filter
+    if (checkedOrganizationFields.length > 0) {
+      const itemFields = Array.isArray(item.OrganizationField) ? item.OrganizationField : [item.OrganizationField].filter(Boolean);
+      if (!checkedOrganizationFields.some(field => itemFields.includes(field))) {
+        return false;
+      }
+    }
+
+    // HBMTopic filter - use filterState if form values are empty
+    const activeHBMTopics = checkedHBMTopics.length > 0 ? checkedHBMTopics : (filterState.checkedFilters['HBMTopic'] || []);
+    if (activeHBMTopics.length > 0) {
+      const itemTopics = Array.isArray(item.HBMTopic) ? item.HBMTopic : [item.HBMTopic].filter(Boolean);
+      if (!activeHBMTopics.some(topic => itemTopics.includes(topic))) {
+        return false;
+      }
+    }
+
+    // HBMCharacteristics filter - use filterState if form values are empty
+    const activeHBMCharacteristics = checkedHBMCharacteristics.length > 0 ? checkedHBMCharacteristics : (filterState.checkedFilters['HBMCharacteristics'] || []);
+    if (activeHBMCharacteristics.length > 0) {
+      const itemCharacteristics = Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics : [item.HBMCharacteristics].filter(Boolean);
+      if (!activeHBMCharacteristics.some(characteristic => itemCharacteristics.includes(characteristic))) {
+        return false;
+      }
+    }
+
+    // HBMSector filter - use filterState if form values are empty
+    const activeHBMSectors = checkedHBMSectors.length > 0 ? checkedHBMSectors : (filterState.checkedFilters['HBMSector'] || []);
+    if (activeHBMSectors.length > 0) {
+      const itemSectors = Array.isArray(item.HBMSector) ? item.HBMSector : [item.HBMSector].filter(Boolean);
+      if (!activeHBMSectors.some(sector => itemSectors.includes(sector))) {
+        return false;
+      }
+    }
+
+    // Municipality filter - use filterState if form values are empty
+    const activeMunicipalities = checkedMunicipalities.length > 0 ? checkedMunicipalities : (filterState.checkedFilters['Municipality'] || []);
+    if (activeMunicipalities.length > 0 && !activeMunicipalities.includes(item.Municipality)) {
+      return false;
+    }
+
+    // Search filter
+    if (currentFilter.searchTerm) {
+      const searchLower = currentFilter.searchTerm.toLowerCase();
+      const nameMatch = item.Name && item.Name.toLowerCase().includes(searchLower);
+      const descMatch = item.Description && item.Description.toLowerCase().includes(searchLower);
+      if (!nameMatch && !descMatch) {
+        return false;
+      }
+    }
+
+    // Location filter (if user location is set)
+    if (currentFilter.userLocation && currentFilter.radius) {
+      const distance = calculateDistance(
+        currentFilter.userLocation.lat,
+        currentFilter.userLocation.lng,
+        item.Latitude,
+        item.Longitude
+      );
+      if (distance > currentFilter.radius) return false;
+    }
+
+    return true;
   });
 }
