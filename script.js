@@ -1,5 +1,4 @@
-// Import version configuration
-import { APP_VERSION, getCacheBustParam, cleanupLocalStorage, shouldRunCleanup } from './config/version.js';
+// Version configuration will be loaded via script tag
 
 // Global variables
 let map;

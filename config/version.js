@@ -89,8 +89,23 @@ export function cleanupLocalStorage() {
   localStorage.setItem('hbm_last_cleanup', now.toString());
   
   if (cleanupCount > 0) {
-    console.log(`Cleaned up ${cleanupCount} old filters from localStorage`);
-  }
+    // Version configuration
+const APP_VERSION = '1.0.0';
+
+function getCacheBustParam() {
+  return `?v=${APP_VERSION}`;
+}
+
+function cleanupLocalStorage() {
+  // Implementation for cleanup
+  console.log('Cleaning up localStorage...');
+}
+
+function shouldRunCleanup() {
+  return true;
+}
+
+console.log(`Version ${APP_VERSION} loaded successfully`);
 }
 
 // Check if cleanup is needed
