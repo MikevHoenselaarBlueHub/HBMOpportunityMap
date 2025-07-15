@@ -951,6 +951,11 @@ function applyFilters() {
   createMarkers(filteredData);
   updateListView(filteredData);
   updateResultCount(filteredData.length);
+  
+  // Synchronize tab based on current filter types
+  if (filterState.checkedTypes && filterState.checkedTypes.length === 1) {
+    synchronizeTabWithTypes(filterState.checkedTypes);
+  }
 }
 
 // Calculate distance between two coordinates using Haversine formula
@@ -2040,6 +2045,15 @@ function loadFromURL() {
     document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
       cb.checked = types.includes(cb.value);
     });
+
+    // Synchronize tab selection based on types
+    synchronizeTabWithTypes(types);
+  }
+
+  // Check for specific filter parameters that should activate tabs
+  if (params.has('projecttype')) {
+    // If projecttype is specified, show projects tab
+    activateTab('buildings');
   }
 
   // Load other filters
@@ -2327,6 +2341,41 @@ function fallbackCopyToClipboard(text) {
   document.body.removeChild(textArea);
 }
 
+// Function to synchronize tab with types parameter
+function synchronizeTabWithTypes(types) {
+  if (types.length === 1) {
+    // Only one type selected, switch to appropriate tab
+    if (types.includes('Project')) {
+      activateTab('buildings');
+    } else if (types.includes('Bedrijf')) {
+      activateTab('companies');
+    }
+  }
+}
+
+// Function to activate specific tab
+function activateTab(tabName) {
+  setTimeout(() => {
+    // Remove active class from all tabs
+    const tabButtons = document.querySelectorAll('.list-tab');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    tabPanes.forEach(pane => pane.classList.remove('active'));
+    
+    // Add active class to specified tab
+    const targetButton = document.querySelector(`[data-tab="${tabName}"]`);
+    const targetPane = document.getElementById(tabName + 'Tab');
+    
+    if (targetButton) {
+      targetButton.classList.add('active');
+    }
+    if (targetPane) {
+      targetPane.classList.add('active');
+    }
+  }, 100);
+}
+
 // Export for global access
 window.getCurrentLocation = getCurrentLocation;
 window.showDetails = showDetails;
@@ -2334,3 +2383,5 @@ window.openContactForm = openContactForm;
 window.trackEvent = trackEvent;
 window.updateFilterState = updateFilterState;
 window.toggleAdvancedFilters = toggleAdvancedFilters;
+window.synchronizeTabWithTypes = synchronizeTabWithTypes;
+window.activateTab = activateTab;
