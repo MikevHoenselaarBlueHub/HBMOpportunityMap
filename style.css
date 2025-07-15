@@ -257,7 +257,7 @@ header {
 #desktopNav {
   display: none;
   gap: 1rem;
-  margin-right: 210px;
+  margin-right: 310px;
 }
 
 @media (min-width: 769px) {
