@@ -1194,6 +1194,65 @@ button {
   bottom: 0;
 }
 
+.detail-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 2rem 0;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid rgb(38, 123, 41);
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover:not(.disabled) {
+  background: rgb(38, 123, 41);
+}
+
+.nav-btn:hover:not(.disabled) .nav-icon {
+  filter: invert(1);
+}
+
+.nav-btn.disabled {
+  border-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.nav-icon {
+  width: 16px;
+  height: 16px;
+  transition: filter 0.2s ease;
+}
+
+.nav-icon-left {
+  transform: rotate(90deg);
+}
+
+.nav-icon-right {
+  transform: rotate(-90deg);
+}
+
+.nav-counter {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  min-width: 60px;
+  text-align: center;
+}
+
 .detail-content {
   padding: 3rem 2rem 2rem;
   max-width: 800px;

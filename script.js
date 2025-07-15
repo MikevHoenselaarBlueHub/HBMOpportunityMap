@@ -1076,6 +1076,30 @@ function initializeFilters() {
     });
   }
 
+  // Initialize select all/none buttons
+  const selectAllBtn = document.getElementById('selectAll');
+  const selectNoneBtn = document.getElementById('selectNone');
+  
+  if (selectAllBtn) {
+    selectAllBtn.addEventListener('click', function() {
+      const checkboxes = filterForm.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+      });
+      updateFilterState();
+    });
+  }
+
+  if (selectNoneBtn) {
+    selectNoneBtn.addEventListener('click', function() {
+      const checkboxes = filterForm.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+      });
+      updateFilterState();
+    });
+  }
+
   // Initialize advanced filters toggle
   const advancedFiltersHeader = document.querySelector('.advanced-filters-header');
   if (advancedFiltersHeader) {
@@ -1223,10 +1247,24 @@ function openDetailPanel(item) {
   const detailPanel = document.getElementById('detailPanel');
   if (!detailPanel) return;
 
+  // Find current item index in filtered data
+  const currentData = getCurrentFilteredData();
+  const currentIndex = currentData.findIndex(d => d.Name === item.Name);
+  const totalItems = currentData.length;
+
   detailPanel.innerHTML = `
     <a href="#" id="closeDetail" class="close-btn">
       <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
     </a>
+    <div class="detail-navigation">
+      <button id="prevDetail" class="nav-btn ${currentIndex === 0 ? 'disabled' : ''}" ${currentIndex === 0 ? 'disabled' : ''}>
+        <img src="icons/close.svg" alt="Vorige" class="nav-icon nav-icon-left" />
+      </button>
+      <span class="nav-counter">${currentIndex + 1} / ${totalItems}</span>
+      <button id="nextDetail" class="nav-btn ${currentIndex === totalItems - 1 ? 'disabled' : ''}" ${currentIndex === totalItems - 1 ? 'disabled' : ''}>
+        <img src="icons/close.svg" alt="Volgende" class="nav-icon nav-icon-right" />
+      </button>
+    </div>
     <div class="detail-content">
       <div class="detail-header">
         <h2>${item.Name || 'Onbekend'}</h2>
@@ -1269,6 +1307,66 @@ function openDetailPanel(item) {
       detailPanel.classList.remove('open');
     });
   }
+
+  // Add navigation functionality
+  const prevBtn = detailPanel.querySelector('#prevDetail');
+  const nextBtn = detailPanel.querySelector('#nextDetail');
+
+  if (prevBtn && currentIndex > 0) {
+    prevBtn.addEventListener('click', function() {
+      const prevItem = currentData[currentIndex - 1];
+      if (prevItem) {
+        openDetailPanel(prevItem);
+        // Center map on new item
+        if (prevItem.Latitude && prevItem.Longitude) {
+          map.setView([prevItem.Latitude, prevItem.Longitude], map.getZoom());
+        }
+      }
+    });
+  }
+
+  if (nextBtn && currentIndex < totalItems - 1) {
+    nextBtn.addEventListener('click', function() {
+      const nextItem = currentData[currentIndex + 1];
+      if (nextItem) {
+        openDetailPanel(nextItem);
+        // Center map on new item
+        if (nextItem.Latitude && nextItem.Longitude) {
+          map.setView([nextItem.Latitude, nextItem.Longitude], map.getZoom());
+        }
+      }
+    });
+  }
+}
+
+// Helper function to get current filtered data
+function getCurrentFilteredData() {
+  if (!window.data || !Array.isArray(window.data)) {
+    return [];
+  }
+
+  // Get filter values from form
+  const checkedTypes = Array.from(document.querySelectorAll('input[name="HBMType"]:checked')).map(cb => cb.value);
+  
+  return window.data.filter(item => {
+    // Type filter (Project/Bedrijf checkboxes)
+    if (checkedTypes.length > 0 && !checkedTypes.includes(item.HBMType)) {
+      return false;
+    }
+
+    // Location filter (if user location is set)
+    if (currentFilter.userLocation && currentFilter.radius) {
+      const distance = calculateDistance(
+        currentFilter.userLocation.lat,
+        currentFilter.userLocation.lng,
+        item.Latitude,
+        item.Longitude
+      );
+      if (distance > currentFilter.radius) return false;
+    }
+
+    return true;
+  });
 }
 
 // Add missing functions
