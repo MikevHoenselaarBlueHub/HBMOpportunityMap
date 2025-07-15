@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="nl">
   <head>
-
     <!-- Prevent caching during development -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,7 +27,12 @@
             onerror="this.style.display='none'"
           />
         </a>
-        <a href="https://www.interregeurope.eu/project-results" target="_blank" rel="noopener noreferrer" class="logo-link">
+        <a
+          href="https://www.interregeurope.eu/project-results"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="logo-link"
+        >
           <img
             src="images/Interreg_logo.svg"
             alt="Interreg Logo"
@@ -50,8 +57,20 @@
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
-              <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle
+                cx="11"
+                cy="11"
+                r="8"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+              <path
+                d="m21 21-4.35-4.35"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -80,8 +99,16 @@
 
     <div class="map-controls">
       <div class="map-controls-row">
-        <button id="filterBtn" aria-label="Open filter opties" aria-expanded="false">
-          <img src="icons/filter-setting.svg" alt="Filter" class="filter-icon" />
+        <button
+          id="filterBtn"
+          aria-label="Open filter opties"
+          aria-expanded="false"
+        >
+          <img
+            src="icons/filter-setting.svg"
+            alt="Filter"
+            class="filter-icon"
+          />
           Filters
         </button>
         <div class="filter-dropdown">
@@ -90,9 +117,7 @@
             <button id="exportBtn" class="dropdown-item">
               Exporteer resultaten
             </button>
-            <button id="shareBtn" class="dropdown-item">
-              Deel
-            </button>
+            <button id="shareBtn" class="dropdown-item">Deel</button>
             <button id="saveCurrentFiltersBtn" class="dropdown-item">
               Huidige filter opslaan
             </button>
@@ -104,8 +129,15 @@
             </button>
           </div>
         </div>
-        <div id="lastFilterNotification" class="last-filter-notification" style="display: none;">
-          <span>Laatstgekozen filter gebruiken? <a href="#" id="useLastFilterLink">Ja</a></span>
+        <div
+          id="lastFilterNotification"
+          class="last-filter-notification"
+          style="display: none"
+        >
+          <span
+            >Laatstgekozen filter gebruiken?
+            <a href="#" id="useLastFilterLink">Ja</a></span
+          >
           <button id="closeNotification" class="close-notification">×</button>
         </div>
       </div>
@@ -148,37 +180,81 @@
           <div id="HBMSector"></div>
         </div>
 
-
         <!-- Advanced Filters -->
         <div class="advanced-filters" id="advancedFilters">
-          <strong>Type:</strong>
-          <div>
-            <label><input type="checkbox" name="HBMType" value="Project" checked="" onchange="updateFilterState()">
-              <span data-i18n="projects">Projecten</span></label>
-            <label><input type="checkbox" name="HBMType" value="Bedrijf" checked="" onchange="updateFilterState()">
-              <span data-i18n="companies">Bedrijven</span></label>
-          </div>
-
-          <strong>Project Type:</strong>
-          <div id="ProjectType">
-            <!-- Project type options will be populated here -->
-          </div>
-          <div class="advanced-filters-header" onclick="toggleAdvancedFilters()">
+          <div
+            class="advanced-filters-header"
+            onclick="toggleAdvancedFilters()"
+          >
             <a href="#" data-i18n="advancedFilters">Geavanceerde filters</a>
           </div>
           <div class="advanced-filters-content">
             <div class="filter-group">
+              <strong>Welke objecten wil je tonen:</strong>
+              <div>
+                <label
+                  ><input
+                    type="checkbox"
+                    name="HBMType"
+                    value="Project"
+                    checked=""
+                    onchange="updateFilterState()"
+                  />
+                  <span data-i18n="projects">Projecten</span></label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="HBMType"
+                    value="Bedrijf"
+                    checked=""
+                    onchange="updateFilterState()"
+                  />
+                  <span data-i18n="companies">Bedrijven</span></label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    name="HBMType"
+                    value="Expert"
+                    checked=""
+                    onchange="updateFilterState()"
+                  />
+                  <span data-i18n="experts">Expert</span></label
+                >
+              </div>
+            </div>
+            <div class="filter-group">
               <strong data-i18n="locationFilter">Locatie Filter</strong>
               <div class="location-filter-controls">
                 <button type="button" id="useMyLocation" class="location-btn">
-                  <span data-i18n="useMyLocation">📍 Mijn locatie gebruiken</span>
+                  <span data-i18n="useMyLocation"
+                    >📍 Mijn locatie gebruiken</span
+                  >
                 </button>
-                <button type="button" id="clearLocation" class="location-btn clear-location-btn" style="display: none;">
+                <button
+                  type="button"
+                  id="clearLocation"
+                  class="location-btn clear-location-btn"
+                  style="display: none"
+                >
                   <span>❌ Locatie wissen</span>
                 </button>
-                <div class="distance-filter" id="distanceFilter" style="display: none;">
-                  <label for="distanceRange" data-i18n="maxDistance">Maximale afstand: </label>
-                  <input type="range" id="distanceRange" min="1" max="100" value="25" />
+                <div
+                  class="distance-filter"
+                  id="distanceFilter"
+                  style="display: none"
+                >
+                  <label for="distanceRange" data-i18n="maxDistance"
+                    >Maximale afstand:
+                  </label>
+                  <input
+                    type="range"
+                    id="distanceRange"
+                    min="1"
+                    max="100"
+                    value="25"
+                  />
                   <span id="distanceValue">25 km</span>
                 </div>
               </div>
@@ -186,7 +262,11 @@
 
             <div class="filter-group">
               <strong data-i18n="textFilter">Tekst Filter</strong>
-              <input type="text" id="advancedTextFilter" placeholder="Zoek in alle velden..." />
+              <input
+                type="text"
+                id="advancedTextFilter"
+                placeholder="Zoek in alle velden..."
+              />
             </div>
 
             <div class="filter-group">
@@ -194,11 +274,15 @@
               <div class="combination-controls">
                 <label>
                   <input type="radio" name="filterMode" value="AND" checked />
-                  <span data-i18n="allFilters">Alle filters moeten voldoen (EN)</span>
+                  <span data-i18n="allFilters"
+                    >Alle filters moeten voldoen (EN)</span
+                  >
                 </label>
                 <label>
                   <input type="radio" name="filterMode" value="OR" />
-                  <span data-i18n="anyFilter">Minstens één filter moet voldoen (OF)</span>
+                  <span data-i18n="anyFilter"
+                    >Minstens één filter moet voldoen (OF)</span
+                  >
                 </label>
               </div>
             </div>
@@ -207,8 +291,6 @@
               <strong data-i18n="municipality">Gemeente</strong>
               <div id="Municipality"></div>
             </div>
-
-
           </div>
         </div>
 
@@ -225,8 +307,12 @@
           <h2>Kansen</h2>
           <span id="resultsCount" class="results-count">0 resultaten</span>
           <div class="list-tabs">
-            <button class="list-tab active" data-tab="buildings">Gezonde gebouwen <span id="buildingsCount">(0)</span></button>
-            <button class="list-tab" data-tab="companies">Bedrijven <span id="companiesCount">(0)</span></button>
+            <button class="list-tab active" data-tab="buildings">
+              Gezonde gebouwen <span id="buildingsCount">(0)</span>
+            </button>
+            <button class="list-tab" data-tab="companies">
+              Bedrijven <span id="companiesCount">(0)</span>
+            </button>
             <button class="list-tab" data-tab="experts">Experts</button>
           </div>
         </div>
@@ -246,10 +332,27 @@
 
           <div id="expertsTab" class="tab-pane">
             <div class="experts-content">
-              <h2>Ben jij expert in bouwen of installeren? Dan zoeken we jou!</h2>
-              <p>Healthy Building Movement (HBM) brengt gezond bouwen naar de praktijk. Ons innovatieve karakter berust op de samenwerking tussen wetenschap en bedrijfsleven.</p>
-              <p>Door middel van bijeenkomsten waar experts uit de praktijk samen komen (expert pools) willen we bestaande kennis uit toegepast wetenschappelijk onderzoek toegankelijk maken voor de praktijk. In deze groepen met deskundigen ontwikkelen en optimaliseren we producten en diensten.</p>
-              <a href="https://healthybuildingmovement.com/expert-pools/" target="_blank" rel="noopener noreferrer" class="btn-primary experts-cta">
+              <h2>
+                Ben jij expert in bouwen of installeren? Dan zoeken we jou!
+              </h2>
+              <p>
+                Healthy Building Movement (HBM) brengt gezond bouwen naar de
+                praktijk. Ons innovatieve karakter berust op de samenwerking
+                tussen wetenschap en bedrijfsleven.
+              </p>
+              <p>
+                Door middel van bijeenkomsten waar experts uit de praktijk samen
+                komen (expert pools) willen we bestaande kennis uit toegepast
+                wetenschappelijk onderzoek toegankelijk maken voor de praktijk.
+                In deze groepen met deskundigen ontwikkelen en optimaliseren we
+                producten en diensten.
+              </p>
+              <a
+                href="https://healthybuildingmovement.com/expert-pools/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-primary experts-cta"
+              >
                 Word expert bij HBM
               </a>
             </div>

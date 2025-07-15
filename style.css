@@ -707,7 +707,6 @@ button {
   margin: 0 auto;
   padding: 2rem;
   flex: 1;
-  overflow-y: auto;
 }
 
 @media (max-width: 768px) {
@@ -868,12 +867,12 @@ button {
   margin-top: 2px;
 }
 
-.checkbox-label input[type="checkbox"]:checked + .checkmark {
+.checkbox-label input[type="checkbox"]:checked+.checkmark {
   background: rgb(38, 123, 41);
   border-color: rgb(38, 123, 41);
 }
 
-.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+.checkbox-label input[type="checkbox"]:checked+.checkmark::after {
   content: '✓';
   position: absolute;
   top: -2px;
@@ -1664,14 +1663,6 @@ button {
   transition: filter 0.2s ease;
 }
 
-.nav-icon-left {
-  transform: rotate(0deg);
-}
-
-.nav-icon-right {
-  transform: rotate(180deg);
-}
-
 .nav-counter {
   font-size: 0.9rem;
   color: #666;
@@ -1999,14 +1990,6 @@ button {
   width: 12px;
   height: 12px;
   transition: filter 0.2s ease;
-}
-
-.popup-content .nav-icon-left {
-  transform: rotate(0deg);
-}
-
-.popup-content .nav-icon-right {
-  transform: rotate(180deg);
 }
 
 .popup-content .nav-counter {
