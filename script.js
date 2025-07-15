@@ -2573,9 +2573,6 @@ function activateTab(tabName) {
     const tabPanes = document.querySelectorAll('.tab-pane');
 
     tabButtons.forEach(btn => btn.classList.remove('active'));
-    tabPanes = document.querySelectorAll(`.tab-pane');
-
-    tabButtons.forEach(btn => btn.classList.remove('active'));
     tabPanes.forEach(pane => pane.classList.remove('active'));
 
     // Add active class to specified tab
