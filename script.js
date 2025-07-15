@@ -951,11 +951,11 @@ function createPopupContent(item) {
   return `
     <div class="popup-content">
       <div class="popup-navigation">
-        <button id="prevPopup" class="nav-btn ${currentIndex === 0 ? 'disabled' : ''}" ${currentIndex === 0 ? 'disabled' : ''} onclick="navigatePopup('${encodeURIComponent(item.Name)}', 'prev')">
+        <button id="prevPopup" class="nav-btn ${currentIndex === 0 ? 'disabled' : ''}" ${currentIndex === 0 ? 'disabled' : ''} onclick="navigateToItem('${encodeURIComponent(item.Name)}', 'prev')">
           <img src="icons/arrow-left.svg" alt="Vorige" class="nav-icon nav-icon-left" />
         </button>
         <span class="nav-counter">${currentIndex + 1} / ${totalItems}</span>
-        <button id="nextPopup" class="nav-btn ${currentIndex === totalItems - 1 ? 'disabled' : ''}" ${currentIndex === totalItems - 1 ? 'disabled' : ''} onclick="navigatePopup('${encodeURIComponent(item.Name)}', 'next')">
+        <button id="nextPopup" class="nav-btn ${currentIndex === totalItems - 1 ? 'disabled' : ''}" ${currentIndex === totalItems - 1 ? 'disabled' : ''} onclick="navigateToItem('${encodeURIComponent(item.Name)}', 'next')">
           <img src="icons/arrow-right.svg" alt="Volgende" class="nav-icon nav-icon-right" />
         </button>
       </div>
@@ -1846,7 +1846,7 @@ function createListItem(item) {
 }
 
 // Popup navigation function
-function navigatePopup(currentItemName, direction) {
+function navigateToItem(currentItemName, direction) {
   const decodedName = decodeURIComponent(currentItemName);
   const currentData = getCurrentFilteredData();
   const currentIndex = currentData.findIndex(d => d.Name === decodedName);
@@ -1895,8 +1895,7 @@ function showDetails(itemName) {
   }
 }
 
-function openContactForm(itemName) {  const decodedName = decodeURIComponent(itemName);
-  const item = window.data.find(d => d.Name === decodedName);
+function openContactForm(itemName) {  const decodedName = decodeURIComponent(itemName);  const item = window.data.find(d => d.Name === decodedName);
   if (item) {
     alert(`Contact informatie voor ${decodedName} wordt binnenkort beschikbaar gesteld.`);
     trackEvent('contact_click', { name: decodedName });
@@ -1917,11 +1916,11 @@ function openDetailPanel(item) {
       <img src="icons/close.svg" alt="Sluiten" class="close-icon" />
     </a>
     <div class="detail-navigation">
-        <button id="prevDetail" class="nav-btn ${currentIndex === 0 ? 'disabled' : ''}" ${currentIndex === 0 ? 'disabled' : ''}>
+        <button id="prevDetail" class="nav-btn ${currentIndex === 0 ? 'disabled' : ''}" ${currentIndex === 0 ? 'disabled' : ''} onclick="navigateToItem('${encodeURIComponent(item.Name)}', 'prev')">
           <img src="icons/arrow-left.svg" alt="Vorige" class="nav-icon nav-icon-left" />
         </button>
         <span class="nav-counter">${currentIndex + 1} / ${totalItems}</span>
-        <button id="nextDetail" class="nav-btn ${currentIndex === totalItems - 1 ? 'disabled' : ''}" ${currentIndex === totalItems - 1 ? 'disabled' : ''}>
+        <button id="nextDetail" class="nav-btn ${currentIndex === totalItems - 1 ? 'disabled' : ''}" ${currentIndex === totalItems - 1 ? 'disabled' : ''} onclick="navigateToItem('${encodeURIComponent(item.Name)}', 'next')">
           <img src="icons/arrow-right.svg" alt="Volgende" class="nav-icon nav-icon-right" />
         </button>
       </div>

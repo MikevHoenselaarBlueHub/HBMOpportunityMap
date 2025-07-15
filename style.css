@@ -1305,6 +1305,16 @@ button {
   background: #2196F3;
 }
 
+.legend-icon.project::after {
+  content: '🏗️';
+  font-size: 14px;
+}
+
+.legend-icon.company::after {
+  content: '🏢';
+  font-size: 14px;
+}
+
 #detailPanel {
   position: fixed;
   bottom: -100%;
