@@ -655,21 +655,22 @@ button {
 
 #selectAll,
 #selectNone {
-  background: rgb(38, 123, 41);
-  color: white;
-  border: none;
+  background: #fff;
+  color: #000;
+  border: 1px solid #000;
   padding: 0.75rem 1rem;
   margin-right: 0.5rem;
   border-radius: 4px;
   font-weight: bold;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
 #selectAll:hover,
 #selectNone:hover {
-  background: rgb(28, 93, 31);
+  background: #000;
+  color: #fff;
 }
 
 /* === Close icon === */
