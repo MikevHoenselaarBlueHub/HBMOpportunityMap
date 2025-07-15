@@ -1,4 +1,3 @@
-
 // Global variables
 let map;
 let markers;
@@ -733,7 +732,7 @@ function applyFilters() {
 
   // Get filter values from form
   const checkedTypes = Array.from(document.querySelectorAll('input[name="HBMType"]:checked')).map(cb => cb.value);
-  
+
   const filteredData = window.data.filter(item => {
     // Type filter (Project/Bedrijf checkboxes)
     if (checkedTypes.length > 0 && !checkedTypes.includes(item.HBMType)) {
@@ -1028,12 +1027,12 @@ document.addEventListener('DOMContentLoaded', function() {
     loadSavedFiltersBtn.addEventListener('click', function() {
       const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
       const filterNames = Object.keys(savedFilters);
-      
+
       if (filterNames.length === 0) {
         alert('Geen opgeslagen filters gevonden.');
         return;
       }
-      
+
       const selectedFilter = prompt('Kies een opgeslagen filter:\n' + filterNames.map((name, i) => `${i + 1}. ${name}`).join('\n'));
       if (selectedFilter && filterNames.includes(selectedFilter)) {
         loadSavedFilter(selectedFilter);
@@ -1127,7 +1126,7 @@ function initializeFilters() {
   // Initialize select all/none buttons
   const selectAllBtn = document.getElementById('selectAll');
   const selectNoneBtn = document.getElementById('selectNone');
-  
+
   if (selectAllBtn) {
     selectAllBtn.addEventListener('click', function() {
       const checkboxes = filterForm.querySelectorAll('input[type="checkbox"]');
@@ -1200,7 +1199,7 @@ function initializeFilters() {
 function initializeListView() {
   const viewToggle = document.getElementById('viewToggle');
   const listContainer = document.querySelector('.list-container');
-  
+
   if (viewToggle && listContainer) {
     viewToggle.addEventListener('click', function() {
       listContainer.classList.toggle('show');
@@ -1216,11 +1215,11 @@ function initializeListView() {
   tabButtons.forEach(button => {
     button.addEventListener('click', function() {
       const targetTab = this.getAttribute('data-tab');
-      
+
       // Remove active from all tabs
       tabButtons.forEach(btn => btn.classList.remove('active'));
       tabPanes.forEach(pane => pane.classList.remove('active'));
-      
+
       // Add active to clicked tab
       this.classList.add('active');
       const targetPane = document.getElementById(targetTab + 'Tab');
@@ -1293,14 +1292,14 @@ function createListItem(item) {
       <button class="card-contact-btn" onclick="showDetails('${item.Name}')">Meer info</button>
     </div>
   `;
-  
+
   div.addEventListener('click', function() {
     // Highlight corresponding marker on map
     if (item.Latitude && item.Longitude) {
       map.setView([item.Latitude, item.Longitude], 15);
     }
   });
-  
+
   return div;
 }
 
@@ -1350,7 +1349,7 @@ function openDetailPanel(item) {
         <h2>${item.Name || 'Onbekend'}</h2>
         <span class="detail-type-badge ${item.HBMType?.toLowerCase() || 'unknown'}">${item.HBMType || 'Onbekend'}</span>
       </div>
-      
+
       <div class="detail-images">
         ${item.Logo ? `<img src="${item.Logo}" alt="Logo" class="detail-logo" onerror="this.style.display='none'">` : ''}
         ${item.ProjectImage ? `<img src="${item.ProjectImage}" alt="Project" class="detail-image" onerror="this.style.display='none'">` : ''}
@@ -1358,7 +1357,7 @@ function openDetailPanel(item) {
 
       <div class="detail-info">
         ${item.Description ? `<div class="detail-description"><h4>Beschrijving</h4><p>${item.Description}</p></div>` : ''}
-        
+
         <div class="detail-specs">
           ${item.ProjectType ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArray(item.ProjectType)}</div>` : ''}
           ${item.OrganizationType ? `<div class="detail-row"><strong>Organisatie:</strong> ${item.OrganizationType}</div>` : ''}
@@ -1427,7 +1426,7 @@ function getCurrentFilteredData() {
 
   // Get filter values from form
   const checkedTypes = Array.from(document.querySelectorAll('input[name="HBMType"]:checked')).map(cb => cb.value);
-  
+
   return window.data.filter(item => {
     // Type filter (Project/Bedrijf checkboxes)
     if (checkedTypes.length > 0 && !checkedTypes.includes(item.HBMType)) {
@@ -1454,21 +1453,21 @@ function updateFilterState() {
   // Update filter state object
   const checkedTypes = Array.from(document.querySelectorAll('input[name="HBMType"]:checked')).map(cb => cb.value);
   filterState.checkedTypes = checkedTypes;
-  
+
   // Get all other checked filters
   const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector'];
   filterState.checkedFilters = {};
-  
+
   filterSections.forEach(section => {
     const checked = Array.from(document.querySelectorAll(`input[name="${section}"]:checked`)).map(cb => cb.value);
     if (checked.length > 0) {
       filterState.checkedFilters[section] = checked;
     }
   });
-  
+
   // Update URL
   updateURL();
-  
+
   applyFilters();
 }
 
@@ -1482,44 +1481,44 @@ function toggleAdvancedFilters() {
 // URL state management
 function updateURL() {
   const params = new URLSearchParams();
-  
+
   // Add filter types
   if (filterState.checkedTypes.length > 0 && filterState.checkedTypes.length < 2) {
     params.set('types', filterState.checkedTypes.join(','));
   }
-  
+
   // Add other filters
   Object.keys(filterState.checkedFilters).forEach(section => {
     if (filterState.checkedFilters[section].length > 0) {
       params.set(section.toLowerCase(), filterState.checkedFilters[section].join(','));
     }
   });
-  
+
   // Add location if set
   if (filterState.userLocation) {
     params.set('lat', filterState.userLocation.lat.toFixed(6));
     params.set('lng', filterState.userLocation.lng.toFixed(6));
     params.set('radius', filterState.radius);
   }
-  
+
   const url = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
   window.history.replaceState({}, '', url);
 }
 
 function loadFromURL() {
   const params = new URLSearchParams(window.location.search);
-  
+
   // Load filter types
   if (params.has('types')) {
     const types = params.get('types').split(',');
     filterState.checkedTypes = types;
-    
+
     // Update checkboxes
     document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
       cb.checked = types.includes(cb.value);
     });
   }
-  
+
   // Load other filters
   const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector'];
   filterSections.forEach(section => {
@@ -1527,7 +1526,7 @@ function loadFromURL() {
     if (params.has(paramKey)) {
       const values = params.get(paramKey).split(',');
       filterState.checkedFilters[section] = values;
-      
+
       // Update checkboxes when they exist
       setTimeout(() => {
         document.querySelectorAll(`input[name="${section}"]`).forEach(cb => {
@@ -1536,46 +1535,46 @@ function loadFromURL() {
       }, 100);
     }
   });
-  
+
   // Load location
   if (params.has('lat') && params.has('lng')) {
     const lat = parseFloat(params.get('lat'));
     const lng = parseFloat(params.get('lng'));
     const radius = params.has('radius') ? parseInt(params.get('radius')) : 25;
-    
+
     filterState.userLocation = { lat, lng };
     filterState.radius = radius;
     currentFilter.userLocation = { lat, lng };
     currentFilter.radius = radius * 1000;
-    
+
     // Show location on map
     if (map) {
       map.setView([lat, lng], 12);
-      
+
       if (userLocationCircle) {
         map.removeLayer(userLocationCircle);
       }
-      
+
       userLocationCircle = L.circle([lat, lng], {
         color: '#3388ff',
         fillColor: '#3388ff',
         fillOpacity: 0.2,
         radius: radius * 1000
       }).addTo(map);
-      
+
       // Update UI
       const distanceFilter = document.getElementById('distanceFilter');
       if (distanceFilter) {
         distanceFilter.style.display = 'block';
       }
-      
+
       const distanceRange = document.getElementById('distanceRange');
       const distanceValue = document.getElementById('distanceValue');
       if (distanceRange && distanceValue) {
         distanceRange.value = radius;
         distanceValue.textContent = radius + ' km';
       }
-      
+
       const locationBtn = document.getElementById('useMyLocation');
       if (locationBtn) {
         locationBtn.innerHTML = '<span>📍 Locatie actief</span>';
@@ -1589,13 +1588,13 @@ function loadFromURL() {
 function saveCurrentFilters() {
   const filterName = prompt('Geef een naam voor deze filter configuratie:');
   if (!filterName) return;
-  
+
   const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
   savedFilters[filterName] = {
     ...filterState,
     timestamp: new Date().toISOString()
   };
-  
+
   localStorage.setItem('hbm_saved_filters', JSON.stringify(savedFilters));
   updateSavedFiltersDropdown();
   alert(`Filter "${filterName}" opgeslagen!`);
@@ -1604,18 +1603,18 @@ function saveCurrentFilters() {
 function loadSavedFilter(filterName) {
   const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
   if (!savedFilters[filterName]) return;
-  
+
   const savedFilter = savedFilters[filterName];
-  
+
   // Load filter state
   filterState = { ...savedFilter };
   delete filterState.timestamp;
-  
+
   // Update UI
   document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
     cb.checked = filterState.checkedTypes.includes(cb.value);
   });
-  
+
   // Clear all other checkboxes first
   const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector'];
   filterSections.forEach(section => {
@@ -1623,7 +1622,7 @@ function loadSavedFilter(filterName) {
       cb.checked = false;
     });
   });
-  
+
   // Set saved filter checkboxes
   Object.keys(filterState.checkedFilters).forEach(section => {
     filterState.checkedFilters[section].forEach(value => {
@@ -1633,19 +1632,19 @@ function loadSavedFilter(filterName) {
       }
     });
   });
-  
+
   // Load location if saved
   if (filterState.userLocation) {
     currentFilter.userLocation = filterState.userLocation;
     currentFilter.radius = filterState.radius * 1000;
-    
+
     if (map) {
       map.setView([filterState.userLocation.lat, filterState.userLocation.lng], 12);
-      
+
       if (userLocationCircle) {
         map.removeLayer(userLocationCircle);
       }
-      
+
       userLocationCircle = L.circle([filterState.userLocation.lat, filterState.userLocation.lng], {
         color: '#3388ff',
         fillColor: '#3388ff',
@@ -1654,7 +1653,7 @@ function loadSavedFilter(filterName) {
       }).addTo(map);
     }
   }
-  
+
   updateFilterState();
   alert(`Filter "${filterName}" geladen!`);
 }
@@ -1663,13 +1662,13 @@ function deleteSavedFilter() {
   const select = document.getElementById('savedFiltersSelect');
   const filterName = select.value;
   if (!filterName) return;
-  
+
   if (!confirm(`Weet je zeker dat je filter "${filterName}" wilt verwijderen?`)) return;
-  
+
   const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
   delete savedFilters[filterName];
   localStorage.setItem('hbm_saved_filters', JSON.stringify(savedFilters));
-  
+
   updateSavedFiltersDropdown();
   alert(`Filter "${filterName}" verwijderd!`);
 }
@@ -1677,23 +1676,33 @@ function deleteSavedFilter() {
 function updateSavedFiltersDropdown() {
   const select = document.getElementById('savedFiltersSelect');
   if (!select) return;
-  
+
   const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
-  
+
   select.innerHTML = '<option value="">Selecteer opgeslagen filter...</option>';
-  
+
   Object.keys(savedFilters).forEach(filterName => {
     const option = document.createElement('option');
     option.value = filterName;
     option.textContent = filterName;
     select.appendChild(option);
   });
+
+  // Update saved filters text
+  updateSavedFiltersText(Object.keys(savedFilters).length);
+}
+
+function updateSavedFiltersText(count) {
+  const savedFiltersText = document.getElementById('savedFiltersText');
+  if (savedFiltersText) {
+    savedFiltersText.textContent = `Opgeslagen filters${count > 0 ? ` (${count})` : ''}`;
+  }
 }
 
 // Share functionality
 function shareCurrentFilters() {
   const url = window.location.href;
-  
+
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(url).then(() => {
       alert('URL gekopieerd naar klembord!');
@@ -1714,14 +1723,14 @@ function fallbackCopyToClipboard(text) {
   document.body.appendChild(textArea);
   textArea.focus();
   textArea.select();
-  
+
   try {
     document.execCommand('copy');
     alert('URL gekopieerd naar klembord!');
   } catch (err) {
     alert('Kon URL niet kopiëren. URL: ' + text);
   }
-  
+
   document.body.removeChild(textArea);
 }
 

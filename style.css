@@ -1138,7 +1138,7 @@ button {
   .list-container ~ .map-legend {
     right: 520px; /* Adjust based on list container width (500px + 20px margin) */
   }
-  
+
   .list-container.show ~ .map-legend {
     right: 520px;
   }
@@ -1166,7 +1166,7 @@ button {
   font-size: 0.9rem;
 }
 
-.legend-item:last-child {
+.legend-item:last-child{
   margin-bottom: 0;
 }
 
@@ -1356,25 +1356,25 @@ button {
   #detailPanel {
     height: 90%;
   }
-  
+
   .detail-content {
     padding: 2rem 1rem 1rem;
   }
-  
+
   .detail-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .detail-header h2 {
     font-size: 1.5rem;
   }
-  
+
   .detail-row {
     flex-direction: column;
     gap: 0.25rem;
   }
-  
+
   .detail-row strong {
     min-width: auto;
   }
@@ -1645,3 +1645,215 @@ button {
 .filter-group:last-child {
   margin-bottom: 0;
 }
+
+/* === Saved Filters Popup === */
+.saved-filters-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9500;
+}
+
+.saved-filters-popup-content {
+  background: #fff;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 70vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.saved-filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.saved-filters-header h3 {
+  margin: 0;
+  color: rgb(38, 123, 41);
+  font-size: 1.25rem;
+}
+
+.close-popup-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid #000;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.close-popup-btn:hover {
+  background: #000;
+}
+
+.close-popup-btn:hover .close-icon {
+  filter: invert(1);
+}
+
+.saved-filters-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.saved-filter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  background: #f8f9fa;
+  transition: all 0.2s ease;
+}
+
+.saved-filter-item:hover {
+  border-color: rgb(38, 123, 41);
+  background: #fff;
+}
+
+.saved-filter-item:last-child {
+  margin-bottom: 0;
+}
+
+.saved-filter-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.saved-filter-name {
+  font-weight: bold;
+  color: rgb(38, 123, 41);
+  font-size: 1rem;
+}
+
+.saved-filter-date {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.saved-filter-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.load-filter-btn {
+  background: rgb(38, 123, 41);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.load-filter-btn:hover {
+  background: #267b29;
+}
+
+.delete-filter-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.delete-filter-btn:hover {
+  background: #c82333;
+}
+
+/* === Location Controls === */
+.location-filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.location-btn {
+  background: rgb(38, 123, 41);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.location-btn:hover {
+  background: #267b29;
+}
+
+.location-btn.active {
+  background: #267b29;
+}
+
+.clear-location-btn {
+  background: #dc3545;
+}
+
+.clear-location-btn:hover {
+  background: #c82333;
+}
+
+@media (max-width: 768px) {
+  .saved-filters-popup-content {
+    width: 95%;
+    max-height: 80vh;
+  }
+
+  .saved-filter-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .saved-filter-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .load-filter-btn,
+  .delete-filter-btn {
+    flex: 1;
+    padding: 0.75rem;
+  }
+
+  .location-filter-controls {
+    gap: 0.5rem;
+  }
+}
+/* === Export for global access === */
+window.getCurrentLocation = getCurrentLocation;
+window.showDetails = showDetails;
+window.openContactForm = openContactForm;
+window.trackEvent = trackEvent;
+window.updateFilterState = updateFilterState;
+window.toggleAdvancedFilters = toggleAdvancedFilters;
