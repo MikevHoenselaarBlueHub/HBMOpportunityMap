@@ -711,6 +711,15 @@ function createMarkers(data) {
         className: 'custom-popup'
       });
 
+      // Add hover label functionality
+      marker.on('mouseover', function(e) {
+        showHoverLabel(e, item.Name || 'Onbekend');
+      });
+
+      marker.on('mouseout', function(e) {
+        hideHoverLabel();
+      });
+
       // Store item data for filtering
       marker.itemData = item;
 
@@ -721,26 +730,74 @@ function createMarkers(data) {
   console.log(`Created ${markerCount} markers, total layers:`, markers.getLayers().length);
 }
 
+// Hover label functions
+let hoverLabelElement = null;
+
+function showHoverLabel(e, text) {
+  hideHoverLabel(); // Remove any existing label
+
+  const mapContainer = document.getElementById('map');
+  if (!mapContainer) return;
+
+  // Create label element
+  hoverLabelElement = document.createElement('div');
+  hoverLabelElement.className = 'marker-hover-label';
+  hoverLabelElement.textContent = text;
+  
+  // Add to map container
+  mapContainer.appendChild(hoverLabelElement);
+
+  // Position the label
+  positionHoverLabel(e);
+}
+
+function positionHoverLabel(e) {
+  if (!hoverLabelElement) return;
+
+  const mapContainer = document.getElementById('map');
+  const mapRect = mapContainer.getBoundingClientRect();
+  
+  // Get mouse position relative to map
+  const mouseX = e.originalEvent.clientX - mapRect.left;
+  const mouseY = e.originalEvent.clientY - mapRect.top;
+  
+  // Get label dimensions
+  const labelRect = hoverLabelElement.getBoundingClientRect();
+  const labelWidth = labelRect.width;
+  const labelHeight = labelRect.height;
+  
+  // Calculate position with offset from cursor
+  let left = mouseX + 10;
+  let top = mouseY - labelHeight - 10;
+  
+  // Keep label within map bounds
+  if (left + labelWidth > mapRect.width) {
+    left = mouseX - labelWidth - 10;
+  }
+  if (top < 0) {
+    top = mouseY + 10;
+  }
+  if (left < 0) {
+    left = 10;
+  }
+  
+  hoverLabelElement.style.left = left + 'px';
+  hoverLabelElement.style.top = top + 'px';
+}
+
+function hideHoverLabel() {
+  if (hoverLabelElement) {
+    hoverLabelElement.remove();
+    hoverLabelElement = null;
+  }
+}
+
 function createPopupContent(item) {
   return `
     <div class="popup-content">
       <h3>${item.Name || 'Onbekend'}</h3>
-      <div class="popup-type">
-        <span class="type-badge ${item.HBMType?.toLowerCase() || 'unknown'}">${item.HBMType || 'Onbekend'}</span>
-      </div>
-
-      ${item.Logo ? `<img src="${item.Logo}" alt="Logo" class="popup-logo" onerror="this.style.display='none'">` : ''}
-      ${item.ProjectImage ? `<img src="${item.ProjectImage}" alt="Project" class="popup-image" onerror="this.style.display='none'">` : ''}
-
-      <div class="popup-details">
-        ${item.ProjectType ? `<p><strong>Project Type:</strong> ${formatArray(item.ProjectType)}</p>` : ''}
-        ${item.OrganizationType ? `<p><strong>Organisatie:</strong> ${item.OrganizationType}</p>` : ''}
-        ${item.OrganizationField ? `<p><strong>Vakgebied:</strong> ${formatArray(item.OrganizationField)}</p>` : ''}
-        ${item.HBMTopic ? `<p><strong>HBM Onderwerp:</strong> ${formatArray(item.HBMTopic)}</p>` : ''}
-        ${item.HBMCharacteristics ? `<p><strong>Kenmerken:</strong> ${formatArray(item.HBMCharacteristics)}</p>` : ''}
-        ${item.HBMSector ? `<p><strong>Sector:</strong> ${item.HBMSector}</p>` : ''}
-        ${item.Description ? `<p class="description">${item.Description}</p>` : ''}
-      </div>
+      
+      ${item.Description ? `<p class="description">${item.Description}</p>` : ''}
 
       <div class="popup-actions">
         <button onclick="showDetails('${encodeURIComponent(item.Name || '')}')" class="card-contact-btn">Meer info</button>
@@ -1524,7 +1581,8 @@ function openDetailPanel(item) {
         ${item.Description ? `<div class="detail-description"><h4>Beschrijving</h4><p>${item.Description}</p></div>` : ''}
 
         <div class="detail-specs">
-          ${item.ProjectType ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArray(item.ProjectType)}</div>` : ''}
+          ${item.HBMType === 'Project' && item.ProjectType ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArray(item.ProjectType)}</div>` : ''}
+          ${item.HBMType === 'Bedrijf' && item.ProjectType ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArray(item.ProjectType)}</div>` : ''}
           ${item.OrganizationType ? `<div class="detail-row"><strong>Organisatie:</strong> ${item.OrganizationType}</div>` : ''}
           ${item.OrganizationField ? `<div class="detail-row"><strong>Vakgebied:</strong> ${formatArray(item.OrganizationField)}</div>` : ''}
           ${item.HBMTopic ? `<div class="detail-row"><strong>HBM Onderwerp:</strong> ${formatArray(item.HBMTopic)}</div>` : ''}

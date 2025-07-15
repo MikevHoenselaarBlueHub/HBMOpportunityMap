@@ -1482,6 +1482,24 @@ button {
   margin: 10px;
 }
 
+/* === Marker hover label === */
+.marker-hover-label {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  z-index: 1500;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  max-width: 250px;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
 /* === Municipality popup styling === */
 .municipality-popup {
   padding: 15px;
