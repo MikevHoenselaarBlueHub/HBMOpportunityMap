@@ -46,3 +46,24 @@ if (shouldRunCleanup()) {
 }
 
 console.log(`Version ${APP_VERSION} loaded successfully`);
+
+// Global function to check if you're running the latest version
+window.checkVersion = function() {
+  const currentTime = Date.now();
+  const versionAge = (currentTime - APP_VERSION) / 1000; // in seconds
+
+  console.log(`Current version: ${APP_VERSION}`);
+  console.log(`Version age: ${Math.floor(versionAge)} seconds`);
+
+  if (versionAge > 60) {
+    console.warn('⚠️ Version might be cached - try hard refresh (Ctrl+F5)');
+    return false;
+  } else {
+    console.log('✅ Version is fresh');
+    return true;
+  }
+};
+
+// Add visual indicator in console
+console.log('%c🔄 Cache Status Check Available', 'color: blue; font-weight: bold;');
+console.log('%cRun window.checkVersion() to check if you have the latest version', 'color: blue;');

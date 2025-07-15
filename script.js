@@ -844,11 +844,11 @@ function getCurrentLocation() {
         distanceFilter.style.display = 'block';
       }
 
-      const distanceRange = document.getElementById('distanceRange');
-      const distanceValue = document.getElementById('distanceValue');
-      if (distanceRange && distanceValue) {
-        distanceRange.value = radius;
-        distanceValue.textContent = radius + ' km';
+      const distanceRangeEl = document.getElementById('distanceRange');
+      const distanceValueEl = document.getElementById('distanceValue');
+      if (distanceRangeEl && distanceValueEl) {
+        distanceRangeEl.value = radius;
+        distanceValueEl.textContent = radius + ' km';
       }
 
       const locationBtn = document.getElementById('useMyLocation');
@@ -1020,8 +1020,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const filterDropdown = optionsBtn?.parentElement;
   if (optionsBtn && filterDropdown) {
     optionsBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      filterDropdown.classList.toggle('open');
+      e.stopPropagation();      filterDropdown.classList.toggle('open');
     });
 
     // Close dropdown when clicking outside
@@ -1640,11 +1639,11 @@ function loadFromURL() {
         distanceFilter.style.display = 'block';
       }
 
-      const distanceRange = document.getElementById('distanceRange');
-      const distanceValue = document.getElementById('distanceValue');
-      if (distanceRange && distanceValue) {
-        distanceRange.value = radius;
-        distanceValue.textContent = radius + ' km';
+      const distanceRangeEl = document.getElementById('distanceRange');
+      const distanceValueEl = document.getElementById('distanceValue');
+      if (distanceRangeEl && distanceValueEl) {
+        distanceRangeEl.value = radius;
+        distanceValueEl.textContent = radius + ' km';
       }
 
       const locationBtn = document.getElementById('useMyLocation');
@@ -1748,11 +1747,11 @@ function loadSavedFilter(filterName) {
         distanceFilter.style.display = 'block';
       }
 
-      const distanceRange = document.getElementById('distanceRange');
-      const distanceValue = document.getElementById('distanceValue');
-      if (distanceRange && distanceValue) {
-        distanceRange.value = filterState.radius;
-        distanceValue.textContent = filterState.radius + ' km';
+      const distanceRangeEl = document.getElementById('distanceRange');
+      const distanceValueEl = document.getElementById('distanceValue');
+      if (distanceRangeEl && distanceValueEl) {
+        distanceRangeEl.value = filterState.radius;
+        distanceValueEl.textContent = filterState.radius + ' km';
       }
 
       const locationBtn = document.getElementById('useMyLocation');

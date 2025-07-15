@@ -2,7 +2,7 @@
 // Utility Functions
 
 // Distance calculation
-export function calculateDistance(lat1, lon1, lat2, lon2) {
+function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Radius of earth in kilometers
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
@@ -15,7 +15,7 @@ export function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 // Format array values for display
-export function formatArray(value) {
+function formatArray(value) {
   if (Array.isArray(value)) {
     return value.join(', ');
   }
@@ -23,7 +23,7 @@ export function formatArray(value) {
 }
 
 // Debounce function for search
-export function debounce(func, wait) {
+function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
     const later = () => {
@@ -36,7 +36,7 @@ export function debounce(func, wait) {
 }
 
 // Validate coordinates
-export function isValidCoordinate(lat, lng) {
+function isValidCoordinate(lat, lng) {
   return lat && lng && 
          typeof lat === 'number' && typeof lng === 'number' &&
          lat >= -90 && lat <= 90 && 
@@ -45,13 +45,23 @@ export function isValidCoordinate(lat, lng) {
 }
 
 // Generate unique ID
-export function generateId() {
+function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 // Sanitize HTML to prevent XSS
-export function sanitizeHtml(str) {
+function sanitizeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
 }
+
+// Make functions globally available
+window.utilFunctions = {
+  calculateDistance,
+  formatArray,
+  debounce,
+  isValidCoordinate,
+  generateId,
+  sanitizeHtml
+};
