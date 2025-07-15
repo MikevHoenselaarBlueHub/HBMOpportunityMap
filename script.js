@@ -423,6 +423,9 @@ async function loadDutchMunicipalities() {
                       dashArray: '5, 8'
                     });
                     layer.bringToFront();
+                    
+                    // Show hover label with municipality name
+                    showHoverLabel(e, municipalityName);
                   },
                   mouseout: function(e) {
                     const layer = e.target;
@@ -434,6 +437,9 @@ async function loadDutchMunicipalities() {
                       fillOpacity: 0.1,
                       dashArray: '5, 8'
                     });
+                    
+                    // Hide hover label
+                    hideHoverLabel();
                   },
                   click: function(e) {
                     // Zoom to municipality and filter
@@ -551,6 +557,9 @@ async function loadGermanMunicipalities() {
                     dashArray: '5, 8'
                   });
                   layer.bringToFront();
+                  
+                  // Show hover label with municipality name
+                  showHoverLabel(e, municipalityName);
                 },
                 mouseout: function(e) {
                   const layer = e.target;
@@ -562,6 +571,9 @@ async function loadGermanMunicipalities() {
                     fillOpacity: 0.1,
                     dashArray: '5, 8'
                   });
+                  
+                  // Hide hover label
+                  hideHoverLabel();
                 },
                 click: function(e) {
                   // Zoom to municipality and filter
@@ -1648,9 +1660,14 @@ function initializeFilters() {
 
   if (selectAllBtn) {
     selectAllBtn.addEventListener('click', function() {
+      // Only affect checkboxes outside of advanced filters
+      const advancedFilters = document.getElementById('advancedFilters');
       const checkboxes = filterForm.querySelectorAll('input[type="checkbox"]');
       checkboxes.forEach(checkbox => {
-        checkbox.checked = true;
+        // Skip checkboxes that are inside advanced filters
+        if (!advancedFilters.contains(checkbox)) {
+          checkbox.checked = true;
+        }
       });
       updateFilterState();
     });
@@ -1658,9 +1675,14 @@ function initializeFilters() {
 
   if (selectNoneBtn) {
     selectNoneBtn.addEventListener('click', function() {
+      // Only affect checkboxes outside of advanced filters
+      const advancedFilters = document.getElementById('advancedFilters');
       const checkboxes = filterForm.querySelectorAll('input[type="checkbox"]');
       checkboxes.forEach(checkbox => {
-        checkbox.checked = false;
+        // Skip checkboxes that are inside advanced filters
+        if (!advancedFilters.contains(checkbox)) {
+          checkbox.checked = false;
+        }
       });
       updateFilterState();
     });
@@ -1708,6 +1730,27 @@ function initializeFilters() {
   const shareBtn = document.getElementById('shareBtn');
   if (shareBtn) {
     shareBtn.addEventListener('click', shareCurrentFilters);
+  }
+
+  // Initialize saved filters modal
+  const showSavedFiltersModalBtn = document.getElementById('showSavedFiltersModal');
+  if (showSavedFiltersModalBtn) {
+    showSavedFiltersModalBtn.addEventListener('click', showSavedFiltersModal);
+  }
+
+  const closeSavedFiltersModalBtn = document.getElementById('closeSavedFiltersModal');
+  if (closeSavedFiltersModalBtn) {
+    closeSavedFiltersModalBtn.addEventListener('click', closeSavedFiltersModal);
+  }
+
+  // Close modal when clicking outside
+  const savedFiltersModal = document.getElementById('savedFiltersModal');
+  if (savedFiltersModal) {
+    savedFiltersModal.addEventListener('click', function(e) {
+      if (e.target === savedFiltersModal) {
+        closeSavedFiltersModal();
+      }
+    });
   }
 
   // Load saved filters dropdown
@@ -1990,6 +2033,128 @@ function openDetailPanel(item) {
       }
     });
   }
+}
+
+// Saved filters modal functions
+function showSavedFiltersModal() {
+  const modal = document.getElementById('savedFiltersModal');
+  const savedFiltersGrid = document.getElementById('savedFiltersGrid');
+  const noSavedFilters = document.getElementById('noSavedFilters');
+  
+  // Load saved filters from localStorage
+  const savedFilters = JSON.parse(localStorage.getItem('savedFilters') || '[]');
+  
+  if (savedFilters.length === 0) {
+    savedFiltersGrid.style.display = 'none';
+    noSavedFilters.style.display = 'block';
+  } else {
+    savedFiltersGrid.style.display = 'grid';
+    noSavedFilters.style.display = 'none';
+    
+    // Clear existing content
+    savedFiltersGrid.innerHTML = '';
+    
+    // Create cards for each saved filter
+    savedFilters.forEach((filter, index) => {
+      const card = document.createElement('div');
+      card.className = 'saved-filter-card';
+      
+      const filterSummary = createFilterSummary(filter);
+      
+      card.innerHTML = `
+        <h3>${filter.name}</h3>
+        <p><strong>Opgeslagen op:</strong> ${new Date(filter.timestamp).toLocaleDateString()}</p>
+        <p><strong>Filters:</strong> ${filterSummary}</p>
+        <div class="saved-filter-actions">
+          <button class="load-filter-btn" onclick="loadSavedFilterFromModal(${index})">Laden</button>
+          <button class="delete-filter-btn" onclick="deleteSavedFilterFromModal(${index})">Verwijderen</button>
+        </div>
+      `;
+      
+      savedFiltersGrid.appendChild(card);
+    });
+  }
+  
+  modal.classList.add('show');
+}
+
+function closeSavedFiltersModal() {
+  const modal = document.getElementById('savedFiltersModal');
+  modal.classList.remove('show');
+}
+
+function createFilterSummary(filter) {
+  const parts = [];
+  
+  if (filter.checkedTypes && filter.checkedTypes.length > 0) {
+    parts.push(`Type: ${filter.checkedTypes.join(', ')}`);
+  }
+  
+  if (filter.checkedFilters) {
+    Object.keys(filter.checkedFilters).forEach(key => {
+      if (filter.checkedFilters[key] && filter.checkedFilters[key].length > 0) {
+        parts.push(`${key}: ${filter.checkedFilters[key].slice(0, 2).join(', ')}${filter.checkedFilters[key].length > 2 ? '...' : ''}`);
+      }
+    });
+  }
+  
+  return parts.length > 0 ? parts.join('; ') : 'Geen specifieke filters';
+}
+
+function loadSavedFilterFromModal(index) {
+  const savedFilters = JSON.parse(localStorage.getItem('savedFilters') || '[]');
+  if (savedFilters[index]) {
+    loadSavedFilterData(savedFilters[index]);
+    closeSavedFiltersModal();
+  }
+}
+
+function deleteSavedFilterFromModal(index) {
+  if (confirm('Weet je zeker dat je dit filter wilt verwijderen?')) {
+    const savedFilters = JSON.parse(localStorage.getItem('savedFilters') || '[]');
+    savedFilters.splice(index, 1);
+    localStorage.setItem('savedFilters', JSON.stringify(savedFilters));
+    
+    // Refresh the modal content
+    showSavedFiltersModal();
+    
+    // Update the dropdown as well
+    updateSavedFiltersDropdown();
+  }
+}
+
+function loadSavedFilterData(filterData) {
+  // Clear all existing filters first
+  document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+  });
+
+  // Set the types
+  if (filterData.checkedTypes) {
+    filterData.checkedTypes.forEach(type => {
+      const checkbox = document.querySelector(`input[name="HBMType"][value="${type}"]`);
+      if (checkbox) {
+        checkbox.checked = true;
+      }
+    });
+  }
+
+  // Set other filters
+  if (filterData.checkedFilters) {
+    Object.keys(filterData.checkedFilters).forEach(section => {
+      if (filterData.checkedFilters[section]) {
+        filterData.checkedFilters[section].forEach(value => {
+          const checkbox = document.querySelector(`input[name="${section}"][value="${value}"]`);
+          if (checkbox) {
+            checkbox.checked = true;
+          }
+        });
+      }
+    });
+  }
+
+  // Update filter state and apply
+  updateFilterState();
 }
 
 // Helper function to get current filtered data
