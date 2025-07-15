@@ -1,8 +1,8 @@
-// Version configuration
-const APP_VERSION = '1.0.0';
+// Version configuration - NO CACHING
+const APP_VERSION = Date.now(); // Always unique timestamp
 
 function getCacheBustParam() {
-  return `?v=${APP_VERSION}`;
+  return `?nocache=${Date.now()}&v=${APP_VERSION}`;
 }
 
 function cleanupLocalStorage() {

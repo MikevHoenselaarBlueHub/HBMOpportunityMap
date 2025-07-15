@@ -1,16 +1,23 @@
 
-# Disable caching for development
+# Disable ALL caching for development
 <IfModule mod_headers.c>
-    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
-    Header set Expires "0"
+    Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    Header unset ETag
+    Header unset Last-Modified
 </IfModule>
 
-# Prevent caching of JSON and JS files
-<FilesMatch "\.(json|js)$">
+# Prevent caching of ALL file types
+<FilesMatch ".*">
     <IfModule mod_headers.c>
         Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
         Header set Pragma "no-cache"
         Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+        Header unset ETag
+        Header unset Last-Modified
     </IfModule>
 </FilesMatch>
+
+# Disable ETags completely
+FileETag None

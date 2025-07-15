@@ -69,8 +69,8 @@ if (isMapPage && !isInfoPage && !isOverPage) {
       // Track page view
       trackPageView('Kansenkaart');
 
-      // Data laden
-      fetch(`data/opportunities.json?v=${APP_VERSION}`)
+      // Data laden - with aggressive cache busting
+      fetch(`data/opportunities.json?nocache=${Date.now()}&v=${APP_VERSION}`)
         .then(res => {
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -232,7 +232,7 @@ function trackPageView(pageTitle) {
 // Language system
 async function loadTranslations() {
   try {
-    const translationPath = `translations/${currentLanguage}.json${getCacheBustParam()}`;
+    const translationPath = `translations/${currentLanguage}.json?nocache=${Date.now()}&v=${APP_VERSION}`;
     const response = await fetch(translationPath);
     translations = await response.json();
   } catch (error) {
