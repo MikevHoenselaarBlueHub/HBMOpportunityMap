@@ -685,12 +685,12 @@ function createMarkers(data) {
 
       // Check if item has an image (Logo for companies, ProjectImage for projects)
       const hasImage = (item.HBMType === 'Bedrijf' && item.Logo) || (item.HBMType === 'Project' && item.ProjectImage);
-      
+
       if (hasImage) {
         // Create custom image marker
         const imageUrl = item.HBMType === 'Bedrijf' ? item.Logo : item.ProjectImage;
         const borderColor = item.HBMType === 'Project' ? 'rgb(255, 107, 53)' : 'rgb(33, 150, 243)';
-        
+
         const customIcon = L.divIcon({
           className: item.HBMType === 'Bedrijf' ? 'logo-marker' : 'photo-marker',
           html: `
@@ -703,7 +703,7 @@ function createMarkers(data) {
           iconAnchor: [25, 25],
           popupAnchor: [0, -25]
         });
-        
+
         marker = L.marker([item.Latitude, item.Longitude], {
           icon: customIcon
         });
@@ -711,7 +711,7 @@ function createMarkers(data) {
         // Create white circle marker with icon
         const iconUrl = item.HBMType === 'Project' ? 'icons/marker-project.svg' : 'icons/marker-company.svg';
         const borderColor = item.HBMType === 'Project' ? 'rgb(255, 107, 53)' : 'rgb(33, 150, 243)';
-        
+
         const customIcon = L.divIcon({
           className: 'default-marker',
           html: `
@@ -723,7 +723,7 @@ function createMarkers(data) {
           iconAnchor: [25, 25],
           popupAnchor: [0, -25]
         });
-        
+
         marker = L.marker([item.Latitude, item.Longitude], {
           icon: customIcon
         });
@@ -768,7 +768,7 @@ function showHoverLabel(e, text) {
   hoverLabelElement = document.createElement('div');
   hoverLabelElement.className = 'marker-hover-label';
   hoverLabelElement.textContent = text;
-  
+
   // Add to map container
   mapContainer.appendChild(hoverLabelElement);
 
@@ -781,20 +781,20 @@ function positionHoverLabel(e) {
 
   const mapContainer = document.getElementById('map');
   const mapRect = mapContainer.getBoundingClientRect();
-  
+
   // Get mouse position relative to map
   const mouseX = e.originalEvent.clientX - mapRect.left;
   const mouseY = e.originalEvent.clientY - mapRect.top;
-  
+
   // Get label dimensions
   const labelRect = hoverLabelElement.getBoundingClientRect();
   const labelWidth = labelRect.width;
   const labelHeight = labelRect.height;
-  
+
   // Calculate position with offset from cursor
   let left = mouseX + 10;
   let top = mouseY - labelHeight - 10;
-  
+
   // Keep label within map bounds
   if (left + labelWidth > mapRect.width) {
     left = mouseX - labelWidth - 10;
@@ -805,7 +805,7 @@ function positionHoverLabel(e) {
   if (left < 0) {
     left = 10;
   }
-  
+
   hoverLabelElement.style.left = left + 'px';
   hoverLabelElement.style.top = top + 'px';
 }
@@ -835,7 +835,7 @@ function createPopupContent(item) {
         </button>
       </div>
       <h3>${item.Name || 'Onbekend'}</h3>
-      
+
       ${item.Description ? `<p class="description">${item.Description}</p>` : ''}
 
       <div class="popup-actions">
@@ -895,32 +895,36 @@ function applyFilters() {
       }
     }
 
-    // HBMTopic filter
-    if (checkedHBMTopics.length > 0) {
+    // HBMTopic filter - use filterState if form values are empty
+    const activeHBMTopics = checkedHBMTopics.length > 0 ? checkedHBMTopics : (filterState.checkedFilters['HBMTopic'] || []);
+    if (activeHBMTopics.length > 0) {
       const itemTopics = Array.isArray(item.HBMTopic) ? item.HBMTopic : [item.HBMTopic].filter(Boolean);
-      if (!checkedHBMTopics.some(topic => itemTopics.includes(topic))) {
+      if (!activeHBMTopics.some(topic => itemTopics.includes(topic))) {
         return false;
       }
     }
 
-    // HBMCharacteristics filter
-    if (checkedHBMCharacteristics.length > 0) {
+    // HBMCharacteristics filter - use filterState if form values are empty
+    const activeHBMCharacteristics = checkedHBMCharacteristics.length > 0 ? checkedHBMCharacteristics : (filterState.checkedFilters['HBMCharacteristics'] || []);
+    if (activeHBMCharacteristics.length > 0) {
       const itemCharacteristics = Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics : [item.HBMCharacteristics].filter(Boolean);
-      if (!checkedHBMCharacteristics.some(characteristic => itemCharacteristics.includes(characteristic))) {
+      if (!activeHBMCharacteristics.some(characteristic => itemCharacteristics.includes(characteristic))) {
         return false;
       }
     }
 
-    // HBMSector filter
-    if (checkedHBMSectors.length > 0) {
+    // HBMSector filter - use filterState if form values are empty
+    const activeHBMSectors = checkedHBMSectors.length > 0 ? checkedHBMSectors : (filterState.checkedFilters['HBMSector'] || []);
+    if (activeHBMSectors.length > 0) {
       const itemSectors = Array.isArray(item.HBMSector) ? item.HBMSector : [item.HBMSector].filter(Boolean);
-      if (!checkedHBMSectors.some(sector => itemSectors.includes(sector))) {
+      if (!activeHBMSectors.some(sector => itemSectors.includes(sector))) {
         return false;
       }
     }
 
-    // Municipality filter
-    if (checkedMunicipalities.length > 0 && !checkedMunicipalities.includes(item.Municipality)) {
+    // Municipality filter - use filterState if form values are empty
+    const activeMunicipalities = checkedMunicipalities.length > 0 ? checkedMunicipalities : (filterState.checkedFilters['Municipality'] || []);
+    if (activeMunicipalities.length > 0 && !activeMunicipalities.includes(item.Municipality)) {
       return false;
     }
 
@@ -950,12 +954,15 @@ function applyFilters() {
 
   createMarkers(filteredData);
   updateListView(filteredData);
-  updateResultCount(filteredData.length);
-  
+  updateResultCount(filtereddata.length);
+
   // Synchronize tab based on current filter types
   if (filterState.checkedTypes && filterState.checkedTypes.length === 1) {
     synchronizeTabWithTypes(filterState.checkedTypes);
   }
+
+  // Update checkboxes after filters are populated
+  updateCheckboxesFromFilterState();
 }
 
 // Calculate distance between two coordinates using Haversine formula
@@ -999,34 +1006,34 @@ function formatSingleValueWithLink(value, filterType, currentType) {
 // Apply filter from detail panel link
 function applyFilterFromDetail(filterType, filterValue, currentType) {
   const decodedValue = decodeURIComponent(filterValue);
-  
+
   // Clear all existing filters first
   document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => {
     cb.checked = false;
   });
-  
+
   // Set the type filter (Project or Bedrijf)
   document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
     if (cb.value === currentType) {
       cb.checked = true;
     }
   });
-  
+
   // Set the specific filter value
   const filterCheckbox = document.querySelector(`input[name="${filterType}"][value="${decodedValue}"]`);
   if (filterCheckbox) {
     filterCheckbox.checked = true;
   }
-  
+
   // Close detail panel
   const detailPanel = document.getElementById('detailPanel');
   if (detailPanel) {
     detailPanel.classList.remove('open');
   }
-  
+
   // Update filter state and apply filters
   updateFilterState();
-  
+
   // Track event
   trackEvent('filter_from_detail', {
     filter_type: filterType,
@@ -1198,7 +1205,7 @@ async function populateFilters(data) {
     // Load filter options from filters.json
     const response = await fetch(`data/filters.json?nocache=${Date.now()}&v=${APP_VERSION}`);
     const filterOptions = await response.json();
-    
+
     // Get municipalities from data
     const municipalities = [...new Set(data.map(item => item.Municipality).filter(Boolean))].sort();
 
@@ -1218,7 +1225,7 @@ async function populateFilters(data) {
 
     // Add municipality selection buttons
     addMunicipalitySelectionButtons(data);
-    
+
   } catch (error) {
     console.error('Error loading filters:', error);
     // Fallback to generating from data
@@ -1235,23 +1242,23 @@ function populateFiltersFromData(data) {
   const organizations = [...new Set(data.flatMap(item => 
     Array.isArray(item.OrganizationType) ? item.OrganizationType : [item.OrganizationType]
   ).filter(Boolean))].sort();
-  
+
   const organizationFields = [...new Set(data.flatMap(item => 
     Array.isArray(item.OrganizationField) ? item.OrganizationField : [item.OrganizationField]
   ).filter(Boolean))].sort();
-  
+
   const topics = [...new Set(data.flatMap(item => 
     Array.isArray(item.HBMTopic) ? item.HBMTopic : [item.HBMTopic]
   ).filter(Boolean))].sort();
-  
+
   const characteristics = [...new Set(data.flatMap(item => 
     Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics : [item.HBMCharacteristics]
   ).filter(Boolean))].sort();
-  
+
   const sectors = [...new Set(data.flatMap(item => 
     Array.isArray(item.HBMSector) ? item.HBMSector : [item.HBMSector]
   ).filter(Boolean))].sort();
-  
+
   const municipalities = [...new Set(data.map(item => item.Municipality).filter(Boolean))].sort();
 
   // Populate filter sections
@@ -1416,7 +1423,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const searchTerm = this.value.trim();
       currentFilter.searchTerm = searchTerm;
       filterState.searchTerm = searchTerm;
-      
+
       updateURL();
       applyFilters();
     });
@@ -1654,7 +1661,7 @@ function navigatePopup(currentItemName, direction) {
   const decodedName = decodeURIComponent(currentItemName);
   const currentData = getCurrentFilteredData();
   const currentIndex = currentData.findIndex(d => d.Name === decodedName);
-  
+
   let newIndex;
   if (direction === 'prev' && currentIndex > 0) {
     newIndex = currentIndex - 1;
@@ -1663,12 +1670,12 @@ function navigatePopup(currentItemName, direction) {
   } else {
     return; // No navigation possible
   }
-  
+
   const newItem = currentData[newIndex];
   if (newItem && newItem.Latitude && newItem.Longitude) {
     // Close current popup
     map.closePopup();
-    
+
     // Find the marker for the new item in the current visible markers
     let targetMarker = null;
     markers.eachLayer(function(marker) {
@@ -1676,11 +1683,11 @@ function navigatePopup(currentItemName, direction) {
         targetMarker = marker;
       }
     });
-    
+
     if (targetMarker) {
       // Center map on new marker
       map.setView([newItem.Latitude, newItem.Longitude], map.getZoom());
-      
+
       // Open popup for new marker
       setTimeout(() => {
         targetMarker.openPopup();
@@ -1850,32 +1857,36 @@ function getCurrentFilteredData() {
       }
     }
 
-    // HBMTopic filter
-    if (checkedHBMTopics.length > 0) {
+    // HBMTopic filter - use filterState if form values are empty
+    const activeHBMTopics = checkedHBMTopics.length > 0 ? checkedHBMTopics : (filterState.checkedFilters['HBMTopic'] || []);
+    if (activeHBMTopics.length > 0) {
       const itemTopics = Array.isArray(item.HBMTopic) ? item.HBMTopic : [item.HBMTopic].filter(Boolean);
-      if (!checkedHBMTopics.some(topic => itemTopics.includes(topic))) {
+      if (!activeHBMTopics.some(topic => itemTopics.includes(topic))) {
         return false;
       }
     }
 
-    // HBMCharacteristics filter
-    if (checkedHBMCharacteristics.length > 0) {
+    // HBMCharacteristics filter - use filterState if form values are empty
+    const activeHBMCharacteristics = checkedHBMCharacteristics.length > 0 ? checkedHBMCharacteristics : (filterState.checkedFilters['HBMCharacteristics'] || []);
+    if (activeHBMCharacteristics.length > 0) {
       const itemCharacteristics = Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics : [item.HBMCharacteristics].filter(Boolean);
-      if (!checkedHBMCharacteristics.some(characteristic => itemCharacteristics.includes(characteristic))) {
+      if (!activeHBMCharacteristics.some(characteristic => itemCharacteristics.includes(characteristic))) {
         return false;
       }
     }
 
-    // HBMSector filter
-    if (checkedHBMSectors.length > 0) {
+    // HBMSector filter - use filterState if form values are empty
+    const activeHBMSectors = checkedHBMSectors.length > 0 ? checkedHBMSectors : (filterState.checkedFilters['HBMSector'] || []);
+    if (activeHBMSectors.length > 0) {
       const itemSectors = Array.isArray(item.HBMSector) ? item.HBMSector : [item.HBMSector].filter(Boolean);
-      if (!checkedHBMSectors.some(sector => itemSectors.includes(sector))) {
+      if (!activeHBMSectors.some(sector => itemSectors.includes(sector))) {
         return false;
       }
     }
 
-    // Municipality filter
-    if (checkedMunicipalities.length > 0 && !checkedMunicipalities.includes(item.Municipality)) {
+    // Municipality filter - use filterState if form values are empty
+    const activeMunicipalities = checkedMunicipalities.length > 0 ? checkedMunicipalities : (filterState.checkedFilters['Municipality'] || []);
+    if (activeMunicipalities.length > 0 && !activeMunicipalities.includes(item.Municipality)) {
       return false;
     }
 
@@ -2012,7 +2023,7 @@ function updateURL() {
     'HBMSector': 'hbmsector',
     'Municipality': 'municipality'
   };
-  
+
   Object.keys(filterState.checkedFilters).forEach(section => {
     if (filterState.checkedFilters[section].length > 0) {
       const paramKey = sectionToParam[section] || section.toLowerCase();
@@ -2039,7 +2050,7 @@ function loadFromURL() {
     const searchTerm = params.get('search');
     filterState.searchTerm = searchTerm;
     currentFilter.searchTerm = searchTerm;
-    
+
     // Update search input
     const searchInput = document.getElementById('mapSearch');
     if (searchInput) {
@@ -2077,7 +2088,7 @@ function loadFromURL() {
     { section: 'HBMSector', param: 'hbmsector' },
     { section: 'Municipality', param: 'municipality' }
   ];
-  
+
   filterSections.forEach(({ section, param }) => {
     if (params.has(param)) {
       const values = params.get(param).split(',');
@@ -2378,14 +2389,14 @@ function activateTab(tabName) {
     // Remove active class from all tabs
     const tabButtons = document.querySelectorAll('.list-tab');
     const tabPanes = document.querySelectorAll('.tab-pane');
-    
+
     tabButtons.forEach(btn => btn.classList.remove('active'));
     tabPanes.forEach(pane => pane.classList.remove('active'));
-    
+
     // Add active class to specified tab
     const targetButton = document.querySelector(`[data-tab="${tabName}"]`);
     const targetPane = document.getElementById(tabName + 'Tab');
-    
+
     if (targetButton) {
       targetButton.classList.add('active');
     }
@@ -2404,3 +2415,19 @@ window.updateFilterState = updateFilterState;
 window.toggleAdvancedFilters = toggleAdvancedFilters;
 window.synchronizeTabWithTypes = synchronizeTabWithTypes;
 window.activateTab = activateTab;
+
+// Function to update checkboxes based on filter state
+function updateCheckboxesFromFilterState() {
+  // HBMTypes
+  document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
+    cb.checked = filterState.checkedTypes.includes(cb.value);
+  });
+
+  // Other filters
+  const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector', 'Municipality'];
+  filterSections.forEach(section => {
+    document.querySelectorAll(`input[name="${section}"]`).forEach(cb => {
+      cb.checked = filterState.checkedFilters[section]?.includes(cb.value) || false;
+    });
+  });
+}
