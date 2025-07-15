@@ -973,6 +973,63 @@ function formatArray(value) {
   return value || '';
 }
 
+// Format array with clickable filter links
+function formatArrayWithLinks(value, filterType, currentType) {
+  if (Array.isArray(value)) {
+    const typeLabel = currentType === 'Project' ? 'projecten' : 'bedrijven';
+    return value.map(val => 
+      `<span class="filter-link" onclick="applyFilterFromDetail('${filterType}', '${encodeURIComponent(val)}', '${currentType}')" title="Bekijk alle ${typeLabel} met kenmerk ${val}">${val}</span>`
+    ).join(', ');
+  }
+  return value ? formatSingleValueWithLink(value, filterType, currentType) : '';
+}
+
+// Format single value with clickable filter link
+function formatSingleValueWithLink(value, filterType, currentType) {
+  if (!value) return '';
+  const typeLabel = currentType === 'Project' ? 'projecten' : 'bedrijven';
+  return `<span class="filter-link" onclick="applyFilterFromDetail('${filterType}', '${encodeURIComponent(value)}', '${currentType}')" title="Bekijk alle ${typeLabel} met kenmerk ${value}">${value}</span>`;
+}
+
+// Apply filter from detail panel link
+function applyFilterFromDetail(filterType, filterValue, currentType) {
+  const decodedValue = decodeURIComponent(filterValue);
+  
+  // Clear all existing filters first
+  document.querySelectorAll('#filtersForm input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+  });
+  
+  // Set the type filter (Project or Bedrijf)
+  document.querySelectorAll('input[name="HBMType"]').forEach(cb => {
+    if (cb.value === currentType) {
+      cb.checked = true;
+    }
+  });
+  
+  // Set the specific filter value
+  const filterCheckbox = document.querySelector(`input[name="${filterType}"][value="${decodedValue}"]`);
+  if (filterCheckbox) {
+    filterCheckbox.checked = true;
+  }
+  
+  // Close detail panel
+  const detailPanel = document.getElementById('detailPanel');
+  if (detailPanel) {
+    detailPanel.classList.remove('open');
+  }
+  
+  // Update filter state and apply filters
+  updateFilterState();
+  
+  // Track event
+  trackEvent('filter_from_detail', {
+    filter_type: filterType,
+    filter_value: decodedValue,
+    current_type: currentType
+  });
+}
+
 function updateResultCount(count) {
   const resultElement = document.getElementById('resultsCount');
   if (resultElement) {
@@ -1683,12 +1740,12 @@ function openDetailPanel(item) {
         ${item.Description ? `<div class="detail-description"><h4>Beschrijving</h4><p>${item.Description}</p></div>` : ''}
 
         <div class="detail-specs">
-          ${item.ProjectType ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArray(item.ProjectType)}</div>` : ''}
-          ${item.OrganizationType ? `<div class="detail-row"><strong>Organisatie:</strong> ${item.OrganizationType}</div>` : ''}
-          ${item.OrganizationField ? `<div class="detail-row"><strong>Vakgebied:</strong> ${formatArray(item.OrganizationField)}</div>` : ''}
-          ${item.HBMTopic ? `<div class="detail-row"><strong>HBM Onderwerp:</strong> ${formatArray(item.HBMTopic)}</div>` : ''}
-          ${item.HBMCharacteristics ? `<div class="detail-row"><strong>Kenmerken:</strong> ${formatArray(item.HBMCharacteristics)}</div>` : ''}
-          ${item.HBMSector ? `<div class="detail-row"><strong>Sector:</strong> ${item.HBMSector}</div>` : ''}
+          ${item.ProjectType ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArrayWithLinks(item.ProjectType, 'ProjectType', item.HBMType)}</div>` : ''}
+          ${item.OrganizationType ? `<div class="detail-row"><strong>Organisatie:</strong> ${formatSingleValueWithLink(item.OrganizationType, 'OrganizationType', item.HBMType)}</div>` : ''}
+          ${item.OrganizationField ? `<div class="detail-row"><strong>Vakgebied:</strong> ${formatArrayWithLinks(item.OrganizationField, 'OrganizationField', item.HBMType)}</div>` : ''}
+          ${item.HBMTopic ? `<div class="detail-row"><strong>HBM Onderwerp:</strong> ${formatArrayWithLinks(item.HBMTopic, 'HBMTopic', item.HBMType)}</div>` : ''}
+          ${item.HBMCharacteristics ? `<div class="detail-row"><strong>Kenmerken:</strong> ${formatArrayWithLinks(item.HBMCharacteristics, 'HBMCharacteristics', item.HBMType)}</div>` : ''}
+          ${item.HBMSector ? `<div class="detail-row"><strong>Sector:</strong> ${formatSingleValueWithLink(item.HBMSector, 'HBMSector', item.HBMType)}</div>` : ''}
           ${item.Street || item.City ? `<div class="detail-row"><strong>Adres:</strong> ${[item.Street, item.Zip, item.City].filter(Boolean).join(', ')}</div>` : ''}
         </div>
       </div>

@@ -1246,11 +1246,11 @@ button {
 }
 
 .nav-icon-left {
-  transform: rotate(180deg);
+  transform: rotate(0deg);
 }
 
 .nav-icon-right {
-  transform: rotate(0deg);
+  transform: rotate(180deg);
 }
 
 .nav-counter {
@@ -1351,6 +1351,18 @@ button {
   min-width: 140px;
   color: rgb(38, 123, 41);
   font-weight: 600;
+}
+
+.filter-link {
+  color: rgb(38, 123, 41);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.filter-link:hover {
+  color: #267b29;
+  text-decoration: none;
 }
 
 .detail-actions {
@@ -1571,11 +1583,11 @@ button {
 }
 
 .popup-content .nav-icon-left {
-  transform: rotate(180deg);
+  transform: rotate(0deg);
 }
 
 .popup-content .nav-icon-right {
-  transform: rotate(0deg);
+  transform: rotate(180deg);
 }
 
 .popup-content .nav-counter {
