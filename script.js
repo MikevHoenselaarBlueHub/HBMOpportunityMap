@@ -1383,6 +1383,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  const showAllResultsBtn = document.getElementById('showAllResultsBtn');
+  if (showAllResultsBtn) {
+    showAllResultsBtn.addEventListener('click', function() {
+      showAllResults();
+      // Close dropdown after action
+      const filterDropdown = document.querySelector('.filter-dropdown');
+      if (filterDropdown) {
+        filterDropdown.classList.remove('open');
+      }
+    });
+  }
+
   // Location button
   const locationBtn = document.getElementById('useMyLocation');
   if (locationBtn) {
@@ -2568,6 +2580,44 @@ function escapeCsvValue(value) {
   return stringValue;
 }
 
+// Show all results function
+function showAllResults() {
+  const currentData = getCurrentFilteredData();
+  
+  if (currentData.length === 0) {
+    alert('Geen resultaten om te tonen.');
+    return;
+  }
+
+  // Get all coordinates from current filtered data
+  const validCoordinates = currentData
+    .filter(item => item.Latitude && item.Longitude)
+    .map(item => [item.Latitude, item.Longitude]);
+
+  if (validCoordinates.length === 0) {
+    alert('Geen geldige coördinaten gevonden voor huidige resultaten.');
+    return;
+  }
+
+  // Create a bounds object from all coordinates
+  const bounds = L.latLngBounds(validCoordinates);
+
+  // Fit the map to show all results with some padding
+  map.fitBounds(bounds, {
+    padding: [50, 50], // Add 50px padding on all sides
+    maxZoom: 15 // Don't zoom in too far
+  });
+
+  // Track the event
+  trackEvent('show_all_results', {
+    result_count: currentData.length,
+    bounds_northeast: bounds.getNorthEast(),
+    bounds_southwest: bounds.getSouthWest()
+  });
+
+  console.log(`Centered map to show all ${currentData.length} results`);
+}
+
 // Export for global access
 window.getCurrentLocation = getCurrentLocation;
 window.showDetails = showDetails;
@@ -2578,6 +2628,7 @@ window.toggleAdvancedFilters = toggleAdvancedFilters;
 window.synchronizeTabWithTypes = synchronizeTabWithTypes;
 window.activateTab = activateTab;
 window.exportCurrentResults = exportCurrentResults;
+window.showAllResults = showAllResults;
 
 // Function to update checkboxes based on filter state
 function updateCheckboxesFromFilterState() {
