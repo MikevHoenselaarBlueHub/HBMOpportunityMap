@@ -566,12 +566,20 @@ button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 1rem;
+}
+
+#filterBtn .filter-icon {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+  flex-shrink: 0;
 }
 
 .filter-icon {
   width: 16px;
   height: 16px;
-  filter: invert(1);
+  filter: brightness(0) invert(1);
 }
 
 #filterBtn:hover {

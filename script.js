@@ -820,24 +820,47 @@ function getCurrentLocation() {
         map.removeLayer(userLocationCircle);
       }
 
+      // Add user location marker
+      const userMarker = L.marker([latitude, longitude], {
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34]
+        })
+      }).addTo(map).bindPopup('Uw locatie');
+
+      // Add radius circle
       userLocationCircle = L.circle([latitude, longitude], {
         color: '#3388ff',
         fillColor: '#3388ff',
         fillOpacity: 0.2,
-        radius: radius
+        radius: radius * 1000
       }).addTo(map);
 
-      // Show distance filter
+      // Update UI
       const distanceFilter = document.getElementById('distanceFilter');
       if (distanceFilter) {
         distanceFilter.style.display = 'block';
       }
 
-      // Update location button
+      const distanceRange = document.getElementById('distanceRange');
+      const distanceValue = document.getElementById('distanceValue');
+      if (distanceRange && distanceValue) {
+        distanceRange.value = radius;
+        distanceValue.textContent = radius + ' km';
+      }
+
       const locationBtn = document.getElementById('useMyLocation');
       if (locationBtn) {
         locationBtn.innerHTML = '<span>📍 Locatie actief</span>';
         locationBtn.classList.add('active');
+      }
+
+      // Show clear location button
+      const clearLocationBtn = document.getElementById('clearLocation');
+      if (clearLocationBtn) {
+        clearLocationBtn.style.display = 'block';
       }
 
       // Apply filters
@@ -1045,6 +1068,43 @@ document.addEventListener('DOMContentLoaded', function() {
   if (locationBtn) {
     locationBtn.addEventListener('click', getCurrentLocation);
   }
+
+    // Clear location button
+    const clearLocationBtn = document.getElementById('clearLocation');
+    if (clearLocationBtn) {
+      clearLocationBtn.addEventListener('click', function() {
+        // Remove user location
+        currentFilter.userLocation = null;
+        filterState.userLocation = null;
+  
+        // Remove circle
+        if (userLocationCircle) {
+          map.removeLayer(userLocationCircle);
+        }
+  
+        // Hide distance filter
+        const distanceFilter = document.getElementById('distanceFilter');
+        if (distanceFilter) {
+          distanceFilter.style.display = 'none';
+        }
+  
+        // Update location button
+        const locationBtn = document.getElementById('useMyLocation');
+        if (locationBtn) {
+          locationBtn.innerHTML = '<span>📍 Gebruik mijn locatie</span>';
+          locationBtn.classList.remove('active');
+        }
+
+          // Hide clear location button
+          const clearLocationBtn = document.getElementById('clearLocation');
+          if (clearLocationBtn) {
+            clearLocationBtn.style.display = 'none';
+          }
+  
+        // Apply filters
+        applyFilters();
+      });
+    }
 
   // Distance range slider
   const distanceRange = document.getElementById('distanceRange');
@@ -1551,16 +1611,53 @@ function loadFromURL() {
     if (map) {
       map.setView([lat, lng], 12);
 
+      // Add user location marker and circle
       if (userLocationCircle) {
         map.removeLayer(userLocationCircle);
       }
 
+      // Add user location marker
+      const userMarker = L.marker([lat, lng], {
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34]
+        })
+      }).addTo(map).bindPopup('Uw locatie');
+
+      // Add radius circle
       userLocationCircle = L.circle([lat, lng], {
         color: '#3388ff',
         fillColor: '#3388ff',
         fillOpacity: 0.2,
         radius: radius * 1000
       }).addTo(map);
+
+      // Update UI
+      const distanceFilter = document.getElementById('distanceFilter');
+      if (distanceFilter) {
+        distanceFilter.style.display = 'block';
+      }
+
+      const distanceRange = document.getElementById('distanceRange');
+      const distanceValue = document.getElementById('distanceValue');
+      if (distanceRange && distanceValue) {
+        distanceRange.value = radius;
+        distanceValue.textContent = radius + ' km';
+      }
+
+      const locationBtn = document.getElementById('useMyLocation');
+      if (locationBtn) {
+        locationBtn.innerHTML = '<span>📍 Locatie actief</span>';
+        locationBtn.classList.add('active');
+      }
+
+      // Show clear location button
+      const clearLocationBtn = document.getElementById('clearLocation');
+      if (clearLocationBtn) {
+        clearLocationBtn.style.display = 'block';
+      }
     }
   }
 }
@@ -1622,16 +1719,53 @@ function loadSavedFilter(filterName) {
     if (map) {
       map.setView([filterState.userLocation.lat, filterState.userLocation.lng], 12);
 
+      // Add user location marker and circle
       if (userLocationCircle) {
         map.removeLayer(userLocationCircle);
       }
 
+      // Add user location marker
+      const userMarker = L.marker([filterState.userLocation.lat, filterState.userLocation.lng], {
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34]
+        })
+      }).addTo(map).bindPopup('Uw locatie');
+
+      // Add radius circle
       userLocationCircle = L.circle([filterState.userLocation.lat, filterState.userLocation.lng], {
         color: '#3388ff',
         fillColor: '#3388ff',
         fillOpacity: 0.2,
         radius: filterState.radius * 1000
       }).addTo(map);
+
+      // Update UI
+      const distanceFilter = document.getElementById('distanceFilter');
+      if (distanceFilter) {
+        distanceFilter.style.display = 'block';
+      }
+
+      const distanceRange = document.getElementById('distanceRange');
+      const distanceValue = document.getElementById('distanceValue');
+      if (distanceRange && distanceValue) {
+        distanceRange.value = filterState.radius;
+        distanceValue.textContent = filterState.radius + ' km';
+      }
+
+      const locationBtn = document.getElementById('useMyLocation');
+      if (locationBtn) {
+        locationBtn.innerHTML = '<span>📍 Locatie actief</span>';
+        locationBtn.classList.add('active');
+      }
+
+      // Show clear location button
+      const clearLocationBtn = document.getElementById('clearLocation');
+      if (clearLocationBtn) {
+        clearLocationBtn.style.display = 'block';
+      }
     }
   }
 
