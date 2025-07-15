@@ -242,7 +242,8 @@ header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-right: 180px; /* Make space for Interreg logo */
+  margin-right: 180px;
+  /* Make space for Interreg logo */
 }
 
 #hamburger {
@@ -256,7 +257,7 @@ header {
 #desktopNav {
   display: none;
   gap: 1rem;
-  margin-right: 180px; /* Make space for Interreg logo */
+  margin-right: 210px;
 }
 
 @media (min-width: 769px) {
@@ -1231,7 +1232,7 @@ button {
 /* === Map Legend === */
 .map-legend {
   position: fixed;
-  bottom: 1rem;
+  bottom: 5rem;
   left: 1rem;
   background: rgba(255, 255, 255, 0.95);
   padding: 1rem;
@@ -2210,10 +2211,5 @@ button {
     gap: 0.5rem;
   }
 }
-            <button id="showAllResultsBtn" class="dropdown-item">
-              Toon alle resultaten
-            </button>
-            <button id="showAllOnMapBtn" class="dropdown-item">
-              Alles in beeld
-            </button>
-</media>
+
+<button id="showAllResultsBtn" class="dropdown-item">Toon alle resultaten </button><button id="showAllOnMapBtn" class="dropdown-item">Alles in beeld </button></media>
