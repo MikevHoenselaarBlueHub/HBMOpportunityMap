@@ -295,9 +295,41 @@ git push origin feature/amazing-feature
 - **Icons**: Custom SVG icon set
 - **Gemeente data**: Open data van Nederlandse en Duitse overheden
 
-## 🔧 Replit Deployment Notities
+## 🔧 Template Structuur & Maintenance
 
-### Belangrijke Wijzigingen
+### Header/Footer Consistentie
+**⚠️ Voor wijzigingen aan headers, footers en algemene elementen:**
+
+#### Huidige Structuur (Handmatige Updates)
+- **Interreg Logo**: Alle pagina's bevatten het Interreg logo in de header
+- **Navigatie**: Dezelfde navigatiestructuur op alle pagina's
+- **Logo's**: HBM en Interreg logo consistent gepositioneerd
+
+#### Bij wijzigingen aan gemeenschappelijke elementen:
+1. **Header wijzigingen**: Update de volgende bestanden:
+   - `index.html` (hoofdpagina)
+   - `info.html` (informatie pagina)
+   - `over.html` (over HBM pagina)
+   - `contact.html` (contact pagina)
+
+2. **CSS wijzigingen**: Alle stijlen staan in `style.css`
+   - Logo positionering: `#interreg-logo` en `#logo`
+   - Header layout: `header`, `#branding`, `#desktopNav`
+   - Responsive behavior: Media queries voor verschillende schermgroottes
+
+3. **Link wijzigingen**: Interreg logo linkt naar:
+   - URL: `https://www.interregeurope.eu/project-results`
+   - Target: `_blank` met `rel="noopener noreferrer"`
+
+#### Toekomstige Verbetering: Template Systeem
+Voor efficiëntere maintenance zou een template systeem nuttig zijn:
+- **Include bestanden**: Header/footer als aparte bestanden
+- **Build proces**: Automatische samenvoeging van templates
+- **Component systeem**: Herbruikbare header/footer componenten
+
+### Replit Deployment Notities
+
+#### Belangrijke Wijzigingen
 **⚠️ Bij belangrijke updates moet deze README.md bijgewerkt worden met:**
 - Nieuwe functionaliteiten en hun status
 - Wijzigingen in de technische architectuur

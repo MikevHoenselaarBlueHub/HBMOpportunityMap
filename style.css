@@ -1305,14 +1305,20 @@ button {
   background: #2196F3;
 }
 
-.legend-icon.project::after {
-  content: '🏗️';
-  font-size: 14px;
+.legend-icon.project {
+  background-image: url('icons/marker-project.svg');
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: #FF6B35;
 }
 
-.legend-icon.company::after {
-  content: '🏢';
-  font-size: 14px;
+.legend-icon.company {
+  background-image: url('icons/marker-company.svg');
+  background-size: 16px 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: #2196F3;
 }
 
 #detailPanel {
