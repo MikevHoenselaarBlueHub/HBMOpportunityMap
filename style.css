@@ -1857,11 +1857,4 @@ button {
   .location-filter-controls {
     gap: 0.5rem;
   }
-}
-/* === Export for global access === */
-window.getCurrentLocation = getCurrentLocation;
-window.showDetails = showDetails;
-window.openContactForm = openContactForm;
-window.trackEvent = trackEvent;
-window.updateFilterState = updateFilterState;
-window.toggleAdvancedFilters = toggleAdvancedFilters;
+}ters;

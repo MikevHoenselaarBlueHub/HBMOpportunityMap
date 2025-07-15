@@ -1,10 +1,9 @@
-
 // Map Configuration
 const mapConfig = {
   // Default map center (Euregio Maas-Rijn)
   defaultCenter: [51.2, 6.0],
   defaultZoom: 9,
-  
+
   // Tile layer configuration for simplified map
   tileLayer: {
     url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
@@ -14,7 +13,7 @@ const mapConfig = {
       maxZoom: 20
     }
   },
-  
+
   // Municipality styling
   municipalityStyle: {
     default: {
@@ -35,7 +34,7 @@ const mapConfig = {
       dashArray: '5, 8'
     }
   },
-  
+
   // Marker configuration
   markers: {
     project: {
@@ -51,7 +50,7 @@ const mapConfig = {
       popupAnchor: [0, -40]
     }
   },
-  
+
   // Cluster configuration
   cluster: {
     maxClusterRadius: 50,

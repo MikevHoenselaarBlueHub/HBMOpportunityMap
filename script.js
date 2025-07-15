@@ -70,7 +70,7 @@ if (isMapPage && !isInfoPage && !isOverPage) {
       trackPageView('Kansenkaart');
 
       // Data laden
-      fetch(`data/opportunities.json${getCacheBustParam()}`)
+      fetch(`data/opportunities.json?v=${APP_VERSION}`)
         .then(res => {
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -1025,7 +1025,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Close dropdown when clicking outside
-```text
     document.addEventListener('click', function(e) {
       if (!filterDropdown.contains(e.target)) {
         filterDropdown.classList.remove('open');
