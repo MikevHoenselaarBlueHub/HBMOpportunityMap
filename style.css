@@ -1500,6 +1500,66 @@ button {
   white-space: normal;
 }
 
+/* === Popup navigation === */
+.popup-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.popup-content .nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgb(38, 123, 41);
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.popup-content .nav-btn:hover:not(.disabled) {
+  background: rgb(38, 123, 41);
+}
+
+.popup-content .nav-btn:hover:not(.disabled) .nav-icon {
+  filter: invert(1);
+}
+
+.popup-content .nav-btn.disabled {
+  border-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.popup-content .nav-icon {
+  width: 12px;
+  height: 12px;
+  transition: filter 0.2s ease;
+}
+
+.popup-content .nav-icon-left {
+  transform: rotate(90deg);
+}
+
+.popup-content .nav-icon-right {
+  transform: rotate(-90deg);
+}
+
+.popup-content .nav-counter {
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 500;
+  min-width: 50px;
+  text-align: center;
+}
+
 /* === Municipality popup styling === */
 .municipality-popup {
   padding: 15px;

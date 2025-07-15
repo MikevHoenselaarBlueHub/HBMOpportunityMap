@@ -279,17 +279,28 @@ function initMap() {
     position: 'bottomright'
   }).addTo(map);
 
-  // Add simplified tile layer
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  // Define base layers
+  const streetLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap contributors © CARTO',
     maxZoom: 18
-  }).addTo(map);
+  });
+
+  const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '© Esri, Maxar, Earthstar Geographics',
+    maxZoom: 18
+  });
+
+  // Add default street layer
+  streetLayer.addTo(map);
 
   // Initialize municipality layer
   municipalityLayer = L.layerGroup();
 
-  // Add layer control for municipalities
-  const layerControl = L.control.layers({}, {
+  // Add layer control with base layers and overlays
+  const layerControl = L.control.layers({
+    'Kaart': streetLayer,
+    'Satelliet': satelliteLayer
+  }, {
     'Gemeentegrenzen': municipalityLayer
   }, {
     position: 'topright'
@@ -793,8 +804,22 @@ function hideHoverLabel() {
 }
 
 function createPopupContent(item) {
+  // Find current item index in filtered data
+  const currentData = getCurrentFilteredData();
+  const currentIndex = currentData.findIndex(d => d.Name === item.Name);
+  const totalItems = currentData.length;
+
   return `
     <div class="popup-content">
+      <div class="popup-navigation">
+        <button id="prevPopup" class="nav-btn ${currentIndex === 0 ? 'disabled' : ''}" ${currentIndex === 0 ? 'disabled' : ''} onclick="navigatePopup('${encodeURIComponent(item.Name)}', 'prev')">
+          <img src="icons/arrow-left.svg" alt="Vorige" class="nav-icon nav-icon-left" />
+        </button>
+        <span class="nav-counter">${currentIndex + 1} / ${totalItems}</span>
+        <button id="nextPopup" class="nav-btn ${currentIndex === totalItems - 1 ? 'disabled' : ''}" ${currentIndex === totalItems - 1 ? 'disabled' : ''} onclick="navigatePopup('${encodeURIComponent(item.Name)}', 'next')">
+          <img src="icons/arrow-right.svg" alt="Volgende" class="nav-icon nav-icon-right" />
+        </button>
+      </div>
       <h3>${item.Name || 'Onbekend'}</h3>
       
       ${item.Description ? `<p class="description">${item.Description}</p>` : ''}
@@ -1525,6 +1550,41 @@ function createListItem(item) {
   return div;
 }
 
+// Popup navigation function
+function navigatePopup(currentItemName, direction) {
+  const decodedName = decodeURIComponent(currentItemName);
+  const currentData = getCurrentFilteredData();
+  const currentIndex = currentData.findIndex(d => d.Name === decodedName);
+  
+  let newIndex;
+  if (direction === 'prev' && currentIndex > 0) {
+    newIndex = currentIndex - 1;
+  } else if (direction === 'next' && currentIndex < currentData.length - 1) {
+    newIndex = currentIndex + 1;
+  } else {
+    return; // No navigation possible
+  }
+  
+  const newItem = currentData[newIndex];
+  if (newItem && newItem.Latitude && newItem.Longitude) {
+    // Close current popup and open new one
+    map.closePopup();
+    
+    // Find the marker for the new item
+    markers.eachLayer(function(marker) {
+      if (marker.itemData && marker.itemData.Name === newItem.Name) {
+        // Center map on new marker
+        map.setView([newItem.Latitude, newItem.Longitude], map.getZoom());
+        
+        // Open popup for new marker
+        setTimeout(() => {
+          marker.openPopup();
+        }, 100);
+      }
+    });
+  }
+}
+
 // Global functions for popup actions
 function showDetails(itemName) {
   const decodedName = decodeURIComponent(itemName);
@@ -1581,8 +1641,7 @@ function openDetailPanel(item) {
         ${item.Description ? `<div class="detail-description"><h4>Beschrijving</h4><p>${item.Description}</p></div>` : ''}
 
         <div class="detail-specs">
-          ${item.HBMType === 'Project' && item.ProjectType ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArray(item.ProjectType)}</div>` : ''}
-          ${item.HBMType === 'Bedrijf' && item.ProjectType ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArray(item.ProjectType)}</div>` : ''}
+          ${item.ProjectType ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArray(item.ProjectType)}</div>` : ''}
           ${item.OrganizationType ? `<div class="detail-row"><strong>Organisatie:</strong> ${item.OrganizationType}</div>` : ''}
           ${item.OrganizationField ? `<div class="detail-row"><strong>Vakgebied:</strong> ${formatArray(item.OrganizationField)}</div>` : ''}
           ${item.HBMTopic ? `<div class="detail-row"><strong>HBM Onderwerp:</strong> ${formatArray(item.HBMTopic)}</div>` : ''}
