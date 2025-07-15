@@ -47,7 +47,7 @@ if (isMapPage && !isInfoPage && !isOverPage) {
         zoomToBoundsOnClick: true
       });
 
-      // Initialize icons
+      // Initialize icons with updated colors
       pIcon = L.icon({
         iconUrl: 'icons/marker-project.svg',
         iconSize: [32, 32],
@@ -669,12 +669,40 @@ function createMarkers(data) {
   let markerCount = 0;
   data.forEach(item => {
     if (item.Latitude && item.Longitude) {
-      const icon = item.HBMType === 'Project' ? pIcon : bIcon;
+      let marker;
       markerCount++;
 
-      const marker = L.marker([item.Latitude, item.Longitude], {
-        icon: icon
-      });
+      // Check if item has an image (Logo for companies, ProjectImage for projects)
+      const hasImage = (item.HBMType === 'Bedrijf' && item.Logo) || (item.HBMType === 'Project' && item.ProjectImage);
+      
+      if (hasImage) {
+        // Create custom image marker
+        const imageUrl = item.HBMType === 'Bedrijf' ? item.Logo : item.ProjectImage;
+        const borderColor = item.HBMType === 'Project' ? 'rgb(255, 107, 53)' : 'rgb(33, 150, 243)';
+        
+        const customIcon = L.divIcon({
+          className: item.HBMType === 'Bedrijf' ? 'logo-marker' : 'photo-marker',
+          html: `
+            <div class="${item.HBMType === 'Bedrijf' ? 'logo-marker-container' : 'photo-marker-container'}" style="border-color: ${borderColor};">
+              <img src="${imageUrl}" alt="${item.Name}" class="${item.HBMType === 'Bedrijf' ? 'logo-marker-image' : 'photo-marker-image'}" onerror="this.parentElement.innerHTML='<div class=\\'fallback-marker\\' style=\\'background: ${borderColor}\\'></div>'">
+              <div class="${item.HBMType === 'Bedrijf' ? 'logo-marker-overlay' : 'photo-marker-overlay'}"></div>
+            </div>
+          `,
+          iconSize: [50, 50],
+          iconAnchor: [25, 25],
+          popupAnchor: [0, -25]
+        });
+        
+        marker = L.marker([item.Latitude, item.Longitude], {
+          icon: customIcon
+        });
+      } else {
+        // Use default SVG icon
+        const icon = item.HBMType === 'Project' ? pIcon : bIcon;
+        marker = L.marker([item.Latitude, item.Longitude], {
+          icon: icon
+        });
+      }
 
       // Create popup content
       const popupContent = createPopupContent(item);
@@ -1563,11 +1591,81 @@ function getCurrentFilteredData() {
 
   // Get filter values from form
   const checkedTypes = Array.from(document.querySelectorAll('input[name="HBMType"]:checked')).map(cb => cb.value);
+  const checkedProjectTypes = Array.from(document.querySelectorAll('input[name="ProjectType"]:checked')).map(cb => cb.value);
+  const checkedOrganizationTypes = Array.from(document.querySelectorAll('input[name="OrganizationType"]:checked')).map(cb => cb.value);
+  const checkedOrganizationFields = Array.from(document.querySelectorAll('input[name="OrganizationField"]:checked')).map(cb => cb.value);
+  const checkedHBMTopics = Array.from(document.querySelectorAll('input[name="HBMTopic"]:checked')).map(cb => cb.value);
+  const checkedHBMCharacteristics = Array.from(document.querySelectorAll('input[name="HBMCharacteristics"]:checked')).map(cb => cb.value);
+  const checkedHBMSectors = Array.from(document.querySelectorAll('input[name="HBMSector"]:checked')).map(cb => cb.value);
+  const checkedMunicipalities = Array.from(document.querySelectorAll('input[name="Municipality"]:checked')).map(cb => cb.value);
 
   return window.data.filter(item => {
     // Type filter (Project/Bedrijf checkboxes)
     if (checkedTypes.length > 0 && !checkedTypes.includes(item.HBMType)) {
       return false;
+    }
+
+    // ProjectType filter
+    if (checkedProjectTypes.length > 0) {
+      const itemProjectTypes = Array.isArray(item.ProjectType) ? item.ProjectType : [item.ProjectType].filter(Boolean);
+      if (!checkedProjectTypes.some(type => itemProjectTypes.includes(type))) {
+        return false;
+      }
+    }
+
+    // OrganizationType filter
+    if (checkedOrganizationTypes.length > 0) {
+      const itemOrganizationTypes = Array.isArray(item.OrganizationType) ? item.OrganizationType : [item.OrganizationType].filter(Boolean);
+      if (!checkedOrganizationTypes.some(type => itemOrganizationTypes.includes(type))) {
+        return false;
+      }
+    }
+
+    // OrganizationField filter
+    if (checkedOrganizationFields.length > 0) {
+      const itemFields = Array.isArray(item.OrganizationField) ? item.OrganizationField : [item.OrganizationField].filter(Boolean);
+      if (!checkedOrganizationFields.some(field => itemFields.includes(field))) {
+        return false;
+      }
+    }
+
+    // HBMTopic filter
+    if (checkedHBMTopics.length > 0) {
+      const itemTopics = Array.isArray(item.HBMTopic) ? item.HBMTopic : [item.HBMTopic].filter(Boolean);
+      if (!checkedHBMTopics.some(topic => itemTopics.includes(topic))) {
+        return false;
+      }
+    }
+
+    // HBMCharacteristics filter
+    if (checkedHBMCharacteristics.length > 0) {
+      const itemCharacteristics = Array.isArray(item.HBMCharacteristics) ? item.HBMCharacteristics : [item.HBMCharacteristics].filter(Boolean);
+      if (!checkedHBMCharacteristics.some(characteristic => itemCharacteristics.includes(characteristic))) {
+        return false;
+      }
+    }
+
+    // HBMSector filter
+    if (checkedHBMSectors.length > 0) {
+      const itemSectors = Array.isArray(item.HBMSector) ? item.HBMSector : [item.HBMSector].filter(Boolean);
+      if (!checkedHBMSectors.some(sector => itemSectors.includes(sector))) {
+        return false;
+      }
+    }
+
+    // Municipality filter
+    if (checkedMunicipalities.length > 0 && !checkedMunicipalities.includes(item.Municipality)) {
+      return false;
+    }
+
+    // Search filter
+    if (currentFilter.searchTerm) {
+      const searchLower = currentFilter.searchTerm.toLowerCase();
+      const nameMatch = item.Name && item.Name.toLowerCase().includes(searchLower);
+      const descMatch = item.Description && item.Description.toLowerCase().includes(searchLower);
+      if (!nameMatch && !descMatch) {
+        return false;
+      }
     }
 
     // Location filter (if user location is set)
