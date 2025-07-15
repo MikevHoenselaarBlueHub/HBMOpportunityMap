@@ -2002,10 +2002,21 @@ function updateURL() {
     params.set('search', filterState.searchTerm.trim());
   }
 
-  // Add other filters
+  // Add other filters - mapping filter sections to URL parameters
+  const sectionToParam = {
+    'ProjectType': 'projecttype',
+    'OrganizationType': 'organizationtype', 
+    'OrganizationField': 'organizationfield',
+    'HBMTopic': 'hbmtopic',
+    'HBMCharacteristics': 'hbmcharacteristics',
+    'HBMSector': 'hbmsector',
+    'Municipality': 'municipality'
+  };
+  
   Object.keys(filterState.checkedFilters).forEach(section => {
     if (filterState.checkedFilters[section].length > 0) {
-      params.set(section.toLowerCase(), filterState.checkedFilters[section].join(','));
+      const paramKey = sectionToParam[section] || section.toLowerCase();
+      params.set(paramKey, filterState.checkedFilters[section].join(','));
     }
   });
 
@@ -2056,12 +2067,20 @@ function loadFromURL() {
     activateTab('buildings');
   }
 
-  // Load other filters
-  const filterSections = ['ProjectType', 'OrganizationType', 'OrganizationField', 'HBMTopic', 'HBMCharacteristics', 'HBMSector', 'Municipality'];
-  filterSections.forEach(section => {
-    const paramKey = section.toLowerCase();
-    if (params.has(paramKey)) {
-      const values = params.get(paramKey).split(',');
+  // Load other filters - mapping URL parameters to filter sections
+  const filterSections = [
+    { section: 'ProjectType', param: 'projecttype' },
+    { section: 'OrganizationType', param: 'organizationtype' },
+    { section: 'OrganizationField', param: 'organizationfield' },
+    { section: 'HBMTopic', param: 'hbmtopic' },
+    { section: 'HBMCharacteristics', param: 'hbmcharacteristics' },
+    { section: 'HBMSector', param: 'hbmsector' },
+    { section: 'Municipality', param: 'municipality' }
+  ];
+  
+  filterSections.forEach(({ section, param }) => {
+    if (params.has(param)) {
+      const values = params.get(param).split(',');
       filterState.checkedFilters[section] = values;
 
       // Update checkboxes when they exist
