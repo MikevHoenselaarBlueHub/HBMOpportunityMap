@@ -228,7 +228,7 @@
                     checked=""
                     onchange="updateFilterState()"
                   />
-                  <span data-i18n="projects">Projecten</span></label
+                  <span data-i18n="projects">Gezond gebouw</span></label
                 >
                 <label
                   ><input
@@ -238,7 +238,7 @@
                     checked=""
                     onchange="updateFilterState()"
                   />
-                  <span data-i18n="companies">Bedrijven</span></label
+                  <span data-i18n="companies">Partner</span></label
                 >
                 <label
                   ><input
@@ -343,7 +343,9 @@
     </div>
 
     <!-- Apply filters button positioned outside filter overlay -->
-    <button type="button" id="applyFilters" style="display: none;">Toepassen</button>
+    <button type="button" id="applyFilters" style="display: none">
+      Toepassen
+    </button>
 
     <main class="main-content">
       <div id="map" class="map-container"></div>
@@ -356,7 +358,7 @@
               Gezonde gebouwen <span id="buildingsCount">(0)</span>
             </button>
             <button class="list-tab" data-tab="companies">
-              Bedrijven <span id="companiesCount">(0)</span>
+              Partners <span id="companiesCount">(0)</span>
             </button>
             <button class="list-tab" data-tab="experts">Experts</button>
           </div>
@@ -412,13 +414,13 @@
         <div class="legend-icon company">
           <img src="icons/partner.svg" alt="Bedrijf Icoon" />
         </div>
-        <span data-i18n="companies">Bedrijven</span>
+        <span data-i18n="companies">Partner</span>
       </div>
       <div class="legend-item">
         <div class="legend-icon project">
           <img src="icons/healthy-building.svg" alt="Project Icoon" />
         </div>
-        <span data-i18n="projects">Projecten</span>
+        <span data-i18n="projects">Gezond gebouw</span>
       </div>
     </div>
 

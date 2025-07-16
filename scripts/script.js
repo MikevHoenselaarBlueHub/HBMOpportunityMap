@@ -50,13 +50,13 @@ if (isMapPage) {
 
       // Initialize icons with updated colors
       pIcon = L.icon({
-        iconUrl: "icons/marker-project.svg",
+        iconUrl: "icons/healthy-building.svg",
         iconSize: [32, 32],
         iconAnchor: [16, 32],
         popupAnchor: [0, -32],
       });
       bIcon = L.icon({
-        iconUrl: "icons/marker-company.svg",
+        iconUrl: "icons/partner.svg",
         iconSize: [32, 32],
         iconAnchor: [16, 32],
         popupAnchor: [0, -32],
@@ -906,12 +906,10 @@ function createMarkers(data) {
         // Create white circle marker with icon
         const iconUrl =
           item.HBMType === "Project"
-            ? "icons/marker-project.svg"
-            : "icons/marker-company.svg";
+            ? "icons/healthy-building.svg"
+            : "icons/partner.svg";
         const borderColor =
-          item.HBMType === "Project"
-            ? "rgb(255, 107, 53)"
-            : "rgb(33, 150, 243)";
+          item.HBMType === "Project" ? "rgb(139, 179, 17)" : "rgb(22, 65, 148)";
 
         const customIcon = L.divIcon({
           className: "default-marker",
@@ -1876,14 +1874,14 @@ function initializeFilters() {
   if (filterBtn && filterOverlay) {
     filterBtn.addEventListener("click", function () {
       filterOverlay.classList.add("open");
-      
+
       // Show apply button on mobile when filter overlay is opened
       if (applyBtn) {
-        if (window.innerWidth <= 768) {
-          applyBtn.style.display = "block";
-        } else {
-          applyBtn.style.display = "none";
-        }
+        //if (window.innerWidth <= 768) {
+        applyBtn.style.display = "block";
+        //} else {
+        //applyBtn.style.display = "none";
+        //}
       }
     });
   }
@@ -1891,7 +1889,7 @@ function initializeFilters() {
   if (closeFiltersBtn && filterOverlay) {
     closeFiltersBtn.addEventListener("click", function () {
       filterOverlay.classList.remove("open");
-      
+
       // Hide apply button when filter overlay is closed
       if (applyBtn) {
         applyBtn.style.display = "none";
@@ -1968,9 +1966,10 @@ function initializeFilters() {
     window.addEventListener("resize", function () {
       const applyBtn = document.getElementById("applyFilters");
       if (applyBtn) {
-        if (window.innerWidth > 768) {
-          applyBtn.style.display = "none";
-        } else if (filterOverlay.classList.contains("open")) {
+        //if (window.innerWidth > 768) {
+        //applyBtn.style.display = "none";
+        //} else
+        if (filterOverlay.classList.contains("open")) {
           applyBtn.style.display = "block";
         } else {
           applyBtn.style.display = "none";
