@@ -1511,7 +1511,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (listContainer && listContainer.classList.contains('show')) {
           listContainer.classList.remove('show');
           if (toggleText) {
-            toggleText.textContent = 'Lijst';
+            toggleText.innerHTML = '<img src="icons/listview.svg" alt="Lijst" class="listmapview-icon" /> Lijst';
           }
         }
       }
@@ -1805,8 +1805,16 @@ function initializeListView() {
         listContainer.classList.toggle('show');
         const isShowing = listContainer.classList.contains('show');
         const toggleText = viewToggle.querySelector('#viewToggleText');
-        if (toggleText) {
-          toggleText.textContent = isShowing ? 'Kaart' : 'Lijst';
+        const toggleIcon = viewToggle.querySelector('.listmapview-icon');
+        
+        if (toggleText && toggleIcon) {
+          if (isShowing) {
+            // Showing list, so button should show "Kaart" with map icon
+            toggleText.innerHTML = '<img src="icons/map-view.svg" alt="Kaart" class="listmapview-icon" /> Kaart';
+          } else {
+            // Showing map, so button should show "Lijst" with list icon
+            toggleText.innerHTML = '<img src="icons/listview.svg" alt="Lijst" class="listmapview-icon" /> Lijst';
+          }
         }
 
         // Track the toggle event
@@ -1821,11 +1829,11 @@ function initializeListView() {
   window.addEventListener('resize', function() {
     const listContainer = document.querySelector('.list-container');
     if (listContainer && window.innerWidth > 768) {
-      // On desktop, ensure list is always visible and reset toggle text
+      // On desktop, ensure list is always visible and reset toggle text and icon
       listContainer.classList.remove('show');
       const toggleText = viewToggle?.querySelector('#viewToggleText');
       if (toggleText) {
-        toggleText.textContent = 'Lijst';
+        toggleText.innerHTML = '<img src="icons/listview.svg" alt="Lijst" class="listmapview-icon" /> Lijst';
       }
     }
   });
