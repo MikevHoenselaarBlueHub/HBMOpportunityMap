@@ -1588,38 +1588,6 @@ button {
   width: 24px;
   height: 24px;
   flex-shrink: 0;
-  border-radius: 3px;
-  background: #2196F3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  font-size: 0.8rem;
-}
-
-.legend-icon.project {
-  background: #FF6B35;
-}
-
-.legend-icon.company {
-  background: #2196F3;
-}
-
-.legend-icon.project {
-  background-image: url('icons/marker-project.svg');
-  background-size: 16px 16px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: #FF6B35;
-}
-
-.legend-icon.company {
-  background-image: url('icons/marker-company.svg');
-  background-size: 16px 16px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: #2196F3;
 }
 
 #detailPanel {
@@ -2192,18 +2160,18 @@ button {
 
 .municipality-btn {
   padding: 0.75rem 1rem;
-  background: rgb(38, 123, 41);
-  color: white;
-  border: none;
+  background: white;
+  color: black;
+  border: 2px solid black;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: bold;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
 .municipality-btn:hover {
-  background: rgb(28, 93, 31);
+  background: #f0f0f0;
 }
 
 .municipality-btn:active {
@@ -2460,25 +2428,25 @@ button {
 }
 
 .location-btn {
-  background: rgb(38, 123, 41);
-  color: white;
-  border: none;
+  background: white;
+  color: black;
+  border: 2px solid black;
   padding: 0.75rem 1rem;
   border-radius: 4px;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
   display: inline-block;
   width: auto;
   max-width: 250px;
 }
 
 .location-btn:hover {
-  background: rgb(28, 93, 31);
+  background: #f0f0f0;
 }
 
 .location-btn.active {
-  background: rgb(28, 93, 31);
+  background: #f0f0f0;
 }
 
 .clear-location-btn {

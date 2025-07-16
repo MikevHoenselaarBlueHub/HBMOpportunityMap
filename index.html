@@ -21,7 +21,7 @@
       <div id="branding">
         <a href="index.html" class="logo-link">
           <img
-            src="logo-hbm.svg"
+            src="images/logo-hbm.svg"
             alt="HBM Logo"
             id="logo"
             onerror="this.style.display='none'"
@@ -227,7 +227,7 @@
             <div class="filter-group">
               <strong data-i18n="locationFilter">Locatie Filter</strong>
               <div class="location-filter-controls">
-                <button type="button" id="useMyLocation" class="location-btn">
+                <button type="button" id="useMyLocation" class="location-btn"  style="background-color: white; border: 1px solid black; color: black;">
                   <span data-i18n="useMyLocation"
                     >📍 Mijn locatie gebruiken</span
                   >
@@ -236,7 +236,7 @@
                   type="button"
                   id="clearLocation"
                   class="location-btn clear-location-btn"
-                  style="display: none"
+                  style="display: none; background-color: white; border: 1px solid black; color: black;"
                 >
                   <span>❌ Locatie wissen</span>
                 </button>
@@ -364,11 +364,11 @@
     <div id="mapLegend" class="map-legend">
       <h4 data-i18n="legend">Legenda</h4>
       <div class="legend-item">
-        <div class="legend-icon company">🏢</div>
+        <div class="legend-icon company"><img src="icons/marker-company.svg" alt="Bedrijf Icoon"></div>
         <span data-i18n="companies">Bedrijven</span>
       </div>
       <div class="legend-item">
-        <div class="legend-icon project">🏗️</div>
+        <div class="legend-icon project"><img src="icons/marker-project.svg" alt="Project Icoon"></div>
         <span data-i18n="projects">Projecten</span>
       </div>
     </div>
@@ -418,6 +418,22 @@
     />
     <script src="config/version.js"></script>
     <script src="config/map-config.js"></script>
-    <script src="script.js"></script>
+    <script src="scripts/script.js"></script>
   </body>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/scripts/sw.js');
+    }
+
+    const municipalityDiv = document.getElementById('Municipality');
+
+    if (municipalityDiv) {
+      const buttons = municipalityDiv.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.style.backgroundColor = 'white';
+        button.style.border = '1px solid black';
+        button.style.color = 'black';
+      });
+    }
+  </script>
 </html>
