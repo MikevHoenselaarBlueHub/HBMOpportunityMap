@@ -38,13 +38,13 @@ const mapConfig = {
   // Marker configuration
   markers: {
     project: {
-      iconUrl: 'icons/marker-project.svg',
+      iconUrl: 'icons/healthy-building.svg',
       iconSize: [30, 40],
       iconAnchor: [15, 40],
       popupAnchor: [0, -40]
     },
     company: {
-      iconUrl: 'icons/marker-company.svg', 
+      iconUrl: 'icons/partner.svg', 
       iconSize: [30, 40],
       iconAnchor: [15, 40],
       popupAnchor: [0, -40]
