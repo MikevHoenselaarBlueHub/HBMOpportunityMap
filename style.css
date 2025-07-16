@@ -723,7 +723,8 @@ button {
 }
 
 #selectAll,
-#selectNone {
+#selectNone,
+#resetAllFilters {
   background: #fff;
   color: #000;
   border: 1px solid #000;
@@ -737,7 +738,8 @@ button {
 }
 
 #selectAll:hover,
-#selectNone:hover {
+#selectNone:hover,
+#resetAllFilters:hover {
   background: #000;
   color: #fff;
 }
