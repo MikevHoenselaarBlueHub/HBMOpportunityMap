@@ -1754,6 +1754,20 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Reset all filters button in options menu
+  const resetAllFiltersMenuBtn = document.getElementById("resetAllFiltersMenu");
+  if (resetAllFiltersMenuBtn) {
+    resetAllFiltersMenuBtn.addEventListener("click", function () {
+      // Close dropdown
+      const dropdown = document.querySelector(".filter-dropdown");
+      if (dropdown) {
+        dropdown.classList.remove("open");
+      }
+      
+      resetAllFilters();
+    });
+  }
+
   // Location button
   const locationBtn = document.getElementById("useMyLocation");
   if (locationBtn) {
@@ -1938,6 +1952,14 @@ function initializeFilters() {
         }
       });
       updateFilterState();
+    });
+  }
+
+  // Initialize reset all filters button in filter pane
+  const resetAllFiltersBtn = document.getElementById("resetAllFilters");
+  if (resetAllFiltersBtn) {
+    resetAllFiltersBtn.addEventListener("click", function () {
+      resetAllFilters();
     });
   }
 
@@ -3773,6 +3795,104 @@ document.addEventListener("visibilitychange", function () {
   }
 });
 
+// Reset all filters function
+function resetAllFilters() {
+  // Clear all checkboxes in the filter form
+  const filterForm = document.getElementById("filtersForm");
+  if (filterForm) {
+    filterForm.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
+      checkbox.checked = false;
+    });
+    
+    // Reset radio buttons to default (AND mode)
+    const radioButtons = filterForm.querySelectorAll('input[type="radio"]');
+    radioButtons.forEach((radio) => {
+      if (radio.name === "filterMode" && radio.value === "AND") {
+        radio.checked = true;
+      } else if (radio.name === "filterMode") {
+        radio.checked = false;
+      }
+    });
+  }
+
+  // Clear search input
+  const searchInput = document.getElementById("mapSearch");
+  if (searchInput) {
+    searchInput.value = "";
+  }
+
+  // Clear advanced text filter
+  const advancedTextFilter = document.getElementById("advancedTextFilter");
+  if (advancedTextFilter) {
+    advancedTextFilter.value = "";
+  }
+
+  // Reset location filter
+  currentFilter.userLocation = null;
+  filterState.userLocation = null;
+  currentFilter.radius = null;
+  filterState.radius = 25;
+
+  // Remove user location circle and marker from map
+  if (userLocationCircle) {
+    map.removeLayer(userLocationCircle);
+    userLocationCircle = null;
+  }
+
+  // Reset location UI
+  const distanceFilter = document.getElementById("distanceFilter");
+  if (distanceFilter) {
+    distanceFilter.style.display = "none";
+  }
+
+  const locationBtn = document.getElementById("useMyLocation");
+  if (locationBtn) {
+    locationBtn.innerHTML = "<span data-i18n='useMyLocation'>📍 Mijn locatie gebruiken</span>";
+    locationBtn.classList.remove("active");
+  }
+
+  const clearLocationBtn = document.getElementById("clearLocation");
+  if (clearLocationBtn) {
+    clearLocationBtn.style.display = "none";
+  }
+
+  const distanceRangeEl = document.getElementById("distanceRange");
+  const distanceValueEl = document.getElementById("distanceValue");
+  if (distanceRangeEl && distanceValueEl) {
+    distanceRangeEl.value = 25;
+    distanceValueEl.textContent = "25 km";
+  }
+
+  // Reset filter state
+  filterState = {
+    checkedTypes: ["Project", "Bedrijf"],
+    checkedFilters: {},
+    userLocation: null,
+    radius: 25,
+    searchTerm: "",
+  };
+
+  // Reset current filter
+  currentFilter = {};
+
+  // Check default HBMType checkboxes (Project and Bedrijf)
+  document.querySelectorAll('input[name="HBMType"]').forEach((cb) => {
+    if (cb.value === "Project" || cb.value === "Bedrijf") {
+      cb.checked = true;
+    }
+  });
+
+  // Update filter state and apply filters
+  updateFilterState();
+
+  // Track event
+  trackEvent("reset_all_filters", {
+    source: "button_click"
+  });
+
+  console.log("All filters reset to default state");
+}
+
 // Export for global access
 window.getCurrentLocation = getCurrentLocation;
 window.showDetails = showDetails;
@@ -3786,6 +3906,7 @@ window.exportResultsToCSV = exportResultsToCSV;
 window.showAllResults = showAllResults;
 window.closeAllOverlays = closeAllOverlays;
 window.filterByMunicipalityAndZoom = filterByMunicipalityAndZoom;
+window.resetAllFilters = resetAllFilters;
 
 // Function to update checkboxes based on filter state
 function updateCheckboxesFromFilterState() {
