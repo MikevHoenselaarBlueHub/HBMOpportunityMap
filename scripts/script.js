@@ -987,9 +987,21 @@ function positionHoverLabel(e) {
   const mapContainer = document.getElementById("map");
   const mapRect = mapContainer.getBoundingClientRect();
 
-  // Get mouse position relative to map
-  const mouseX = e.originalEvent.clientX - mapRect.left;
-  const mouseY = e.originalEvent.clientY - mapRect.top;
+  // Get mouse position relative to map - handle both marker and layer events
+  let mouseX, mouseY;
+  if (e.originalEvent) {
+    // For marker events
+    mouseX = e.originalEvent.clientX - mapRect.left;
+    mouseY = e.originalEvent.clientY - mapRect.top;
+  } else if (e.containerPoint) {
+    // For layer events
+    mouseX = e.containerPoint.x;
+    mouseY = e.containerPoint.y;
+  } else {
+    // Fallback
+    mouseX = e.layerPoint ? e.layerPoint.x : 0;
+    mouseY = e.layerPoint ? e.layerPoint.y : 0;
+  }
 
   // Get label dimensions
   const labelRect = hoverLabelElement.getBoundingClientRect();

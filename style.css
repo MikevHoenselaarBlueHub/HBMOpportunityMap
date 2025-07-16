@@ -1192,8 +1192,7 @@ button {
   transform: translateY(-1px);
 }
 
-.text-link {
-  color: rgb(38, 123, 41);
+.text-link {color: rgb(38, 123, 41);
   text-decoration: underline;
   font-weight: 500;
   transition: color 0.2s ease;
@@ -2053,16 +2052,17 @@ button {
   position: absolute;
   background: rgba(0, 0, 0, 0.8);
   color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 6px 10px;
+  border-radius: 4px;
   font-size: 14px;
   font-weight: 500;
-  z-index: 1500;
   pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  max-width: 250px;
-  word-wrap: break-word;
-  white-space: normal;
+  max-width: 200px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 /* === Popup navigation === */
