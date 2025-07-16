@@ -669,10 +669,23 @@ button {
 
   #applyFilters {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    position: fixed;
-    left: 1rem;
-    bottom: 1rem;
-    z-index: 9100;
+    position: fixed !important;
+    left: 1rem !important;
+    bottom: 1rem !important;
+    z-index: 9999 !important;
+    transform: none !important;
+    background: rgb(38, 123, 41) !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 4px !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    transition: background 0.2s !important;
+  }
+
+  #applyFilters:hover {
+    background: #267b29 !important;
   }
 
 }
@@ -1178,7 +1191,7 @@ button {
 }
 
 .text-link {
-  color: rgb(38, 123, 41);
+  color: rgb(38, 123,41);
   text-decoration: underline;
   font-weight: 500;
   transition: color 0.2s ease;

@@ -977,6 +977,7 @@ function createPopupContent(item) {
       ${item.Description ? `<p class="description">${item.Description}</p>` : ''}
 
       <div class="popup-actions">
+```tool_code
         <button onclick="showDetails('${encodeURIComponent(item.Name || '')}')" class="card-contact-btn">Meer info</button>
         <button onclick="openContactForm('${encodeURIComponent(item.Name || '')}')" class="card-contact-btn">Contact</button>
       </div>
@@ -1507,7 +1508,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const listContainer = document.querySelector('.list-container');
         const viewToggle = document.getElementById('viewToggle');
         const toggleText = viewToggle?.querySelector('#viewToggleText');
-        
+
         if (listContainer && listContainer.classList.contains('show')) {
           listContainer.classList.remove('show');
           if (toggleText) {
@@ -1737,6 +1738,22 @@ function initializeFilters() {
     applyFiltersBtn.addEventListener('click', function() {
       applyFilters();
       filterOverlay.classList.remove('open');
+      // Hide button after applying filters
+      if (window.innerWidth <= 768) {
+        applyFiltersBtn.style.display = 'none';
+      }
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      const applyBtn = document.getElementById('applyFilters');
+      if (applyBtn) {
+        if (window.innerWidth > 768) {
+          applyBtn.style.display = 'none';
+        } else if (filterOverlay.classList.contains('open')) {
+          applyBtn.style.display = 'block';
+        }
+      }
     });
   }
 
@@ -1806,7 +1823,7 @@ function initializeListView() {
         const isShowing = listContainer.classList.contains('show');
         const toggleText = viewToggle.querySelector('#viewToggleText');
         const toggleIcon = viewToggle.querySelector('.listmapview-icon');
-        
+
         if (toggleText && toggleIcon) {
           if (isShowing) {
             // Showing list, so button should show "Kaart" with map icon
@@ -1880,7 +1897,8 @@ function updateListView(data) {
   if (resultsCount) resultsCount.textContent = `${data.length} resultaten`;
 
   // Clear existing content
-  buildingsList.innerHTML = '';
+  ```tool_code
+buildingsList.innerHTML = '';
   companiesList.innerHTML = '';
 
   // Add projects to buildings list
@@ -2681,7 +2699,8 @@ function loadSavedFilter(filterName) {
       }
 
       // Add user location marker
-      const userMarker = L.marker([filterState.userLocation.lat, filterState.userLocation.lng], {
+      ```tool_code
+const userMarker = L.marker([filterState.userLocation.lat, filterState.userLocation.lng], {
         icon: L.icon({
           iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
           iconSize: [25, 41],
@@ -3478,5 +3497,3 @@ function getCurrentFilteredData() {
       return true;
     });
   }
-
-//The button text has been updated, also the popup content has been updated.
