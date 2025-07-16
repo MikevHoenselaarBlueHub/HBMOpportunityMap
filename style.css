@@ -672,6 +672,9 @@ button {
     position: fixed;
     left: 1rem;
     bottom: 1rem;
+    z-index: 9100;
+    width: calc(100% - 2rem);
+    max-width: 300px;
   }
 
 }
@@ -2246,6 +2249,12 @@ button {
   overflow: auto;
   z-index: 9000;
   padding: 2rem;
+}
+
+@media (max-width: 768px) {
+  #filterOverlay {
+    padding: 2rem 1rem 6rem 1rem;
+  }
 }
 
 #filterOverlay.open {
