@@ -639,11 +639,18 @@ button {
   font-size: 1rem;
 }
 
-#filterBtn .filter-icon {
+#filterBtn .filter-icon,
+.settings-icon,
+.listmapview-icon {
   width: 16px;
   height: 16px;
-  filter: brightness(0) invert(1);
   flex-shrink: 0;
+}
+
+.settings-icon,
+.listmapview-icon {
+  color: #000;
+  vertical-align: middle;
 }
 
 .filter-icon {
