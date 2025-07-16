@@ -1502,6 +1502,20 @@ document.addEventListener('DOMContentLoaded', function() {
         dropdown.classList.remove('open');
       }
 
+      // On mobile, ensure map view is active and list view is hidden
+      if (window.innerWidth <= 768) {
+        const listContainer = document.querySelector('.list-container');
+        const viewToggle = document.getElementById('viewToggle');
+        const toggleText = viewToggle?.querySelector('#viewToggleText');
+        
+        if (listContainer && listContainer.classList.contains('show')) {
+          listContainer.classList.remove('show');
+          if (toggleText) {
+            toggleText.textContent = 'Lijst';
+          }
+        }
+      }
+
       // Get current filtered data
       const currentData = getCurrentFilteredData();
 
