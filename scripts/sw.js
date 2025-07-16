@@ -27,16 +27,19 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  // Always fetch from network, never cache
-  event.respondWith(
-    fetch(event.request).catch(function() {
-      // Only for navigation requests, return index.html as fallback
-      if (event.request.destination === 'document') {
-        return fetch('/index.html');
-      }
-      throw new Error('Network request failed and caching is disabled');
-    })
-  );
+  // Only cache GET requests and exclude API calls and HTML pages
+  if (event.request.method === 'GET' && 
+      !event.request.url.includes('/api/') && 
+      !event.request.url.endsWith('.html') && 
+      !event.request.url.endsWith('/')) {
+    event.respondWith(
+      caches.match(event.request)
+        .then(function(response) {
+          // Return cached version or fetch from network
+          return response || fetch(event.request);
+        })
+    );
+  }
 });
 
 // Clear any existing caches on message

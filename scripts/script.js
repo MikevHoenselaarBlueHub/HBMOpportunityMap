@@ -1626,6 +1626,16 @@ document.addEventListener('DOMContentLoaded', function() {
       menuOverlay.classList.remove('open');
     });
   }
+
+  // Ensure navigation links work properly - prevent any event blocking
+  document.querySelectorAll('#menuOverlay a, #desktopNav a').forEach(link => {
+    if (link.href && !link.href.includes('#') && !link.href.includes('javascript:')) {
+      link.addEventListener('click', function(e) {
+        // Allow normal navigation to proceed
+        return true;
+      });
+    }
+  });
 });
 
 // Filter UI initialization

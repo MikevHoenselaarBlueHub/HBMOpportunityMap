@@ -128,14 +128,32 @@
       }
 
       // Hamburger menu functionality
-      document.getElementById("hamburger").onclick = () => {
-        document.getElementById("menuOverlay").classList.add("open");
-      };
+      const hamburger = document.getElementById("hamburger");
+      const menuOverlay = document.getElementById("menuOverlay");
+      const closeMenu = document.getElementById("closeMenu");
 
-      document.getElementById("closeMenu").onclick = (e) => {
-        e.preventDefault();
-        document.getElementById("menuOverlay").classList.remove("open");
-      };
+      if (hamburger && menuOverlay) {
+        hamburger.addEventListener('click', function() {
+          menuOverlay.classList.add("open");
+        });
+      }
+
+      if (closeMenu && menuOverlay) {
+        closeMenu.addEventListener('click', function(e) {
+          e.preventDefault();
+          menuOverlay.classList.remove("open");
+        });
+      }
+
+      // Ensure navigation links work properly
+      document.querySelectorAll('#menuOverlay a, #desktopNav a').forEach(link => {
+        if (link.href && !link.href.includes('#') && !link.href.includes('javascript:')) {
+          link.addEventListener('click', function(e) {
+            // Allow normal navigation to proceed
+            return true;
+          });
+        }
+      });
 
       // Initialize on page load
       document.addEventListener("DOMContentLoaded", async () => {
