@@ -1627,13 +1627,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Ensure navigation links work properly - prevent any event blocking
+  // Close menu when clicking on navigation links
+  document.querySelectorAll('#menuOverlay a[href]').forEach(link => {
+    if (!link.href.includes('#') && !link.href.includes('javascript:')) {
+      link.addEventListener('click', function() {
+        // Close menu before navigation
+        if (menuOverlay) {
+          menuOverlay.classList.remove('open');
+        }
+      });
+    }
+  });
+
+  // Remove any navigation blocking - let links work normally
   document.querySelectorAll('#menuOverlay a, #desktopNav a').forEach(link => {
     if (link.href && !link.href.includes('#') && !link.href.includes('javascript:')) {
-      link.addEventListener('click', function(e) {
-        // Allow normal navigation to proceed
-        return true;
-      });
+      // Remove any existing event listeners that might block navigation
+      link.onclick = null;
     }
   });
 });
