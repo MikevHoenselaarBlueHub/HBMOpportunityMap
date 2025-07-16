@@ -5,10 +5,14 @@
   "main": "index.html",
   "scripts": {
     "start": "npx serve . -l 5000",
-    "dev": "npx serve . -l 5000"
+    "dev": "npx serve . -l 5000",
+    "admin": "node admin/server.js"
   },
   "dependencies": {
-    "serve": "^14.2.4"
+    "serve": "^14.2.4",
+    "express": "^4.18.2",
+    "bcrypt": "^5.1.0",
+    "jsonwebtoken": "^9.0.0"
   },
   "keywords": [
     "map",
