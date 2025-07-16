@@ -23,7 +23,7 @@
           href="https://www.interregeurope.eu/project-results"
           target="_blank"
           rel="noopener noreferrer"
-          class="logo-link"
+          class="logo-link interreg-logo"
         >
           <img
             src="images/Interreg_logo.svg"
@@ -75,31 +75,50 @@
         <div class="content-section">
           <h2>Onze Missie</h2>
           <p>
-            Het Healthy Building Movement (HBM) verbindt professionals, projecten en kennis in de Euregio Maas-Rijn. 
-            We maken gezond bouwen toegankelijk door wetenschap en praktijk samen te brengen.
+            Het Healthy Building Movement (HBM) verbindt professionals,
+            projecten en kennis in de Euregio Maas-Rijn. We maken gezond bouwen
+            toegankelijk door wetenschap en praktijk samen te brengen.
           </p>
 
           <blockquote>
-            <p>Gezond bouwen begint met de juiste kennis en de juiste partners op het juiste moment.</p>
+            <p>
+              Gezond bouwen begint met de juiste kennis en de juiste partners op
+              het juiste moment.
+            </p>
           </blockquote>
 
           <h2>Wat We Doen</h2>
           <ul>
-            <li><strong>Kennisdeling:</strong> We brengen de nieuwste inzichten uit onderzoek naar de praktijk</li>
-            <li><strong>Netwerken:</strong> We verbinden professionals uit Nederland, Duitsland en België</li>
-            <li><strong>Projectondersteuning:</strong> We helpen bij het realiseren van gezonde bouwprojecten</li>
-            <li><strong>Innovatie:</strong> We stimuleren nieuwe ontwikkelingen in gezond bouwen</li>
+            <li>
+              <strong>Kennisdeling:</strong> We brengen de nieuwste inzichten
+              uit onderzoek naar de praktijk
+            </li>
+            <li>
+              <strong>Netwerken:</strong> We verbinden professionals uit
+              Nederland, Duitsland en België
+            </li>
+            <li>
+              <strong>Projectondersteuning:</strong> We helpen bij het
+              realiseren van gezonde bouwprojecten
+            </li>
+            <li>
+              <strong>Innovatie:</strong> We stimuleren nieuwe ontwikkelingen in
+              gezond bouwen
+            </li>
           </ul>
 
           <h2>Onze Visie</h2>
           <p>
-            Een Euregio waar alle gebouwen bijdragen aan de gezondheid en het welzijn van hun gebruikers. 
-            Door grensoverschrijdende samenwerking en kennisuitwisseling maken we dit mogelijk.
+            Een Euregio waar alle gebouwen bijdragen aan de gezondheid en het
+            welzijn van hun gebruikers. Door grensoverschrijdende samenwerking
+            en kennisuitwisseling maken we dit mogelijk.
           </p>
 
           <div class="contact-cta">
             <h3>Doe mee met HBM</h3>
-            <p>Ontdek hoe jij kunt bijdragen aan gezond bouwen in onze regio.</p>
+            <p>
+              Ontdek hoe jij kunt bijdragen aan gezond bouwen in onze regio.
+            </p>
             <a href="contact.html" class="btn-primary">Neem contact op</a>
           </div>
         </div>
@@ -109,19 +128,19 @@
     <!-- Limited script loading for over page -->
     <script>
       // Minimal script for over page - only hamburger menu
-      document.addEventListener("DOMContentLoaded", function() {
+      document.addEventListener("DOMContentLoaded", function () {
         const hamburger = document.getElementById("hamburger");
         const menuOverlay = document.getElementById("menuOverlay");
         const closeMenu = document.getElementById("closeMenu");
 
         if (hamburger && menuOverlay) {
-          hamburger.addEventListener('click', function() {
+          hamburger.addEventListener("click", function () {
             menuOverlay.classList.add("open");
           });
         }
 
         if (closeMenu && menuOverlay) {
-          closeMenu.addEventListener('click', function(e) {
+          closeMenu.addEventListener("click", function (e) {
             e.preventDefault();
             menuOverlay.classList.remove("open");
           });

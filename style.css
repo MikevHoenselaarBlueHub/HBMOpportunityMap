@@ -426,8 +426,10 @@ button {
   border-color: #267b29;
 }
 
+.interreg-logo {}
+
 .mobile-interreg-logo {
-  margin-top: auto;
+  margin-top: 0px;
   padding-top: 2rem;
   text-align: center;
   border-top: 1px solid #eee;
@@ -435,8 +437,8 @@ button {
 }
 
 .mobile-interreg-logo img {
-  height: 60px;
-  width: auto;
+  height: auto;
+  width: 250px;
   object-fit: contain;
 }
 
@@ -444,7 +446,11 @@ button {
   .mobile-interreg-logo {
     display: block;
   }
-  
+
+  .interreg-logo {
+    display: none
+  }
+
   #menuOverlay {
     display: flex;
     flex-direction: column;
@@ -727,6 +733,7 @@ button {
   height: 16px;
   display: block;
   margin: auto;
+  margin-top: 9px;
 }
 
 /* === Container for content pages === */
@@ -1221,7 +1228,8 @@ button {
 
 .list-tab span {
   font-weight: 600;
-  opacity: 0.8;}
+  opacity: 0.8;
+}
 
 .tab-content {
   flex: 1;
@@ -1528,16 +1536,19 @@ button {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.5rem;
-    z-index: 2100; /* Higher than list container */
+    z-index: 2100;
+    /* Higher than list container */
     position: fixed;
   }
 
   .filter-dropdown {
-    z-index: 2200; /* Even higher for dropdown */
+    z-index: 2200;
+    /* Even higher for dropdown */
   }
 
   .filter-dropdown-menu {
-    z-index: 2300; /* Highest for dropdown menu */
+    z-index: 2300;
+    /* Highest for dropdown menu */
   }
 
   #viewToggle {
@@ -1558,7 +1569,7 @@ button {
   }
 
   /* Hide map legend when list is shown on mobile */
-  .list-container.show ~ .map-legend {
+  .list-container.show~.map-legend {
     display: none;
   }
 }
@@ -2520,6 +2531,7 @@ button {
 }
 
 <button id="showAllResultsBtn" class="dropdown-item">Toon alle resultaten </button><button id="showAllOnMapBtn" class="dropdown-item">Alles in beeld </button>
+
 /* === Layer Control Styling === */
 .leaflet-control-layers label img {
   vertical-align: middle;
