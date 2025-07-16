@@ -23,15 +23,13 @@ let filterState = {
 };
 
 // Determine page type - improved detection
-const isMapPage = window.location.pathname === '/' || 
-                  window.location.pathname === '/index.html' ||
-                  window.location.pathname.endsWith('/index.html') ||
-                  window.location.pathname.endsWith('/');
 const isInfoPage = window.location.pathname.includes('info.html');
 const isOverPage = window.location.pathname.includes('over.html');
+const isContactPage = window.location.pathname.includes('contact.html');
+const isMapPage = !isInfoPage && !isOverPage && !isContactPage;
 
 // Only initialize map on the main page
-if (isMapPage && !isInfoPage && !isOverPage) {
+if (isMapPage) {
   // Check if user returned to map page and show notification
   checkForReturnToMapPage();
 
@@ -1454,10 +1452,9 @@ function initAutocomplete(data) {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize UI components if not on map page
+  // Only run map initialization on map page
   if (!isMapPage) {
-    initializeFilters();
-    initializeListView();
+    console.log('Not on map page, skipping map initialization');
     return;
   }
 
