@@ -1,14 +1,14 @@
-// Service Worker DISABLED for development
-// This prevents any caching issues during development
+// Service Worker COMPLETELY DISABLED for development
+// This prevents any caching or navigation issues
 
 self.addEventListener('install', function(event) {
-  console.log('Service Worker: Install event - DISABLED');
-  // Skip waiting to immediately activate
+  console.log('Service Worker: Install event - COMPLETELY DISABLED');
+  // Skip waiting and immediately activate
   self.skipWaiting();
 });
 
 self.addEventListener('activate', function(event) {
-  console.log('Service Worker: Activate event - DISABLED');
+  console.log('Service Worker: Activate event - COMPLETELY DISABLED');
 
   event.waitUntil(
     // Delete ALL existing caches
@@ -26,26 +26,10 @@ self.addEventListener('activate', function(event) {
   );
 });
 
+// DO NOT INTERCEPT ANY REQUESTS - let browser handle everything normally
 self.addEventListener('fetch', function(event) {
-  // Let all HTML pages load normally without any caching or interference
-  if (event.request.method === 'GET' && 
-      (event.request.url.endsWith('.html') || 
-       event.request.url.endsWith('/') ||
-       event.request.destination === 'document')) {
-    // Don't interfere with HTML page navigation at all
-    return;
-  }
-  
-  // Only cache other resources (CSS, JS, images)
-  if (event.request.method === 'GET' && 
-      !event.request.url.includes('/api/')) {
-    event.respondWith(
-      caches.match(event.request)
-        .then(function(response) {
-          return response || fetch(event.request);
-        })
-    );
-  }
+  // Do absolutely nothing - let all requests go through normally
+  return;
 });
 
 // Clear any existing caches on message

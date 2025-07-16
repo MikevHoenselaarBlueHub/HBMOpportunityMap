@@ -421,9 +421,8 @@
     <script src="scripts/script.js"></script>
   </body>
   <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/scripts/sw.js');
-    }
+    // Service worker registration disabled for development
+    console.log('Service worker registration disabled');
 
     const municipalityDiv = document.getElementById('Municipality');
 
