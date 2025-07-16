@@ -485,7 +485,7 @@ button {
   position: fixed;
   bottom: 1rem;
   left: 1rem;
-  z-index: 1100;
+  z-index: 2200;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -1567,38 +1567,37 @@ button {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.5rem;
-    z-index: 2100;
+    z-index: 2200;
     /* Higher than list container */
     position: fixed;
   }
 
   .filter-dropdown {
-    z-index: 2200;
+    z-index: 2300;
     /* Even higher for dropdown */
   }
 
   .filter-dropdown-menu {
-    z-index: 2300;
+    z-index: 2400;
     /* Highest for dropdown menu */
   }
 
-  .dropdown-item#viewToggle {
-    background: transparent;
-    color: #333;
-    border: none;
+  .view-toggle-btn {
+    background: white;
+    color: black;
+    border: 2px solid black;
     padding: 0.75rem 1rem;
     border-radius: 4px;
     font-weight: bold;
     cursor: pointer;
-    transition: background 0.2s;
-    width: 100%;
-    text-align: left;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-size: 1rem;
   }
 
-  .dropdown-item#viewToggle:hover {
+  .view-toggle-btn:hover {
     background: #f5f5f5;
   }
 
