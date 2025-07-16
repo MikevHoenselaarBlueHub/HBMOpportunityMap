@@ -1783,7 +1783,15 @@ function initializeListView() {
   const listContainer = document.querySelector('.list-container');
 
   if (viewToggle && listContainer) {
-    viewToggle.addEventListener('click', function() {
+    viewToggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // Close the dropdown menu first
+      const dropdown = document.querySelector('.filter-dropdown');
+      if (dropdown) {
+        dropdown.classList.remove('open');
+      }
+      
       listContainer.classList.toggle('show');
       const isShowing = listContainer.classList.contains('show');
       viewToggle.querySelector('#viewToggleText').textContent = isShowing ? 'Kaart' : 'Lijst';
