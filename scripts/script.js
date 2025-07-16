@@ -1786,19 +1786,35 @@ function initializeListView() {
     viewToggle.addEventListener('click', function(e) {
       e.preventDefault();
 
-      listContainer.classList.toggle('show');
-      const isShowing = listContainer.classList.contains('show');
-      const toggleText = viewToggle.querySelector('#viewToggleText');
-      if (toggleText) {
-        toggleText.textContent = isShowing ? 'Kaart' : 'Lijst';
-      }
+      // Only toggle on mobile/tablet screens
+      if (window.innerWidth <= 768) {
+        listContainer.classList.toggle('show');
+        const isShowing = listContainer.classList.contains('show');
+        const toggleText = viewToggle.querySelector('#viewToggleText');
+        if (toggleText) {
+          toggleText.textContent = isShowing ? 'Kaart' : 'Lijst';
+        }
 
-      // Track the toggle event
-      trackEvent('view_toggle', { 
-        view: isShowing ? 'list' : 'map' 
-      });
+        // Track the toggle event
+        trackEvent('view_toggle', { 
+          view: isShowing ? 'list' : 'map' 
+        });
+      }
     });
   }
+
+  // Listen for window resize to handle responsive behavior
+  window.addEventListener('resize', function() {
+    const listContainer = document.querySelector('.list-container');
+    if (listContainer && window.innerWidth > 768) {
+      // On desktop, ensure list is always visible and reset toggle text
+      listContainer.classList.remove('show');
+      const toggleText = viewToggle?.querySelector('#viewToggleText');
+      if (toggleText) {
+        toggleText.textContent = 'Lijst';
+      }
+    }
+  });
 
   // Initialize tab functionality
   const tabButtons = document.querySelectorAll('.list-tab');
