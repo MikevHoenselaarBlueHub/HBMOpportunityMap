@@ -504,7 +504,14 @@ async function loadDutchMunicipalities() {
                     ${municipalityInfo}
                     <p><a href="#" class="municipality-filter-link" onclick="filterByMunicipalityAndZoom('${municipalityName}'); return false;">Bekijk alle projecten en bedrijven in deze gemeente</a></p>
                   </div>
-                `);
+                `, {
+                  maxWidth: 280,
+                  minWidth: 200,
+                  autoPan: true,
+                  autoPanPadding: [20, 20],
+                  keepInView: true,
+                  closeOnEscapeKey: true
+                });
               },
             });
 
@@ -652,7 +659,14 @@ async function loadGermanMunicipalities() {
                   ${municipalityInfo}
                   <p><a href="#" class="municipality-filter-link" onclick="filterByMunicipalityAndZoom('${municipalityName}'); return false;">Bekijk alle projecten en bedrijven in deze gemeente</a></p>
                 </div>
-              `);
+              `, {
+                maxWidth: 280,
+                minWidth: 200,
+                autoPan: true,
+                autoPanPadding: [20, 20],
+                keepInView: true,
+                closeOnEscapeKey: true
+              });
             },
           });
 
