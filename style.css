@@ -509,6 +509,7 @@ button {
   cursor: pointer;
   transition: background 0.2s;
   font-size: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .filter-dropdown>button:hover {
@@ -637,6 +638,7 @@ button {
   align-items: center;
   gap: 0.5rem;
   font-size: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 #filterBtn .filter-icon,
@@ -1620,6 +1622,7 @@ button {
     align-items: center;
     gap: 0.5rem;
     font-size: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
 
   /* Hide map legend when list is shown on mobile */
