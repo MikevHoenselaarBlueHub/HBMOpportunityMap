@@ -262,6 +262,12 @@
         console.log("Form submitted");
       };
 
+      // Ensure menu links work normally without any JavaScript interference
+      document.querySelectorAll('#menuOverlay a, #desktopNav a').forEach(link => {
+        // Remove any onclick handlers that might interfere
+        link.onclick = null;
+      });
+
       // Initialize on page load
       document.addEventListener("DOMContentLoaded", async () => {
         await loadTranslations();
