@@ -337,7 +337,7 @@ function initMap() {
   // Lazy load municipality boundaries when layer is added
   let municipalitiesLoaded = false;
   map.on('overlayadd', function(e) {
-    if (e.name === 'Interreg-gemeenten' && !municipalitiesLoaded) {
+    if (e.name.includes('Interreg-gemeenten') && !municipalitiesLoaded) {
       municipalitiesLoaded = true;
       loadMunicipalityBoundaries();
     }
