@@ -140,7 +140,7 @@ if (isMapPage) {
   document.addEventListener('DOMContentLoaded', function() {
     // Initialize saved filters counter
     updateSavedFiltersDropdown();
-    
+
     // Wait for Leaflet to load
     const checkLeaflet = setInterval(() => {
       if (typeof L !== 'undefined') {
@@ -424,7 +424,7 @@ async function loadDutchMunicipalities() {
                       dashArray: '5, 8'
                     });
                     layer.bringToFront();
-                    
+
                     // Show hover label with municipality name
                     showHoverLabel(e, municipalityName);
                   },
@@ -438,7 +438,7 @@ async function loadDutchMunicipalities() {
                       fillOpacity: 0.1,
                       dashArray: '5, 8'
                     });
-                    
+
                     // Hide hover label
                     hideHoverLabel();
                   },
@@ -558,7 +558,7 @@ async function loadGermanMunicipalities() {
                     dashArray: '5, 8'
                   });
                   layer.bringToFront();
-                  
+
                   // Show hover label with municipality name
                   showHoverLabel(e, municipalityName);
                 },
@@ -572,7 +572,7 @@ async function loadGermanMunicipalities() {
                     fillOpacity: 0.1,
                     dashArray: '5, 8'
                   });
-                  
+
                   // Hide hover label
                   hideHoverLabel();
                 },
@@ -1504,7 +1504,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Get current filtered data
       const currentData = getCurrentFilteredData();
-      
+
       if (currentData.length === 0) {
         alert('Geen resultaten om in beeld te brengen.');
         return;
@@ -1785,11 +1785,14 @@ function initializeListView() {
   if (viewToggle && listContainer) {
     viewToggle.addEventListener('click', function(e) {
       e.preventDefault();
-      
+
       listContainer.classList.toggle('show');
       const isShowing = listContainer.classList.contains('show');
-      viewToggle.querySelector('#viewToggleText').textContent = isShowing ? 'Kaart' : 'Lijst';
-      
+      const toggleText = viewToggle.querySelector('#viewToggleText');
+      if (toggleText) {
+        toggleText.textContent = isShowing ? 'Kaart' : 'Lijst';
+      }
+
       // Track the toggle event
       trackEvent('view_toggle', { 
         view: isShowing ? 'list' : 'map' 
@@ -2067,27 +2070,27 @@ function showSavedFiltersModal() {
   const modal = document.getElementById('savedFiltersModal');
   const savedFiltersGrid = document.getElementById('savedFiltersGrid');
   const noSavedFilters = document.getElementById('noSavedFilters');
-  
+
   // Load saved filters from localStorage
   const savedFilters = JSON.parse(localStorage.getItem('savedFilters') || '[]');
-  
+
   if (savedFilters.length === 0) {
     savedFiltersGrid.style.display = 'none';
     noSavedFilters.style.display = 'block';
   } else {
     savedFiltersGrid.style.display = 'grid';
     noSavedFilters.style.display = 'none';
-    
+
     // Clear existing content
     savedFiltersGrid.innerHTML = '';
-    
+
     // Create cards for each saved filter
     savedFilters.forEach((filter, index) => {
       const card = document.createElement('div');
       card.className = 'saved-filter-card';
-      
+
       const filterSummary = createFilterSummary(filter);
-      
+
       card.innerHTML = `
         <h3>${filter.name}</h3>
         <p><strong>Opgeslagen op:</strong> ${new Date(filter.timestamp).toLocaleDateString()}</p>
@@ -2097,11 +2100,11 @@ function showSavedFiltersModal() {
           <button class="delete-filter-btn" onclick="deleteSavedFilterFromModal(${index})">Verwijderen</button>
         </div>
       `;
-      
+
       savedFiltersGrid.appendChild(card);
     });
   }
-  
+
   modal.classList.add('show');
 }
 
@@ -2112,11 +2115,11 @@ function closeSavedFiltersModal() {
 
 function createFilterSummary(filter) {
   const parts = [];
-  
+
   if (filter.checkedTypes && filter.checkedTypes.length > 0) {
     parts.push(`Type: ${filter.checkedTypes.join(', ')}`);
   }
-  
+
   if (filter.checkedFilters) {
     Object.keys(filter.checkedFilters).forEach(key => {
       if (filter.checkedFilters[key] && filter.checkedFilters[key].length > 0) {
@@ -2124,7 +2127,7 @@ function createFilterSummary(filter) {
       }
     });
   }
-  
+
   return parts.length > 0 ? parts.join('; ') : 'Geen specifieke filters';
 }
 
@@ -2141,10 +2144,10 @@ function deleteSavedFilterFromModal(index) {
     const savedFilters = JSON.parse(localStorage.getItem('savedFilters') || '[]');
     savedFilters.splice(index, 1);
     localStorage.setItem('savedFilters', JSON.stringify(savedFilters));
-    
+
     // Refresh the modal content
     showSavedFiltersModal();
-    
+
     // Update the dropdown as well
     updateSavedFiltersDropdown();
   }
@@ -2748,7 +2751,7 @@ function updateSavedFiltersText(count) {
 
 function updateSavedFiltersDropdown() {
   const select = document.getElementById('savedFiltersSelect');
-  
+
   const savedFilters = JSON.parse(localStorage.getItem('hbm_saved_filters') || '{}');
 
   if (select) {
