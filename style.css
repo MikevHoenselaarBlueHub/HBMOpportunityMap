@@ -426,6 +426,31 @@ button {
   border-color: #267b29;
 }
 
+.mobile-interreg-logo {
+  margin-top: auto;
+  padding-top: 2rem;
+  text-align: center;
+  border-top: 1px solid #eee;
+  display: none;
+}
+
+.mobile-interreg-logo img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .mobile-interreg-logo {
+    display: block;
+  }
+  
+  #menuOverlay {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 .map-controls {
   position: fixed;
   bottom: 1rem;
@@ -700,6 +725,8 @@ button {
 .close-icon {
   width: 16px;
   height: 16px;
+  display: block;
+  margin: auto;
 }
 
 /* === Container for content pages === */
