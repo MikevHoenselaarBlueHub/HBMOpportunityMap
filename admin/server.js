@@ -3,14 +3,64 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
 const app = express();
 
+// Rate limiting voor login attempts
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minuten
+    max: 5, // Maximaal 5 pogingen per IP
+    message: { success: false, message: "Te veel login pogingen. Probeer het later opnieuw." },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Algemene rate limiting
+const generalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minuten
+    max: 100, // Maximaal 100 requests per IP
+});
+
+app.use(generalLimiter);
+
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static("."));
 
-// Secret key voor JWT (in productie zou dit uit environment variables komen)
-const JWT_SECRET = "hbm-admin-secret-key-2024";
+// Input sanitatie functie
+function sanitizeInput(input) {
+    if (typeof input !== 'string') return input;
+    return input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/javascript:/gi, '')
+                .trim();
+}
+
+// Validatie middleware
+function validateInput(req, res, next) {
+    if (req.body) {
+        for (const key in req.body) {
+            if (typeof req.body[key] === 'string') {
+                req.body[key] = sanitizeInput(req.body[key]);
+            }
+        }
+    }
+    next();
+}
+
+app.use(validateInput);
+
+// Security headers
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';");
+    next();
+});
+
+// Secret key voor JWT - gebruik environment variable
+const JWT_SECRET = process.env.JWT_SECRET || "hbm-admin-secret-key-2024";
 
 // Gebruikers database (in productie zou dit een echte database zijn)
 const users = [
@@ -53,7 +103,7 @@ const authenticateToken = (req, res, next) => {
 };
 
 // Login endpoint
-app.post("/admin/api/login", async (req, res) => {
+app.post("/admin/api/login", loginLimiter, async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -112,6 +162,29 @@ app.get("/admin/api/users", authenticateToken, (req, res) => {
     res.json(userList);
 });
 
+// Wachtwoord validatie functie
+function validatePassword(password) {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (password.length < minLength) {
+        return "Wachtwoord moet minimaal 8 karakters lang zijn";
+    }
+    if (!hasUpperCase || !hasLowerCase) {
+        return "Wachtwoord moet zowel hoofdletters als kleine letters bevatten";
+    }
+    if (!hasNumbers) {
+        return "Wachtwoord moet minimaal één cijfer bevatten";
+    }
+    if (!hasSpecialChar) {
+        return "Wachtwoord moet minimaal één speciaal karakter bevatten";
+    }
+    return null;
+}
+
 app.post("/admin/api/users", authenticateToken, async (req, res) => {
     const { username, email, password, role } = req.body;
 
@@ -119,9 +192,21 @@ app.post("/admin/api/users", authenticateToken, async (req, res) => {
         return res.status(400).json({ error: "Alle velden zijn vereist" });
     }
 
+    // Valideer wachtwoord sterkte
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+        return res.status(400).json({ error: passwordError });
+    }
+
     // Controleer of gebruiker al bestaat
     if (users.find((u) => u.username === username)) {
         return res.status(400).json({ error: "Gebruikersnaam bestaat al" });
+    }
+
+    // Valideer email formaat
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Ongeldig email formaat" });
     }
 
     // Hash wachtwoord
