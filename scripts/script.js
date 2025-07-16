@@ -3821,8 +3821,64 @@ document.addEventListener("visibilitychange", function () {
   }
 });
 
-// Reset all filters function
+// Reset all filters function with confirmation
 function resetAllFilters() {
+  // Show confirmation popup
+  showResetConfirmationPopup();
+}
+
+// Show confirmation popup for reset filters
+function showResetConfirmationPopup() {
+  const popupHTML = `
+    <div class="reset-confirmation-popup">
+      <div class="reset-confirmation-content">
+        <div class="reset-confirmation-header">
+          <h3>Weet je het zeker?</h3>
+        </div>
+        <div class="reset-confirmation-body">
+          <p>Alle actieve filters, zoektermen en locatie-instellingen worden gewist. Deze actie kan niet ongedaan worden gemaakt.</p>
+        </div>
+        <div class="reset-confirmation-actions">
+          <button class="reset-confirm-btn" onclick="confirmResetAllFilters()">Ja, reset alle filters</button>
+          <button class="reset-cancel-btn" onclick="closeResetConfirmationPopup()">Annuleren</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Add popup to body
+  document.body.insertAdjacentHTML("beforeend", popupHTML);
+
+  // Add event listener to close popup when clicking outside
+  const popup = document.querySelector(".reset-confirmation-popup");
+  if (popup) {
+    popup.addEventListener("click", function(e) {
+      if (e.target === popup) {
+        closeResetConfirmationPopup();
+      }
+    });
+  }
+}
+
+// Close confirmation popup
+function closeResetConfirmationPopup() {
+  const popup = document.querySelector(".reset-confirmation-popup");
+  if (popup) {
+    popup.remove();
+  }
+}
+
+// Confirm and execute reset all filters
+function confirmResetAllFilters() {
+  // Close popup first
+  closeResetConfirmationPopup();
+  
+  // Execute the actual reset
+  executeResetAllFilters();
+}
+
+// Execute reset all filters (the actual reset logic)
+function executeResetAllFilters() {
   // Clear all checkboxes in the filter form
   const filterForm = document.getElementById("filtersForm");
   if (filterForm) {
@@ -3913,7 +3969,8 @@ function resetAllFilters() {
 
   // Track event
   trackEvent("reset_all_filters", {
-    source: "button_click"
+    source: "button_click",
+    confirmed: true
   });
 
   console.log("All filters reset to default state");
@@ -3933,6 +3990,9 @@ window.showAllResults = showAllResults;
 window.closeAllOverlays = closeAllOverlays;
 window.filterByMunicipalityAndZoom = filterByMunicipalityAndZoom;
 window.resetAllFilters = resetAllFilters;
+window.showResetConfirmationPopup = showResetConfirmationPopup;
+window.closeResetConfirmationPopup = closeResetConfirmationPopup;
+window.confirmResetAllFilters = confirmResetAllFilters;
 
 // Function to update checkboxes based on filter state
 function updateCheckboxesFromFilterState() {
