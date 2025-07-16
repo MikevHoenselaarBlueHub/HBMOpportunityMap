@@ -27,6 +27,23 @@ args = "npm install -g serve"
 task = "shell.exec"
 args = "npm run start"
 
+[[workflows.workflow]]
+name = "Admin Server"
+author = 45113069
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd admin"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server.js"
+
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[[ports]]
+localPort = 42683
+externalPort = 3000
