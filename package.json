@@ -4,8 +4,8 @@
   "description": "HBM Kansenkaart - Opportunity Map",
   "main": "index.html",
   "scripts": {
-    "start": "npx serve . -s -l 5000",
-    "dev": "npx serve . -s -l 5000"
+    "start": "npx serve . -l 5000",
+    "dev": "npx serve . -l 5000"
   },
   "dependencies": {
     "serve": "^14.2.4"
