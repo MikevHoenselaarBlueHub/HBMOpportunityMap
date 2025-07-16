@@ -94,63 +94,24 @@
 
     <!-- Limited script loading for over page -->
     <script>
-      // Only load basic functionality for over page
-      let currentLanguage = "nl";
-      let translations = {};
+      // Minimal script for over page - only hamburger menu
+      document.addEventListener("DOMContentLoaded", function() {
+        const hamburger = document.getElementById("hamburger");
+        const menuOverlay = document.getElementById("menuOverlay");
+        const closeMenu = document.getElementById("closeMenu");
 
-      async function loadTranslations() {
-        try {
-          const response = await fetch(`translations/${currentLanguage}.json`);
-          translations = await response.json();
-        } catch (error) {
-          console.error("Error loading translations:", error);
+        if (hamburger && menuOverlay) {
+          hamburger.addEventListener('click', function() {
+            menuOverlay.classList.add("open");
+          });
         }
-      }
 
-      function t(key) {
-        return translations[key] || key;
-      }
-
-      async function setLanguage(lang) {
-        currentLanguage = lang;
-        await loadTranslations();
-        updateUI();
-      }
-
-      function updateUI() {
-        document.querySelectorAll("[data-i18n]").forEach((element) => {
-          const key = element.getAttribute("data-i18n");
-          if (translations[key]) {
-            element.textContent = t(key);
-          }
-        });
-        document.title = t("aboutHBM") || "Over HBM";
-      }
-
-      // Hamburger menu functionality
-      const hamburger = document.getElementById("hamburger");
-      const menuOverlay = document.getElementById("menuOverlay");
-      const closeMenu = document.getElementById("closeMenu");
-
-      if (hamburger && menuOverlay) {
-        hamburger.addEventListener('click', function() {
-          menuOverlay.classList.add("open");
-        });
-      }
-
-      if (closeMenu && menuOverlay) {
-        closeMenu.addEventListener('click', function(e) {
-          e.preventDefault();
-          menuOverlay.classList.remove("open");
-        });
-      }
-
-      // Let all navigation links work normally - no JavaScript interference
-
-      // Initialize on page load
-      document.addEventListener("DOMContentLoaded", async () => {
-        await loadTranslations();
-        updateUI();
+        if (closeMenu && menuOverlay) {
+          closeMenu.addEventListener('click', function(e) {
+            e.preventDefault();
+            menuOverlay.classList.remove("open");
+          });
+        }
       });
     </script>
   </body>
