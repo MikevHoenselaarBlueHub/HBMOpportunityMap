@@ -1871,16 +1871,31 @@ function initializeFilters() {
   const filterBtn = document.getElementById("filterBtn");
   const filterOverlay = document.getElementById("filterOverlay");
   const closeFiltersBtn = document.getElementById("closeFilters");
+  const applyBtn = document.getElementById("applyFilters");
 
   if (filterBtn && filterOverlay) {
     filterBtn.addEventListener("click", function () {
       filterOverlay.classList.add("open");
+      
+      // Show apply button on mobile when filter overlay is opened
+      if (applyBtn) {
+        if (window.innerWidth <= 768) {
+          applyBtn.style.display = "block";
+        } else {
+          applyBtn.style.display = "none";
+        }
+      }
     });
   }
 
   if (closeFiltersBtn && filterOverlay) {
     closeFiltersBtn.addEventListener("click", function () {
       filterOverlay.classList.remove("open");
+      
+      // Hide apply button when filter overlay is closed
+      if (applyBtn) {
+        applyBtn.style.display = "none";
+      }
     });
   }
 
@@ -1946,9 +1961,7 @@ function initializeFilters() {
       applyFilters();
       filterOverlay.classList.remove("open");
       // Hide button after applying filters
-      if (window.innerWidth <= 768) {
-        applyFiltersBtn.style.display = "none";
-      }
+      applyFiltersBtn.style.display = "none";
     });
 
     // Handle window resize
@@ -1959,6 +1972,8 @@ function initializeFilters() {
           applyBtn.style.display = "none";
         } else if (filterOverlay.classList.contains("open")) {
           applyBtn.style.display = "block";
+        } else {
+          applyBtn.style.display = "none";
         }
       }
     });
