@@ -161,6 +161,10 @@ a {
   gap: 1rem;
 }
 
+#branding #logo {
+  height: 4rem
+}
+
 #interreg-logo {
   height: 150px;
   width: auto;
@@ -170,7 +174,6 @@ a {
   top: 0px;
   background-color: rgb(244, 244, 244);
   box-shadow: .4275rem .6875rem .75rem rgba(0, 0, 0, .098);
-  object-fit: contain;
   z-index: 1100;
 }
 
@@ -216,7 +219,6 @@ header {
   align-items: center;
   background: #fff;
   padding: 1rem;
-  z-index: 1200;
   flex-wrap: wrap;
   gap: 1rem;
   position: relative;
@@ -429,8 +431,6 @@ button {
   outline: none;
   border-color: #267b29;
 }
-
-.interreg-logo {}
 
 .mobile-interreg-logo {
   margin-top: 0px;
@@ -1086,6 +1086,14 @@ button {
   font-size: 0.9rem;
 }
 
+@media (max-width: 768px) {
+
+  .results-count {
+    position: absolute;
+    right: 1rem;
+  }
+}
+
 .opportunities-list {
   flex: 1;
   overflow-y: auto;
@@ -1531,7 +1539,7 @@ button {
   }
 }
 
-</media>@media (max-width: 768px) {
+@media (max-width: 768px) {
   .main-content {
     position: relative;
     height: calc(100vh - 80px);
@@ -1555,7 +1563,6 @@ button {
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 2;
     transform: translateX(100%);
     transition: transform 0.3s ease;
     border-left: none;
@@ -1577,22 +1584,18 @@ button {
     flex-wrap: wrap;
     gap: 0.5rem;
     z-index: 2200;
-    /* Higher than list container */
-    position: fixed;
-		bottom: initial; /* changed from 1rem */
-		top: 5rem;
   }
 
-    /* move the last filter notification above the filter and options button */
-	.last-filter-notification {
-		position: absolute;
-		top: -4rem;
-		left: 0;
-		width: 100%;
-		box-sizing: border-box;
-		padding: 0.75rem;
-		text-align: center;
-	}
+  /* move the last filter notification above the filter and options button */
+  .last-filter-notification {
+    position: absolute;
+    top: -4rem;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem;
+    text-align: center;
+  }
 
   .filter-dropdown {
     z-index: 2300;
@@ -2026,7 +2029,6 @@ button {
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
-  white-space: nowrap;
   z-index: 1500;
   pointer-events: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -2287,9 +2289,6 @@ button {
     width: 100%;
     text-align: center;
   }
-}
-
-;
 }
 
 #filterOverlay strong {
@@ -2585,8 +2584,6 @@ button {
   }
 }
 
-<button id="showAllResultsBtn" class="dropdown-item">Toon alle resultaten </button><button id="showAllOnMapBtn" class="dropdown-item">Alles in beeld </button>
-
 /* === Layer Control Styling === */
 .leaflet-control-layers label img {
   vertical-align: middle;
@@ -2595,22 +2592,22 @@ button {
 
 /* Add responsive list/map toggle button styling */
 .view-toggle-btn {
-	background: white;
-	color: black;
-	border: 2px solid black;
-	padding: 0.75rem 1rem;
-	border-radius: 4px;
-	font-weight: bold;
-	cursor: pointer;
-	transition: all 0.2s;
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	font-size: 1rem;
+  background: white;
+  color: black;
+  border: 2px solid black;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
 }
 
 .view-toggle-btn:hover {
-	background: #f5f5f5;
+  background: #f5f5f5;
 }
 
 /* Ensure the button is visible on all screen sizes */
