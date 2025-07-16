@@ -1783,14 +1783,16 @@ document.addEventListener("DOMContentLoaded", function () {
   // Reset all filters button in options menu
   const resetAllFiltersMenuBtn = document.getElementById("resetAllFiltersMenu");
   if (resetAllFiltersMenuBtn) {
-    resetAllFiltersMenuBtn.addEventListener("click", function () {
+    // Remove any existing event listeners to prevent double binding
+    resetAllFiltersMenuBtn.onclick = null;
+    resetAllFiltersMenuBtn.addEventListener("click", function (event) {
       // Close dropdown
       const dropdown = document.querySelector(".filter-dropdown");
       if (dropdown) {
         dropdown.classList.remove("open");
       }
       
-      resetAllFilters();
+      resetAllFilters(event);
     });
   }
 
@@ -1984,8 +1986,10 @@ function initializeFilters() {
   // Initialize reset all filters button in filter pane
   const resetAllFiltersBtn = document.getElementById("resetAllFilters");
   if (resetAllFiltersBtn) {
-    resetAllFiltersBtn.addEventListener("click", function () {
-      resetAllFilters();
+    // Remove any existing event listeners to prevent double binding
+    resetAllFiltersBtn.onclick = null;
+    resetAllFiltersBtn.addEventListener("click", function (event) {
+      resetAllFilters(event);
     });
   }
 
@@ -3822,13 +3826,30 @@ document.addEventListener("visibilitychange", function () {
 });
 
 // Reset all filters function with confirmation
-function resetAllFilters() {
+function resetAllFilters(event) {
+  // Prevent event propagation and default behavior
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
+  // Check if popup already exists to prevent double popups
+  if (document.querySelector(".reset-confirmation-popup")) {
+    return;
+  }
+  
   // Show confirmation popup
   showResetConfirmationPopup();
 }
 
 // Show confirmation popup for reset filters
 function showResetConfirmationPopup() {
+  // Check if popup already exists
+  const existingPopup = document.querySelector(".reset-confirmation-popup");
+  if (existingPopup) {
+    return;
+  }
+  
   const popupHTML = `
     <div class="reset-confirmation-popup">
       <div class="reset-confirmation-content">
@@ -3839,7 +3860,7 @@ function showResetConfirmationPopup() {
           <p>Alle actieve filters, zoektermen en locatie-instellingen worden gewist. Deze actie kan niet ongedaan worden gemaakt.</p>
         </div>
         <div class="reset-confirmation-actions">
-          <button class="reset-confirm-btn" onclick="confirmResetAllFilters()">Ja, reset alle filters</button>
+          <button class="reset-confirm-btn" onclick="confirmResetAllFilters(event)">Ja, reset alle filters</button>
           <button class="reset-cancel-btn" onclick="closeResetConfirmationPopup()">Annuleren</button>
         </div>
       </div>
@@ -3869,7 +3890,13 @@ function closeResetConfirmationPopup() {
 }
 
 // Confirm and execute reset all filters
-function confirmResetAllFilters() {
+function confirmResetAllFilters(event) {
+  // Prevent event propagation and default behavior
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  
   // Close popup first
   closeResetConfirmationPopup();
   
