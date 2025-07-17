@@ -1540,11 +1540,25 @@ function initializeTabs() {
 
 async function populateFilters(data) {
   try {
-    // Load filter options from filters.json
-    const filtersResponse = await fetch(
-      `data/filters.json?nocache=${Date.now()}&v=${APP_VERSION}`,
-    );
-    const filterOptions = await filtersResponse.json();
+    // Try to load filter options from admin API first (latest database version)
+    let filterOptions;
+    try {
+      const adminFiltersResponse = await fetch(`/admin/api/filters?nocache=${Date.now()}&v=${APP_VERSION}`);
+      if (adminFiltersResponse.ok) {
+        filterOptions = await adminFiltersResponse.json();
+        console.log("Loaded filters from admin API (database)");
+      } else {
+        throw new Error("Admin API not available");
+      }
+    } catch (adminError) {
+      console.log("Admin API not available, falling back to filters.json");
+      // Fallback to filters.json
+      const filtersResponse = await fetch(
+        `data/filters.json?nocache=${Date.now()}&v=${APP_VERSION}`,
+      );
+      filterOptions = await filtersResponse.json();
+      console.log("Loaded filters from filters.json");
+    }
 
     // Load municipalities from municipalities.json
     const municipalitiesResponse = await fetch(
@@ -1561,15 +1575,15 @@ async function populateFilters(data) {
     });
 
     // Populate filter sections
-    populateFilterSection("ProjectType", filterOptions.ProjectType);
-    populateFilterSection("OrganizationType", filterOptions.OrganizationType);
-    populateFilterSection("OrganizationField", filterOptions.OrganizationField);
-    populateFilterSection("HBMTopic", filterOptions.HBMTopic);
+    populateFilterSection("ProjectType", filterOptions.ProjectType || []);
+    populateFilterSection("OrganizationType", filterOptions.OrganizationType || []);
+    populateFilterSection("OrganizationField", filterOptions.OrganizationField || []);
+    populateFilterSection("HBMTopic", filterOptions.HBMTopic || []);
     populateFilterSection(
       "HBMCharacteristics",
-      filterOptions.HBMCharacteristics,
+      filterOptions.HBMCharacteristics || [],
     );
-    populateFilterSection("HBMSector", filterOptions.HBMSector);
+    populateFilterSection("HBMSector", filterOptions.HBMSector || []);
     populateFilterSection("Municipality", municipalities);
 
     // Add municipality selection buttons with config data
