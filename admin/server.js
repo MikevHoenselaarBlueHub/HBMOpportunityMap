@@ -213,12 +213,18 @@ app.post("/admin/api/users", authenticateToken, async (req, res) => {
         return res.status(400).json({ error: "Ongeldig email formaat" });
     }
 
+    // Valideer rol
+    const validRoles = ['admin', 'editor'];
+    if (!validRoles.includes(role)) {
+        return res.status(400).json({ error: "Ongeldige rol" });
+    }
+
     // Hash wachtwoord
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Voeg gebruiker toe
     const newUser = {
-        id: users.length + 1,
+        id: Math.max(...users.map(u => u.id), 0) + 1,
         username,
         email,
         password: hashedPassword,
@@ -235,6 +241,79 @@ app.post("/admin/api/users", authenticateToken, async (req, res) => {
         role: newUser.role,
         created: newUser.created,
     });
+});
+
+app.put("/admin/api/users/:id", authenticateToken, async (req, res) => {
+    const userId = parseInt(req.params.id);
+    const { email, password, role } = req.body;
+
+    const userIndex = users.findIndex(u => u.id === userId);
+    if (userIndex === -1) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+    }
+
+    const user = users[userIndex];
+
+    // Valideer email formaat
+    if (email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ error: "Ongeldig email formaat" });
+        }
+        user.email = email;
+    }
+
+    // Valideer en update rol
+    if (role) {
+        const validRoles = ['admin', 'editor'];
+        if (!validRoles.includes(role)) {
+            return res.status(400).json({ error: "Ongeldige rol" });
+        }
+        user.role = role;
+    }
+
+    // Update wachtwoord als opgegeven
+    if (password) {
+        const passwordError = validatePassword(password);
+        if (passwordError) {
+            return res.status(400).json({ error: passwordError });
+        }
+        user.password = await bcrypt.hash(password, 10);
+    }
+
+    users[userIndex] = user;
+
+    res.json({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        created: user.created,
+    });
+});
+
+app.delete("/admin/api/users/:id", authenticateToken, (req, res) => {
+    const userId = parseInt(req.params.id);
+    const userIndex = users.findIndex(u => u.id === userId);
+    
+    if (userIndex === -1) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+    }
+
+    // Voorkom dat de huidige gebruiker zichzelf verwijdert
+    if (users[userIndex].id === req.user.id) {
+        return res.status(400).json({ error: "Je kunt jezelf niet verwijderen" });
+    }
+
+    // Voorkom dat de laatste admin wordt verwijderd
+    const adminUsers = users.filter(u => u.role === 'admin');
+    if (users[userIndex].role === 'admin' && adminUsers.length === 1) {
+        return res.status(400).json({ error: "Je kunt de laatste administrator niet verwijderen" });
+    }
+
+    users.splice(userIndex, 1);
+    
+    res.json({ message: "Gebruiker succesvol verwijderd" });
 });
 
 // Data endpoints

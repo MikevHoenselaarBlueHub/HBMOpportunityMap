@@ -196,29 +196,218 @@ class AdminDashboard {
     }
 
     async loadUsers() {
-        // Mock user data - in real implementation, this would come from a database
-        const users = [
-            { username: 'admin', email: 'admin@hbm.com', role: 'Administrator', created: '2024-01-01' },
-            { username: 'editor', email: 'editor@hbm.com', role: 'Editor', created: '2024-01-15' }
-        ];
+        try {
+            const response = await fetch('/admin/api/users', {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to load users');
+            }
+            
+            const users = await response.json();
+            
+            const tableBody = document.getElementById('usersTableBody');
+            tableBody.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>${new Date(user.created).toLocaleDateString('nl-NL')}</td>
+                    <td class="action-buttons">
+                        <button class="action-btn edit-btn" onclick="editUser(${user.id})">Bewerken</button>
+                        <button class="action-btn delete-btn" onclick="deleteUser(${user.id})">Verwijderen</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error loading users:', error);
+            alert('Fout bij het laden van gebruikers');
+        }
+    }
+
+    openUserModal(userId = null) {
+        const isEdit = userId !== null;
         
-        const tableBody = document.getElementById('usersTableBody');
-        tableBody.innerHTML = '';
+        const modalHTML = `
+            <div id="userModal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>${isEdit ? 'Gebruiker bewerken' : 'Nieuwe gebruiker toevoegen'}</h3>
+                        <button class="modal-close" onclick="closeModal()">×</button>
+                    </div>
+                    <form id="userForm" class="modal-form">
+                        <div class="form-group">
+                            <label for="username">Gebruikersnaam *</label>
+                            <input type="text" id="username" name="username" required ${isEdit ? 'readonly' : ''}>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Wachtwoord ${isEdit ? '(laat leeg om niet te wijzigen)' : '*'}</label>
+                            <input type="password" id="password" name="password" ${isEdit ? '' : 'required'}>
+                            <small>Minimaal 8 karakters, moet hoofdletters, kleine letters, cijfers en speciale karakters bevatten</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="role">Rol *</label>
+                            <select id="role" name="role" required>
+                                <option value="">Selecteer rol</option>
+                                <option value="admin">Administrator</option>
+                                <option value="editor">Editor</option>
+                            </select>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuleren</button>
+                            <button type="submit" class="btn btn-primary">${isEdit ? 'Opslaan' : 'Toevoegen'}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
         
-        users.forEach(user => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${user.username}</td>
-                <td>${user.email}</td>
-                <td>${user.role}</td>
-                <td>${new Date(user.created).toLocaleDateString('nl-NL')}</td>
-                <td class="action-buttons">
-                    <button class="action-btn edit-btn" onclick="editUser('${user.username}')">Bewerken</button>
-                    <button class="action-btn delete-btn" onclick="deleteUser('${user.username}')">Verwijderen</button>
-                </td>
-            `;
-            tableBody.appendChild(row);
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        const form = document.getElementById('userForm');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (isEdit) {
+                this.updateUser(userId);
+            } else {
+                this.createUser();
+            }
         });
+        
+        if (isEdit) {
+            this.loadUserData(userId);
+        }
+    }
+
+    async loadUserData(userId) {
+        try {
+            const response = await fetch('/admin/api/users', {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to load user data');
+            }
+            
+            const users = await response.json();
+            const user = users.find(u => u.id === userId);
+            
+            if (user) {
+                document.getElementById('username').value = user.username;
+                document.getElementById('email').value = user.email;
+                document.getElementById('role').value = user.role;
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            alert('Fout bij het laden van gebruikersgegevens');
+        }
+    }
+
+    async createUser() {
+        const formData = new FormData(document.getElementById('userForm'));
+        const userData = {
+            username: formData.get('username'),
+            email: formData.get('email'),
+            password: formData.get('password'),
+            role: formData.get('role')
+        };
+        
+        try {
+            const response = await fetch('/admin/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
+                },
+                body: JSON.stringify(userData)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('Gebruiker succesvol toegevoegd!');
+                closeModal();
+                this.loadUsers();
+            } else {
+                alert(`Fout: ${result.error || 'Onbekende fout'}`);
+            }
+        } catch (error) {
+            console.error('Error creating user:', error);
+            alert('Fout bij het toevoegen van gebruiker');
+        }
+    }
+
+    async updateUser(userId) {
+        const formData = new FormData(document.getElementById('userForm'));
+        const userData = {
+            email: formData.get('email'),
+            role: formData.get('role')
+        };
+        
+        const password = formData.get('password');
+        if (password) {
+            userData.password = password;
+        }
+        
+        try {
+            const response = await fetch(`/admin/api/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
+                },
+                body: JSON.stringify(userData)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('Gebruiker succesvol bijgewerkt!');
+                closeModal();
+                this.loadUsers();
+            } else {
+                alert(`Fout: ${result.error || 'Onbekende fout'}`);
+            }
+        } catch (error) {
+            console.error('Error updating user:', error);
+            alert('Fout bij het bijwerken van gebruiker');
+        }
+    }
+
+    async deleteUser(userId) {
+        try {
+            const response = await fetch(`/admin/api/users/${userId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('Gebruiker succesvol verwijderd!');
+                this.loadUsers();
+            } else {
+                alert(`Fout: ${result.error || 'Onbekende fout'}`);
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            alert('Fout bij het verwijderen van gebruiker');
+        }
     }
 
     saveSettings() {
@@ -310,6 +499,21 @@ function importData() {
     window.adminDashboard.importData();
 }
 
+// User Management Functions
+function openAddUserModal() {
+    window.adminDashboard.openUserModal();
+}
+
+function editUser(userId) {
+    window.adminDashboard.openUserModal(userId);
+}
+
+async function deleteUser(userId) {
+    if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
+        await window.adminDashboard.deleteUser(userId);
+    }
+}
+
 // Modal functions
 function openAddOpportunityModal() {
     alert('Toevoegen van nieuwe kansen - implementatie volgt');
@@ -321,10 +525,6 @@ function openAddFilterModal() {
 
 function openAddMunicipalityModal() {
     alert('Toevoegen van nieuwe gemeenten - implementatie volgt');
-}
-
-function openAddUserModal() {
-    alert('Toevoegen van nieuwe gebruikers - implementatie volgt');
 }
 
 function editOpportunity(name) {
@@ -347,19 +547,16 @@ function deleteMunicipality(name) {
     }
 }
 
-function editUser(username) {
-    alert(`Bewerken van gebruiker: ${username} - implementatie volgt`);
-}
-
-function deleteUser(username) {
-    if (confirm(`Weet je zeker dat je "${username}" wilt verwijderen?`)) {
-        alert(`Verwijderen van gebruiker: ${username} - implementatie volgt`);
-    }
-}
-
 function deleteFilterItem(containerId, item) {
     if (confirm(`Weet je zeker dat je "${item}" wilt verwijderen?`)) {
         alert(`Verwijderen van filter item: ${item} - implementatie volgt`);
+    }
+}
+
+function closeModal() {
+    const modal = document.getElementById('userModal');
+    if (modal) {
+        modal.remove();
     }
 }
 
