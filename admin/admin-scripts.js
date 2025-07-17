@@ -1,4 +1,3 @@
-
 // Admin Dashboard JavaScript
 class AdminDashboard {
     constructor() {
@@ -18,7 +17,7 @@ class AdminDashboard {
 
         // Decode token to get user info
         this.decodeToken();
-        
+
         // Setup role-based UI
         this.setupRoleBasedUI();
 
@@ -65,23 +64,23 @@ class AdminDashboard {
                 'users',
                 'settings'
             ];
-            
+
             adminOnlyItems.forEach(sectionName => {
                 const navLink = document.querySelector(`[href="#${sectionName}"]`);
                 if (navLink) {
                     navLink.style.display = 'none';
                 }
-                
+
                 const section = document.getElementById(`${sectionName}-section`);
                 if (section) {
                     section.style.display = 'none';
                 }
             });
-            
+
             // Update dashboard stats voor editors (verberg gebruiker stats)
             this.hideAdminStats();
         }
-        
+
         // Show role-specific welcome message
         this.showRoleMessage();
     }
@@ -127,7 +126,7 @@ class AdminDashboard {
                 'Dashboard statistieken bekijken'
             ]
         };
-        
+
         return permissions[this.userRole] || [];
     }
 
@@ -142,11 +141,11 @@ class AdminDashboard {
                 'view_stats'
             ]
         };
-        
+
         if (this.userRole === 'admin') {
             return true; // Admin heeft alle rechten
         }
-        
+
         return rolePermissions[this.userRole]?.includes(action) || false;
     }
 
@@ -186,7 +185,7 @@ class AdminDashboard {
 
         // Show selected section
         document.getElementById(sectionName + '-section').classList.add('active');
-        
+
         // Add active class to clicked nav link
         document.querySelector(`[href="#${sectionName}"]`).classList.add('active');
 
@@ -208,15 +207,15 @@ class AdminDashboard {
 
     canAccessSection(sectionName) {
         const adminOnlySections = ['users', 'settings'];
-        
+
         if (this.userRole === 'admin') {
             return true; // Admin heeft toegang tot alles
         }
-        
+
         if (this.userRole === 'editor') {
             return !adminOnlySections.includes(sectionName);
         }
-        
+
         return false;
     }
 
@@ -225,12 +224,12 @@ class AdminDashboard {
             // Load opportunities data
             const opportunitiesResponse = await fetch('/data/opportunities.json');
             const opportunities = await opportunitiesResponse.json();
-            
+
             // Calculate stats
             const totalOpportunities = opportunities.length;
             const totalProjects = opportunities.filter(item => item.HBMType === 'Project').length;
             const totalCompanies = opportunities.filter(item => item.HBMType === 'Bedrijf').length;
-            
+
             // Load municipalities data
             const municipalitiesResponse = await fetch('/data/municipalities.json');
             const municipalitiesData = await municipalitiesResponse.json();
@@ -268,10 +267,10 @@ class AdminDashboard {
         try {
             const response = await fetch('/data/opportunities.json');
             const opportunities = await response.json();
-            
+
             const tableBody = document.getElementById('opportunitiesTableBody');
             tableBody.innerHTML = '';
-            
+
             opportunities.forEach(opportunity => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -295,20 +294,49 @@ class AdminDashboard {
         try {
             const response = await fetch('/data/filters.json');
             const filters = await response.json();
-            
-            this.renderFilterCategory('projectTypesFilter', filters.ProjectType);
-            this.renderFilterCategory('organizationTypesFilter', filters.OrganizationType);
-            this.renderFilterCategory('hbmTopicsFilter', filters.HBMTopic);
-            this.renderFilterCategory('hbmSectorsFilter', filters.HBMSector);
+
+            const container = document.getElementById('filtersContainer');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            Object.keys(filters).forEach(category => {
+                const section = document.createElement('div');
+                section.className = 'filter-section';
+
+                const canEdit = this.userRole === 'admin' || this.userRole === 'editor';
+                const canDelete = this.userRole === 'admin';
+
+                section.innerHTML = `
+                    <div class="section-header">
+                        <h3>${this.getCategoryDisplayName(category)} (${filters[category].length})</h3>
+                        ${canEdit ? `<button class="add-item-btn" onclick="adminApp.openFilterModal('${category}')" title="Nieuw item toevoegen">+</button>` : ''}
+                    </div>
+                    <div class="filter-items">
+                        ${filters[category].map(item => `
+                            <div class="filter-item">
+                                <span>${item}</span>
+                                <div class="filter-actions">
+                                    ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openFilterModal('${category}', '${item}')" title="Bewerken">✏️</button>` : ''}
+                                    ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteFilterItem('${category}', '${item}')">Verwijderen</button>` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                container.appendChild(section);
+            });
         } catch (error) {
             console.error('Error loading filters:', error);
+            alert('Fout bij het laden van filters');
         }
     }
 
     renderFilterCategory(containerId, items) {
         const container = document.getElementById(containerId);
         container.innerHTML = '';
-        
+
         // Add button to add new filter item
         const addButton = document.createElement('button');
         addButton.className = 'btn btn-primary';
@@ -316,7 +344,7 @@ class AdminDashboard {
         addButton.textContent = 'Nieuw item toevoegen';
         addButton.onclick = () => this.openAddFilterItemModal(containerId);
         container.appendChild(addButton);
-        
+
         items.forEach(item => {
             const div = document.createElement('div');
             div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem; background: white; border-radius: 4px; border: 1px solid #ddd;';
@@ -333,33 +361,58 @@ class AdminDashboard {
 
     async loadMunicipalities() {
         try {
-            const response = await fetch('/data/municipalities.json');
+            const response = await fetch('/admin/api/municipalities', {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load municipalities');
+            }
+
             const data = await response.json();
-            
-            const tableBody = document.getElementById('municipalitiesTableBody');
+            const municipalities = data.municipalities || [];
+
+            const tableBody = document.querySelector('#municipalitiesTable tbody');
+            if (!tableBody) return;
+
             tableBody.innerHTML = '';
-            
-            data.municipalities.forEach(municipality => {
-                const canDelete = this.userRole === 'admin';
-                
+
+            municipalities.forEach(municipality => {
                 const row = document.createElement('tr');
+
+                const canEdit = this.userRole === 'admin' || this.userRole === 'editor';
+                const canDelete = this.userRole === 'admin';
+
+                // Format municipality name with largest places
+                let municipalityDisplay = `<div class="municipality-info">
+                    <div class="municipality-name">${municipality.name}</div>`;
+
+                if (municipality.largest_places && municipality.largest_places.length > 0) {
+                    const places = municipality.largest_places.slice(0, 3).join(', ');
+                    municipalityDisplay += `<div class="municipality-places">${places}</div>`;
+                }
+
+                municipalityDisplay += '</div>';
+
                 row.innerHTML = `
-                    <td>${municipality.name}</td>
-                    <td>${municipality.code === 'NL' ? 'Nederland' : 'Duitsland'}</td>
-                    <td>${municipality.population ? municipality.population.toLocaleString() : 'N/A'}</td>
-                    <td>${municipality.area || 'N/A'}</td>
-                    <td class="action-buttons">
-                        <button class="action-btn edit-btn" onclick="editMunicipality('${municipality.name}')">Bewerken</button>
-                        ${canDelete ? 
-                            `<button class="action-btn delete-btn" onclick="deleteMunicipality('${municipality.name}')">Verwijderen</button>` : 
-                            `<span style="color: #999; font-size: 0.8em;">Alleen admin kan verwijderen</span>`
-                        }
+                    <td>${municipalityDisplay}</td>
+                    <td>${municipality.country}</td>
+                    <td>${municipality.code || ''}</td>
+                    <td>${municipality.population ? municipality.population.toLocaleString() : ''}</td>
+                    <td>${municipality.area || ''}</td>
+                    <td>
+                        ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openMunicipalityModal('${municipality.name}')" title="Bewerken">✏️</button>` : ''}
+                        ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteMunicipality('${municipality.name}')">Verwijderen</button>` : ''}
+                        ${!canEdit && !canDelete ? '<span style="color: #999;">Geen acties beschikbaar</span>' : ''}
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
         } catch (error) {
             console.error('Error loading municipalities:', error);
+            alert('Fout bij het laden van gemeenten');
         }
     }
 
@@ -387,20 +440,20 @@ class AdminDashboard {
                     'Authorization': `Bearer ${this.token}`
                 }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to load users');
             }
-            
+
             const users = await response.json();
-            
+
             const tableBody = document.getElementById('usersTableBody');
             tableBody.innerHTML = '';
-            
+
             users.forEach(user => {
                 const canEditUser = this.userRole === 'admin' || user.id === this.userInfo.id;
                 const canDeleteUser = this.userRole === 'admin' && user.id !== this.userInfo.id;
-                
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${user.username}</td>
@@ -433,7 +486,7 @@ class AdminDashboard {
         }
 
         const isEdit = userId !== null;
-        
+
         const modalHTML = `
             <div id="userModal" class="modal-overlay">
                 <div class="modal-content">
@@ -475,9 +528,9 @@ class AdminDashboard {
                 </div>
             </div>
         `;
-        
+
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
+
         const form = document.getElementById('userForm');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -487,7 +540,7 @@ class AdminDashboard {
                 this.createUser();
             }
         });
-        
+
         if (isEdit) {
             this.loadUserData(userId);
         }
@@ -500,14 +553,14 @@ class AdminDashboard {
                     'Authorization': `Bearer ${this.token}`
                 }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to load user data');
             }
-            
+
             const users = await response.json();
             const user = users.find(u => u.id === userId);
-            
+
             if (user) {
                 document.getElementById('username').value = user.username;
                 document.getElementById('email').value = user.email;
@@ -527,7 +580,7 @@ class AdminDashboard {
             password: formData.get('password'),
             role: formData.get('role')
         };
-        
+
         try {
             const response = await fetch('/admin/api/users', {
                 method: 'POST',
@@ -537,9 +590,9 @@ class AdminDashboard {
                 },
                 body: JSON.stringify(userData)
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok) {
                 alert('Gebruiker succesvol toegevoegd!');
                 closeModal();
@@ -559,12 +612,12 @@ class AdminDashboard {
             email: formData.get('email'),
             role: formData.get('role')
         };
-        
+
         const password = formData.get('password');
         if (password) {
             userData.password = password;
         }
-        
+
         try {
             const response = await fetch(`/admin/api/users/${userId}`, {
                 method: 'PUT',
@@ -574,9 +627,9 @@ class AdminDashboard {
                 },
                 body: JSON.stringify(userData)
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok) {
                 alert('Gebruiker succesvol bijgewerkt!');
                 closeModal();
@@ -598,9 +651,9 @@ class AdminDashboard {
                     'Authorization': `Bearer ${this.token}`
                 }
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok) {
                 alert('Gebruiker succesvol verwijderd!');
                 this.loadUsers();
@@ -616,13 +669,13 @@ class AdminDashboard {
     saveSettings() {
         const appTitle = document.getElementById('appTitle').value;
         const defaultZoom = document.getElementById('defaultZoom').value;
-        
+
         // Save settings to localStorage for now
         localStorage.setItem('app_settings', JSON.stringify({
             appTitle,
             defaultZoom: parseInt(defaultZoom)
         }));
-        
+
         alert('Instellingen opgeslagen!');
     }
 
@@ -639,7 +692,7 @@ class AdminDashboard {
                 municipalities,
                 exportDate: new Date().toISOString()
             };
-            
+
             const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -682,7 +735,7 @@ class AdminDashboard {
     // Municipality Management Functions
     openMunicipalityModal(municipalityName = null) {
         const isEdit = municipalityName !== null;
-        
+
         const modalHTML = `
             <div id="municipalityModal" class="modal-overlay">
                 <div class="modal-content">
@@ -732,13 +785,13 @@ class AdminDashboard {
                 </div>
             </div>
         `;
-        
+
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
+
         // Set up country-code synchronization
         const countrySelect = document.getElementById('municipalityCountry');
         const codeSelect = document.getElementById('municipalityCode');
-        
+
         countrySelect.addEventListener('change', () => {
             if (countrySelect.value === 'Netherlands') {
                 codeSelect.value = 'NL';
@@ -746,7 +799,7 @@ class AdminDashboard {
                 codeSelect.value = 'DE';
             }
         });
-        
+
         codeSelect.addEventListener('change', () => {
             if (codeSelect.value === 'NL') {
                 countrySelect.value = 'Netherlands';
@@ -754,7 +807,7 @@ class AdminDashboard {
                 countrySelect.value = 'Germany';
             }
         });
-        
+
         const form = document.getElementById('municipalityForm');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -764,7 +817,7 @@ class AdminDashboard {
                 this.createMunicipality();
             }
         });
-        
+
         if (isEdit) {
             this.loadMunicipalityData(municipalityName);
         }
@@ -775,7 +828,7 @@ class AdminDashboard {
             const response = await fetch('/data/municipalities.json');
             const data = await response.json();
             const municipality = data.municipalities.find(m => m.name === municipalityName);
-            
+
             if (municipality) {
                 document.getElementById('municipalityName').value = municipality.name;
                 document.getElementById('municipalityCountry').value = municipality.country;
@@ -800,7 +853,7 @@ class AdminDashboard {
             area: formData.get('area'),
             largest_places: formData.get('largest_places')
         };
-        
+
         try {
             const response = await fetch('/admin/api/municipalities', {
                 method: 'POST',
@@ -810,9 +863,9 @@ class AdminDashboard {
                 },
                 body: JSON.stringify(municipalityData)
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok) {
                 alert('Gemeente succesvol toegevoegd!');
                 closeModal('municipalityModal');
@@ -836,7 +889,7 @@ class AdminDashboard {
             area: formData.get('area'),
             largest_places: formData.get('largest_places')
         };
-        
+
         try {
             const response = await fetch(`/admin/api/municipalities/${encodeURIComponent(municipalityName)}`, {
                 method: 'PUT',
@@ -846,9 +899,9 @@ class AdminDashboard {
                 },
                 body: JSON.stringify(municipalityData)
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok) {
                 alert('Gemeente succesvol bijgewerkt!');
                 closeModal('municipalityModal');
@@ -875,9 +928,9 @@ class AdminDashboard {
                     'Authorization': `Bearer ${this.token}`
                 }
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok) {
                 alert('Gemeente succesvol verwijderd!');
                 this.loadMunicipalities();
@@ -898,7 +951,7 @@ class AdminDashboard {
             'hbmTopicsFilter': 'HBMTopic',
             'hbmSectorsFilter': 'HBMSector'
         };
-        
+
         const category = categoryMap[containerId];
         const categoryDisplayName = {
             'ProjectType': 'Project Types',
@@ -906,7 +959,7 @@ class AdminDashboard {
             'HBMTopic': 'HBM Topics',
             'HBMSector': 'HBM Sectoren'
         }[category];
-        
+
         const modalHTML = `
             <div id="filterModal" class="modal-overlay">
                 <div class="modal-content">
@@ -927,9 +980,9 @@ class AdminDashboard {
                 </div>
             </div>
         `;
-        
+
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
+
         const form = document.getElementById('filterForm');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -944,7 +997,7 @@ class AdminDashboard {
             'hbmTopicsFilter': 'HBMTopic',
             'hbmSectorsFilter': 'HBMSector'
         };
-        
+
         const category = categoryMap[containerId];
         const categoryDisplayName = {
             'ProjectType': 'Project Types',
@@ -952,7 +1005,7 @@ class AdminDashboard {
             'HBMTopic': 'HBM Topics',
             'HBMSector': 'HBM Sectoren'
         }[category];
-        
+
         const modalHTML = `
             <div id="filterModal" class="modal-overlay">
                 <div class="modal-content">
@@ -973,9 +1026,9 @@ class AdminDashboard {
                 </div>
             </div>
         `;
-        
+
         document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
+
         const form = document.getElementById('filterForm');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -988,7 +1041,7 @@ class AdminDashboard {
         const itemData = {
             item: formData.get('item')
         };
-        
+
         try {
             const response = await fetch(`/admin/api/filters/${category}`, {
                 method: 'POST',
@@ -998,9 +1051,9 @@ class AdminDashboard {
                 },
                 body: JSON.stringify(itemData)
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok) {
                 alert('Filter item succesvol toegevoegd!');
                 closeModal('filterModal');
@@ -1019,7 +1072,7 @@ class AdminDashboard {
         const itemData = {
             item: formData.get('item')
         };
-        
+
         try {
             const response = await fetch(`/admin/api/filters/${category}/${encodeURIComponent(oldItem)}`, {
                 method: 'PUT',
@@ -1029,9 +1082,9 @@ class AdminDashboard {
                 },
                 body: JSON.stringify(itemData)
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok) {
                 alert('Filter item succesvol bijgewerkt!');
                 closeModal('filterModal');
@@ -1052,9 +1105,9 @@ class AdminDashboard {
             'hbmTopicsFilter': 'HBMTopic',
             'hbmSectorsFilter': 'HBMSector'
         };
-        
+
         const category = categoryMap[containerId];
-        
+
         try {
             const response = await fetch(`/admin/api/filters/${category}/${encodeURIComponent(item)}`, {
                 method: 'DELETE',
@@ -1062,9 +1115,9 @@ class AdminDashboard {
                     'Authorization': `Bearer ${this.token}`
                 }
             });
-            
+
             const result = await response.json();
-            
+
             if (response.ok) {
                 alert('Filter item succesvol verwijderd!');
                 this.loadFilters();
@@ -1075,6 +1128,16 @@ class AdminDashboard {
             console.error('Error deleting filter item:', error);
             alert('Fout bij het verwijderen van filter item');
         }
+    }
+
+    getCategoryDisplayName(category) {
+        const categoryDisplayNames = {
+            'ProjectType': 'Project Types',
+            'OrganizationType': 'Organisatie Types',
+            'HBMTopic': 'HBM Topics',
+            'HBMSector': 'HBM Sectoren'
+        };
+        return categoryDisplayNames[category] || category;
     }
 }
 
@@ -1122,12 +1185,12 @@ async function deleteUser(userId) {
         alert('Alleen administrators kunnen gebruikers verwijderen.');
         return;
     }
-    
+
     if (userId === window.adminDashboard.userInfo.id) {
         alert('Je kunt jezelf niet verwijderen.');
         return;
     }
-    
+
     if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
         await window.adminDashboard.deleteUser(userId);
     }
@@ -1179,7 +1242,7 @@ function deleteFilterItem(containerId, item) {
 function closeModal(modalId = null) {
     const modals = modalId ? [document.getElementById(modalId)] : 
                   [document.getElementById('userModal'), document.getElementById('municipalityModal'), document.getElementById('filterModal')];
-    
+
     modals.forEach(modal => {
         if (modal) {
             modal.remove();

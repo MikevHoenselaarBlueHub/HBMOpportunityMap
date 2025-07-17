@@ -165,6 +165,7 @@ body {
     margin-bottom: 2rem;
     padding-bottom: 1rem;
     border-bottom: 2px solid #eee;
+    position: relative;
 }
 
 .section-header h2 {
@@ -378,31 +379,77 @@ tr:hover {
 }
 
 .action-btn {
-    padding: 0.25rem 0.75rem;
-    margin: 0 0.25rem;
+    padding: 6px 12px;
     border: none;
     border-radius: 4px;
-    font-size: 0.85rem;
     cursor: pointer;
-    transition: background-color 0.2s;
+    font-size: 12px;
+    margin-right: 5px;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .edit-btn {
-    background-color: #007bff;
+    background-color: #2196F3;
     color: white;
+    padding: 8px;
+    min-width: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .edit-btn:hover {
-    background-color: #0056b3;
+    background-color: #1976D2;
 }
 
 .delete-btn {
-    background-color: #dc3545;
+    background-color: #f44336;
     color: white;
 }
 
 .delete-btn:hover {
-    background-color: #c82333;
+    background-color: #d32f2f;
+}
+
+.add-item-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.add-item-btn:hover {
+    background-color: #45a049;
+    transform: scale(1.1);
+}
+
+.municipality-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.municipality-name {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.municipality-places {
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
 }
 
 /* Settings */
@@ -448,32 +495,7 @@ tr:hover {
     justify-content: center;
 }
 
-.action-btn {
-    padding: 0.25rem 0.5rem;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
 
-.edit-btn {
-    background: #2196f3;
-    color: white;
-}
-
-.edit-btn:hover {
-    background: #1976d2;
-}
-
-.delete-btn {
-    background: #f44336;
-    color: white;
-}
-
-.delete-btn:hover {
-    background: #d32f2f;
-}
 
 /* Role badges */
 .role-badge {

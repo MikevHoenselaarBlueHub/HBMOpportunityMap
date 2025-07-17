@@ -1,4 +1,3 @@
-
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
@@ -14,7 +13,7 @@ class DatabaseManager {
         if (!fs.existsSync(path.dirname(this.dbPath))) {
             fs.mkdirSync(path.dirname(this.dbPath), { recursive: true });
         }
-        
+
         if (!fs.existsSync(this.dbPath)) {
             const initialData = {
                 users: [],
@@ -85,7 +84,7 @@ class DatabaseManager {
     async validatePassword(username, password) {
         const user = this.findUserByUsername(username);
         if (!user) return null;
-        
+
         const isValid = await bcrypt.compare(password, user.password);
         return isValid ? user : null;
     }
@@ -93,32 +92,33 @@ class DatabaseManager {
     // Maak nieuwe gebruiker aan
     async createUser(userData) {
         const { username, email, password, role } = userData;
-        
+
         // Validatie
         if (!username || !email || !password || !role) {
             throw new Error('Alle velden zijn vereist');
         }
 
         const db = this.loadDatabase();
-        
-        // Check duplicaten
-        if (db.users.find(u => u.username === username)) {
-            throw new Error('Gebruiker met deze gebruikersnaam bestaat al');
-        }
-        
-        if (db.users.find(u => u.email === email)) {
-            throw new Error('Gebruiker met dit email bestaat al');
-        }
 
-        // Valideer rol
         const validRoles = ['admin', 'editor'];
         if (!validRoles.includes(role)) {
             throw new Error('Ongeldige rol');
         }
 
+        // Check of username al bestaat (case-insensitive)
+        if (db.users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
+            throw new Error('Gebruikersnaam bestaat al');
+        }
+
+        if (db.users.find(u => u.email === email)) {
+            throw new Error('Gebruiker met dit email bestaat al');
+        }
+
+
+
         // Hash wachtwoord
         const hashedPassword = await bcrypt.hash(password, 10);
-        
+
         // Nieuwe gebruiker
         const newUser = {
             id: db.lastId + 1,
@@ -133,7 +133,7 @@ class DatabaseManager {
         // Voeg toe aan database
         db.users.push(newUser);
         db.lastId = newUser.id;
-        
+
         if (this.saveDatabase(db)) {
             console.log(`[DB] User created: ${username} (ID: ${newUser.id})`);
             return {
@@ -153,13 +153,13 @@ class DatabaseManager {
     async updateUser(userId, updateData) {
         const db = this.loadDatabase();
         const userIndex = db.users.findIndex(u => u.id === userId);
-        
+
         if (userIndex === -1) {
             throw new Error('Gebruiker niet gevonden');
         }
 
         const user = db.users[userIndex];
-        
+
         // Update velden
         if (updateData.username && updateData.username !== user.username) {
             // Check of nieuwe username al bestaat
@@ -168,7 +168,7 @@ class DatabaseManager {
             }
             user.username = updateData.username;
         }
-        
+
         if (updateData.email && updateData.email !== user.email) {
             // Check of nieuwe email al bestaat
             if (db.users.find(u => u.email === updateData.email && u.id !== userId)) {
@@ -176,7 +176,7 @@ class DatabaseManager {
             }
             user.email = updateData.email;
         }
-        
+
         if (updateData.role) {
             const validRoles = ['admin', 'editor'];
             if (!validRoles.includes(updateData.role)) {
@@ -184,13 +184,13 @@ class DatabaseManager {
             }
             user.role = updateData.role;
         }
-        
+
         if (updateData.password) {
             user.password = await bcrypt.hash(updateData.password, 10);
         }
-        
+
         user.updated = new Date().toISOString();
-        
+
         if (this.saveDatabase(db)) {
             console.log(`[DB] User updated: ${user.username} (ID: ${userId})`);
             return {
@@ -210,13 +210,13 @@ class DatabaseManager {
     deleteUser(userId) {
         const db = this.loadDatabase();
         const userIndex = db.users.findIndex(u => u.id === userId);
-        
+
         if (userIndex === -1) {
             throw new Error('Gebruiker niet gevonden');
         }
 
         const deletedUser = db.users.splice(userIndex, 1)[0];
-        
+
         if (this.saveDatabase(db)) {
             console.log(`[DB] User deleted: ${deletedUser.username} (ID: ${userId})`);
             return true;
@@ -242,7 +242,7 @@ class DatabaseManager {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupPath = path.join(__dirname, `users-backup-${timestamp}.json`);
             const currentData = this.loadDatabase();
-            
+
             fs.writeFileSync(backupPath, JSON.stringify(currentData, null, 2));
             console.log(`[DB] Backup created: ${backupPath}`);
             return backupPath;
