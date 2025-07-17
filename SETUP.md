@@ -22,11 +22,6 @@ Na het starten:
 - **Hoofdapplicatie**: Klik op de webview URL
 - **Admin CMS**: Voeg `/admin` toe aan de URL
 
-## Login gegevens Admin CMS
-
-- **Gebruiker**: admin
-- **Wachtwoord**: password
-
 ## Poorten
 
 De applicatie draait op poort 5000 en is automatisch geconfigureerd voor Replit deployment.
