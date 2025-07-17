@@ -363,6 +363,9 @@ function initMap() {
 
   // Initialize municipality layer
   municipalityLayer = L.layerGroup();
+  
+  // Track current map layer for dynamic styling
+  let currentBaseLayer = 'street';
 
   // Add layer control with base layers and overlays
   const layerControl = L.control
@@ -380,6 +383,37 @@ function initMap() {
       },
     )
     .addTo(map);
+
+  // Listen for base layer changes to update municipality colors
+  map.on('baselayerchange', function(e) {
+    if (e.name === 'Satelliet') {
+      currentBaseLayer = 'satellite';
+      updateMunicipalityColors('satellite');
+    } else {
+      currentBaseLayer = 'street';
+      updateMunicipalityColors('street');
+    }
+  });
+
+  // Function to update municipality colors based on base layer
+  function updateMunicipalityColors(layerType) {
+    const color = layerType === 'satellite' ? '#FFD700' : 'rgb(38, 123, 41)';
+    const fillColor = layerType === 'satellite' ? '#FFD700' : 'rgb(38, 123, 41)';
+    
+    municipalityLayer.eachLayer(function(layer) {
+      if (layer.setStyle) {
+        layer.setStyle({
+          color: color,
+          fillColor: fillColor,
+          weight: 2,
+          opacity: 0.9,
+          fillOpacity: 0.1,
+          smoothFactor: 1,
+          dashArray: "5, 8",
+        });
+      }
+    });
+  }
 
   // Lazy load municipality boundaries when layer is added
   let municipalitiesLoaded = false;
@@ -454,25 +488,27 @@ async function loadFilteredMunicipalities() {
 
         if (municipalityName && feature.geometry) {
           try {
+            const baseColor = currentBaseLayer === 'satellite' ? '#FFD700' : 'rgb(38, 123, 41)';
             const geoJsonLayer = L.geoJSON(feature, {
               style: {
-                color: "rgb(38, 123, 41)",
-                weight: country === "Netherlands" ? 4 : 2,
+                color: baseColor,
+                weight: 2,
                 opacity: 0.9,
-                fillColor: "rgb(38, 123, 41)",
+                fillColor: baseColor,
                 fillOpacity: 0.1,
-                smoothFactor: country === "Netherlands" ? 0.5 : 1,
+                smoothFactor: 1,
                 dashArray: "5, 8",
               },
               onEachFeature: function (feature, layer) {
                 layer.on({
                   mouseover: function (e) {
                     const layer = e.target;
+                    const hoverColor = currentBaseLayer === 'satellite' ? '#FFD700' : 'rgb(38, 123, 41)';
                     layer.setStyle({
-                      color: "rgb(38, 123, 41)",
-                      weight: country === "Netherlands" ? 6 : 4,
+                      color: hoverColor,
+                      weight: 4,
                       opacity: 1,
-                      fillColor: "rgb(38, 123, 41)",
+                      fillColor: hoverColor,
                       fillOpacity: 0.3,
                       dashArray: "5, 8",
                     });
@@ -483,11 +519,12 @@ async function loadFilteredMunicipalities() {
                   },
                   mouseout: function (e) {
                     const layer = e.target;
+                    const baseColor = currentBaseLayer === 'satellite' ? '#FFD700' : 'rgb(38, 123, 41)';
                     layer.setStyle({
-                      color: "rgb(38, 123, 41)",
-                      weight: country === "Netherlands" ? 4 : 2,
+                      color: baseColor,
+                      weight: 2,
                       opacity: 0.9,
-                      fillColor: "rgb(38, 123, 41)",
+                      fillColor: baseColor,
                       fillOpacity: 0.1,
                       dashArray: "5, 8",
                     });
@@ -1090,7 +1127,7 @@ function createMarkers(data) {
           item.HBMType === "Bedrijf" ? item.Logo : item.ProjectImage;
         const borderColor =
           item.HBMType === "Project"
-            ? "rgb(255, 107, 53)"
+            ? "rgb(139, 179, 17)"
             : "rgb(33, 150, 243)";
 
         const customIcon = L.divIcon({

@@ -1983,7 +1983,7 @@ button {
   border-radius: 50%;
   overflow: hidden;
   position: relative;
-  border: 3px solid #FF6B35;
+  border: 3px solid rgb(139, 179, 17);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -1999,7 +1999,7 @@ button {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 107, 53, 0.2);
+  background: rgba(139, 179, 17, 0.2);
   pointer-events: none;
 }
 
@@ -2042,7 +2042,7 @@ button {
 .fallback-marker {
   width: 30px;
   height: 40px;
-  background: #FF6B35;
+  background: rgb(139, 179, 17);
   border-radius: 50% 50% 50% 0;
   transform: rotate(-45deg);
   margin: 10px;
