@@ -448,8 +448,9 @@ class AdminDashboard {
                 }
 
                 const data = await response.json();
+                // Filter municipalities that are visible AND have visibility=true in database
                 municipalitiesToShow = (data.municipalities || []).filter(
-                    municipality => visibleMunicipalityNames.includes(municipality.name)
+                    municipality => visibleMunicipalityNames.includes(municipality.name) && municipality.visibility !== false
                 );
             } else {
                 // Load all municipalities normally
@@ -1822,11 +1823,14 @@ async function saveMunicipalityVisibility() {
                 const isVisible =
                     window.adminDashboard.municipalityLayers[municipalityName]
                         .visible;
-                // Store all values explicitly (true = visible, false = hidden)
-                visibilityData[municipalityName] = isVisible;
+                // Only store true values (optimization)
+                if (isVisible) {
+                    visibilityData[municipalityName] = true;
+                }
             },
         );
 
+        // Save visibility data
         const response = await fetch("/admin/api/municipality-visibility", {
             method: "POST",
             headers: {
@@ -1839,27 +1843,41 @@ async function saveMunicipalityVisibility() {
         const result = await response.json();
 
         if (response.ok) {
-            alert("Gemeente zichtbaarheid succesvol opgeslagen!");
-
-            // Reload the municipalities data table to reflect changes
-            window.adminDashboard.loadMunicipalities();
-
-            // Generate new visible municipalities GeoJSON for main application
-            const generateResponse = await fetch(
-                "/admin/api/generate-visible-geojson",
-                {
-                    method: "POST",
-                    headers: {
-                        Authorization: `Bearer ${window.adminDashboard.token}`,
-                    },
+            // Update municipality database with visibility changes
+            const updateResponse = await fetch("/admin/api/update-municipality-visibility", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${window.adminDashboard.token}`,
                 },
-            );
+                body: JSON.stringify(visibilityData),
+            });
 
-            if (generateResponse.ok) {
-                const generateResult = await generateResponse.json();
-                console.log(
-                    `Generated visible municipalities GeoJSON with ${generateResult.count} municipalities`,
+            if (updateResponse.ok) {
+                alert("Gemeente zichtbaarheid succesvol opgeslagen!");
+
+                // Reload the municipalities data table to reflect changes
+                window.adminDashboard.loadMunicipalities();
+
+                // Generate new visible municipalities GeoJSON for main application
+                const generateResponse = await fetch(
+                    "/admin/api/generate-visible-geojson",
+                    {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${window.adminDashboard.token}`,
+                        },
+                    },
                 );
+
+                if (generateResponse.ok) {
+                    const generateResult = await generateResponse.json();
+                    console.log(
+                        `Generated visible municipalities GeoJSON with ${generateResult.count} municipalities`,
+                    );
+                }
+            } else {
+                alert("Gemeente zichtbaarheid opgeslagen, maar database update gefaald");
             }
         } else {
             alert(`Fout bij opslaan: ${result.message || result.error}`);

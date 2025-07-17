@@ -953,7 +953,11 @@ app.post('/admin/api/municipality-visibility', authenticateToken, async (req, re
 
         // Create backup of current visibility data
         if (fs.existsSync(visibilityPath)) {
-            const backupPath = path.join(__dirname, 'backup', `municipality-visibility-${new Date().toISOString()}.json`);
+            const backupDir = path.join(__dirname, 'backup');
+            if (!fs.existsSync(backupDir)) {
+                fs.mkdirSync(backupDir, { recursive: true });
+            }
+            const backupPath = path.join(backupDir, `municipality-visibility-${new Date().toISOString()}.json`);
             fs.copyFileSync(visibilityPath, backupPath);
         }
 
@@ -980,6 +984,125 @@ app.post('/admin/api/municipality-visibility', authenticateToken, async (req, re
         res.status(500).json({
             success: false,
             message: "Fout bij opslaan van gemeente zichtbaarheid"
+        });
+    }
+});
+
+// Update municipality visibility in database
+app.post('/admin/api/update-municipality-visibility', authenticateToken, async (req, res) => {
+    try {
+        const visibilityData = req.body; // Only contains municipalities that are true
+        const municipalitiesPath = path.join(__dirname, 'data', 'municipalities.json');
+        const nlGeoJsonPath = path.join(__dirname, 'data', 'geojson', 'nl-gemeenten.geojson');
+        const deGeoJsonPath = path.join(__dirname, 'data', 'geojson', 'de-gemeenten.geojson');
+
+        // Load current municipalities database
+        let municipalitiesData = { municipalities: [] };
+        if (fs.existsSync(municipalitiesPath)) {
+            municipalitiesData = JSON.parse(fs.readFileSync(municipalitiesPath, 'utf8'));
+        }
+
+        // Load GeoJSON data for municipality details
+        const nlData = JSON.parse(fs.readFileSync(nlGeoJsonPath, 'utf8'));
+        const deData = JSON.parse(fs.readFileSync(deGeoJsonPath, 'utf8'));
+
+        // Create a map of existing municipalities for quick lookup
+        const existingMunicipalitiesMap = {};
+        municipalitiesData.municipalities.forEach(municipality => {
+            existingMunicipalitiesMap[municipality.name] = municipality;
+        });
+
+        // Process all municipalities from GeoJSON files
+        const allMunicipalities = [];
+        
+        // Process Dutch municipalities
+        nlData.features.forEach(feature => {
+            const municipalityName = feature.properties.name;
+            if (!municipalityName) return;
+
+            const isVisible = visibilityData[municipalityName] === true;
+            const existing = existingMunicipalitiesMap[municipalityName];
+
+            if (existing) {
+                // Update existing municipality
+                existing.visibility = isVisible;
+                allMunicipalities.push(existing);
+            } else if (isVisible) {
+                // Add new municipality with details from GeoJSON
+                allMunicipalities.push({
+                    name: municipalityName,
+                    country: "Netherlands",
+                    code: "NL",
+                    population: feature.properties.population || 0,
+                    area: feature.properties.area || "",
+                    largest_places: feature.properties.largest_places || [],
+                    visibility: true
+                });
+            }
+        });
+
+        // Process German municipalities
+        deData.features.forEach(feature => {
+            const municipalityName = feature.properties.NAME_4;
+            if (!municipalityName) return;
+
+            const isVisible = visibilityData[municipalityName] === true;
+            const existing = existingMunicipalitiesMap[municipalityName];
+
+            if (existing) {
+                // Update existing municipality (only if not already processed)
+                if (!allMunicipalities.find(m => m.name === municipalityName)) {
+                    existing.visibility = isVisible;
+                    allMunicipalities.push(existing);
+                }
+            } else if (isVisible) {
+                // Add new municipality with details from GeoJSON
+                allMunicipalities.push({
+                    name: municipalityName,
+                    country: "Germany",
+                    code: "DE",
+                    population: feature.properties.population || 0,
+                    area: feature.properties.area || "",
+                    largest_places: feature.properties.largest_places || [],
+                    visibility: true
+                });
+            }
+        });
+
+        // Add any existing municipalities that weren't in the visibility data (set to false)
+        municipalitiesData.municipalities.forEach(existing => {
+            if (!allMunicipalities.find(m => m.name === existing.name)) {
+                existing.visibility = false;
+                allMunicipalities.push(existing);
+            }
+        });
+
+        // Sort municipalities by name
+        allMunicipalities.sort((a, b) => a.name.localeCompare(b.name));
+
+        // Update municipalities data
+        municipalitiesData.municipalities = allMunicipalities;
+        municipalitiesData.lastUpdated = new Date().toISOString();
+        municipalitiesData.totalCount = allMunicipalities.length;
+        municipalitiesData.visibleCount = allMunicipalities.filter(m => m.visibility !== false).length;
+
+        // Save updated data
+        fs.writeFileSync(municipalitiesPath, JSON.stringify(municipalitiesData, null, 2));
+
+        console.log(`[UPDATE_VISIBILITY] Updated ${allMunicipalities.length} municipalities, ${municipalitiesData.visibleCount} visible`);
+
+        res.json({
+            success: true,
+            message: "Municipality visibility updated in database",
+            totalCount: allMunicipalities.length,
+            visibleCount: municipalitiesData.visibleCount
+        });
+
+    } catch (error) {
+        console.error('[UPDATE_VISIBILITY] Error updating municipality visibility:', error);
+        res.status(500).json({
+            success: false,
+            message: "Fout bij updaten van gemeente zichtbaarheid in database"
         });
     }
 });
