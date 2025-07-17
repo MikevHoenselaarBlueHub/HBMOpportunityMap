@@ -1195,17 +1195,186 @@ class AdminDashboard {
     }
 
     // Initialize municipality visibility map
-    initializeMunicipalityVisibilityMap() {
-        // This function would initialize the Leaflet map for municipality visibility
-        // For now, we'll add a placeholder
+    async initializeMunicipalityVisibilityMap() {
         const mapContainer = document.getElementById('municipalityMap');
-        if (mapContainer && !mapContainer.hasChildNodes()) {
+        if (!mapContainer) return;
+
+        // Clear any existing content
+        mapContainer.innerHTML = '';
+
+        // Initialize Leaflet map
+        if (typeof L === 'undefined') {
+            // Load Leaflet if not available
+            const leafletCSS = document.createElement('link');
+            leafletCSS.rel = 'stylesheet';
+            leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            document.head.appendChild(leafletCSS);
+
+            const leafletJS = document.createElement('script');
+            leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            document.head.appendChild(leafletJS);
+
+            leafletJS.onload = () => {
+                this.createVisibilityMap();
+            };
+        } else {
+            this.createVisibilityMap();
+        }
+    }
+
+    async createVisibilityMap() {
+        const mapContainer = document.getElementById('municipalityMap');
+        if (!mapContainer) return;
+
+        try {
+            // Initialize map
+            this.visibilityMap = L.map('municipalityMap', {
+                center: [51.2, 6.0],
+                zoom: 8,
+                zoomControl: true
+            });
+
+            // Add base tile layer
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '© OpenStreetMap contributors © CARTO',
+                maxZoom: 18
+            }).addTo(this.visibilityMap);
+
+            // Load visibility settings
+            const visibilityResponse = await fetch('/admin/api/municipality-visibility', {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                }
+            });
+            const visibilityData = await visibilityResponse.json();
+
+            // Load and display Dutch municipalities
+            await this.loadVisibilityMunicipalities('dutch', visibilityData);
+            
+            // Load and display German municipalities  
+            await this.loadVisibilityMunicipalities('german', visibilityData);
+
+            console.log('Municipality visibility map initialized');
+
+        } catch (error) {
+            console.error('Error initializing visibility map:', error);
             mapContainer.innerHTML = `
                 <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;">
-                    <p style="color: #666; font-size: 16px;">Kaart voor gemeente zichtbaarheid wordt hier geladen...</p>
+                    <p style="color: #dc3545; font-size: 16px;">Fout bij laden van kaart: ${error.message}</p>
                 </div>
             `;
         }
+    }
+
+    async loadVisibilityMunicipalities(country, visibilityData) {
+        try {
+            const geoJsonPath = country === 'dutch' ? 
+                '/data/geojson/nl-gemeenten.geojson' : 
+                '/data/geojson/de-gemeenten.geojson';
+
+            const response = await fetch(geoJsonPath);
+            const geoJsonData = await response.json();
+
+            geoJsonData.features.forEach(feature => {
+                const municipalityName = country === 'dutch' ? 
+                    feature.properties.name : 
+                    feature.properties.NAME_4;
+
+                if (!municipalityName) return;
+
+                const isVisible = visibilityData[municipalityName] !== false; // Default visible
+
+                const layer = L.geoJSON(feature, {
+                    style: {
+                        color: isVisible ? '#28a745' : '#dc3545',
+                        weight: 2,
+                        opacity: 0.8,
+                        fillColor: isVisible ? '#28a745' : '#dc3545',
+                        fillOpacity: 0.3
+                    },
+                    onEachFeature: (feature, layer) => {
+                        // Add click handler to toggle visibility
+                        layer.on('click', () => {
+                            this.toggleMunicipalityVisibility(municipalityName, layer);
+                        });
+
+                        // Add popup with municipality info
+                        const status = isVisible ? 'Zichtbaar' : 'Verborgen';
+                        layer.bindPopup(`
+                            <div>
+                                <h4>${municipalityName}</h4>
+                                <p>Land: ${country === 'dutch' ? 'Nederland' : 'Duitsland'}</p>
+                                <p>Status: <strong style="color: ${isVisible ? '#28a745' : '#dc3545'}">${status}</strong></p>
+                                <p><small>Klik om status te wijzigen</small></p>
+                            </div>
+                        `);
+
+                        // Add hover effects
+                        layer.on('mouseover', () => {
+                            layer.setStyle({
+                                weight: 4,
+                                opacity: 1,
+                                fillOpacity: 0.5
+                            });
+                        });
+
+                        layer.on('mouseout', () => {
+                            layer.setStyle({
+                                weight: 2,
+                                opacity: 0.8,
+                                fillOpacity: 0.3
+                            });
+                        });
+                    }
+                }).addTo(this.visibilityMap);
+
+                // Store reference for toggle functionality
+                if (!this.municipalityLayers) {
+                    this.municipalityLayers = {};
+                }
+                this.municipalityLayers[municipalityName] = {
+                    layer: layer,
+                    visible: isVisible
+                };
+            });
+
+        } catch (error) {
+            console.error(`Error loading ${country} municipalities for visibility:`, error);
+        }
+    }
+
+    toggleMunicipalityVisibility(municipalityName, layer) {
+        if (!this.municipalityLayers[municipalityName]) return;
+
+        const currentVisibility = this.municipalityLayers[municipalityName].visible;
+        const newVisibility = !currentVisibility;
+
+        // Update layer style
+        const color = newVisibility ? '#28a745' : '#dc3545';
+        layer.setStyle({
+            color: color,
+            fillColor: color,
+            weight: 2,
+            opacity: 0.8,
+            fillOpacity: 0.3
+        });
+
+        // Update local state
+        this.municipalityLayers[municipalityName].visible = newVisibility;
+
+        // Update popup
+        const status = newVisibility ? 'Zichtbaar' : 'Verborgen';
+        const country = municipalityName.includes('ü') || municipalityName.includes('ß') ? 'Duitsland' : 'Nederland';
+        layer.setPopupContent(`
+            <div>
+                <h4>${municipalityName}</h4>
+                <p>Land: ${country}</p>
+                <p>Status: <strong style="color: ${color}">${status}</strong></p>
+                <p><small>Klik om status te wijzigen</small></p>
+            </div>
+        `);
+
+        console.log(`Municipality ${municipalityName} visibility changed to: ${newVisibility}`);
     }
 }
 
@@ -1325,4 +1494,93 @@ function closeModal(modalId = null) {
 document.addEventListener('DOMContentLoaded', function() {
     window.adminDashboard = new AdminDashboard();
     window.adminApp = window.adminDashboard; // Make available globally for onclick handlers
+
+// Global functions for municipality visibility
+function toggleAllMunicipalities(visible) {
+    if (!window.adminDashboard.municipalityLayers) return;
+
+    Object.keys(window.adminDashboard.municipalityLayers).forEach(municipalityName => {
+        const municipalityData = window.adminDashboard.municipalityLayers[municipalityName];
+        const layer = municipalityData.layer;
+
+        // Update layer style
+        const color = visible ? '#28a745' : '#dc3545';
+        layer.setStyle({
+            color: color,
+            fillColor: color,
+            weight: 2,
+            opacity: 0.8,
+            fillOpacity: 0.3
+        });
+
+        // Update local state
+        municipalityData.visible = visible;
+
+        // Update popup
+        const status = visible ? 'Zichtbaar' : 'Verborgen';
+        const country = municipalityName.includes('ü') || municipalityName.includes('ß') ? 'Duitsland' : 'Nederland';
+        layer.setPopupContent(`
+            <div>
+                <h4>${municipalityName}</h4>
+                <p>Land: ${country}</p>
+                <p>Status: <strong style="color: ${color}">${status}</strong></p>
+                <p><small>Klik om status te wijzigen</small></p>
+            </div>
+        `);
+    });
+
+    console.log(`All municipalities set to: ${visible ? 'visible' : 'hidden'}`);
+}
+
+async function saveMunicipalityVisibility() {
+    if (!window.adminDashboard.municipalityLayers) {
+        alert('Geen gemeente data beschikbaar om op te slaan');
+        return;
+    }
+
+    try {
+        const visibilityData = {};
+        
+        Object.keys(window.adminDashboard.municipalityLayers).forEach(municipalityName => {
+            const isVisible = window.adminDashboard.municipalityLayers[municipalityName].visible;
+            // Only store if not visible (default is visible)
+            if (!isVisible) {
+                visibilityData[municipalityName] = false;
+            }
+        });
+
+        const response = await fetch('/admin/api/municipality-visibility', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${window.adminDashboard.token}`
+            },
+            body: JSON.stringify(visibilityData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('Gemeente zichtbaarheid succesvol opgeslagen!');
+            
+            // Generate new visible municipalities GeoJSON
+            const generateResponse = await fetch('/admin/api/generate-visible-municipalities', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${window.adminDashboard.token}`
+                }
+            });
+
+            if (generateResponse.ok) {
+                const generateResult = await generateResponse.json();
+                console.log(`Generated visible municipalities GeoJSON with ${generateResult.count} municipalities`);
+            }
+        } else {
+            alert(`Fout bij opslaan: ${result.message}`);
+        }
+    } catch (error) {
+        console.error('Error saving municipality visibility:', error);
+        alert('Fout bij opslaan van gemeente zichtbaarheid');
+    }
+}
 });

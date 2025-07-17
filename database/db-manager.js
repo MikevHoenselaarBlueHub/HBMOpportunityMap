@@ -110,7 +110,7 @@ class DatabaseManager {
             throw new Error('Gebruikersnaam bestaat al');
         }
 
-        if (db.users.find(u => u.email === email)) {
+        if (db.users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
             throw new Error('Gebruiker met dit email bestaat al');
         }
 
@@ -171,8 +171,11 @@ class DatabaseManager {
 
         if (updateData.email && updateData.email !== user.email) {
             // Check of nieuwe email al bestaat
-            if (db.users.find(u => u.email === updateData.email && u.id !== userId)) {
-                throw new Error('Email is al in gebruik');
+           if (updateData.email && updateData.email.toLowerCase() !== user.email.toLowerCase()) {
+                const existingEmail = db.users.find(u => u.email.toLowerCase() === updateData.email.toLowerCase() && u.id !== userId);
+                if (existingEmail) {
+                    throw new Error('Email is al in gebruik');
+                }
             }
             user.email = updateData.email;
         }
