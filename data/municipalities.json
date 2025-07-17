@@ -44,7 +44,7 @@
         "Well",
         "Nieuw-Bergen"
       ],
-      "visibility": true
+      "visibility": false
     },
     {
       "name": "Bergen (L)",
@@ -59,7 +59,7 @@
       "name": "Brüggen",
       "country": "Germany",
       "code": "DE",
-      "visibility": true
+      "visibility": false
     },
     {
       "name": "Echt-Susteren",
@@ -91,13 +91,13 @@
       "name": "Gangelt",
       "country": "Germany",
       "code": "DE",
-      "visibility": true
+      "visibility": false
     },
     {
       "name": "Geilenkirchen",
       "country": "Germany",
       "code": "DE",
-      "visibility": true
+      "visibility": false
     },
     {
       "name": "Gennep",
@@ -142,13 +142,13 @@
       "name": "Heinsberg",
       "country": "Germany",
       "code": "DE",
-      "visibility": true
+      "visibility": false
     },
     {
       "name": "Herzogenrath",
       "country": "Germany",
       "code": "DE",
-      "visibility": true
+      "visibility": false
     },
     {
       "name": "Höngen",
@@ -186,7 +186,7 @@
       "name": "Kranenburg",
       "country": "Germany",
       "code": "DE",
-      "visibility": true
+      "visibility": false
     },
     {
       "name": "Landgraaf",
@@ -244,7 +244,7 @@
       "name": "Mönchengladbach",
       "country": "Germany",
       "code": "DE",
-      "visibility": true
+      "visibility": false
     },
     {
       "name": "Mook en Middelaar",
@@ -302,7 +302,7 @@
       "name": "Selfkant",
       "country": "Germany",
       "code": "DE",
-      "visibility": true
+      "visibility": false
     },
     {
       "name": "Simpelveld",
@@ -347,7 +347,7 @@
       "name": "Übach-Palenberg",
       "country": "Germany",
       "code": "DE",
-      "visibility": true
+      "visibility": false
     },
     {
       "name": "Vaals",
@@ -385,7 +385,8 @@
         "Venlo",
         "Blerick",
         "Tegelen"
-      ]
+      ],
+      "visibility": false
     },
     {
       "name": "Venray",
@@ -417,13 +418,13 @@
       "name": "Waldfeucht",
       "country": "Germany",
       "code": "DE",
-      "visibility": true
+      "visibility": false
     },
     {
       "name": "Wassenberg",
       "country": "Germany",
       "code": "DE",
-      "visibility": true
+      "visibility": false
     },
     {
       "name": "Weert",
@@ -442,10 +443,10 @@
       "name": "Wegberg",
       "country": "Germany",
       "code": "DE",
-      "visibility": true
+      "visibility": false
     }
   ],
-  "lastUpdated": "2025-07-17T14:59:37.820Z",
+  "lastUpdated": "2025-07-17T15:07:40.061Z",
   "totalCount": 42,
-  "visibleCount": 38
+  "visibleCount": 24
 }
