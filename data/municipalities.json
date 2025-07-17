@@ -7,10 +7,10 @@
       "population": 0
     },
     {
-      "name": "Beek",
+      "name": "Beekk",
       "country": "Netherlands",
       "code": "NL",
-      "population": 15680,
+      "population": 99915679,
       "area": "32,53 km²",
       "largest_places": [
         "Beek",
@@ -333,18 +333,6 @@
       ]
     },
     {
-      "name": "Venlo",
-      "country": "Netherlands",
-      "code": "NL",
-      "population": 101797,
-      "area": "96,10 km²",
-      "largest_places": [
-        "Venlo",
-        "Blerick",
-        "Tegelen"
-      ]
-    },
-    {
       "name": "Venray",
       "country": "Netherlands",
       "code": "NL",
@@ -366,6 +354,18 @@
         "Voerendaal",
         "Ransdaal",
         "Klimmen"
+      ]
+    },
+    {
+      "name": "VVenlo",
+      "country": "Netherlands",
+      "code": "NL",
+      "population": 99101797,
+      "area": "96,10 km²",
+      "largest_places": [
+        "Venlo",
+        "Blerick",
+        "Tegelen"
       ]
     },
     {
