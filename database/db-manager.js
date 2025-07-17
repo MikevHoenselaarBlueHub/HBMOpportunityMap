@@ -254,6 +254,29 @@ class DatabaseManager {
             return null;
         }
     }
+
+    // Authenticate user
+    authenticateUser(username, password) {
+        const db = this.loadDatabase();
+        const user = db.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+        if (!user) {
+            return { success: false, message: 'Gebruiker niet gevonden' };
+        }
+
+        const isValid =  bcrypt.compare(password, user.password);
+        if(!isValid){
+             return { success: false, message: 'Wachtwoord is onjuist' };
+        }
+
+        return { success: true, message: 'Login succesvol', user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                created: user.created,
+                updated: user.updated
+            } };
+    }
 }
 
 module.exports = DatabaseManager;

@@ -293,7 +293,20 @@ class AdminDashboard {
     async loadFilters() {
         try {
             const response = await fetch('/data/filters.json');
-            const filters = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const responseText = await response.text();
+            let filters;
+            
+            try {
+                filters = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('Failed to parse filters JSON:', responseText);
+                throw new Error('Invalid JSON response from server');
+            }
 
             const container = document.getElementById('filtersContainer');
             if (!container) return;
@@ -368,10 +381,20 @@ class AdminDashboard {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to load municipalities');
+                const errorText = await response.text();
+                console.error('Municipality API error:', errorText);
+                throw new Error(`Failed to load municipalities: ${response.status}`);
             }
 
-            const data = await response.json();
+            const responseText = await response.text();
+            let data;
+            
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('Failed to parse municipalities JSON:', responseText);
+                throw new Error('Invalid JSON response from municipalities API');
+            }
             const municipalities = data.municipalities || [];
 
             const tableBody = document.querySelector('#municipalitiesTable tbody');
@@ -442,10 +465,20 @@ class AdminDashboard {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to load users');
+                const errorText = await response.text();
+                console.error('Users API error:', errorText);
+                throw new Error(`Failed to load users: ${response.status}`);
             }
 
-            const users = await response.json();
+            const responseText = await response.text();
+            let users;
+            
+            try {
+                users = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('Failed to parse users JSON:', responseText);
+                throw new Error('Invalid JSON response from users API');
+            }
 
             const tableBody = document.getElementById('usersTableBody');
             tableBody.innerHTML = '';
