@@ -12,6 +12,7 @@ let hoverLabel;
 let municipalities = [];
 let translations = {};
 let currentLanguage = "nl";
+let currentBaseLayer = 'street';
 
 // Filter state management
 let filterState = {
@@ -363,9 +364,6 @@ function initMap() {
 
   // Initialize municipality layer
   municipalityLayer = L.layerGroup();
-  
-  // Track current map layer for dynamic styling
-  let currentBaseLayer = 'street';
 
   // Add layer control with base layers and overlays
   const layerControl = L.control
