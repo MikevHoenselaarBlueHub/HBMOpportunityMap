@@ -425,9 +425,17 @@ app.get('/admin', (req, res) => {
     res.redirect('/admin/index.html');
 });
 
+// Request logging middleware
+app.use((req, res, next) => {
+    if (req.url.startsWith('/admin/api/')) {
+        console.log(`[API] ${req.method} ${req.url} - User: ${req.user ? req.user.username : 'Niet geauthenticeerd'}`);
+    }
+    next();
+});
+
 // === MAIN APP ROUTES ===
 
-// Serve static files voor hoofdapplicatie
+// Serve static files voor hoofdapplicatie (exclusief admin directory)
 app.use(express.static('.', {
     index: 'index.html'
 }));
@@ -439,14 +447,6 @@ app.get('*', (req, res) => {
         return res.status(404).send('Admin page not found');
     }
     res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Request logging middleware
-app.use((req, res, next) => {
-    if (req.url.startsWith('/admin/api/')) {
-        console.log(`[API] ${req.method} ${req.url} - User: ${req.user ? req.user.username : 'Niet geauthenticeerd'}`);
-    }
-    next();
 });
 
 // Error handler
