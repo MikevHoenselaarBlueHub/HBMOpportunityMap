@@ -2,51 +2,28 @@
   "municipalities": [
     {
       "name": "Bergen",
-      "country": "Germany",
-      "code": "DE",
-      "population": 0,
-      "area": "",
-      "largest_places": []
-    },
-    {
-      "name": "Bergen",
-      "country": "Germany",
-      "code": "DE",
-      "population": 0,
-      "area": "",
-      "largest_places": []
-    },
-    {
-      "name": "Bergen",
-      "country": "Germany",
-      "code": "DE",
-      "population": 0,
-      "area": "",
-      "largest_places": []
-    },
-    {
-      "name": "Bergen",
-      "country": "Germany",
-      "code": "DE",
-      "population": 0,
-      "area": "",
-      "largest_places": []
-    },
-    {
-      "name": "Bergen",
-      "country": "Germany",
-      "code": "DE",
-      "population": 0,
-      "area": "",
-      "largest_places": []
+      "country": "Netherlands",
+      "code": "NL",
+      "population": 13085,
+      "area": "101,63 km²",
+      "largest_places": [
+        "Bergen",
+        "Well",
+        "Nieuw-Bergen"
+      ],
+      "visibility": true
     },
     {
       "name": "Bergen (L)",
       "country": "Netherlands",
       "code": "NL",
-      "population": 0,
-      "area": "",
-      "largest_places": []
+      "population": 13085,
+      "area": "101,63 km²",
+      "largest_places": [
+        "Bergen",
+        "Well",
+        "Nieuw-Bergen"
+      ]
     },
     {
       "name": "Brüggen",
@@ -54,15 +31,8 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
-    },
-    {
-      "name": "Brüggen",
-      "country": "Germany",
-      "code": "DE",
-      "population": 0,
-      "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Echt-Susteren",
@@ -70,7 +40,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Eijsden-Margraten",
@@ -78,7 +49,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Gangelt",
@@ -86,7 +58,8 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Geilenkirchen",
@@ -94,7 +67,8 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Gennep",
@@ -102,7 +76,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Gulpen-Wittem",
@@ -110,7 +85,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Heerlen",
@@ -118,7 +94,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Heinsberg",
@@ -126,7 +103,8 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Herzogenrath",
@@ -134,7 +112,8 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Horst aan de Maas",
@@ -142,7 +121,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Kerkrade",
@@ -150,7 +130,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Kranenburg",
@@ -158,15 +139,8 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
-    },
-    {
-      "name": "Kranenburg",
-      "country": "Germany",
-      "code": "DE",
-      "population": 0,
-      "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Landgraaf",
@@ -174,7 +148,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Leudal",
@@ -182,7 +157,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Maastricht",
@@ -190,7 +166,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Meerssen",
@@ -198,7 +175,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Mönchengladbach",
@@ -206,7 +184,8 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Mook en Middelaar",
@@ -214,7 +193,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Nederweert",
@@ -222,7 +202,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Peel en Maas",
@@ -230,7 +211,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Roermond",
@@ -238,7 +220,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Selfkant",
@@ -246,7 +229,8 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Simpelveld",
@@ -254,7 +238,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Sittard-Geleen",
@@ -262,15 +247,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
-    },
-    {
-      "name": "Stein",
-      "country": "Netherlands",
-      "code": "NL",
-      "population": 0,
-      "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Stein",
@@ -278,15 +256,8 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
-    },
-    {
-      "name": "Stein",
-      "country": "Germany",
-      "code": "DE",
-      "population": 0,
-      "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Übach-Palenberg",
@@ -294,7 +265,8 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Vaals",
@@ -302,7 +274,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Valkenburg aan de Geul",
@@ -310,7 +283,17 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Venlo",
+      "country": "Netherlands",
+      "code": "NL",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": false
     },
     {
       "name": "Venray",
@@ -318,7 +301,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Voerendaal",
@@ -326,7 +310,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Waldfeucht",
@@ -334,7 +319,8 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Wassenberg",
@@ -342,7 +328,8 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Weert",
@@ -350,7 +337,8 @@
       "code": "NL",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Wegberg",
@@ -358,9 +346,11 @@
       "code": "DE",
       "population": 0,
       "area": "",
-      "largest_places": []
+      "largest_places": [],
+      "visibility": true
     }
   ],
-  "lastUpdated": "2025-07-17T14:52:45.449Z",
-  "totalCount": 45
+  "lastUpdated": "2025-07-17T14:52:06.056Z",
+  "totalCount": 38,
+  "visibleCount": 37
 }

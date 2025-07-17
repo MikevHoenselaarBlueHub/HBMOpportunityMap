@@ -41,14 +41,6 @@
       "largest_places": []
     },
     {
-      "name": "Bergen (L)",
-      "country": "Netherlands",
-      "code": "NL",
-      "population": 0,
-      "area": "",
-      "largest_places": []
-    },
-    {
       "name": "Brüggen",
       "country": "Germany",
       "code": "DE",
@@ -132,14 +124,6 @@
       "name": "Herzogenrath",
       "country": "Germany",
       "code": "DE",
-      "population": 0,
-      "area": "",
-      "largest_places": []
-    },
-    {
-      "name": "Horst aan de Maas",
-      "country": "Netherlands",
-      "code": "NL",
       "population": 0,
       "area": "",
       "largest_places": []
@@ -361,6 +345,6 @@
       "largest_places": []
     }
   ],
-  "lastUpdated": "2025-07-17T14:52:45.449Z",
-  "totalCount": 45
+  "lastUpdated": "2025-07-17T14:44:31.658Z",
+  "totalCount": 43
 }
