@@ -337,6 +337,333 @@ app.get("/admin/api/municipalities", authenticateToken, (req, res) => {
     }
 });
 
+// Municipality management endpoints
+app.post("/admin/api/municipalities", authenticateToken, (req, res) => {
+    const { name, country, code, population, area, largest_places } = req.body;
+    console.log(`[CREATE_MUNICIPALITY] Poging tot aanmaken gemeente door: ${req.user.username}`);
+
+    if (!name || !country || !code) {
+        return res.status(400).json({
+            success: false,
+            message: "Naam, land en code zijn verplichte velden"
+        });
+    }
+
+    try {
+        const municipalitiesPath = path.join(__dirname, "data/municipalities.json");
+        const data = JSON.parse(fs.readFileSync(municipalitiesPath, "utf8"));
+        
+        // Check if municipality already exists
+        const existingMunicipality = data.municipalities.find(m => m.name.toLowerCase() === name.toLowerCase());
+        if (existingMunicipality) {
+            return res.status(400).json({
+                success: false,
+                message: "Een gemeente met deze naam bestaat al"
+            });
+        }
+
+        const newMunicipality = {
+            name,
+            country,
+            code,
+            population: population ? parseInt(population) : undefined,
+            area: area || undefined,
+            largest_places: largest_places ? largest_places.split(',').map(p => p.trim()) : undefined
+        };
+
+        // Remove undefined fields
+        Object.keys(newMunicipality).forEach(key => {
+            if (newMunicipality[key] === undefined) {
+                delete newMunicipality[key];
+            }
+        });
+
+        data.municipalities.push(newMunicipality);
+        
+        // Sort municipalities by name
+        data.municipalities.sort((a, b) => a.name.localeCompare(b.name));
+        
+        fs.writeFileSync(municipalitiesPath, JSON.stringify(data, null, 2));
+        
+        res.status(201).json({
+            success: true,
+            message: "Gemeente succesvol toegevoegd",
+            municipality: newMunicipality
+        });
+
+    } catch (error) {
+        console.error(`[CREATE_MUNICIPALITY] Error:`, error);
+        res.status(500).json({
+            success: false,
+            message: "Server fout bij toevoegen gemeente"
+        });
+    }
+});
+
+app.put("/admin/api/municipalities/:name", authenticateToken, (req, res) => {
+    const municipalityName = decodeURIComponent(req.params.name);
+    const { name, country, code, population, area, largest_places } = req.body;
+    console.log(`[UPDATE_MUNICIPALITY] Poging tot bijwerken gemeente ${municipalityName} door: ${req.user.username}`);
+
+    try {
+        const municipalitiesPath = path.join(__dirname, "data/municipalities.json");
+        const data = JSON.parse(fs.readFileSync(municipalitiesPath, "utf8"));
+        
+        const municipalityIndex = data.municipalities.findIndex(m => m.name === municipalityName);
+        if (municipalityIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                message: "Gemeente niet gevonden"
+            });
+        }
+
+        // Check if new name conflicts with existing (if name changed)
+        if (name && name !== municipalityName) {
+            const existingMunicipality = data.municipalities.find(m => m.name.toLowerCase() === name.toLowerCase());
+            if (existingMunicipality) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Een gemeente met deze naam bestaat al"
+                });
+            }
+        }
+
+        const updatedMunicipality = {
+            name: name || municipalityName,
+            country: country || data.municipalities[municipalityIndex].country,
+            code: code || data.municipalities[municipalityIndex].code,
+            population: population ? parseInt(population) : data.municipalities[municipalityIndex].population,
+            area: area || data.municipalities[municipalityIndex].area,
+            largest_places: largest_places ? largest_places.split(',').map(p => p.trim()) : data.municipalities[municipalityIndex].largest_places
+        };
+
+        // Remove undefined fields
+        Object.keys(updatedMunicipality).forEach(key => {
+            if (updatedMunicipality[key] === undefined) {
+                delete updatedMunicipality[key];
+            }
+        });
+
+        data.municipalities[municipalityIndex] = updatedMunicipality;
+        
+        // Sort municipalities by name
+        data.municipalities.sort((a, b) => a.name.localeCompare(b.name));
+        
+        fs.writeFileSync(municipalitiesPath, JSON.stringify(data, null, 2));
+        
+        res.json({
+            success: true,
+            message: "Gemeente succesvol bijgewerkt",
+            municipality: updatedMunicipality
+        });
+
+    } catch (error) {
+        console.error(`[UPDATE_MUNICIPALITY] Error:`, error);
+        res.status(500).json({
+            success: false,
+            message: "Server fout bij bijwerken gemeente"
+        });
+    }
+});
+
+app.delete("/admin/api/municipalities/:name", authenticateToken, (req, res) => {
+    const municipalityName = decodeURIComponent(req.params.name);
+    console.log(`[DELETE_MUNICIPALITY] Poging tot verwijderen gemeente ${municipalityName} door: ${req.user.username}`);
+
+    // Only admins can delete municipalities
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({
+            success: false,
+            message: "Alleen administrators kunnen gemeenten verwijderen"
+        });
+    }
+
+    try {
+        const municipalitiesPath = path.join(__dirname, "data/municipalities.json");
+        const data = JSON.parse(fs.readFileSync(municipalitiesPath, "utf8"));
+        
+        const municipalityIndex = data.municipalities.findIndex(m => m.name === municipalityName);
+        if (municipalityIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                message: "Gemeente niet gevonden"
+            });
+        }
+
+        data.municipalities.splice(municipalityIndex, 1);
+        fs.writeFileSync(municipalitiesPath, JSON.stringify(data, null, 2));
+        
+        res.json({
+            success: true,
+            message: "Gemeente succesvol verwijderd"
+        });
+
+    } catch (error) {
+        console.error(`[DELETE_MUNICIPALITY] Error:`, error);
+        res.status(500).json({
+            success: false,
+            message: "Server fout bij verwijderen gemeente"
+        });
+    }
+});
+
+// Filter management endpoints
+app.post("/admin/api/filters/:category", authenticateToken, (req, res) => {
+    const category = req.params.category;
+    const { item } = req.body;
+    console.log(`[CREATE_FILTER] Poging tot toevoegen filter item in ${category} door: ${req.user.username}`);
+
+    if (!item || !item.trim()) {
+        return res.status(400).json({
+            success: false,
+            message: "Filter item is verplicht"
+        });
+    }
+
+    try {
+        const filtersPath = path.join(__dirname, "data/filters.json");
+        const data = JSON.parse(fs.readFileSync(filtersPath, "utf8"));
+        
+        if (!data[category]) {
+            return res.status(400).json({
+                success: false,
+                message: "Ongeldige filter categorie"
+            });
+        }
+
+        const trimmedItem = item.trim();
+        
+        // Check if item already exists
+        if (data[category].includes(trimmedItem)) {
+            return res.status(400).json({
+                success: false,
+                message: "Dit filter item bestaat al"
+            });
+        }
+
+        data[category].push(trimmedItem);
+        data[category].sort();
+        
+        fs.writeFileSync(filtersPath, JSON.stringify(data, null, 2));
+        
+        res.status(201).json({
+            success: true,
+            message: "Filter item succesvol toegevoegd",
+            item: trimmedItem
+        });
+
+    } catch (error) {
+        console.error(`[CREATE_FILTER] Error:`, error);
+        res.status(500).json({
+            success: false,
+            message: "Server fout bij toevoegen filter item"
+        });
+    }
+});
+
+app.put("/admin/api/filters/:category/:item", authenticateToken, (req, res) => {
+    const category = req.params.category;
+    const oldItem = decodeURIComponent(req.params.item);
+    const { item: newItem } = req.body;
+    console.log(`[UPDATE_FILTER] Poging tot bijwerken filter item in ${category} door: ${req.user.username}`);
+
+    if (!newItem || !newItem.trim()) {
+        return res.status(400).json({
+            success: false,
+            message: "Nieuw filter item is verplicht"
+        });
+    }
+
+    try {
+        const filtersPath = path.join(__dirname, "data/filters.json");
+        const data = JSON.parse(fs.readFileSync(filtersPath, "utf8"));
+        
+        if (!data[category]) {
+            return res.status(400).json({
+                success: false,
+                message: "Ongeldige filter categorie"
+            });
+        }
+
+        const itemIndex = data[category].indexOf(oldItem);
+        if (itemIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                message: "Filter item niet gevonden"
+            });
+        }
+
+        const trimmedNewItem = newItem.trim();
+        
+        // Check if new item already exists (and is not the same as old)
+        if (trimmedNewItem !== oldItem && data[category].includes(trimmedNewItem)) {
+            return res.status(400).json({
+                success: false,
+                message: "Een filter item met deze naam bestaat al"
+            });
+        }
+
+        data[category][itemIndex] = trimmedNewItem;
+        data[category].sort();
+        
+        fs.writeFileSync(filtersPath, JSON.stringify(data, null, 2));
+        
+        res.json({
+            success: true,
+            message: "Filter item succesvol bijgewerkt",
+            item: trimmedNewItem
+        });
+
+    } catch (error) {
+        console.error(`[UPDATE_FILTER] Error:`, error);
+        res.status(500).json({
+            success: false,
+            message: "Server fout bij bijwerken filter item"
+        });
+    }
+});
+
+app.delete("/admin/api/filters/:category/:item", authenticateToken, (req, res) => {
+    const category = req.params.category;
+    const item = decodeURIComponent(req.params.item);
+    console.log(`[DELETE_FILTER] Poging tot verwijderen filter item ${item} in ${category} door: ${req.user.username}`);
+
+    try {
+        const filtersPath = path.join(__dirname, "data/filters.json");
+        const data = JSON.parse(fs.readFileSync(filtersPath, "utf8"));
+        
+        if (!data[category]) {
+            return res.status(400).json({
+                success: false,
+                message: "Ongeldige filter categorie"
+            });
+        }
+
+        const itemIndex = data[category].indexOf(item);
+        if (itemIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                message: "Filter item niet gevonden"
+            });
+        }
+
+        data[category].splice(itemIndex, 1);
+        fs.writeFileSync(filtersPath, JSON.stringify(data, null, 2));
+        
+        res.json({
+            success: true,
+            message: "Filter item succesvol verwijderd"
+        });
+
+    } catch (error) {
+        console.error(`[DELETE_FILTER] Error:`, error);
+        res.status(500).json({
+            success: false,
+            message: "Server fout bij verwijderen filter item"
+        });
+    }
+});
+
 app.get("/admin/api/stats", authenticateToken, (req, res) => {
     try {
         const opportunities = JSON.parse(fs.readFileSync(path.join(__dirname, "data/opportunities.json"), "utf8"));

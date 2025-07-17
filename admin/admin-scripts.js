@@ -309,12 +309,23 @@ class AdminDashboard {
         const container = document.getElementById(containerId);
         container.innerHTML = '';
         
+        // Add button to add new filter item
+        const addButton = document.createElement('button');
+        addButton.className = 'btn btn-primary';
+        addButton.style.cssText = 'margin-bottom: 1rem; width: 100%;';
+        addButton.textContent = 'Nieuw item toevoegen';
+        addButton.onclick = () => this.openAddFilterItemModal(containerId);
+        container.appendChild(addButton);
+        
         items.forEach(item => {
             const div = document.createElement('div');
-            div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem; background: white; border-radius: 4px;';
+            div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem; background: white; border-radius: 4px; border: 1px solid #ddd;';
             div.innerHTML = `
                 <span>${item}</span>
-                <button class="action-btn delete-btn" onclick="deleteFilterItem('${containerId}', '${item}')">×</button>
+                <div>
+                    <button class="action-btn edit-btn" onclick="editFilterItem('${containerId}', '${item}')" style="margin-right: 0.5rem;">Bewerken</button>
+                    <button class="action-btn delete-btn" onclick="deleteFilterItem('${containerId}', '${item}')">×</button>
+                </div>
             `;
             container.appendChild(div);
         });
@@ -329,6 +340,8 @@ class AdminDashboard {
             tableBody.innerHTML = '';
             
             data.municipalities.forEach(municipality => {
+                const canDelete = this.userRole === 'admin';
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${municipality.name}</td>
@@ -337,7 +350,10 @@ class AdminDashboard {
                     <td>${municipality.area || 'N/A'}</td>
                     <td class="action-buttons">
                         <button class="action-btn edit-btn" onclick="editMunicipality('${municipality.name}')">Bewerken</button>
-                        <button class="action-btn delete-btn" onclick="deleteMunicipality('${municipality.name}')">Verwijderen</button>
+                        ${canDelete ? 
+                            `<button class="action-btn delete-btn" onclick="deleteMunicipality('${municipality.name}')">Verwijderen</button>` : 
+                            `<span style="color: #999; font-size: 0.8em;">Alleen admin kan verwijderen</span>`
+                        }
                     </td>
                 `;
                 tableBody.appendChild(row);
@@ -662,6 +678,404 @@ class AdminDashboard {
         this.loadSectionData(this.currentSection);
         alert('Data vernieuwd!');
     }
+
+    // Municipality Management Functions
+    openMunicipalityModal(municipalityName = null) {
+        const isEdit = municipalityName !== null;
+        
+        const modalHTML = `
+            <div id="municipalityModal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>${isEdit ? 'Gemeente bewerken' : 'Nieuwe gemeente toevoegen'}</h3>
+                        <button class="modal-close" onclick="closeModal('municipalityModal')">×</button>
+                    </div>
+                    <form id="municipalityForm" class="modal-form">
+                        <div class="form-group">
+                            <label for="municipalityName">Naam *</label>
+                            <input type="text" id="municipalityName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="municipalityCountry">Land *</label>
+                            <select id="municipalityCountry" name="country" required>
+                                <option value="">Selecteer land</option>
+                                <option value="Netherlands">Nederland</option>
+                                <option value="Germany">Duitsland</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="municipalityCode">Code *</label>
+                            <select id="municipalityCode" name="code" required>
+                                <option value="">Selecteer code</option>
+                                <option value="NL">NL</option>
+                                <option value="DE">DE</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="municipalityPopulation">Inwoners</label>
+                            <input type="number" id="municipalityPopulation" name="population" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="municipalityArea">Oppervlakte</label>
+                            <input type="text" id="municipalityArea" name="area" placeholder="bijv. 45,32 km²">
+                        </div>
+                        <div class="form-group">
+                            <label for="municipalityPlaces">Grootste plaatsen</label>
+                            <input type="text" id="municipalityPlaces" name="largest_places" placeholder="Gescheiden door komma's">
+                            <small>Voer plaatsnamen in gescheiden door komma's</small>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('municipalityModal')">Annuleren</button>
+                            <button type="submit" class="btn btn-primary">${isEdit ? 'Opslaan' : 'Toevoegen'}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // Set up country-code synchronization
+        const countrySelect = document.getElementById('municipalityCountry');
+        const codeSelect = document.getElementById('municipalityCode');
+        
+        countrySelect.addEventListener('change', () => {
+            if (countrySelect.value === 'Netherlands') {
+                codeSelect.value = 'NL';
+            } else if (countrySelect.value === 'Germany') {
+                codeSelect.value = 'DE';
+            }
+        });
+        
+        codeSelect.addEventListener('change', () => {
+            if (codeSelect.value === 'NL') {
+                countrySelect.value = 'Netherlands';
+            } else if (codeSelect.value === 'DE') {
+                countrySelect.value = 'Germany';
+            }
+        });
+        
+        const form = document.getElementById('municipalityForm');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (isEdit) {
+                this.updateMunicipality(municipalityName);
+            } else {
+                this.createMunicipality();
+            }
+        });
+        
+        if (isEdit) {
+            this.loadMunicipalityData(municipalityName);
+        }
+    }
+
+    async loadMunicipalityData(municipalityName) {
+        try {
+            const response = await fetch('/data/municipalities.json');
+            const data = await response.json();
+            const municipality = data.municipalities.find(m => m.name === municipalityName);
+            
+            if (municipality) {
+                document.getElementById('municipalityName').value = municipality.name;
+                document.getElementById('municipalityCountry').value = municipality.country;
+                document.getElementById('municipalityCode').value = municipality.code;
+                document.getElementById('municipalityPopulation').value = municipality.population || '';
+                document.getElementById('municipalityArea').value = municipality.area || '';
+                document.getElementById('municipalityPlaces').value = municipality.largest_places ? municipality.largest_places.join(', ') : '';
+            }
+        } catch (error) {
+            console.error('Error loading municipality data:', error);
+            alert('Fout bij het laden van gemeente gegevens');
+        }
+    }
+
+    async createMunicipality() {
+        const formData = new FormData(document.getElementById('municipalityForm'));
+        const municipalityData = {
+            name: formData.get('name'),
+            country: formData.get('country'),
+            code: formData.get('code'),
+            population: formData.get('population'),
+            area: formData.get('area'),
+            largest_places: formData.get('largest_places')
+        };
+        
+        try {
+            const response = await fetch('/admin/api/municipalities', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
+                },
+                body: JSON.stringify(municipalityData)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('Gemeente succesvol toegevoegd!');
+                closeModal('municipalityModal');
+                this.loadMunicipalities();
+            } else {
+                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+            }
+        } catch (error) {
+            console.error('Error creating municipality:', error);
+            alert('Fout bij het toevoegen van gemeente');
+        }
+    }
+
+    async updateMunicipality(municipalityName) {
+        const formData = new FormData(document.getElementById('municipalityForm'));
+        const municipalityData = {
+            name: formData.get('name'),
+            country: formData.get('country'),
+            code: formData.get('code'),
+            population: formData.get('population'),
+            area: formData.get('area'),
+            largest_places: formData.get('largest_places')
+        };
+        
+        try {
+            const response = await fetch(`/admin/api/municipalities/${encodeURIComponent(municipalityName)}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
+                },
+                body: JSON.stringify(municipalityData)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('Gemeente succesvol bijgewerkt!');
+                closeModal('municipalityModal');
+                this.loadMunicipalities();
+            } else {
+                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+            }
+        } catch (error) {
+            console.error('Error updating municipality:', error);
+            alert('Fout bij het bijwerken van gemeente');
+        }
+    }
+
+    async deleteMunicipality(municipalityName) {
+        if (this.userRole !== 'admin') {
+            alert('Alleen administrators kunnen gemeenten verwijderen.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/admin/api/municipalities/${encodeURIComponent(municipalityName)}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('Gemeente succesvol verwijderd!');
+                this.loadMunicipalities();
+            } else {
+                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+            }
+        } catch (error) {
+            console.error('Error deleting municipality:', error);
+            alert('Fout bij het verwijderen van gemeente');
+        }
+    }
+
+    // Filter Management Functions
+    openAddFilterItemModal(containerId) {
+        const categoryMap = {
+            'projectTypesFilter': 'ProjectType',
+            'organizationTypesFilter': 'OrganizationType',
+            'hbmTopicsFilter': 'HBMTopic',
+            'hbmSectorsFilter': 'HBMSector'
+        };
+        
+        const category = categoryMap[containerId];
+        const categoryDisplayName = {
+            'ProjectType': 'Project Types',
+            'OrganizationType': 'Organisatie Types',
+            'HBMTopic': 'HBM Topics',
+            'HBMSector': 'HBM Sectoren'
+        }[category];
+        
+        const modalHTML = `
+            <div id="filterModal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Nieuw filter item toevoegen - ${categoryDisplayName}</h3>
+                        <button class="modal-close" onclick="closeModal('filterModal')">×</button>
+                    </div>
+                    <form id="filterForm" class="modal-form">
+                        <div class="form-group">
+                            <label for="filterItem">Filter item *</label>
+                            <input type="text" id="filterItem" name="item" required>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('filterModal')">Annuleren</button>
+                            <button type="submit" class="btn btn-primary">Toevoegen</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        const form = document.getElementById('filterForm');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.createFilterItem(category);
+        });
+    }
+
+    openEditFilterItemModal(containerId, item) {
+        const categoryMap = {
+            'projectTypesFilter': 'ProjectType',
+            'organizationTypesFilter': 'OrganizationType',
+            'hbmTopicsFilter': 'HBMTopic',
+            'hbmSectorsFilter': 'HBMSector'
+        };
+        
+        const category = categoryMap[containerId];
+        const categoryDisplayName = {
+            'ProjectType': 'Project Types',
+            'OrganizationType': 'Organisatie Types',
+            'HBMTopic': 'HBM Topics',
+            'HBMSector': 'HBM Sectoren'
+        }[category];
+        
+        const modalHTML = `
+            <div id="filterModal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Filter item bewerken - ${categoryDisplayName}</h3>
+                        <button class="modal-close" onclick="closeModal('filterModal')">×</button>
+                    </div>
+                    <form id="filterForm" class="modal-form">
+                        <div class="form-group">
+                            <label for="filterItem">Filter item *</label>
+                            <input type="text" id="filterItem" name="item" required value="${item}">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('filterModal')">Annuleren</button>
+                            <button type="submit" class="btn btn-primary">Opslaan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        const form = document.getElementById('filterForm');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.updateFilterItem(category, item);
+        });
+    }
+
+    async createFilterItem(category) {
+        const formData = new FormData(document.getElementById('filterForm'));
+        const itemData = {
+            item: formData.get('item')
+        };
+        
+        try {
+            const response = await fetch(`/admin/api/filters/${category}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
+                },
+                body: JSON.stringify(itemData)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('Filter item succesvol toegevoegd!');
+                closeModal('filterModal');
+                this.loadFilters();
+            } else {
+                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+            }
+        } catch (error) {
+            console.error('Error creating filter item:', error);
+            alert('Fout bij het toevoegen van filter item');
+        }
+    }
+
+    async updateFilterItem(category, oldItem) {
+        const formData = new FormData(document.getElementById('filterForm'));
+        const itemData = {
+            item: formData.get('item')
+        };
+        
+        try {
+            const response = await fetch(`/admin/api/filters/${category}/${encodeURIComponent(oldItem)}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
+                },
+                body: JSON.stringify(itemData)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('Filter item succesvol bijgewerkt!');
+                closeModal('filterModal');
+                this.loadFilters();
+            } else {
+                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+            }
+        } catch (error) {
+            console.error('Error updating filter item:', error);
+            alert('Fout bij het bijwerken van filter item');
+        }
+    }
+
+    async deleteFilterItem(containerId, item) {
+        const categoryMap = {
+            'projectTypesFilter': 'ProjectType',
+            'organizationTypesFilter': 'OrganizationType',
+            'hbmTopicsFilter': 'HBMTopic',
+            'hbmSectorsFilter': 'HBMSector'
+        };
+        
+        const category = categoryMap[containerId];
+        
+        try {
+            const response = await fetch(`/admin/api/filters/${category}/${encodeURIComponent(item)}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('Filter item succesvol verwijderd!');
+                this.loadFilters();
+            } else {
+                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+            }
+        } catch (error) {
+            console.error('Error deleting filter item:', error);
+            alert('Fout bij het verwijderen van filter item');
+        }
+    }
 }
 
 // Global functions
@@ -725,11 +1139,11 @@ function openAddOpportunityModal() {
 }
 
 function openAddFilterModal() {
-    alert('Toevoegen van nieuwe filters - implementatie volgt');
+    alert('Gebruik de "Nieuw item toevoegen" knop in elke filter categorie');
 }
 
 function openAddMunicipalityModal() {
-    alert('Toevoegen van nieuwe gemeenten - implementatie volgt');
+    window.adminDashboard.openMunicipalityModal();
 }
 
 function editOpportunity(name) {
@@ -743,26 +1157,34 @@ function deleteOpportunity(name) {
 }
 
 function editMunicipality(name) {
-    alert(`Bewerken van gemeente: ${name} - implementatie volgt`);
+    window.adminDashboard.openMunicipalityModal(name);
 }
 
 function deleteMunicipality(name) {
     if (confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) {
-        alert(`Verwijderen van gemeente: ${name} - implementatie volgt`);
+        window.adminDashboard.deleteMunicipality(name);
     }
+}
+
+function editFilterItem(containerId, item) {
+    window.adminDashboard.openEditFilterItemModal(containerId, item);
 }
 
 function deleteFilterItem(containerId, item) {
     if (confirm(`Weet je zeker dat je "${item}" wilt verwijderen?`)) {
-        alert(`Verwijderen van filter item: ${item} - implementatie volgt`);
+        window.adminDashboard.deleteFilterItem(containerId, item);
     }
 }
 
-function closeModal() {
-    const modal = document.getElementById('userModal');
-    if (modal) {
-        modal.remove();
-    }
+function closeModal(modalId = null) {
+    const modals = modalId ? [document.getElementById(modalId)] : 
+                  [document.getElementById('userModal'), document.getElementById('municipalityModal'), document.getElementById('filterModal')];
+    
+    modals.forEach(modal => {
+        if (modal) {
+            modal.remove();
+        }
+    });
 }
 
 // Initialize dashboard when page loads
