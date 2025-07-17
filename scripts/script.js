@@ -403,13 +403,174 @@ async function loadMunicipalitiesFromOverpass() {
   try {
     console.log("Loading municipality boundaries from local GeoJSON files...");
 
-    // Load both Dutch and German municipalities
-    await Promise.all([loadDutchMunicipalities(), loadGermanMunicipalities()]);
+    // First try to load filtered municipalities, fallback to all if not available
+    await loadFilteredMunicipalities();
   } catch (error) {
     console.error("Error loading municipalities from local GeoJSON:", error);
     console.log("Loading fallback municipalities...");
     loadProfessionalMunicipalities();
   }
+}
+
+async function loadFilteredMunicipalities() {
+  try {
+    console.log("Loading filtered municipalities from visible-municipalities.geojson...");
+    
+    // Try to load the filtered municipalities file first
+    let response;
+    try {
+      response = await fetch("data/geojson/visible-municipalities.geojson");
+      if (!response.ok) {
+        throw new Error("Filtered municipalities file not found");
+      }
+    } catch (error) {
+      console.log("Filtered municipalities file not available, loading all municipalities...");
+      // Fallback to loading all municipalities
+      await loadAllMunicipalities();
+      return;
+    }
+
+    const geojsonData = await response.json();
+
+    if (!geojsonData.features || geojsonData.features.length === 0) {
+      console.log("No visible municipalities found, loading all municipalities...");
+      await loadAllMunicipalities();
+      return;
+    }
+
+    console.log(`Processing ${geojsonData.features.length} visible municipalities...`);
+    let loadedCount = 0;
+
+    // Load municipalities configuration for additional info
+    const municipalitiesResponse = await fetch(
+      `data/municipalities.json?nocache=${Date.now()}&v=${APP_VERSION}`,
+    );
+    const municipalitiesConfig = await municipalitiesResponse.json();
+
+    geojsonData.features.forEach((feature) => {
+      if (feature.properties) {
+        const municipalityName = feature.properties.name || feature.properties.NAME_4;
+        const country = feature.properties.name ? "Netherlands" : "Germany";
+
+        if (municipalityName && feature.geometry) {
+          try {
+            const geoJsonLayer = L.geoJSON(feature, {
+              style: {
+                color: "rgb(38, 123, 41)",
+                weight: country === "Netherlands" ? 4 : 2,
+                opacity: 0.9,
+                fillColor: "rgb(38, 123, 41)",
+                fillOpacity: 0.1,
+                smoothFactor: country === "Netherlands" ? 0.5 : 1,
+                dashArray: "5, 8",
+              },
+              onEachFeature: function (feature, layer) {
+                layer.on({
+                  mouseover: function (e) {
+                    const layer = e.target;
+                    layer.setStyle({
+                      color: "rgb(38, 123, 41)",
+                      weight: country === "Netherlands" ? 6 : 4,
+                      opacity: 1,
+                      fillColor: "rgb(38, 123, 41)",
+                      fillOpacity: 0.3,
+                      dashArray: "5, 8",
+                    });
+                    layer.bringToFront();
+
+                    // Show hover label with municipality name
+                    showHoverLabel(e, `${municipalityName}${country === "Germany" ? " (DE)" : ""}`);
+                  },
+                  mouseout: function (e) {
+                    const layer = e.target;
+                    layer.setStyle({
+                      color: "rgb(38, 123, 41)",
+                      weight: country === "Netherlands" ? 4 : 2,
+                      opacity: 0.9,
+                      fillColor: "rgb(38, 123, 41)",
+                      fillOpacity: 0.1,
+                      dashArray: "5, 8",
+                    });
+
+                    // Hide hover label
+                    hideHoverLabel();
+                  },
+                  click: function (e) {
+                    // Zoom to municipality and filter
+                    const bounds = layer.getBounds();
+                    map.fitBounds(bounds);
+
+                    // Apply municipality filter
+                    filterByMunicipality(municipalityName);
+
+                    // Track event
+                    trackEvent("municipality_click", {
+                      municipality: municipalityName,
+                      country: country,
+                    });
+                  },
+                });
+
+                // Find municipality data for additional info
+                const municipalityData = municipalitiesConfig.municipalities.find(
+                  (m) => m.name === municipalityName,
+                );
+                let municipalityInfo = "";
+                if (municipalityData && municipalityData.population) {
+                  const places = municipalityData.largest_places
+                    ? municipalityData.largest_places.join(", ")
+                    : "";
+                  municipalityInfo = `<p><small>${municipalityName} heeft ${municipalityData.population.toLocaleString("nl-NL")} inwoners en een oppervlakte van ${municipalityData.area}${places ? ` en de grootste plaatsen zijn ${places}` : ""}.</small></p>`;
+                }
+
+                // Add popup with municipality info
+                layer.bindPopup(`
+                  <div class="municipality-popup">
+                    <h3>${municipalityName}</h3>
+                    ${municipalityInfo}
+                    <p><a href="#" class="municipality-filter-link" onclick="filterByMunicipalityAndZoom('${municipalityName}'); return false;">Bekijk alle projecten en bedrijven in deze gemeente</a></p>
+                  </div>
+                `, {
+                  maxWidth: 280,
+                  minWidth: 200,
+                  autoPan: true,
+                  autoPanPadding: [20, 20],
+                  keepInView: true,
+                  closeOnEscapeKey: true
+                });
+              },
+            });
+
+            municipalityLayer.addLayer(geoJsonLayer);
+            loadedCount++;
+
+            // Store municipality for filter dropdown
+            municipalities.push({
+              name: municipalityName,
+              country: country,
+              bounds: geoJsonLayer.getBounds(),
+            });
+          } catch (layerError) {
+            console.warn(
+              `Error creating layer for municipality ${municipalityName}:`,
+              layerError,
+            );
+          }
+        }
+      }
+    });
+
+    console.log(`Successfully loaded ${loadedCount} visible municipalities`);
+  } catch (error) {
+    console.error("Error loading filtered municipalities:", error);
+    // Fallback to loading all municipalities
+    await loadAllMunicipalities();
+  }
+}
+
+async function loadAllMunicipalities() {
+  // Load both Dutch and German municipalities if no filtered version exists
+  await Promise.all([loadDutchMunicipalities(), loadGermanMunicipalities()]);
 }
 
 async function loadDutchMunicipalities() {
@@ -418,7 +579,7 @@ async function loadDutchMunicipalities() {
     const response = await fetch("data/geojson/nl-gemeenten.geojson");
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const geojsonData = await response.json();

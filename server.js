@@ -792,6 +792,26 @@ app.get('/data/municipalities.json', (req, res) => {
     }
 });
 
+// Special route for visible municipalities (filtered GeoJSON)
+app.get('/data/geojson/visible-municipalities.geojson', (req, res) => {
+    try {
+        const filePath = path.join(__dirname, 'data', 'geojson', 'visible-municipalities.geojson');
+        console.log(`[DATA] Request for visible municipalities GeoJSON`);
+
+        if (!fs.existsSync(filePath)) {
+            console.log(`[DATA] Visible municipalities file not found, returning 404`);
+            return res.status(404).json({ error: "Visible municipalities file not found" });
+        }
+
+        res.setHeader('Content-Type', 'application/geo+json');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.sendFile(filePath);
+    } catch (error) {
+        console.error(`[DATA] Error serving visible municipalities file:`, error);
+        res.status(500).json({ error: "Failed to serve visible municipalities file" });
+    }
+});
+
 // Algemene data directory route als fallback
 app.get('/data/*', (req, res) => {
     try {
@@ -1029,6 +1049,69 @@ app.post('/admin/api/save-municipalities-for-kansenkaart', authenticateToken, as
         res.status(500).json({
             success: false,
             message: "Fout bij opslaan gemeenten voor kansenkaart"
+        });
+    }
+});
+
+// Create a filtered GeoJSON file with only visible municipalities for the main application
+app.post('/admin/api/generate-visible-geojson', authenticateToken, async (req, res) => {
+    try {
+        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
+        const nlGeoJsonPath = path.join(__dirname, 'data', 'geojson', 'nl-gemeenten.geojson');
+        const deGeoJsonPath = path.join(__dirname, 'data', 'geojson', 'de-gemeenten.geojson');
+        const outputPath = path.join(__dirname, 'data', 'geojson', 'visible-municipalities.geojson');
+
+        // Load visibility settings
+        let visibilityData = {};
+        if (fs.existsSync(visibilityPath)) {
+            visibilityData = JSON.parse(fs.readFileSync(visibilityPath, 'utf8'));
+        }
+
+        // Load original GeoJSON files
+        const nlData = JSON.parse(fs.readFileSync(nlGeoJsonPath, 'utf8'));
+        const deData = JSON.parse(fs.readFileSync(deGeoJsonPath, 'utf8'));
+
+        // Filter visible municipalities
+        const visibleFeatures = [];
+
+        // Filter Dutch municipalities
+        nlData.features.forEach(feature => {
+            const municipalityName = feature.properties.name;
+            if (municipalityName && visibilityData[municipalityName] === true) {
+                visibleFeatures.push(feature);
+            }
+        });
+
+        // Filter German municipalities
+        deData.features.forEach(feature => {
+            const municipalityName = feature.properties.NAME_4;
+            if (municipalityName && visibilityData[municipalityName] === true) {
+                visibleFeatures.push(feature);
+            }
+        });
+
+        // Create new GeoJSON with only visible municipalities
+        const visibleGeoJSON = {
+            type: "FeatureCollection",
+            features: visibleFeatures
+        };
+
+        // Save visible municipalities GeoJSON
+        fs.writeFileSync(outputPath, JSON.stringify(visibleGeoJSON, null, 2));
+
+        console.log(`[GENERATE_VISIBLE] Generated visible municipalities GeoJSON with ${visibleFeatures.length} municipalities`);
+
+        res.json({
+            success: true,
+            message: "Zichtbare gemeenten GeoJSON succesvol gegenereerd",
+            count: visibleFeatures.length,
+            filePath: outputPath
+        });
+    } catch (error) {
+        console.error('[GENERATE_VISIBLE] Error generating visible municipalities GeoJSON:', error);
+        res.status(500).json({
+            success: false,
+            message: "Fout bij het genereren van zichtbare gemeenten GeoJSON"
         });
     }
 });

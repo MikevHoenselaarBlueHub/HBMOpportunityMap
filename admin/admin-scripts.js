@@ -1378,7 +1378,7 @@ class AdminDashboard {
                 const layer = L.geoJSON(feature, {
                     style: {
                         color: isVisible ? '#28a745' : '#dc3545',
-                        weight: 2,
+                        weight: country === 'dutch' ? 2 : 1,
                         opacity: 0.8,
                         fillColor: isVisible ? '#28a745' : '#dc3545',
                         fillOpacity: 0.3
@@ -1403,7 +1403,7 @@ class AdminDashboard {
                         // Add hover effects
                         layer.on('mouseover', () => {
                             layer.setStyle({
-                                weight: 4,
+                                weight: country === 'dutch' ? 4 : 2,
                                 opacity: 1,
                                 fillOpacity: 0.5
                             });
@@ -1411,7 +1411,7 @@ class AdminDashboard {
 
                         layer.on('mouseout', () => {
                             layer.setStyle({
-                                weight: 2,
+                                weight: country === 'dutch' ? 2 : 1,
                                 opacity: 0.8,
                                 fillOpacity: 0.3
                             });
@@ -1655,8 +1655,8 @@ async function saveMunicipalityVisibility() {
             // Reload the municipalities data table to reflect changes
             window.adminDashboard.loadMunicipalities();
             
-            // Generate new visible municipalities GeoJSON
-            const generateResponse = await fetch('/admin/api/generate-visible-municipalities', {
+            // Generate new visible municipalities GeoJSON for main application
+            const generateResponse = await fetch('/admin/api/generate-visible-geojson', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${window.adminDashboard.token}`
@@ -1668,7 +1668,7 @@ async function saveMunicipalityVisibility() {
                 console.log(`Generated visible municipalities GeoJSON with ${generateResult.count} municipalities`);
             }
         } else {
-            alert(`Fout bij opslaan: ${result.message}`);
+            alert(`Fout bij opslaan: ${result.message || result.error}`);
         }
     } catch (error) {
         console.error('Error saving municipality visibility:', error);
