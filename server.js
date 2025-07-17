@@ -12,10 +12,10 @@ const db = new DatabaseManager();
 // Trust proxy voor Replit environment - maar specifiek configureren
 app.set('trust proxy', ['127.0.0.1', '::1']);
 
-// Rate limiting met betere proxy configuratie
+// Rate limiting met betere proxy configuratie - verhoogd voor ontwikkeling
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5,
+    max: 50, // Verhoogd van 5 naar 50
     message: { success: false, message: "Te veel login pogingen. Probeer het later opnieuw." },
     standardHeaders: true,
     legacyHeaders: false,
@@ -24,7 +24,7 @@ const loginLimiter = rateLimit({
 
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 1000, // Verhoogd van 100 naar 1000 voor ontwikkeling
     trustProxy: false, // Explicitief uitschakelen voor deze limiter
 });
 
