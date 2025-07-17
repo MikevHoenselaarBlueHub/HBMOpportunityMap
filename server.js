@@ -513,4 +513,26 @@ app.listen(PORT, "0.0.0.0", () => {
     console.log(`🌐 Hoofdapplicatie: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/`);
     console.log(`⚙️  Admin CMS: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/admin/`);
     console.log(`========================================`);
+    
+    // Log data file status for debugging
+    try {
+        const opportunitiesData = JSON.parse(fs.readFileSync(path.join(__dirname, "data/opportunities.json"), "utf8"));
+        console.log(`✅ Opportunities data loaded: ${opportunitiesData.length} items`);
+    } catch (error) {
+        console.error(`❌ Error loading opportunities data:`, error.message);
+    }
+    
+    try {
+        const filtersData = JSON.parse(fs.readFileSync(path.join(__dirname, "data/filters.json"), "utf8"));
+        console.log(`✅ Filters data loaded successfully`);
+    } catch (error) {
+        console.error(`❌ Error loading filters data:`, error.message);
+    }
+    
+    try {
+        const municipalitiesData = JSON.parse(fs.readFileSync(path.join(__dirname, "data/municipalities.json"), "utf8"));
+        console.log(`✅ Municipalities data loaded: ${municipalitiesData.municipalities.length} items`);
+    } catch (error) {
+        console.error(`❌ Error loading municipalities data:`, error.message);
+    }
 });
