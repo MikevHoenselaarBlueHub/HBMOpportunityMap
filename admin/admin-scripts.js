@@ -1175,6 +1175,47 @@ class AdminDashboard {
         };
         return categoryDisplayNames[category] || category;
     }
+
+    // Municipality tab switching functionality
+    switchMunicipalityTab(tabName) {
+        // Remove active class from all tab buttons
+        document.querySelectorAll('.municipality-tabs .tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Hide all tab contents
+        document.querySelectorAll('#municipality-data-tab, #municipality-visibility-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Add active class to clicked button
+        event.target.classList.add('active');
+
+        // Show selected tab content
+        const targetTab = document.getElementById(`municipality-${tabName}-tab`);
+        if (targetTab) {
+            targetTab.classList.add('active');
+        }
+
+        // Initialize municipality visibility map if visibility tab is selected
+        if (tabName === 'visibility') {
+            this.initializeMunicipalityVisibilityMap();
+        }
+    }
+
+    // Initialize municipality visibility map
+    initializeMunicipalityVisibilityMap() {
+        // This function would initialize the Leaflet map for municipality visibility
+        // For now, we'll add a placeholder
+        const mapContainer = document.getElementById('municipalityMap');
+        if (mapContainer && !mapContainer.hasChildNodes()) {
+            mapContainer.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;">
+                    <p style="color: #666; font-size: 16px;">Kaart voor gemeente zichtbaarheid wordt hier geladen...</p>
+                </div>
+            `;
+        }
+    }
 }
 
 // Global functions
@@ -1198,6 +1239,9 @@ function exportData() {
 function importData() {
     window.adminDashboard.importData();
 }
+
+// Make adminApp globally available
+window.adminApp = null;
 
 // User Management Functions
 function openAddUserModal() {
@@ -1289,4 +1333,5 @@ function closeModal(modalId = null) {
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', function() {
     window.adminDashboard = new AdminDashboard();
+    window.adminApp = window.adminDashboard; // Make available globally for onclick handlers
 });

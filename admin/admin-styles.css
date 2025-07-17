@@ -460,6 +460,102 @@ tr:hover {
 }
 
 .tab-btn {
+    background: none;
+    border: none;
+    padding: 12px 24px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    font-size: 14px;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    color: #333;
+    background-color: #f5f5f5;
+}
+
+.tab-btn.active {
+    color: rgb(38, 123, 41);
+    border-bottom-color: rgb(38, 123, 41);
+    background-color: #f8f9fa;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Visibility controls */
+.visibility-controls {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.visibility-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* Filter sections */
+.filter-section {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.filter-section .section-header {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-section h3 {
+    margin: 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.filter-items {
+    padding: 15px 20px;
+}
+
+.filter-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.filter-item:last-child {
+    border-bottom: none;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Municipality tabs */
+.municipality-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-btn {
     padding: 10px 20px;
     background: none;
     border: none;

@@ -98,23 +98,8 @@
                         <button class="btn btn-primary" onclick="openAddFilterModal()">Nieuw filter toevoegen</button>
                     </div>
 
-                    <div class="filters-grid">
-                        <div class="filter-category">
-                            <h3>Project Types</h3>
-                            <div id="projectTypesFilter"></div>
-                        </div>
-                        <div class="filter-category">
-                            <h3>Organisatie Types</h3>
-                            <div id="organizationTypesFilter"></div>
-                        </div>
-                        <div class="filter-category">
-                            <h3>HBM Topics</h3>
-                            <div id="hbmTopicsFilter"></div>
-                        </div>
-                        <div class="filter-category">
-                            <h3>HBM Sectoren</h3>
-                            <div id="hbmSectorsFilter"></div>
-                        </div>
+                    <div id="filtersContainer">
+                        <!-- Filters will be loaded here -->
                     </div>
                 </section>
 
@@ -126,8 +111,8 @@
                     </div>
 
                     <div class="municipality-tabs">
-                        <button class="tab-btn active" onclick="switchMunicipalityTab('data')">Gegevens beheer</button>
-                        <button class="tab-btn" onclick="switchMunicipalityTab('visibility')">Zichtbaarheid configuratie</button>
+                        <button class="tab-btn active" onclick="adminApp.switchMunicipalityTab('data')">Gegevens beheer</button>
+                        <button class="tab-btn" onclick="adminApp.switchMunicipalityTab('visibility')">Zichtbaarheid configuratie</button>
                     </div>
 
                     <div id="municipality-data-tab" class="tab-content active">
