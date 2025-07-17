@@ -670,25 +670,11 @@ app.delete("/admin/api/filters/:category/:item", authenticateToken, (req, res) =
     }
 });
 
-// Save current filters to filters.json with backup
+// Save current filters to filters.json (simplified without backup)
 app.post('/admin/api/filters/save-to-json', authenticateToken, (req, res) => {
     try {
         const filtersData = req.body;
         const filtersPath = path.join(__dirname, 'data', 'filters.json');
-        const backupDir = path.join(__dirname, 'backup');
-
-        // Ensure backup directory exists
-        if (!fs.existsSync(backupDir)) {
-            fs.mkdirSync(backupDir, { recursive: true });
-        }
-
-        // Create backup of current filters.json
-        if (fs.existsSync(filtersPath)) {
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const backupPath = path.join(backupDir, `filters-${timestamp}.json`);
-            fs.copyFileSync(filtersPath, backupPath);
-            console.log(`[SAVE_FILTERS] Backup created: ${backupPath}`);
-        }
 
         // Save new filters data
         fs.writeFileSync(filtersPath, JSON.stringify(filtersData, null, 2));
@@ -709,7 +695,7 @@ app.post('/admin/api/filters/save-to-json', authenticateToken, (req, res) => {
     }
 });
 
-// Save selected municipalities to database (simplified approach)
+// Save selected municipalities (simplified)
 app.post('/admin/api/save-selected-municipalities', authenticateToken, (req, res) => {
     try {
         const { municipalities } = req.body;
@@ -717,24 +703,12 @@ app.post('/admin/api/save-selected-municipalities', authenticateToken, (req, res
 
         const municipalitiesPath = path.join(__dirname, 'data', 'municipalities.json');
 
-        // Create backup of current file if it exists
-        const backupDir = path.join(__dirname, 'backup');
-        if (!fs.existsSync(backupDir)) {
-            fs.mkdirSync(backupDir, { recursive: true });
-        }
-
-        if (fs.existsSync(municipalitiesPath)) {
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const backupPath = path.join(backupDir, `municipalities-${timestamp}.json`);
-            fs.copyFileSync(municipalitiesPath, backupPath);
-        }
-
-        // Save selected municipalities to database
+        // Save selected municipalities
         const municipalitiesData = {
             municipalities: municipalities,
             lastUpdated: new Date().toISOString(),
             totalCount: municipalities.length,
-            source: 'admin_selection'
+            visibleCount: municipalities.filter(m => m.visibility !== false).length
         };
 
         fs.writeFileSync(municipalitiesPath, JSON.stringify(municipalitiesData, null, 2));
@@ -779,71 +753,69 @@ app.get('/admin', (req, res) => {
 
 // === MAIN APP ROUTES ===
 
-// Data routes MOETEN VOOR static middleware komen voor prioriteit
-app.get('/data/opportunities.json', (req, res) => {
+// Public API endpoints voor hoofdapplicatie (geen authenticatie vereist)
+app.get('/api/opportunities', (req, res) => {
     try {
-        console.log(`[DATA] Loading opportunities.json for ${req.ip}`);
+        console.log(`[API] Loading opportunities for ${req.ip}`);
         const dataPath = path.join(__dirname, "data/opportunities.json");
 
-        // Check of bestand bestaat
         if (!fs.existsSync(dataPath)) {
-            console.error(`[DATA] File not found: ${dataPath}`);
+            console.error(`[API] File not found: ${dataPath}`);
             return res.status(404).json({ error: "Opportunities data file not found" });
         }
 
         const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
-        console.log(`[DATA] Successfully loaded ${data.length} opportunities`);
+        console.log(`[API] Successfully loaded ${data.length} opportunities`);
 
-        // Ensure proper headers
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Cache-Control', 'no-cache');
         res.json(data);
     } catch (error) {
-        console.error(`[DATA] Error loading opportunities.json:`, error);
+        console.error(`[API] Error loading opportunities:`, error);
         res.status(500).json({ error: "Failed to load opportunities data", details: error.message });
     }
 });
 
-app.get('/data/filters.json', (req, res) => {
+app.get('/api/filters', (req, res) => {
     try {
-        console.log(`[DATA] Loading filters.json for ${req.ip}`);
+        console.log(`[API] Loading filters for ${req.ip}`);
         const dataPath = path.join(__dirname, "data/filters.json");
 
         if (!fs.existsSync(dataPath)) {
-            console.error(`[DATA] File not found: ${dataPath}`);
+            console.error(`[API] File not found: ${dataPath}`);
             return res.status(404).json({ error: "Filters data file not found" });
         }
 
         const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
-        console.log(`[DATA] Successfully loaded filters data`);
+        console.log(`[API] Successfully loaded filters data`);
 
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Cache-Control', 'no-cache');
         res.json(data);
     } catch (error) {
-        console.error(`[DATA] Error loading filters.json:`, error);
+        console.error(`[API] Error loading filters:`, error);
         res.status(500).json({ error: "Failed to load filters data", details: error.message });
     }
 });
 
-app.get('/data/municipalities.json', (req, res) => {
+app.get('/api/municipalities', (req, res) => {
     try {
-        console.log(`[DATA] Loading municipalities.json for ${req.ip}`);
+        console.log(`[API] Loading municipalities for ${req.ip}`);
         const dataPath = path.join(__dirname, "data/municipalities.json");
 
         if (!fs.existsSync(dataPath)) {
-            console.error(`[DATA] File not found: ${dataPath}`);
+            console.error(`[API] File not found: ${dataPath}`);
             return res.status(404).json({ error: "Municipalities data file not found" });
         }
 
         const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
-        console.log(`[DATA] Successfully loaded municipalities data`);
+        console.log(`[API] Successfully loaded municipalities data`);
 
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Cache-Control', 'no-cache');
         res.json(data);
     } catch (error) {
-        console.error(`[DATA] Error loading municipalities.json:`, error);
+        console.error(`[API] Error loading municipalities:`, error);
         res.status(500).json({ error: "Failed to load municipalities data", details: error.message });
     }
 });
@@ -868,29 +840,23 @@ app.get('/data/geojson/visible-municipalities.geojson', (req, res) => {
     }
 });
 
-// Algemene data directory route als fallback
-app.get('/data/*', (req, res) => {
+// GeoJSON files blijven statisch beschikbaar
+app.get('/data/geojson/*', (req, res) => {
     try {
         const filePath = path.join(__dirname, req.path);
-        console.log(`[DATA] Fallback request for: ${req.path}`);
+        console.log(`[DATA] GeoJSON request for: ${req.path}`);
 
         if (!fs.existsSync(filePath)) {
-            console.error(`[DATA] File not found: ${filePath}`);
-            return res.status(404).json({ error: "Data file not found" });
+            console.error(`[DATA] GeoJSON file not found: ${filePath}`);
+            return res.status(404).json({ error: "GeoJSON file not found" });
         }
 
-        // Serve the file with proper content type
-        if (req.path.endsWith('.json')) {
-            res.setHeader('Content-Type', 'application/json');
-        } else if (req.path.endsWith('.geojson')) {
-            res.setHeader('Content-Type', 'application/geo+json');
-        }
-
+        res.setHeader('Content-Type', 'application/geo+json');
         res.setHeader('Cache-Control', 'no-cache');
         res.sendFile(filePath);
     } catch (error) {
-        console.error(`[DATA] Error serving file:`, error);
-        res.status(500).json({ error: "Failed to serve data file" });
+        console.error(`[DATA] Error serving GeoJSON file:`, error);
+        res.status(500).json({ error: "Failed to serve GeoJSON file" });
     }
 });
 
