@@ -256,14 +256,14 @@ class DatabaseManager {
     }
 
     // Authenticate user
-    authenticateUser(username, password) {
+    async authenticateUser(username, password) {
         const db = this.loadDatabase();
         const user = db.users.find(u => u.username.toLowerCase() === username.toLowerCase());
         if (!user) {
             return { success: false, message: 'Gebruiker niet gevonden' };
         }
 
-        const isValid =  bcrypt.compare(password, user.password);
+        const isValid = await bcrypt.compare(password, user.password);
         if(!isValid){
              return { success: false, message: 'Wachtwoord is onjuist' };
         }

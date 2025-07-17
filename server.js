@@ -327,12 +327,19 @@ app.get("/admin/api/filters", authenticateToken, (req, res) => {
     }
 });
 
-app.get("/admin/api/municipalities", authenticateToken, (req, res) => {
+// Municipality API endpoints
+app.get('/admin/api/municipalities', authenticateToken, (req, res) => {
     try {
-        const data = JSON.parse(fs.readFileSync(path.join(__dirname, "data/municipalities.json"), "utf8"));
-        res.json(data);
+        const municipalitiesPath = path.join(__dirname, 'data', 'municipalities.json');
+        if (!fs.existsSync(municipalitiesPath)) {
+            return res.status(404).json({ error: 'Municipalities data not found' });
+        }
+
+        const municipalitiesData = JSON.parse(fs.readFileSync(municipalitiesPath, 'utf8'));
+        res.json(municipalitiesData);
     } catch (error) {
-        res.status(500).json({ error: "Fout bij het laden van gemeenten" });
+        console.error('Error loading municipalities:', error);
+        res.status(500).json({ error: 'Failed to load municipalities' });
     }
 });
 
@@ -663,6 +670,34 @@ app.delete("/admin/api/filters/:category/:item", authenticateToken, (req, res) =
     }
 });
 
+// Municipality visibility endpoints
+app.get('/admin/api/municipality-visibility', authenticateToken, (req, res) => {
+    try {
+        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
+        if (!fs.existsSync(visibilityPath)) {
+            // Return empty object if file doesn't exist (all visible by default)
+            return res.json({});
+        }
+
+        const visibilityData = JSON.parse(fs.readFileSync(visibilityPath, 'utf8'));
+        res.json(visibilityData);
+    } catch (error) {
+        console.error('Error loading municipality visibility:', error);
+        res.status(500).json({ error: 'Failed to load municipality visibility' });
+    }
+});
+
+app.post('/admin/api/municipality-visibility', authenticateToken, (req, res) => {
+    try {
+        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
+        fs.writeFileSync(visibilityPath, JSON.stringify(req.body, null, 2));
+        res.json({ success: true, message: 'Municipality visibility saved' });
+    } catch (error) {
+        console.error('Error saving municipality visibility:', error);
+        res.status(500).json({ error: 'Failed to save municipality visibility' });
+    }
+});
+
 app.get("/admin/api/stats", authenticateToken, (req, res) => {
     try {
         const opportunities = JSON.parse(fs.readFileSync(path.join(__dirname, "data/opportunities.json"), "utf8"));
@@ -833,50 +868,6 @@ app.use((err, req, res, next) => {
     console.error(`[ERROR] Request: ${req.method} ${req.url}`);
     console.error(`[ERROR] Body:`, req.body);
     res.status(500).json({ error: "Er is een serverfout opgetreden" });
-});
-
-// Municipality visibility endpoints
-app.get('/admin/api/municipality-visibility', authenticateToken, (req, res) => {
-    try {
-        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
-
-        if (!fs.existsSync(visibilityPath)) {
-            // Return empty object if file doesn't exist (all visible by default)
-            return res.json({});
-        }
-
-        const visibilityData = JSON.parse(fs.readFileSync(visibilityPath, 'utf8'));
-        res.json(visibilityData);
-    } catch (error) {
-        console.error('[VISIBILITY] Error loading municipality visibility:', error);
-        res.status(500).json({
-            success: false,
-            message: "Fout bij het laden van gemeente zichtbaarheid"
-        });
-    }
-});
-
-app.post('/admin/api/municipality-visibility', authenticateToken, (req, res) => {
-    try {
-        const visibilityData = req.body;
-        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
-
-        // Save visibility data
-        fs.writeFileSync(visibilityPath, JSON.stringify(visibilityData, null, 2));
-
-        console.log('[VISIBILITY] Municipality visibility updated');
-
-        res.json({
-            success: true,
-            message: "Gemeente zichtbaarheid succesvol opgeslagen"
-        });
-    } catch (error) {
-        console.error('[VISIBILITY] Error saving municipality visibility:', error);
-        res.status(500).json({
-            success: false,
-            message: "Fout bij het opslaan van gemeente zichtbaarheid"
-        });
-    }
 });
 
 app.post('/admin/api/generate-visible-municipalities', authenticateToken, async (req, res) => {

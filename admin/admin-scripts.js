@@ -313,6 +313,19 @@ class AdminDashboard {
 
             container.innerHTML = '';
 
+            // Add save filters button at the top
+            const saveFiltersBtn = document.createElement('div');
+            saveFiltersBtn.innerHTML = `
+                <div style="margin-bottom: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px;">
+                    <h3 style="margin: 0 0 10px 0; color: rgb(38, 123, 41);">Filter beheer</h3>
+                    <p style="margin: 0 0 15px 0; color: #666;">Klik op "Filters opslaan" om de huidige filterinstellingen op te slaan naar filters.json. Er wordt automatisch een backup gemaakt.</p>
+                    <button class="btn btn-primary" onclick="adminApp.saveFiltersToJson()" style="background: rgb(38, 123, 41); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                        Filters opslaan naar filters.json
+                    </button>
+                </div>
+            `;
+            container.appendChild(saveFiltersBtn);
+
             Object.keys(filters).forEach(category => {
                 const section = document.createElement('div');
                 section.className = 'filter-section';
@@ -323,7 +336,9 @@ class AdminDashboard {
                 section.innerHTML = `
                     <div class="section-header">
                         <h3>${this.getCategoryDisplayName(category)} (${filters[category].length})</h3>
-                        ${canEdit ? `<button class="add-item-btn" onclick="adminApp.openFilterModal('${category}')" title="Nieuw item toevoegen">+</button>` : ''}
+                        <div class="section-actions">
+                            ${canEdit ? `<button class="add-item-btn" onclick="adminApp.openFilterModal('${category}')" title="Nieuw item toevoegen">+</button>` : ''}
+                        </div>
                     </div>
                     <div class="filter-items">
                         ${filters[category].map(item => `
@@ -1198,6 +1213,48 @@ class AdminDashboard {
             'HBMSector': 'HBM Sectoren'
         };
         return categoryDisplayNames[category] || category;
+    }
+
+    async saveFiltersToJson() {
+        if (!confirm('Weet je zeker dat je de huidige filters wilt opslaan naar filters.json? Er wordt automatisch een backup gemaakt van de huidige versie.')) {
+            return;
+        }
+
+        try {
+            // Get current filters from the loaded data
+            const response = await fetch('/admin/api/filters', {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to load current filters');
+            }
+
+            const currentFilters = await response.json();
+
+            // Save to filters.json with backup
+            const saveResponse = await fetch('/admin/api/filters/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
+                },
+                body: JSON.stringify(currentFilters)
+            });
+
+            const result = await saveResponse.json();
+
+            if (saveResponse.ok) {
+                alert('Filters succesvol opgeslagen naar filters.json! Er is automatisch een backup gemaakt.');
+            } else {
+                alert(`Fout bij opslaan: ${result.error || 'Onbekende fout'}`);
+            }
+        } catch (error) {
+            console.error('Error saving filters to JSON:', error);
+            alert('Fout bij opslaan van filters');
+        }
     }
 
     // Municipality tab switching functionality
