@@ -1,11 +1,74 @@
 {
   "municipalities": [
     {
+      "name": "Aachen",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
       "name": "Aken",
       "country": "Germany",
       "code": "DE",
       "population": 0,
       "visibility": false
+    },
+    {
+      "name": "Aldenhoven",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Alsdorf",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Alsdorf",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Alsdorf",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Asten",
+      "country": "Netherlands",
+      "code": "NL",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Baesweiler",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Beek",
@@ -18,7 +81,7 @@
         "Neerbeek",
         "Genhout"
       ],
-      "visibility": false
+      "visibility": true
     },
     {
       "name": "Beesel",
@@ -31,7 +94,7 @@
         "Reuver",
         "Offenbeek"
       ],
-      "visibility": false
+      "visibility": true
     },
     {
       "name": "Bergen",
@@ -59,7 +122,25 @@
       "name": "Brüggen",
       "country": "Germany",
       "code": "DE",
-      "visibility": false
+      "visibility": true
+    },
+    {
+      "name": "Brunssum",
+      "country": "Netherlands",
+      "code": "NL",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Deurne",
+      "country": "Netherlands",
+      "code": "NL",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Echt-Susteren",
@@ -88,16 +169,43 @@
       "visibility": true
     },
     {
+      "name": "Erkelenz",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Eschweiler",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
       "name": "Gangelt",
       "country": "Germany",
       "code": "DE",
-      "visibility": false
+      "visibility": true
     },
     {
       "name": "Geilenkirchen",
       "country": "Germany",
       "code": "DE",
-      "visibility": false
+      "visibility": true
+    },
+    {
+      "name": "Geldern",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Gennep",
@@ -110,6 +218,15 @@
         "Milsbeek",
         "Ottersum"
       ],
+      "visibility": true
+    },
+    {
+      "name": "Grefrath",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
       "visibility": true
     },
     {
@@ -142,13 +259,13 @@
       "name": "Heinsberg",
       "country": "Germany",
       "code": "DE",
-      "visibility": false
+      "visibility": true
     },
     {
       "name": "Herzogenrath",
       "country": "Germany",
       "code": "DE",
-      "visibility": false
+      "visibility": true
     },
     {
       "name": "Höngen",
@@ -170,6 +287,51 @@
       "visibility": true
     },
     {
+      "name": "Hückelhoven",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Issum",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Jülich",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Kempen",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Kerken",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
       "name": "Kerkrade",
       "country": "Netherlands",
       "code": "NL",
@@ -183,10 +345,37 @@
       "visibility": true
     },
     {
+      "name": "Kevelaer",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Korschenbroich",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
       "name": "Kranenburg",
       "country": "Germany",
       "code": "DE",
       "visibility": false
+    },
+    {
+      "name": "Krefeld",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
     },
     {
       "name": "Landgraaf",
@@ -212,6 +401,24 @@
         "Heythuysen",
         "Roggel"
       ],
+      "visibility": true
+    },
+    {
+      "name": "Linnich",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Maasgouw",
+      "country": "Netherlands",
+      "code": "NL",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
       "visibility": true
     },
     {
@@ -244,7 +451,7 @@
       "name": "Mönchengladbach",
       "country": "Germany",
       "code": "DE",
-      "visibility": false
+      "visibility": true
     },
     {
       "name": "Mook en Middelaar",
@@ -273,6 +480,42 @@
       "visibility": true
     },
     {
+      "name": "Nettetal",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Niederkrüchten",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Nuth",
+      "country": "Netherlands",
+      "code": "NL",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Onderbanken",
+      "country": "Netherlands",
+      "code": "NL",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
       "name": "Peel en Maas",
       "country": "Netherlands",
       "code": "NL",
@@ -283,6 +526,24 @@
         "Helden",
         "Panningen"
       ],
+      "visibility": true
+    },
+    {
+      "name": "Rheurdt",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Roerdalen",
+      "country": "Netherlands",
+      "code": "NL",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
       "visibility": true
     },
     {
@@ -299,10 +560,37 @@
       "visibility": true
     },
     {
+      "name": "Schinnen",
+      "country": "Netherlands",
+      "code": "NL",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Schwalmtal",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Schwalmtal",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
       "name": "Selfkant",
       "country": "Germany",
       "code": "DE",
-      "visibility": false
+      "visibility": true
     },
     {
       "name": "Simpelveld",
@@ -344,10 +632,37 @@
       "visibility": true
     },
     {
+      "name": "Stolberg(Rhld.)",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Straelen",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Tönisvorst",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
       "name": "Übach-Palenberg",
       "country": "Germany",
       "code": "DE",
-      "visibility": false
+      "visibility": true
     },
     {
       "name": "Vaals",
@@ -386,7 +701,7 @@
         "Blerick",
         "Tegelen"
       ],
-      "visibility": false
+      "visibility": true
     },
     {
       "name": "Venray",
@@ -399,6 +714,15 @@
         "Oostrum",
         "Vredepeel"
       ],
+      "visibility": true
+    },
+    {
+      "name": "Viersen",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
       "visibility": true
     },
     {
@@ -415,16 +739,25 @@
       "visibility": true
     },
     {
+      "name": "Wachtendonk",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
       "name": "Waldfeucht",
       "country": "Germany",
       "code": "DE",
-      "visibility": false
+      "visibility": true
     },
     {
       "name": "Wassenberg",
       "country": "Germany",
       "code": "DE",
-      "visibility": false
+      "visibility": true
     },
     {
       "name": "Weert",
@@ -443,10 +776,28 @@
       "name": "Wegberg",
       "country": "Germany",
       "code": "DE",
-      "visibility": false
+      "visibility": true
+    },
+    {
+      "name": "Willich",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
+    },
+    {
+      "name": "Würselen",
+      "country": "Germany",
+      "code": "DE",
+      "population": 0,
+      "area": "",
+      "largest_places": [],
+      "visibility": true
     }
   ],
-  "lastUpdated": "2025-07-17T15:07:40.061Z",
-  "totalCount": 42,
-  "visibleCount": 24
+  "lastUpdated": "2025-07-17T15:10:23.175Z",
+  "totalCount": 81,
+  "visibleCount": 77
 }
