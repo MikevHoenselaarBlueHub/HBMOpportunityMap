@@ -832,7 +832,6 @@ app.use((err, req, res, next) => {
     console.error(`[ERROR] ${err.stack}`);
     console.error(`[ERROR] Request: ${req.method} ${req.url}`);
     console.error(`[ERROR] Body:`, req.body);
-Adding municipality visibility endpoints and updating the server startup log.```text
     res.status(500).json({ error: "Er is een serverfout opgetreden" });
 });
 
