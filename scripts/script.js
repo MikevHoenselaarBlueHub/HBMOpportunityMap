@@ -36,17 +36,25 @@ if (isMapPage) {
   // Function to initialize everything when Leaflet is ready
   async function initializeApp() {
     if (typeof L !== "undefined") {
+      console.log("Leaflet is available, initializing application...");
       // Load translations first
       await loadTranslations();
 
       // Initialize marker cluster group
-      markers = L.markerClusterGroup({
-        disableClusteringAtZoom: 15,
-        maxClusterRadius: 50,
-        spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false,
-        zoomToBoundsOnClick: true,
-      });
+      if (typeof L.markerClusterGroup !== "undefined") {
+        markers = L.markerClusterGroup({
+          disableClusteringAtZoom: 15,
+          maxClusterRadius: 50,
+          spiderfyOnMaxZoom: true,
+          showCoverageOnHover: false,
+          zoomToBoundsOnClick: true,
+        });
+        console.log("Using marker clustering");
+      } else {
+        // Fallback to regular layer group if MarkerCluster is not available
+        markers = L.layerGroup();
+        console.log("MarkerCluster not available, using regular layer group");
+      }
 
       // Initialize icons with updated colors
       pIcon = L.icon({
@@ -142,19 +150,36 @@ if (isMapPage) {
     updateSavedFiltersDropdown();
 
     // Wait for Leaflet to load
+    let leafletCheckAttempts = 0;
+    const maxAttempts = 50; // 5 seconds max
+    
     const checkLeaflet = setInterval(() => {
+      leafletCheckAttempts++;
+      
       if (typeof L !== "undefined") {
         console.log("Leaflet loaded successfully");
         clearInterval(checkLeaflet);
 
         // Wait for MarkerCluster
+        let markerClusterAttempts = 0;
         const checkMarkerCluster = setInterval(() => {
+          markerClusterAttempts++;
+          
           if (typeof L.markerClusterGroup !== "undefined") {
             console.log("MarkerCluster loaded successfully");
             clearInterval(checkMarkerCluster);
             initializeApp();
+          } else if (markerClusterAttempts >= maxAttempts) {
+            console.warn("MarkerCluster failed to load, continuing without clustering");
+            clearInterval(checkMarkerCluster);
+            // Initialize without clustering
+            initializeApp();
           }
         }, 100);
+      } else if (leafletCheckAttempts >= maxAttempts) {
+        console.error("Leaflet failed to load after 5 seconds");
+        clearInterval(checkLeaflet);
+        alert("Er is een probleem met het laden van de kaart. Probeer de pagina te verversen.");
       }
     }, 100);
   });
