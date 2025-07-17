@@ -11,52 +11,6 @@ run = ["sh", "-c", "npm run dev"]
 runButton = "Start Application"
 
 [[workflows.workflow]]
-name = "App Only"
-author = 45148110
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm install"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev"
-
-[[workflows.workflow]]
-name = "App with Admin"
-author = 45148110
-mode = "parallel"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "pkill -f \"node admin/server.js\" || true"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "pkill -f \"node proxy-server.js\" || true"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "sleep 3"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm install"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node admin/server.js &"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "sleep 3"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node proxy-server.js"
-
-[[workflows.workflow]]
 name = "Start Application"
 author = 45148110
 mode = "sequential"
@@ -76,7 +30,3 @@ externalPort = 3001
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 42683
-externalPort = 3000
