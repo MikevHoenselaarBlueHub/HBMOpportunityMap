@@ -594,7 +594,6 @@ class AdminDashboard {
             const result = await response.json();
 
             if (response.ok) {
-                alert('Gebruiker succesvol toegevoegd!');
                 closeModal();
                 this.loadUsers();
             } else {
@@ -631,7 +630,6 @@ class AdminDashboard {
             const result = await response.json();
 
             if (response.ok) {
-                alert('Gebruiker succesvol bijgewerkt!');
                 closeModal();
                 this.loadUsers();
             } else {
@@ -655,7 +653,6 @@ class AdminDashboard {
             const result = await response.json();
 
             if (response.ok) {
-                alert('Gebruiker succesvol verwijderd!');
                 this.loadUsers();
             } else {
                 alert(`Fout: ${result.error || 'Onbekende fout'}`);
@@ -676,7 +673,7 @@ class AdminDashboard {
             defaultZoom: parseInt(defaultZoom)
         }));
 
-        alert('Instellingen opgeslagen!');
+        // Settings saved silently
     }
 
     exportData() {
@@ -729,7 +726,7 @@ class AdminDashboard {
     refreshData() {
         this.loadDashboardData();
         this.loadSectionData(this.currentSection);
-        alert('Data vernieuwd!');
+        // Data refreshed silently
     }
 
     // Municipality Management Functions
@@ -867,7 +864,6 @@ class AdminDashboard {
             const result = await response.json();
 
             if (response.ok) {
-                alert('Gemeente succesvol toegevoegd!');
                 closeModal('municipalityModal');
                 this.loadMunicipalities();
             } else {
@@ -903,7 +899,6 @@ class AdminDashboard {
             const result = await response.json();
 
             if (response.ok) {
-                alert('Gemeente succesvol bijgewerkt!');
                 closeModal('municipalityModal');
                 this.loadMunicipalities();
             } else {
@@ -931,7 +926,6 @@ class AdminDashboard {
             const result = await response.json();
 
             if (response.ok) {
-                alert('Gemeente succesvol verwijderd!');
                 this.loadMunicipalities();
             } else {
                 alert(`Fout: ${result.message || 'Onbekende fout'}`);
@@ -1000,7 +994,6 @@ class AdminDashboard {
             const result = await response.json();
 
             if (response.ok) {
-                alert('Filter item succesvol verwijderd!');
                 this.loadFilters();
             } else {
                 alert(`Fout: ${result.message || 'Onbekende fout'}`);
@@ -1123,7 +1116,6 @@ class AdminDashboard {
             const result = await response.json();
 
             if (response.ok) {
-                alert('Filter item succesvol toegevoegd!');
                 closeModal('filterModal');
                 this.loadFilters();
             } else {
@@ -1154,7 +1146,6 @@ class AdminDashboard {
             const result = await response.json();
 
             if (response.ok) {
-                alert('Filter item succesvol bijgewerkt!');
                 closeModal('filterModal');
                 this.loadFilters();
             } else {
