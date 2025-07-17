@@ -379,13 +379,14 @@
       "name": "Venlo",
       "country": "Netherlands",
       "code": "NL",
-      "population": 101796,
+      "population": 101797,
       "area": "96,10 km²",
       "largest_places": [
         "Venlo",
         "Blerick",
         "Tegelen"
-      ]
+      ],
+      "visibility": true
     },
     {
       "name": "Venray",
@@ -445,7 +446,7 @@
       "visibility": true
     }
   ],
-  "lastUpdated": "2025-07-17T14:59:37.820Z",
+  "lastUpdated": "2025-07-17T14:59:20.446Z",
   "totalCount": 42,
   "visibleCount": 38
 }
