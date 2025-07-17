@@ -716,7 +716,7 @@ app.post('/admin/api/save-selected-municipalities', authenticateToken, (req, res
         console.log(`[SAVE_SELECTED] Saving ${municipalities.length} selected municipalities`);
 
         const municipalitiesPath = path.join(__dirname, 'data', 'municipalities.json');
-        
+
         // Create backup of current file if it exists
         const backupDir = path.join(__dirname, 'backup');
         if (!fs.existsSync(backupDir)) {
@@ -946,34 +946,35 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: "Er is een serverfout opgetreden" });
 });
 
-// Municipality visibility endpoint
 app.post('/admin/api/municipality-visibility', authenticateToken, async (req, res) => {
     try {
         const visibilityData = req.body;
-        console.log(`[VISIBILITY] Saving visibility data for ${Object.keys(visibilityData).length} municipalities`);
-
         const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
-        
-        // Create backup of current file if it exists
-        const backupDir = path.join(__dirname, 'backup');
-        if (!fs.existsSync(backupDir)) {
-            fs.mkdirSync(backupDir, { recursive: true });
-        }
 
+        // Create backup of current visibility data
         if (fs.existsSync(visibilityPath)) {
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const backupPath = path.join(backupDir, `municipality-visibility-${timestamp}.json`);
+            const backupPath = path.join(__dirname, 'backup', `municipality-visibility-${new Date().toISOString()}.json`);
             fs.copyFileSync(visibilityPath, backupPath);
         }
 
-        // Save visibility data
-        fs.writeFileSync(visibilityPath, JSON.stringify(visibilityData, null, 2));
+        // Only save municipalities that are true (visible)
+        const optimizedVisibilityData = {};
+        Object.keys(visibilityData).forEach(municipalityName => {
+            if (visibilityData[municipalityName] === true) {
+                optimizedVisibilityData[municipalityName] = true;
+            }
+        });
+
+        // Save optimized visibility data
+        fs.writeFileSync(visibilityPath, JSON.stringify(optimizedVisibilityData, null, 2));
+
+        console.log(`[VISIBILITY] Saved municipality visibility data with ${Object.keys(optimizedVisibilityData).length} visible municipalities`);
 
         res.json({
             success: true,
-            message: "Gemeente zichtbaarheid succesvol opgeslagen"
+            message: "Gemeente zichtbaarheid succesvol opgeslagen",
+            count: Object.keys(optimizedVisibilityData).length
         });
-
     } catch (error) {
         console.error('[VISIBILITY] Error saving municipality visibility:', error);
         res.status(500).json({
@@ -1082,7 +1083,7 @@ app.post('/admin/api/save-municipalities-for-kansenkaart', authenticateToken, as
             if (municipalityName) {
                 // Check if municipality is visible (green on map)
                 const isVisible = visibilityData[municipalityName] === true;
-                
+
                 if (isVisible) {
                     municipalities.push({
                         name: municipalityName,
@@ -1102,7 +1103,7 @@ app.post('/admin/api/save-municipalities-for-kansenkaart', authenticateToken, as
             if (municipalityName) {
                 // Check if municipality is visible (green on map)
                 const isVisible = visibilityData[municipalityName] === true;
-                
+
                 if (isVisible) {
                     municipalities.push({
                         name: municipalityName,

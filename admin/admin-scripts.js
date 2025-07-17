@@ -1561,6 +1561,17 @@ class AdminDashboard {
             const response = await fetch(geoJsonPath);
             const geoJsonData = await response.json();
 
+            // Load current visibility data
+            let visibilityData = {};
+            try {
+                const visibilityResponse = await fetch("/data/municipality-visibility.json");
+                if (visibilityResponse.ok) {
+                    visibilityData = await visibilityResponse.json();
+                }
+            } catch (error) {
+                console.log("No visibility data found, using defaults");
+            }
+
             geoJsonData.features.forEach((feature) => {
                 const municipalityName =
                     country === "dutch"
@@ -1569,10 +1580,8 @@ class AdminDashboard {
 
                 if (!municipalityName) return;
 
-                // Check if municipality is in selected list (green if selected, red if not)
-                const isVisible = selectedMunicipalities.some(
-                    (m) => m.name === municipalityName,
-                );
+                // Check if municipality is visible in visibility data (only true values are stored)
+                const isVisible = visibilityData[municipalityName] === true;
 
                 const layer = L.geoJSON(feature, {
                     style: {
