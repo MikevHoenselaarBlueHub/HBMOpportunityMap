@@ -670,6 +670,45 @@ app.delete("/admin/api/filters/:category/:item", authenticateToken, (req, res) =
     }
 });
 
+// Save current filters to filters.json with backup
+app.post('/admin/api/filters/save-to-json', authenticateToken, (req, res) => {
+    try {
+        const filtersData = req.body;
+        const filtersPath = path.join(__dirname, 'data', 'filters.json');
+        const backupDir = path.join(__dirname, 'backup');
+
+        // Ensure backup directory exists
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+        }
+
+        // Create backup of current filters.json
+        if (fs.existsSync(filtersPath)) {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const backupPath = path.join(backupDir, `filters-${timestamp}.json`);
+            fs.copyFileSync(filtersPath, backupPath);
+            console.log(`[SAVE_FILTERS] Backup created: ${backupPath}`);
+        }
+
+        // Save new filters data
+        fs.writeFileSync(filtersPath, JSON.stringify(filtersData, null, 2));
+
+        console.log(`[SAVE_FILTERS] Filters saved to JSON by: ${req.user.username}`);
+
+        res.json({
+            success: true,
+            message: "Filters succesvol opgeslagen naar filters.json"
+        });
+
+    } catch (error) {
+        console.error('[SAVE_FILTERS] Error saving filters to JSON:', error);
+        res.status(500).json({
+            success: false,
+            message: "Fout bij opslaan van filters naar JSON bestand"
+        });
+    }
+});
+
 // Save selected municipalities to database (simplified approach)
 app.post('/admin/api/save-selected-municipalities', authenticateToken, (req, res) => {
     try {

@@ -36,7 +36,10 @@ class AdminDashboard {
                 role: payload.role,
                 id: payload.id
             };
-            console.log('[AUTH] User info:', this.userInfo);
+            console.log('[AUTH] User info decoded:', this.userInfo);
+            
+            // Update user display immediately
+            this.updateUserDisplay();
         } catch (error) {
             console.error('[AUTH] Error decoding token:', error);
             localStorage.removeItem('admin_token');
@@ -44,18 +47,21 @@ class AdminDashboard {
         }
     }
 
-    setupRoleBasedUI() {
-        // Update user display
+    updateUserDisplay() {
         const currentUserElement = document.getElementById('currentUser');
         if (currentUserElement && this.userInfo) {
             const roleDisplayName = this.userRole === 'admin' ? 'Administrator' : 'Editor';
             currentUserElement.innerHTML = `
                 <div style="text-align: left;">
                     <div style="font-weight: bold;">${this.userInfo.username}</div>
-                    <div style="font-size: 0.8em; color: #666;">${roleDisplayName}</div>
+                    <div style="font-size: 0.8em; color: #999;">${roleDisplayName}</div>
                 </div>
             `;
         }
+    }
+
+    setupRoleBasedUI() {
+        // User display is already handled in updateUserDisplay()
 
         // Hide/show navigation items based on role
         if (this.userRole === 'editor') {
@@ -1221,7 +1227,7 @@ class AdminDashboard {
         }
 
         try {
-            // Get current filters from the loaded data
+            // Get current filters from database
             const response = await fetch('/admin/api/filters', {
                 headers: {
                     'Authorization': `Bearer ${this.token}`
@@ -1235,7 +1241,7 @@ class AdminDashboard {
             const currentFilters = await response.json();
 
             // Save to filters.json with backup
-            const saveResponse = await fetch('/admin/api/filters/save', {
+            const saveResponse = await fetch('/admin/api/filters/save-to-json', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1249,43 +1255,69 @@ class AdminDashboard {
             if (saveResponse.ok) {
                 alert('Filters succesvol opgeslagen naar filters.json! Er is automatisch een backup gemaakt.');
             } else {
-                alert(`Fout bij opslaan: ${result.error || 'Onbekende fout'}`);
+                alert(`Fout bij opslaan: ${result.message || result.error || 'Onbekende fout'}`);
             }
         } catch (error) {
             console.error('Error saving filters to JSON:', error);
-            alert('Fout bij opslaan van filters');
+            alert('Fout bij opslaan van filters naar JSON bestand');
         }
     }
 
     // Municipality tab switching functionality
     switchMunicipalityTab(tabName) {
+        console.log(`[TABS] Switching to tab: ${tabName}`);
+        
         // Remove active class from all tab buttons
         document.querySelectorAll('.municipality-tabs .tab-btn').forEach(btn => {
             btn.classList.remove('active');
         });
 
         // Hide all tab contents
-        document.querySelectorAll('#municipality-data-tab, #municipality-visibility-tab').forEach(tab => {
+        document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.remove('active');
         });
 
-        // Add active class to clicked button
-        event.target.classList.add('active');
+        // Add active class to clicked button (find by onclick attribute)
+        const clickedButton = document.querySelector(`[onclick="window.adminApp.switchMunicipalityTab('${tabName}')"]`);
+        if (clickedButton) {
+            clickedButton.classList.add('active');
+        }
 
         // Show selected tab content
         const targetTab = document.getElementById(`municipality-${tabName}-tab`);
         if (targetTab) {
             targetTab.classList.add('active');
+            console.log(`[TABS] Activated tab: municipality-${tabName}-tab`);
+        } else {
+            console.error(`[TABS] Tab not found: municipality-${tabName}-tab`);
         }
 
-        // Initialize municipality visibility map if visibility tab is selected
+        // Load tab-specific content
         if (tabName === 'visibility') {
             this.initializeMunicipalityVisibilityMap();
+        } else if (tabName === 'data') {
+            this.loadMunicipalities();
+            if (this.municipalityLayers) {
+                this.refreshMunicipalityDataTab();
+            }
         }
+    }
 
-        // Refresh data tab if switching to data tab and we have visibility selections
-        if (tabName === 'data' && this.municipalityLayers) {
-            this.refreshMunicipalityDataTab();
+    // Refresh municipality data tab with current selections
+    refreshMunicipalityDataTab() {
+        if (!this.municipalityLayers) return;
+
+        // Get currently visible municipalities
+        const visibleMunicipalities = Object.keys(this.municipalityLayers)
+            .filter(name => this.municipalityLayers[name].visible)
+            .map(name => ({ name }));
+
+        // Update the data table to only show visible municipalities
+        const tableBody = document.querySelector('#municipalitiesTable tbody');
+        if (tableBody && visibleMunicipalities.length > 0) {
+            console.log(`[REFRESH] Refreshing data tab with ${visibleMunicipalities.length} visible municipalities`);
+            // Reload municipalities but filter by visible ones
+            this.loadMunicipalities();
         }
     }
 
@@ -1621,7 +1653,6 @@ function toggleAllMunicipalities(visible) {
     });
 
     console.log(`All municipalities set to: ${visible ? 'visible' : 'hidden'}`);
-}
 }
 
 async function saveMunicipalityVisibility() {

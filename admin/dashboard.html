@@ -138,10 +138,12 @@
                     <div id="municipality-visibility-tab" class="tab-content">
                         <div class="visibility-controls">
                             <h3>Configureer welke gemeenten zichtbaar zijn op de hoofdapplicatie</h3>
-                            <p>Rode gemeenten zijn standaard verborgen, groene zijn zichtbaar. Klik op een gemeente om de status te wijzigen.</p>
+                            <p>Rode gemeenten zijn verborgen, groene zijn zichtbaar. Klik op een gemeente om de status te wijzigen.</p>
                             <div class="visibility-buttons">
+                                <button class="btn btn-secondary" onclick="toggleAllMunicipalities(true)">Alle zichtbaar</button>
+                                <button class="btn btn-secondary" onclick="toggleAllMunicipalities(false)">Alle verbergen</button>
                                 <button class="btn btn-primary" onclick="saveMunicipalityVisibility()">Opslaan</button>
-                                <button class="btn btn-success" onclick="saveMunicipalitiesForKansenkaart()" style="margin-left: 10px;">Opslaan voor kansenkaart</button>
+                                <button class="btn btn-success" onclick="saveMunicipalitiesForKansenkaart()">Opslaan voor kansenkaart</button>
                             </div>
                         </div>
                         <div id="municipalityMap" style="height: 600px; margin-top: 20px;"></div>

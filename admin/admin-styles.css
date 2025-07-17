@@ -781,6 +781,138 @@ tr:hover {
     border: 1px solid #f5c6cb;
 }
 
+/* Municipality Tabs */
+.municipality-tabs {
+    display: flex;
+    border-bottom: 2px solid #e1e5e9;
+    margin-bottom: 2rem;
+}
+
+.municipality-tabs .tab-btn {
+    background: transparent;
+    border: none;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    font-size: 1rem;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.municipality-tabs .tab-btn:hover {
+    color: rgb(38, 123, 41);
+    background-color: rgba(38, 123, 41, 0.05);
+}
+
+.municipality-tabs .tab-btn.active {
+    color: rgb(38, 123, 41);
+    border-bottom-color: rgb(38, 123, 41);
+    font-weight: bold;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Visibility Controls */
+.visibility-controls {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.visibility-controls h3 {
+    color: rgb(38, 123, 41);
+    margin-bottom: 0.5rem;
+}
+
+.visibility-controls p {
+    color: #666;
+    margin-bottom: 1rem;
+}
+
+.visibility-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Municipality Map */
+#municipalityMap {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    min-height: 600px;
+}
+
+/* Filter sections */
+.filter-section {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.filter-section .section-header {
+    background: #f8f9fa;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-section .section-header h3 {
+    margin: 0;
+    color: rgb(38, 123, 41);
+}
+
+.filter-items {
+    padding: 1rem 1.5rem;
+}
+
+.filter-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.filter-item:last-child {
+    border-bottom: none;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.add-item-btn {
+    background: rgb(38, 123, 41);
+    color: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+.add-item-btn:hover {
+    background: rgb(32, 104, 35);
+}
+
 /* Modal Styles */
 .modal-overlay {
     position: fixed;
