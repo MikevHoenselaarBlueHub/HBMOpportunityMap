@@ -5,8 +5,10 @@ const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
+const DatabaseManager = require("./database/db-manager");
 
 const app = express();
+const db = new DatabaseManager();
 
 // Trust proxy voor Replit environment - maar specifiek configureren
 app.set('trust proxy', ['127.0.0.1', '::1']);
@@ -75,26 +77,6 @@ app.use(validateInput);
 // JWT Secret
 const JWT_SECRET = process.env.JWT_SECRET || "hbm-admin-secret-key-2024";
 
-// Gebruikers database
-const users = [
-    {
-        id: 1,
-        username: "admin",
-        password: "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password
-        email: "mike@bluehub.nl",
-        role: "admin",
-        created: new Date("2024-01-01"),
-    },
-    {
-        id: 2,
-        username: "editor",
-        password: "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password
-        email: "info@healthybuildingmovement.com",
-        role: "editor",
-        created: new Date("2024-01-15"),
-    },
-];
-
 // JWT verificatie middleware
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers["authorization"];
@@ -131,47 +113,45 @@ app.post("/admin/api/login", loginLimiter, async (req, res) => {
         });
     }
 
-    const user = users.find((u) => u.username === username);
-    if (!user) {
-        console.log(`[LOGIN] Fout: Gebruiker ${username} niet gevonden`);
-        return res.status(401).json({ success: false, message: "Ongeldige inloggegevens" });
+    try {
+        const user = await db.validatePassword(username, password);
+        if (!user) {
+            console.log(`[LOGIN] Fout: Ongeldige inloggegevens voor ${username}`);
+            return res.status(401).json({ success: false, message: "Ongeldige inloggegevens" });
+        }
+
+        const token = jwt.sign(
+            { id: user.id, username: user.username, role: user.role },
+            JWT_SECRET,
+            { expiresIn: "8h" },
+        );
+
+        console.log(`[LOGIN] Succesvol ingelogd: ${username} (${user.role})`);
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+            },
+        });
+    } catch (error) {
+        console.error(`[LOGIN] Database error:`, error);
+        res.status(500).json({ success: false, message: "Server fout" });
     }
-
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-        console.log(`[LOGIN] Fout: Ongeldig wachtwoord voor gebruiker ${username}`);
-        return res.status(401).json({ success: false, message: "Ongeldige inloggegevens" });
-    }
-
-    const token = jwt.sign(
-        { id: user.id, username: user.username, role: user.role },
-        JWT_SECRET,
-        { expiresIn: "8h" },
-    );
-
-    console.log(`[LOGIN] Succesvol ingelogd: ${username} (${user.role})`);
-    res.json({
-        success: true,
-        token,
-        user: {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-        },
-    });
 });
 
 app.get("/admin/api/users", authenticateToken, (req, res) => {
     console.log(`[USERS] Gebruikerslijst opgevraagd door: ${req.user.username}`);
-    const userList = users.map((user) => ({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        created: user.created,
-    }));
-    res.json(userList);
+    try {
+        const userList = db.getAllUsers();
+        res.json(userList);
+    } catch (error) {
+        console.error(`[USERS] Database error:`, error);
+        res.status(500).json({ error: "Fout bij laden van gebruikers" });
+    }
 });
 
 // Nieuwe gebruiker aanmaken
@@ -181,74 +161,28 @@ app.post("/admin/api/users", authenticateToken, async (req, res) => {
     console.log(`[CREATE_USER] Data ontvangen:`, { username, email, role, password: password ? '[VERBORGEN]' : 'LEEG' });
 
     try {
-        // Validatie
-        if (!username || !email || !password || !role) {
-            console.log(`[CREATE_USER] Fout: Ontbrekende vereiste velden`);
-            return res.status(400).json({
-                success: false,
-                message: "Alle velden zijn vereist: username, email, password, role"
-            });
-        }
-
-        // Check of gebruiker al bestaat
-        const existingUser = users.find(u => u.username === username || u.email === email);
-        if (existingUser) {
-            console.log(`[CREATE_USER] Fout: Gebruiker bestaat al - ${existingUser.username === username ? 'username' : 'email'}`);
-            return res.status(409).json({
-                success: false,
-                message: "Gebruiker met deze gebruikersnaam of email bestaat al"
-            });
-        }
-
-        // Valideer rol
-        const validRoles = ['admin', 'editor'];
-        if (!validRoles.includes(role)) {
-            console.log(`[CREATE_USER] Fout: Ongeldige rol: ${role}`);
-            return res.status(400).json({
-                success: false,
-                message: "Ongeldige rol. Gebruik 'admin' of 'editor'"
-            });
-        }
-
-        // Hash wachtwoord
-        console.log(`[CREATE_USER] Bezig met hashen van wachtwoord...`);
-        const hashedPassword = await bcrypt.hash(password, 10);
-        console.log(`[CREATE_USER] Wachtwoord succesvol gehashed`);
-
-        // Nieuwe gebruiker aanmaken
-        const newUser = {
-            id: Math.max(...users.map(u => u.id)) + 1,
-            username,
-            email,
-            password: hashedPassword,
-            role,
-            created: new Date()
-        };
-
-        users.push(newUser);
-        console.log(`[CREATE_USER] Nieuwe gebruiker succesvol aangemaakt: ${username} (ID: ${newUser.id})`);
-
-        // Stuur response zonder wachtwoord
-        const userResponse = {
-            id: newUser.id,
-            username: newUser.username,
-            email: newUser.email,
-            role: newUser.role,
-            created: newUser.created
-        };
-
+        const newUser = await db.createUser({ username, email, password, role });
+        
         res.status(201).json({
             success: true,
             message: "Gebruiker succesvol aangemaakt",
-            user: userResponse
+            user: newUser
         });
 
     } catch (error) {
-        console.error(`[CREATE_USER] Server fout bij aanmaken gebruiker:`, error);
-        res.status(500).json({
-            success: false,
-            message: "Server fout bij aanmaken gebruiker"
-        });
+        console.error(`[CREATE_USER] Fout bij aanmaken gebruiker:`, error);
+        
+        if (error.message.includes('bestaat al') || error.message.includes('Ongeldige rol') || error.message.includes('vereist')) {
+            res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                message: "Server fout bij aanmaken gebruiker"
+            });
+        }
     }
 });
 
@@ -259,48 +193,33 @@ app.put("/admin/api/users/:id", authenticateToken, async (req, res) => {
     console.log(`[UPDATE_USER] Poging tot bijwerken gebruiker ${userId} door: ${req.user.username}`);
 
     try {
-        const userIndex = users.findIndex(u => u.id === userId);
-        if (userIndex === -1) {
-            console.log(`[UPDATE_USER] Fout: Gebruiker ${userId} niet gevonden`);
-            return res.status(404).json({
-                success: false,
-                message: "Gebruiker niet gevonden"
-            });
-        }
-
-        const user = users[userIndex];
+        const updatedUser = await db.updateUser(userId, { username, email, password, role });
         
-        // Update velden
-        if (username) user.username = username;
-        if (email) user.email = email;
-        if (role) user.role = role;
-        if (password) {
-            console.log(`[UPDATE_USER] Bijwerken wachtwoord voor gebruiker ${userId}`);
-            user.password = await bcrypt.hash(password, 10);
-        }
-
-        console.log(`[UPDATE_USER] Gebruiker ${userId} succesvol bijgewerkt`);
-
-        const userResponse = {
-            id: user.id,
-            username: user.username,
-            email: user.email,
-            role: user.role,
-            created: user.created
-        };
-
         res.json({
             success: true,
             message: "Gebruiker succesvol bijgewerkt",
-            user: userResponse
+            user: updatedUser
         });
 
     } catch (error) {
-        console.error(`[UPDATE_USER] Server fout bij bijwerken gebruiker ${userId}:`, error);
-        res.status(500).json({
-            success: false,
-            message: "Server fout bij bijwerken gebruiker"
-        });
+        console.error(`[UPDATE_USER] Fout bij bijwerken gebruiker ${userId}:`, error);
+        
+        if (error.message.includes('niet gevonden')) {
+            res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        } else if (error.message.includes('in gebruik') || error.message.includes('Ongeldige rol')) {
+            res.status(400).json({
+                success: false,
+                message: error.message
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                message: "Server fout bij bijwerken gebruiker"
+            });
+        }
     }
 });
 
@@ -310,15 +229,6 @@ app.delete("/admin/api/users/:id", authenticateToken, (req, res) => {
     console.log(`[DELETE_USER] Poging tot verwijderen gebruiker ${userId} door: ${req.user.username}`);
 
     try {
-        const userIndex = users.findIndex(u => u.id === userId);
-        if (userIndex === -1) {
-            console.log(`[DELETE_USER] Fout: Gebruiker ${userId} niet gevonden`);
-            return res.status(404).json({
-                success: false,
-                message: "Gebruiker niet gevonden"
-            });
-        }
-
         // Voorkom dat gebruiker zichzelf verwijdert
         if (userId === req.user.id) {
             console.log(`[DELETE_USER] Fout: Gebruiker ${req.user.username} probeert zichzelf te verwijderen`);
@@ -328,20 +238,34 @@ app.delete("/admin/api/users/:id", authenticateToken, (req, res) => {
             });
         }
 
-        const deletedUser = users.splice(userIndex, 1)[0];
-        console.log(`[DELETE_USER] Gebruiker ${deletedUser.username} (${userId}) succesvol verwijderd`);
-
-        res.json({
-            success: true,
-            message: "Gebruiker succesvol verwijderd"
-        });
+        const success = db.deleteUser(userId);
+        
+        if (success) {
+            res.json({
+                success: true,
+                message: "Gebruiker succesvol verwijderd"
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                message: "Fout bij verwijderen van gebruiker"
+            });
+        }
 
     } catch (error) {
-        console.error(`[DELETE_USER] Server fout bij verwijderen gebruiker ${userId}:`, error);
-        res.status(500).json({
-            success: false,
-            message: "Server fout bij verwijderen gebruiker"
-        });
+        console.error(`[DELETE_USER] Fout bij verwijderen gebruiker ${userId}:`, error);
+        
+        if (error.message.includes('niet gevonden')) {
+            res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        } else {
+            res.status(500).json({
+                success: false,
+                message: "Server fout bij verwijderen gebruiker"
+            });
+        }
     }
 });
 

@@ -1,0 +1,26 @@
+
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "email": "mike@bluehub.nl",
+      "role": "admin",
+      "created": "2024-01-01T00:00:00.000Z",
+      "updated": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "username": "editor",
+      "password": "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "email": "info@healthybuildingmovement.com",
+      "role": "editor",
+      "created": "2024-01-15T00:00:00.000Z",
+      "updated": "2024-01-15T00:00:00.000Z"
+    }
+  ],
+  "lastId": 2,
+  "created": "2024-01-01T00:00:00.000Z",
+  "updated": "2024-01-01T00:00:00.000Z"
+}
