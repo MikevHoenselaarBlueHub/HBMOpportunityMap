@@ -427,35 +427,62 @@ class AdminDashboard {
 
     async loadMunicipalities() {
         try {
-            const response = await fetch("/admin/api/municipalities", {
-                headers: {
-                    Authorization: `Bearer ${this.token}`,
-                },
-            });
+            // Check if we're in data tab and have visibility layers to filter by
+            const isDataTab = document.getElementById("municipality-data-tab")?.classList.contains("active");
+            let municipalitiesToShow = [];
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error("Municipality API error:", errorText);
-                throw new Error(
-                    `Failed to load municipalities: ${response.status}`,
+            if (isDataTab && this.municipalityLayers) {
+                // Show only visible municipalities from the visibility map
+                const visibleMunicipalityNames = Object.keys(this.municipalityLayers)
+                    .filter(name => this.municipalityLayers[name].visible);
+
+                // Load current municipalities and filter
+                const response = await fetch("/admin/api/municipalities", {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to load municipalities: ${response.status}`);
+                }
+
+                const data = await response.json();
+                municipalitiesToShow = (data.municipalities || []).filter(
+                    municipality => visibleMunicipalityNames.includes(municipality.name)
                 );
+            } else {
+                // Load all municipalities normally
+                const response = await fetch("/admin/api/municipalities", {
+                    headers: {
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("Municipality API error:", errorText);
+                    throw new Error(
+                        `Failed to load municipalities: ${response.status}`,
+                    );
+                }
+
+                const responseText = await response.text();
+                let data;
+
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error(
+                        "Failed to parse municipalities JSON:",
+                        responseText,
+                    );
+                    throw new Error(
+                        "Invalid JSON response from municipalities API",
+                    );
+                }
+                municipalitiesToShow = data.municipalities || [];
             }
-
-            const responseText = await response.text();
-            let data;
-
-            try {
-                data = JSON.parse(responseText);
-            } catch (parseError) {
-                console.error(
-                    "Failed to parse municipalities JSON:",
-                    responseText,
-                );
-                throw new Error(
-                    "Invalid JSON response from municipalities API",
-                );
-            }
-            const municipalities = data.municipalities || [];
 
             const tableBody = document.querySelector(
                 "#municipalitiesTable tbody",
@@ -464,7 +491,7 @@ class AdminDashboard {
 
             tableBody.innerHTML = "";
 
-            municipalities.forEach((municipality) => {
+            municipalitiesToShow.forEach((municipality) => {
                 const row = document.createElement("tr");
 
                 const canEdit =
@@ -1413,24 +1440,27 @@ class AdminDashboard {
 
         // Get currently visible municipalities
         const visibleMunicipalities = Object.keys(this.municipalityLayers)
-            .filter((name) => this.municipalityLayers[name].visible)
-            .map((name) => ({ name }));
+            .filter((name) => this.municipalityLayers[name].visible);
 
-        // Update the data table to only show visible municipalities
-        const tableBody = document.querySelector("#municipalitiesTable tbody");
-        if (tableBody && visibleMunicipalities.length > 0) {
-            console.log(
-                `[REFRESH] Refreshing data tab with ${visibleMunicipalities.length} visible municipalities`,
-            );
-            // Reload municipalities but filter by visible ones
-            this.loadMunicipalities();
-        }
+        console.log(
+            `[REFRESH] Refreshing data tab with ${visibleMunicipalities.length} visible municipalities`,
+        );
+        
+        // Reload municipalities with filtering
+        this.loadMunicipalities();
     }
 
     // Initialize municipality visibility map
     async initializeMunicipalityVisibilityMap() {
         const mapContainer = document.getElementById("municipalityMap");
         if (!mapContainer) return;
+
+        // Destroy existing map if it exists
+        if (this.visibilityMap) {
+            this.visibilityMap.remove();
+            this.visibilityMap = null;
+            this.municipalityLayers = null;
+        }
 
         // Clear any existing content
         mapContainer.innerHTML = "";
@@ -1768,35 +1798,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Global functions for municipality visibility
-function toggleAllMunicipalities(visible) {
-    if (!window.adminDashboard.municipalityLayers) return;
-
-    Object.keys(window.adminDashboard.municipalityLayers).forEach(
-        (municipalityName) => {
-            const municipalityData =
-                window.adminDashboard.municipalityLayers[municipalityName];
-            const layer = municipalityData.layer;
-
-            // Update layer style
-            const color = visible ? "#28a745" : "#dc3545";
-            layer.setStyle({
-                color: color,
-                fillColor: color,
-                weight: 2,
-                opacity: 0.8,
-                fillOpacity: 0.3,
-            });
-
-            // Update local state
-            municipalityData.visible = visible;
-
-            // Update tooltip content if needed
-            layer.setTooltipContent(municipalityName);
-        },
-    );
-
-    console.log(`All municipalities set to: ${visible ? "visible" : "hidden"}`);
-}
 
 async function saveMunicipalityVisibility() {
     if (!window.adminDashboard.municipalityLayers) {
