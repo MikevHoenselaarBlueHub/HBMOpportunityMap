@@ -425,19 +425,66 @@ app.get('/admin', (req, res) => {
     res.redirect('/admin/index.html');
 });
 
-// Request logging middleware
+// === MAIN APP ROUTES ===
+
+// Explicit data routes voor debugging
+app.get('/data/opportunities.json', (req, res) => {
+    try {
+        console.log(`[DATA] Loading opportunities.json`);
+        const data = JSON.parse(fs.readFileSync(path.join(__dirname, "data/opportunities.json"), "utf8"));
+        console.log(`[DATA] Successfully loaded ${data.length} opportunities`);
+        res.json(data);
+    } catch (error) {
+        console.error(`[DATA] Error loading opportunities.json:`, error);
+        res.status(500).json({ error: "Failed to load opportunities data" });
+    }
+});
+
+app.get('/data/filters.json', (req, res) => {
+    try {
+        console.log(`[DATA] Loading filters.json`);
+        const data = JSON.parse(fs.readFileSync(path.join(__dirname, "data/filters.json"), "utf8"));
+        console.log(`[DATA] Successfully loaded filters data`);
+        res.json(data);
+    } catch (error) {
+        console.error(`[DATA] Error loading filters.json:`, error);
+        res.status(500).json({ error: "Failed to load filters data" });
+    }
+});
+
+app.get('/data/municipalities.json', (req, res) => {
+    try {
+        console.log(`[DATA] Loading municipalities.json`);
+        const data = JSON.parse(fs.readFileSync(path.join(__dirname, "data/municipalities.json"), "utf8"));
+        console.log(`[DATA] Successfully loaded municipalities data`);
+        res.json(data);
+    } catch (error) {
+        console.error(`[DATA] Error loading municipalities.json:`, error);
+        res.status(500).json({ error: "Failed to load municipalities data" });
+    }
+});
+
+// Request logging middleware for all requests
 app.use((req, res, next) => {
+    console.log(`[REQUEST] ${req.method} ${req.url}`);
     if (req.url.startsWith('/admin/api/')) {
         console.log(`[API] ${req.method} ${req.url} - User: ${req.user ? req.user.username : 'Niet geauthenticeerd'}`);
     }
     next();
 });
 
-// === MAIN APP ROUTES ===
-
-// Serve static files voor hoofdapplicatie (exclusief admin directory)
+// Serve static files voor hoofdapplicatie met specifieke MIME types
 app.use(express.static('.', {
-    index: 'index.html'
+    index: 'index.html',
+    setHeaders: (res, path) => {
+        if (path.endsWith('.js')) {
+            res.setHeader('Content-Type', 'application/javascript');
+        } else if (path.endsWith('.css')) {
+            res.setHeader('Content-Type', 'text/css');
+        } else if (path.endsWith('.json')) {
+            res.setHeader('Content-Type', 'application/json');
+        }
+    }
 }));
 
 // Fallback voor SPA routing
@@ -460,7 +507,10 @@ app.use((err, req, res, next) => {
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server draait op poort ${PORT}`);
-    console.log(`Hoofdapplicatie: http://localhost:${PORT}`);
-    console.log(`Admin CMS: http://localhost:${PORT}/admin/`);
+    console.log(`========================================`);
+    console.log(`🚀 Server succesvol gestart op poort ${PORT}`);
+    console.log(`📍 Server luistert op: 0.0.0.0:${PORT}`);
+    console.log(`🌐 Hoofdapplicatie: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/`);
+    console.log(`⚙️  Admin CMS: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/admin/`);
+    console.log(`========================================`);
 });
