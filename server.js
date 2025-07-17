@@ -8,21 +8,23 @@ const rateLimit = require("express-rate-limit");
 
 const app = express();
 
-// Trust proxy voor Replit environment
-app.set('trust proxy', true);
+// Trust proxy voor Replit environment - maar specifiek configureren
+app.set('trust proxy', ['127.0.0.1', '::1']);
 
-// Rate limiting
+// Rate limiting met betere proxy configuratie
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 5,
     message: { success: false, message: "Te veel login pogingen. Probeer het later opnieuw." },
     standardHeaders: true,
     legacyHeaders: false,
+    trustProxy: false, // Explicitief uitschakelen voor deze limiter
 });
 
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
+    trustProxy: false, // Explicitief uitschakelen voor deze limiter
 });
 
 app.use(generalLimiter);
@@ -427,62 +429,132 @@ app.get('/admin', (req, res) => {
 
 // === MAIN APP ROUTES ===
 
-// Explicit data routes voor debugging
+// Data routes MOETEN VOOR static middleware komen voor prioriteit
 app.get('/data/opportunities.json', (req, res) => {
     try {
-        console.log(`[DATA] Loading opportunities.json`);
-        const data = JSON.parse(fs.readFileSync(path.join(__dirname, "data/opportunities.json"), "utf8"));
+        console.log(`[DATA] Loading opportunities.json for ${req.ip}`);
+        const dataPath = path.join(__dirname, "data/opportunities.json");
+        
+        // Check of bestand bestaat
+        if (!fs.existsSync(dataPath)) {
+            console.error(`[DATA] File not found: ${dataPath}`);
+            return res.status(404).json({ error: "Opportunities data file not found" });
+        }
+        
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
         console.log(`[DATA] Successfully loaded ${data.length} opportunities`);
+        
+        // Ensure proper headers
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-cache');
         res.json(data);
     } catch (error) {
         console.error(`[DATA] Error loading opportunities.json:`, error);
-        res.status(500).json({ error: "Failed to load opportunities data" });
+        res.status(500).json({ error: "Failed to load opportunities data", details: error.message });
     }
 });
 
 app.get('/data/filters.json', (req, res) => {
     try {
-        console.log(`[DATA] Loading filters.json`);
-        const data = JSON.parse(fs.readFileSync(path.join(__dirname, "data/filters.json"), "utf8"));
+        console.log(`[DATA] Loading filters.json for ${req.ip}`);
+        const dataPath = path.join(__dirname, "data/filters.json");
+        
+        if (!fs.existsSync(dataPath)) {
+            console.error(`[DATA] File not found: ${dataPath}`);
+            return res.status(404).json({ error: "Filters data file not found" });
+        }
+        
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
         console.log(`[DATA] Successfully loaded filters data`);
+        
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-cache');
         res.json(data);
     } catch (error) {
         console.error(`[DATA] Error loading filters.json:`, error);
-        res.status(500).json({ error: "Failed to load filters data" });
+        res.status(500).json({ error: "Failed to load filters data", details: error.message });
     }
 });
 
 app.get('/data/municipalities.json', (req, res) => {
     try {
-        console.log(`[DATA] Loading municipalities.json`);
-        const data = JSON.parse(fs.readFileSync(path.join(__dirname, "data/municipalities.json"), "utf8"));
+        console.log(`[DATA] Loading municipalities.json for ${req.ip}`);
+        const dataPath = path.join(__dirname, "data/municipalities.json");
+        
+        if (!fs.existsSync(dataPath)) {
+            console.error(`[DATA] File not found: ${dataPath}`);
+            return res.status(404).json({ error: "Municipalities data file not found" });
+        }
+        
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
         console.log(`[DATA] Successfully loaded municipalities data`);
+        
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'no-cache');
         res.json(data);
     } catch (error) {
         console.error(`[DATA] Error loading municipalities.json:`, error);
-        res.status(500).json({ error: "Failed to load municipalities data" });
+        res.status(500).json({ error: "Failed to load municipalities data", details: error.message });
+    }
+});
+
+// Algemene data directory route als fallback
+app.get('/data/*', (req, res) => {
+    try {
+        const filePath = path.join(__dirname, req.path);
+        console.log(`[DATA] Fallback request for: ${req.path}`);
+        
+        if (!fs.existsSync(filePath)) {
+            console.error(`[DATA] File not found: ${filePath}`);
+            return res.status(404).json({ error: "Data file not found" });
+        }
+        
+        // Serve the file with proper content type
+        if (req.path.endsWith('.json')) {
+            res.setHeader('Content-Type', 'application/json');
+        } else if (req.path.endsWith('.geojson')) {
+            res.setHeader('Content-Type', 'application/geo+json');
+        }
+        
+        res.setHeader('Cache-Control', 'no-cache');
+        res.sendFile(filePath);
+    } catch (error) {
+        console.error(`[DATA] Error serving file:`, error);
+        res.status(500).json({ error: "Failed to serve data file" });
     }
 });
 
 // Request logging middleware for all requests
 app.use((req, res, next) => {
-    console.log(`[REQUEST] ${req.method} ${req.url}`);
+    console.log(`[REQUEST] ${req.method} ${req.url} from ${req.ip}`);
     if (req.url.startsWith('/admin/api/')) {
         console.log(`[API] ${req.method} ${req.url} - User: ${req.user ? req.user.username : 'Niet geauthenticeerd'}`);
     }
     next();
 });
 
-// Serve static files voor hoofdapplicatie met specifieke MIME types
+// Serve static files voor hoofdapplicatie - NA data routes voor juiste prioriteit
 app.use(express.static('.', {
     index: 'index.html',
-    setHeaders: (res, path) => {
-        if (path.endsWith('.js')) {
+    dotfiles: 'ignore',
+    etag: false,
+    setHeaders: (res, filePath) => {
+        // Cache-Control headers
+        if (filePath.endsWith('.js')) {
             res.setHeader('Content-Type', 'application/javascript');
-        } else if (path.endsWith('.css')) {
+            res.setHeader('Cache-Control', 'no-cache');
+        } else if (filePath.endsWith('.css')) {
             res.setHeader('Content-Type', 'text/css');
-        } else if (path.endsWith('.json')) {
+            res.setHeader('Cache-Control', 'no-cache');
+        } else if (filePath.endsWith('.json')) {
             res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Cache-Control', 'no-cache');
+        } else if (filePath.endsWith('.svg')) {
+            res.setHeader('Content-Type', 'image/svg+xml');
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+        } else if (filePath.endsWith('.html')) {
+            res.setHeader('Content-Type', 'text/html');
+            res.setHeader('Cache-Control', 'no-cache');
         }
     }
 }));
@@ -505,7 +577,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server - Fixed port configuration
-const PORT = 5000; // Fixed port voor consistentie
+const PORT = 5000; // Fixed port voor consistentie  
 app.listen(PORT, "0.0.0.0", () => {
     const replUrl = process.env.REPLIT_DEV_DOMAIN || `${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.replit.dev`;
     
@@ -514,6 +586,7 @@ app.listen(PORT, "0.0.0.0", () => {
     console.log(`📍 Server luistert op: 0.0.0.0:${PORT}`);
     console.log(`🌐 Hoofdapplicatie: https://${replUrl}/`);
     console.log(`⚙️  Admin CMS: https://${replUrl}/admin/`);
+    console.log(`🔧 Data API: https://${replUrl}/data/`);
     console.log(`========================================`);
     
     // Log data file status for debugging
