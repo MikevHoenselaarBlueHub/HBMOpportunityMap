@@ -56,15 +56,11 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm install"
+args = "npm install && node admin/server.js"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "node admin/server.js &"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node proxy-server.js"
+args = "npm install && node proxy-server.js"
 
 [[ports]]
 localPort = 3000
