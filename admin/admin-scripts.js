@@ -4,6 +4,8 @@ class AdminDashboard {
     constructor() {
         this.currentSection = 'dashboard';
         this.token = localStorage.getItem('admin_token');
+        this.userRole = null;
+        this.userInfo = null;
         this.init();
     }
 
@@ -14,9 +16,138 @@ class AdminDashboard {
             return;
         }
 
+        // Decode token to get user info
+        this.decodeToken();
+        
+        // Setup role-based UI
+        this.setupRoleBasedUI();
+
         // Load initial data
         this.loadDashboardData();
         this.setupEventListeners();
+    }
+
+    decodeToken() {
+        try {
+            // Simple JWT decode (voor display doeleinden)
+            const payload = JSON.parse(atob(this.token.split('.')[1]));
+            this.userRole = payload.role;
+            this.userInfo = {
+                username: payload.username,
+                role: payload.role,
+                id: payload.id
+            };
+            console.log('[AUTH] User info:', this.userInfo);
+        } catch (error) {
+            console.error('[AUTH] Error decoding token:', error);
+            localStorage.removeItem('admin_token');
+            window.location.href = '/admin/index.html';
+        }
+    }
+
+    setupRoleBasedUI() {
+        // Update user display
+        const currentUserElement = document.getElementById('currentUser');
+        if (currentUserElement && this.userInfo) {
+            const roleDisplayName = this.userRole === 'admin' ? 'Administrator' : 'Editor';
+            currentUserElement.innerHTML = `
+                <div style="text-align: left;">
+                    <div style="font-weight: bold;">${this.userInfo.username}</div>
+                    <div style="font-size: 0.8em; color: #666;">${roleDisplayName}</div>
+                </div>
+            `;
+        }
+
+        // Hide/show navigation items based on role
+        if (this.userRole === 'editor') {
+            // Verberg admin-only secties voor editors
+            const adminOnlyItems = [
+                'users',
+                'settings'
+            ];
+            
+            adminOnlyItems.forEach(sectionName => {
+                const navLink = document.querySelector(`[href="#${sectionName}"]`);
+                if (navLink) {
+                    navLink.style.display = 'none';
+                }
+                
+                const section = document.getElementById(`${sectionName}-section`);
+                if (section) {
+                    section.style.display = 'none';
+                }
+            });
+            
+            // Update dashboard stats voor editors (verberg gebruiker stats)
+            this.hideAdminStats();
+        }
+        
+        // Show role-specific welcome message
+        this.showRoleMessage();
+    }
+
+    hideAdminStats() {
+        // Voor editors: focus op content stats, niet op gebruiker stats
+        setTimeout(() => {
+            const statsGrid = document.querySelector('.stats-grid');
+            if (statsGrid && this.userRole === 'editor') {
+                // Voeg editor-specifieke melding toe
+                const editorMessage = document.createElement('div');
+                editorMessage.innerHTML = `
+                    <div style="background: #e3f2fd; border: 1px solid #2196f3; border-radius: 4px; padding: 1rem; margin-bottom: 1rem;">
+                        <strong>👋 Welkom ${this.userInfo.username}!</strong><br>
+                        Als Editor kun je kansen, filters en gemeenten beheren. Voor gebruikersbeheer en systeeminstellingen heb je admin rechten nodig.
+                    </div>
+                `;
+                statsGrid.parentNode.insertBefore(editorMessage, statsGrid);
+            }
+        }, 100);
+    }
+
+    showRoleMessage() {
+        const permissions = this.getRolePermissions();
+        console.log(`[ROLE] Gebruiker ${this.userInfo.username} heeft ${this.userRole} rechten:`, permissions);
+    }
+
+    getRolePermissions() {
+        const permissions = {
+            admin: [
+                'Alle kansen beheren',
+                'Alle filters beheren', 
+                'Alle gemeenten beheren',
+                'Gebruikers aanmaken/bewerken/verwijderen',
+                'Systeeminstellingen wijzigen',
+                'Data export/import',
+                'Volledige toegang tot alle functies'
+            ],
+            editor: [
+                'Kansen beheren (toevoegen/bewerken/verwijderen)',
+                'Filters beheren (toevoegen/bewerken/verwijderen)',
+                'Gemeenten beheren (toevoegen/bewerken/verwijderen)',
+                'Dashboard statistieken bekijken'
+            ]
+        };
+        
+        return permissions[this.userRole] || [];
+    }
+
+    hasPermission(action) {
+        const rolePermissions = {
+            admin: ['all'],
+            editor: [
+                'view_dashboard',
+                'manage_opportunities', 
+                'manage_filters',
+                'manage_municipalities',
+                'view_stats'
+            ]
+        };
+        
+        if (this.userRole === 'admin') {
+            return true; // Admin heeft alle rechten
+        }
+        
+        return rolePermissions[this.userRole]?.includes(action) || false;
     }
 
     setupEventListeners() {
@@ -37,6 +168,12 @@ class AdminDashboard {
     }
 
     showSection(sectionName) {
+        // Check permissions
+        if (!this.canAccessSection(sectionName)) {
+            alert(`Je hebt geen toegang tot deze sectie. Je huidige rol (${this.userRole}) heeft hiervoor onvoldoende rechten.`);
+            return;
+        }
+
         // Hide all sections
         document.querySelectorAll('.content-section').forEach(section => {
             section.classList.remove('active');
@@ -59,13 +196,28 @@ class AdminDashboard {
             opportunities: 'Kansen beheer',
             filters: 'Filter beheer',
             municipalities: 'Gemeenten',
-            users: 'Gebruikers',
-            settings: 'Instellingen'
+            users: 'Gebruikers beheer',
+            settings: 'Systeeminstellingen'
         };
         document.getElementById('pageTitle').textContent = titles[sectionName] || 'Dashboard';
 
         // Load section-specific data
         this.loadSectionData(sectionName);
+        this.currentSection = sectionName;
+    }
+
+    canAccessSection(sectionName) {
+        const adminOnlySections = ['users', 'settings'];
+        
+        if (this.userRole === 'admin') {
+            return true; // Admin heeft toegang tot alles
+        }
+        
+        if (this.userRole === 'editor') {
+            return !adminOnlySections.includes(sectionName);
+        }
+        
+        return false;
     }
 
     async loadDashboardData() {
@@ -196,6 +348,23 @@ class AdminDashboard {
     }
 
     async loadUsers() {
+        // Check if user has permission to view users
+        if (!this.hasPermission('manage_users') && this.userRole !== 'admin') {
+            const tableBody = document.getElementById('usersTableBody');
+            if (tableBody) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem; color: #666;">
+                            <strong>Toegang geweigerd</strong><br>
+                            Je hebt geen rechten om gebruikers te beheren.<br>
+                            Alleen administrators kunnen gebruikers bekijken en bewerken.
+                        </td>
+                    </tr>
+                `;
+            }
+            return;
+        }
+
         try {
             const response = await fetch('/admin/api/users', {
                 headers: {
@@ -213,15 +382,23 @@ class AdminDashboard {
             tableBody.innerHTML = '';
             
             users.forEach(user => {
+                const canEditUser = this.userRole === 'admin' || user.id === this.userInfo.id;
+                const canDeleteUser = this.userRole === 'admin' && user.id !== this.userInfo.id;
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${user.username}</td>
                     <td>${user.email}</td>
-                    <td>${user.role}</td>
+                    <td>
+                        <span class="role-badge role-${user.role}">
+                            ${user.role === 'admin' ? 'Administrator' : 'Editor'}
+                        </span>
+                    </td>
                     <td>${new Date(user.created).toLocaleDateString('nl-NL')}</td>
                     <td class="action-buttons">
-                        <button class="action-btn edit-btn" onclick="editUser(${user.id})">Bewerken</button>
-                        <button class="action-btn delete-btn" onclick="deleteUser(${user.id})">Verwijderen</button>
+                        ${canEditUser ? `<button class="action-btn edit-btn" onclick="editUser(${user.id})">Bewerken</button>` : ''}
+                        ${canDeleteUser ? `<button class="action-btn delete-btn" onclick="deleteUser(${user.id})">Verwijderen</button>` : ''}
+                        ${!canEditUser && !canDeleteUser ? '<span style="color: #999;">Geen acties beschikbaar</span>' : ''}
                     </td>
                 `;
                 tableBody.appendChild(row);
@@ -233,6 +410,12 @@ class AdminDashboard {
     }
 
     openUserModal(userId = null) {
+        // Check permissions
+        if (this.userRole !== 'admin') {
+            alert('Alleen administrators kunnen gebruikers aanmaken of bewerken.');
+            return;
+        }
+
         const isEdit = userId !== null;
         
         const modalHTML = `
@@ -260,9 +443,13 @@ class AdminDashboard {
                             <label for="role">Rol *</label>
                             <select id="role" name="role" required>
                                 <option value="">Selecteer rol</option>
-                                <option value="admin">Administrator</option>
-                                <option value="editor">Editor</option>
+                                <option value="admin">Administrator - Volledige toegang</option>
+                                <option value="editor">Editor - Content beheer alleen</option>
                             </select>
+                            <small>
+                                <strong>Administrator:</strong> Alle rechten inclusief gebruikersbeheer en systeeminstellingen<br>
+                                <strong>Editor:</strong> Kan alleen kansen, filters en gemeenten beheren
+                            </small>
                         </div>
                         <div class="modal-actions">
                             <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuleren</button>
@@ -501,14 +688,32 @@ function importData() {
 
 // User Management Functions
 function openAddUserModal() {
+    if (window.adminDashboard.userRole !== 'admin') {
+        alert('Alleen administrators kunnen nieuwe gebruikers toevoegen.');
+        return;
+    }
     window.adminDashboard.openUserModal();
 }
 
 function editUser(userId) {
+    if (window.adminDashboard.userRole !== 'admin' && userId !== window.adminDashboard.userInfo.id) {
+        alert('Je kunt alleen je eigen profiel bewerken.');
+        return;
+    }
     window.adminDashboard.openUserModal(userId);
 }
 
 async function deleteUser(userId) {
+    if (window.adminDashboard.userRole !== 'admin') {
+        alert('Alleen administrators kunnen gebruikers verwijderen.');
+        return;
+    }
+    
+    if (userId === window.adminDashboard.userInfo.id) {
+        alert('Je kunt jezelf niet verwijderen.');
+        return;
+    }
+    
     if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
         await window.adminDashboard.deleteUser(userId);
     }
