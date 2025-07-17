@@ -37,7 +37,7 @@ class AdminDashboard {
                 id: payload.id
             };
             console.log('[AUTH] User info decoded:', this.userInfo);
-            
+
             // Update user display immediately
             this.updateUserDisplay();
         } catch (error) {
@@ -1266,7 +1266,7 @@ class AdminDashboard {
     // Municipality tab switching functionality
     switchMunicipalityTab(tabName) {
         console.log(`[TABS] Switching to tab: ${tabName}`);
-        
+
         // Remove active class from all tab buttons
         document.querySelectorAll('.municipality-tabs .tab-btn').forEach(btn => {
             btn.classList.remove('active');
@@ -1709,36 +1709,36 @@ async function saveMunicipalityVisibility() {
 }
 
 async function saveMunicipalitiesForKansenkaart() {
-    if (!window.adminDashboard.municipalityLayers) {
-        alert('Geen gemeente data beschikbaar om op te slaan');
-        return;
-    }
-
-    if (!confirm('Weet je zeker dat je alle zichtbare gemeenten wilt opslaan naar municipalities.json? Er wordt automatisch een backup gemaakt van de huidige versie.')) {
-        return;
-    }
-
-    try {
-        const response = await fetch('/admin/api/save-municipalities-for-kansenkaart', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${window.adminDashboard.token}`
-            }
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            alert(`Succesvol ${result.count} zichtbare gemeenten opgeslagen naar municipalities.json!`);
-
-            // Reload the municipalities data table to reflect changes
-            window.adminDashboard.loadMunicipalities();
-        } else {
-            alert(`Fout bij opslaan: ${result.message}`);
+        if (!window.adminDashboard.municipalityLayers) {
+            alert('Geen gemeente data beschikbaar om op te slaan');
+            return;
         }
-    } catch (error) {
-        console.error('Error saving municipalities for kansenkaart:', error);
-        alert('Fout bij opslaan van gemeenten voor kansenkaart');
+
+        if (!confirm('Weet je zeker dat je alle zichtbare gemeenten wilt opslaan naar municipalities.json? Er wordt automatisch een backup gemaakt van de huidige versie.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/admin/api/save-municipalities-for-kansenkaart', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${window.adminDashboard.token}`
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert(`Succesvol ${result.count} zichtbare gemeenten opgeslagen naar municipalities.json!`);
+
+                // Reload the municipalities data table to reflect changes
+                window.adminDashboard.loadMunicipalities();
+            } else {
+                alert(`Fout bij opslaan: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error saving municipalities for kansenkaart:', error);
+            alert('Fout bij opslaan van gemeenten voor kansenkaart');
+        }
     }
 }
-});
