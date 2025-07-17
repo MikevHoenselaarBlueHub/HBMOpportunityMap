@@ -1,4 +1,3 @@
-
 {
   "users": [
     {
@@ -18,9 +17,18 @@
       "role": "editor",
       "created": "2024-01-15T00:00:00.000Z",
       "updated": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "username": "Jesse",
+      "email": "jesse@bluehub.nl",
+      "password": "$2b$10$Ce1/DzlEXaOjQiHvwEiEu./i.Cb56Z1CBqq9/guZmAorL1DJivwkK",
+      "role": "editor",
+      "created": "2025-07-17T09:39:44.129Z",
+      "updated": "2025-07-17T09:39:44.129Z"
     }
   ],
-  "lastId": 2,
+  "lastId": 3,
   "created": "2024-01-01T00:00:00.000Z",
-  "updated": "2024-01-01T00:00:00.000Z"
+  "updated": "2025-07-17T09:39:44.129Z"
 }
