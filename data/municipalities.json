@@ -7,6 +7,18 @@
       "population": 0
     },
     {
+      "name": "BBeesel",
+      "country": "Netherlands",
+      "code": "NL",
+      "population": 13483,
+      "area": "28,42 km²",
+      "largest_places": [
+        "Beesel",
+        "Reuver",
+        "Offenbeek"
+      ]
+    },
+    {
       "name": "Beekk",
       "country": "Netherlands",
       "code": "NL",
@@ -16,18 +28,6 @@
         "Beek",
         "Neerbeek",
         "Genhout"
-      ]
-    },
-    {
-      "name": "Beesel",
-      "country": "Netherlands",
-      "code": "NL",
-      "population": 13483,
-      "area": "28,42 km²",
-      "largest_places": [
-        "Beesel",
-        "Reuver",
-        "Offenbeek"
       ]
     },
     {
