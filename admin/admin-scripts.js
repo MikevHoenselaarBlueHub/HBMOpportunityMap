@@ -1,8 +1,8 @@
 // Admin Dashboard JavaScript
 class AdminDashboard {
     constructor() {
-        this.currentSection = 'dashboard';
-        this.token = localStorage.getItem('admin_token');
+        this.currentSection = "dashboard";
+        this.token = localStorage.getItem("admin_token");
         this.userRole = null;
         this.userInfo = null;
         this.init();
@@ -11,7 +11,7 @@ class AdminDashboard {
     init() {
         // Check if user is logged in
         if (!this.token) {
-            window.location.href = '/admin/index.html';
+            window.location.href = "/admin/index.html";
             return;
         }
 
@@ -29,28 +29,29 @@ class AdminDashboard {
     decodeToken() {
         try {
             // Simple JWT decode (voor display doeleinden)
-            const payload = JSON.parse(atob(this.token.split('.')[1]));
+            const payload = JSON.parse(atob(this.token.split(".")[1]));
             this.userRole = payload.role;
             this.userInfo = {
                 username: payload.username,
                 role: payload.role,
-                id: payload.id
+                id: payload.id,
             };
-            console.log('[AUTH] User info decoded:', this.userInfo);
+            console.log("[AUTH] User info decoded:", this.userInfo);
 
             // Update user display immediately
             this.updateUserDisplay();
         } catch (error) {
-            console.error('[AUTH] Error decoding token:', error);
-            localStorage.removeItem('admin_token');
-            window.location.href = '/admin/index.html';
+            console.error("[AUTH] Error decoding token:", error);
+            localStorage.removeItem("admin_token");
+            window.location.href = "/admin/index.html";
         }
     }
 
     updateUserDisplay() {
-        const currentUserElement = document.getElementById('currentUser');
+        const currentUserElement = document.getElementById("currentUser");
         if (currentUserElement && this.userInfo) {
-            const roleDisplayName = this.userRole === 'admin' ? 'Administrator' : 'Editor';
+            const roleDisplayName =
+                this.userRole === "admin" ? "Administrator" : "Editor";
             currentUserElement.innerHTML = `
                 <div style="text-align: left;">
                     <div style="font-weight: bold;">${this.userInfo.username}</div>
@@ -64,22 +65,23 @@ class AdminDashboard {
         // User display is already handled in updateUserDisplay()
 
         // Hide/show navigation items based on role
-        if (this.userRole === 'editor') {
+        if (this.userRole === "editor") {
             // Verberg admin-only secties voor editors
-            const adminOnlyItems = [
-                'users',
-                'settings'
-            ];
+            const adminOnlyItems = ["users", "settings"];
 
-            adminOnlyItems.forEach(sectionName => {
-                const navLink = document.querySelector(`[href="#${sectionName}"]`);
+            adminOnlyItems.forEach((sectionName) => {
+                const navLink = document.querySelector(
+                    `[href="#${sectionName}"]`,
+                );
                 if (navLink) {
-                    navLink.style.display = 'none';
+                    navLink.style.display = "none";
                 }
 
-                const section = document.getElementById(`${sectionName}-section`);
+                const section = document.getElementById(
+                    `${sectionName}-section`,
+                );
                 if (section) {
-                    section.style.display = 'none';
+                    section.style.display = "none";
                 }
             });
 
@@ -94,10 +96,10 @@ class AdminDashboard {
     hideAdminStats() {
         // Voor editors: focus op content stats, niet op gebruiker stats
         setTimeout(() => {
-            const statsGrid = document.querySelector('.stats-grid');
-            if (statsGrid && this.userRole === 'editor') {
+            const statsGrid = document.querySelector(".stats-grid");
+            if (statsGrid && this.userRole === "editor") {
                 // Voeg editor-specifieke melding toe
-                const editorMessage = document.createElement('div');
+                const editorMessage = document.createElement("div");
                 editorMessage.innerHTML = `
                     <div style="background: #e3f2fd; border: 1px solid #2196f3; border-radius: 4px; padding: 1rem; margin-bottom: 1rem;">
                         <strong>👋 Welkom ${this.userInfo.username}!</strong><br>
@@ -111,26 +113,29 @@ class AdminDashboard {
 
     showRoleMessage() {
         const permissions = this.getRolePermissions();
-        console.log(`[ROLE] Gebruiker ${this.userInfo.username} heeft ${this.userRole} rechten:`, permissions);
+        console.log(
+            `[ROLE] Gebruiker ${this.userInfo.username} heeft ${this.userRole} rechten:`,
+            permissions,
+        );
     }
 
     getRolePermissions() {
         const permissions = {
             admin: [
-                'Alle kansen beheren',
-                'Alle filters beheren', 
-                'Alle gemeenten beheren',
-                'Gebruikers aanmaken/bewerken/verwijderen',
-                'Systeeminstellingen wijzigen',
-                'Data export/import',
-                'Volledige toegang tot alle functies'
+                "Alle kansen beheren",
+                "Alle filters beheren",
+                "Alle gemeenten beheren",
+                "Gebruikers aanmaken/bewerken/verwijderen",
+                "Systeeminstellingen wijzigen",
+                "Data export/import",
+                "Volledige toegang tot alle functies",
             ],
             editor: [
-                'Kansen beheren (toevoegen/bewerken/verwijderen)',
-                'Filters beheren (toevoegen/bewerken/verwijderen)',
-                'Gemeenten beheren (toevoegen/bewerken/verwijderen)',
-                'Dashboard statistieken bekijken'
-            ]
+                "Kansen beheren (toevoegen/bewerken/verwijderen)",
+                "Filters beheren (toevoegen/bewerken/verwijderen)",
+                "Gemeenten beheren (toevoegen/bewerken/verwijderen)",
+                "Dashboard statistieken bekijken",
+            ],
         };
 
         return permissions[this.userRole] || [];
@@ -138,17 +143,17 @@ class AdminDashboard {
 
     hasPermission(action) {
         const rolePermissions = {
-            admin: ['all'],
+            admin: ["all"],
             editor: [
-                'view_dashboard',
-                'manage_opportunities', 
-                'manage_filters',
-                'manage_municipalities',
-                'view_stats'
-            ]
+                "view_dashboard",
+                "manage_opportunities",
+                "manage_filters",
+                "manage_municipalities",
+                "view_stats",
+            ],
         };
 
-        if (this.userRole === 'admin') {
+        if (this.userRole === "admin") {
             return true; // Admin heeft alle rechten
         }
 
@@ -157,54 +162,63 @@ class AdminDashboard {
 
     setupEventListeners() {
         // Navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
+        document.querySelectorAll(".nav-link").forEach((link) => {
+            link.addEventListener("click", (e) => {
                 e.preventDefault();
-                const section = link.getAttribute('href').substring(1);
+                const section = link.getAttribute("href").substring(1);
                 this.showSection(section);
             });
         });
 
         // Settings form
-        document.getElementById('appSettingsForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveSettings();
-        });
+        document
+            .getElementById("appSettingsForm")
+            .addEventListener("submit", (e) => {
+                e.preventDefault();
+                this.saveSettings();
+            });
     }
 
     showSection(sectionName) {
         // Check permissions
         if (!this.canAccessSection(sectionName)) {
-            alert(`Je hebt geen toegang tot deze sectie. Je huidige rol (${this.userRole}) heeft hiervoor onvoldoende rechten.`);
+            alert(
+                `Je hebt geen toegang tot deze sectie. Je huidige rol (${this.userRole}) heeft hiervoor onvoldoende rechten.`,
+            );
             return;
         }
 
         // Hide all sections
-        document.querySelectorAll('.content-section').forEach(section => {
-            section.classList.remove('active');
+        document.querySelectorAll(".content-section").forEach((section) => {
+            section.classList.remove("active");
         });
 
         // Remove active class from all nav links
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
+        document.querySelectorAll(".nav-link").forEach((link) => {
+            link.classList.remove("active");
         });
 
         // Show selected section
-        document.getElementById(sectionName + '-section').classList.add('active');
+        document
+            .getElementById(sectionName + "-section")
+            .classList.add("active");
 
         // Add active class to clicked nav link
-        document.querySelector(`[href="#${sectionName}"]`).classList.add('active');
+        document
+            .querySelector(`[href="#${sectionName}"]`)
+            .classList.add("active");
 
         // Update page title
         const titles = {
-            dashboard: 'Dashboard',
-            opportunities: 'Kansen beheer',
-            filters: 'Filter beheer',
-            municipalities: 'Gemeenten',
-            users: 'Gebruikers beheer',
-            settings: 'Systeeminstellingen'
+            dashboard: "Dashboard",
+            opportunities: "Kansen beheer",
+            filters: "Filter beheer",
+            municipalities: "Gemeenten",
+            users: "Gebruikers beheer",
+            settings: "Systeeminstellingen",
         };
-        document.getElementById('pageTitle').textContent = titles[sectionName] || 'Dashboard';
+        document.getElementById("pageTitle").textContent =
+            titles[sectionName] || "Dashboard";
 
         // Load section-specific data
         this.loadSectionData(sectionName);
@@ -212,13 +226,13 @@ class AdminDashboard {
     }
 
     canAccessSection(sectionName) {
-        const adminOnlySections = ['users', 'settings'];
+        const adminOnlySections = ["users", "settings"];
 
-        if (this.userRole === 'admin') {
+        if (this.userRole === "admin") {
             return true; // Admin heeft toegang tot alles
         }
 
-        if (this.userRole === 'editor') {
+        if (this.userRole === "editor") {
             return !adminOnlySections.includes(sectionName);
         }
 
@@ -228,42 +242,54 @@ class AdminDashboard {
     async loadDashboardData() {
         try {
             // Load opportunities data
-            const opportunitiesResponse = await fetch('/data/opportunities.json');
+            const opportunitiesResponse = await fetch(
+                "/data/opportunities.json",
+            );
             const opportunities = await opportunitiesResponse.json();
 
             // Calculate stats
             const totalOpportunities = opportunities.length;
-            const totalProjects = opportunities.filter(item => item.HBMType === 'Project').length;
-            const totalCompanies = opportunities.filter(item => item.HBMType === 'Bedrijf').length;
+            const totalProjects = opportunities.filter(
+                (item) => item.HBMType === "Project",
+            ).length;
+            const totalCompanies = opportunities.filter(
+                (item) => item.HBMType === "Bedrijf",
+            ).length;
 
             // Load municipalities data
-            const municipalitiesResponse = await fetch('/data/municipalities.json');
+            const municipalitiesResponse = await fetch(
+                "/data/municipalities.json",
+            );
             const municipalitiesData = await municipalitiesResponse.json();
-            const totalMunicipalities = municipalitiesData.municipalities.length;
+            const totalMunicipalities =
+                municipalitiesData.municipalities.length;
 
             // Update stats
-            document.getElementById('totalOpportunities').textContent = totalOpportunities;
-            document.getElementById('totalProjects').textContent = totalProjects;
-            document.getElementById('totalCompanies').textContent = totalCompanies;
-            document.getElementById('totalMunicipalities').textContent = totalMunicipalities;
-
+            document.getElementById("totalOpportunities").textContent =
+                totalOpportunities;
+            document.getElementById("totalProjects").textContent =
+                totalProjects;
+            document.getElementById("totalCompanies").textContent =
+                totalCompanies;
+            document.getElementById("totalMunicipalities").textContent =
+                totalMunicipalities;
         } catch (error) {
-            console.error('Error loading dashboard data:', error);
+            console.error("Error loading dashboard data:", error);
         }
     }
 
     async loadSectionData(sectionName) {
-        switch(sectionName) {
-            case 'opportunities':
+        switch (sectionName) {
+            case "opportunities":
                 await this.loadOpportunities();
                 break;
-            case 'filters':
+            case "filters":
                 await this.loadFilters();
                 break;
-            case 'municipalities':
+            case "municipalities":
                 await this.loadMunicipalities();
                 break;
-            case 'users':
+            case "users":
                 await this.loadUsers();
                 break;
         }
@@ -271,19 +297,19 @@ class AdminDashboard {
 
     async loadOpportunities() {
         try {
-            const response = await fetch('/data/opportunities.json');
+            const response = await fetch("/data/opportunities.json");
             const opportunities = await response.json();
 
-            const tableBody = document.getElementById('opportunitiesTableBody');
-            tableBody.innerHTML = '';
+            const tableBody = document.getElementById("opportunitiesTableBody");
+            tableBody.innerHTML = "";
 
-            opportunities.forEach(opportunity => {
-                const row = document.createElement('tr');
+            opportunities.forEach((opportunity) => {
+                const row = document.createElement("tr");
                 row.innerHTML = `
-                    <td>${opportunity.Name || 'N/A'}</td>
-                    <td>${opportunity.HBMType || 'N/A'}</td>
-                    <td>${opportunity.Municipality || 'N/A'}</td>
-                    <td>${opportunity.HBMSector || 'N/A'}</td>
+                    <td>${opportunity.Name || "N/A"}</td>
+                    <td>${opportunity.HBMType || "N/A"}</td>
+                    <td>${opportunity.Municipality || "N/A"}</td>
+                    <td>${opportunity.HBMSector || "N/A"}</td>
                     <td class="action-buttons">
                         <button class="action-btn edit-btn" onclick="editOpportunity('${opportunity.Name}')">Bewerken</button>
                         <button class="action-btn delete-btn" onclick="deleteOpportunity('${opportunity.Name}')">Verwijderen</button>
@@ -292,13 +318,13 @@ class AdminDashboard {
                 tableBody.appendChild(row);
             });
         } catch (error) {
-            console.error('Error loading opportunities:', error);
+            console.error("Error loading opportunities:", error);
         }
     }
 
     async loadFilters() {
         try {
-            const response = await fetch('/data/filters.json');
+            const response = await fetch("/data/filters.json");
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -310,17 +336,17 @@ class AdminDashboard {
             try {
                 filters = JSON.parse(responseText);
             } catch (parseError) {
-                console.error('Failed to parse filters JSON:', responseText);
-                throw new Error('Invalid JSON response from server');
+                console.error("Failed to parse filters JSON:", responseText);
+                throw new Error("Invalid JSON response from server");
             }
 
-            const container = document.getElementById('filtersContainer');
+            const container = document.getElementById("filtersContainer");
             if (!container) return;
 
-            container.innerHTML = '';
+            container.innerHTML = "";
 
             // Add save filters button at the top
-            const saveFiltersBtn = document.createElement('div');
+            const saveFiltersBtn = document.createElement("div");
             saveFiltersBtn.innerHTML = `
                 <div style="margin-bottom: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px;">
                     <h3 style="margin: 0 0 10px 0; color: rgb(38, 123, 41);">Filter beheer</h3>
@@ -332,56 +358,62 @@ class AdminDashboard {
             `;
             container.appendChild(saveFiltersBtn);
 
-            Object.keys(filters).forEach(category => {
-                const section = document.createElement('div');
-                section.className = 'filter-section';
+            Object.keys(filters).forEach((category) => {
+                const section = document.createElement("div");
+                section.className = "filter-section";
 
-                const canEdit = this.userRole === 'admin' || this.userRole === 'editor';
-                const canDelete = this.userRole === 'admin';
+                const canEdit =
+                    this.userRole === "admin" || this.userRole === "editor";
+                const canDelete = this.userRole === "admin";
 
                 section.innerHTML = `
                     <div class="section-header">
                         <h3>${this.getCategoryDisplayName(category)} (${filters[category].length})</h3>
                         <div class="section-actions">
-                            ${canEdit ? `<button class="add-item-btn" onclick="adminApp.openFilterModal('${category}')" title="Nieuw item toevoegen">+</button>` : ''}
+                            ${canEdit ? `<button class="add-item-btn" onclick="adminApp.openFilterModal('${category}')" title="Nieuw item toevoegen">+</button>` : ""}
                         </div>
                     </div>
                     <div class="filter-items">
-                        ${filters[category].map(item => `
+                        ${filters[category]
+                            .map(
+                                (item) => `
                             <div class="filter-item">
                                 <span>${item}</span>
                                 <div class="filter-actions">
-                                    ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openFilterModal('${category}', '${item}')" title="Bewerken">✏️</button>` : ''}
-                                    ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteFilterItem('${category}', '${item}')">Verwijderen</button>` : ''}
+                                    ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openFilterModal('${category}', '${item}')" title="Bewerken">✏️</button>` : ""}
+                                    ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteFilterItem('${category}', '${item}')">Verwijderen</button>` : ""}
                                 </div>
                             </div>
-                        `).join('')}
+                        `,
+                            )
+                            .join("")}
                     </div>
                 `;
 
                 container.appendChild(section);
             });
         } catch (error) {
-            console.error('Error loading filters:', error);
-            alert('Fout bij het laden van filters');
+            console.error("Error loading filters:", error);
+            alert("Fout bij het laden van filters");
         }
     }
 
     renderFilterCategory(containerId, items) {
         const container = document.getElementById(containerId);
-        container.innerHTML = '';
+        container.innerHTML = "";
 
         // Add button to add new filter item
-        const addButton = document.createElement('button');
-        addButton.className = 'btn btn-primary';
-        addButton.style.cssText = 'margin-bottom: 1rem; width: 100%;';
-        addButton.textContent = 'Nieuw item toevoegen';
+        const addButton = document.createElement("button");
+        addButton.className = "btn btn-primary";
+        addButton.style.cssText = "margin-bottom: 1rem; width: 100%;";
+        addButton.textContent = "Nieuw item toevoegen";
         addButton.onclick = () => this.openAddFilterItemModal(containerId);
         container.appendChild(addButton);
 
-        items.forEach(item => {
-            const div = document.createElement('div');
-            div.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem; background: white; border-radius: 4px; border: 1px solid #ddd;';
+        items.forEach((item) => {
+            const div = document.createElement("div");
+            div.style.cssText =
+                "display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; padding: 0.5rem; background: white; border-radius: 4px; border: 1px solid #ddd;";
             div.innerHTML = `
                 <span>${item}</span>
                 <div>
@@ -395,16 +427,18 @@ class AdminDashboard {
 
     async loadMunicipalities() {
         try {
-            const response = await fetch('/admin/api/municipalities', {
+            const response = await fetch("/admin/api/municipalities", {
                 headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
+                    Authorization: `Bearer ${this.token}`,
+                },
             });
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('Municipality API error:', errorText);
-                throw new Error(`Failed to load municipalities: ${response.status}`);
+                console.error("Municipality API error:", errorText);
+                throw new Error(
+                    `Failed to load municipalities: ${response.status}`,
+                );
             }
 
             const responseText = await response.text();
@@ -413,57 +447,70 @@ class AdminDashboard {
             try {
                 data = JSON.parse(responseText);
             } catch (parseError) {
-                console.error('Failed to parse municipalities JSON:', responseText);
-                throw new Error('Invalid JSON response from municipalities API');
+                console.error(
+                    "Failed to parse municipalities JSON:",
+                    responseText,
+                );
+                throw new Error(
+                    "Invalid JSON response from municipalities API",
+                );
             }
             const municipalities = data.municipalities || [];
 
-            const tableBody = document.querySelector('#municipalitiesTable tbody');
+            const tableBody = document.querySelector(
+                "#municipalitiesTable tbody",
+            );
             if (!tableBody) return;
 
-            tableBody.innerHTML = '';
+            tableBody.innerHTML = "";
 
-            municipalities.forEach(municipality => {
-                const row = document.createElement('tr');
+            municipalities.forEach((municipality) => {
+                const row = document.createElement("tr");
 
-                const canEdit = this.userRole === 'admin' || this.userRole === 'editor';
-                const canDelete = this.userRole === 'admin';
+                const canEdit =
+                    this.userRole === "admin" || this.userRole === "editor";
+                const canDelete = this.userRole === "admin";
 
                 // Format municipality name with largest places
                 let municipalityDisplay = `<div class="municipality-info">
                     <div class="municipality-name">${municipality.name}</div>`;
 
-                if (municipality.largest_places && municipality.largest_places.length > 0) {
-                    const places = municipality.largest_places.slice(0, 3).join(', ');
+                if (
+                    municipality.largest_places &&
+                    municipality.largest_places.length > 0
+                ) {
+                    const places = municipality.largest_places
+                        .slice(0, 3)
+                        .join(", ");
                     municipalityDisplay += `<div class="municipality-places">${places}</div>`;
                 }
 
-                municipalityDisplay += '</div>';
+                municipalityDisplay += "</div>";
 
                 row.innerHTML = `
                     <td>${municipalityDisplay}</td>
                     <td>${municipality.country}</td>
-                    <td>${municipality.code || ''}</td>
-                    <td>${municipality.population ? municipality.population.toLocaleString() : ''}</td>
-                    <td>${municipality.area || ''}</td>
+                    <td>${municipality.code || ""}</td>
+                    <td>${municipality.population ? municipality.population.toLocaleString() : ""}</td>
+                    <td>${municipality.area || ""}</td>
                     <td>
-                        ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openMunicipalityModal('${municipality.name}')" title="Bewerken">✏️</button>` : ''}
-                        ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteMunicipality('${municipality.name}')">Verwijderen</button>` : ''}
-                        ${!canEdit && !canDelete ? '<span style="color: #999;">Geen acties beschikbaar</span>' : ''}
+                        ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openMunicipalityModal('${municipality.name}')" title="Bewerken">✏️</button>` : ""}
+                        ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteMunicipality('${municipality.name}')">Verwijderen</button>` : ""}
+                        ${!canEdit && !canDelete ? '<span style="color: #999;">Geen acties beschikbaar</span>' : ""}
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
         } catch (error) {
-            console.error('Error loading municipalities:', error);
-            alert('Fout bij het laden van gemeenten');
+            console.error("Error loading municipalities:", error);
+            alert("Fout bij het laden van gemeenten");
         }
     }
 
     async loadUsers() {
         // Check if user has permission to view users
-        if (!this.hasPermission('manage_users') && this.userRole !== 'admin') {
-            const tableBody = document.getElementById('usersTableBody');
+        if (!this.hasPermission("manage_users") && this.userRole !== "admin") {
+            const tableBody = document.getElementById("usersTableBody");
             if (tableBody) {
                 tableBody.innerHTML = `
                     <tr>
@@ -479,15 +526,15 @@ class AdminDashboard {
         }
 
         try {
-            const response = await fetch('/admin/api/users', {
+            const response = await fetch("/admin/api/users", {
                 headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
+                    Authorization: `Bearer ${this.token}`,
+                },
             });
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('Users API error:', errorText);
+                console.error("Users API error:", errorText);
                 throw new Error(`Failed to load users: ${response.status}`);
             }
 
@@ -497,45 +544,49 @@ class AdminDashboard {
             try {
                 users = JSON.parse(responseText);
             } catch (parseError) {
-                console.error('Failed to parse users JSON:', responseText);
-                throw new Error('Invalid JSON response from users API');
+                console.error("Failed to parse users JSON:", responseText);
+                throw new Error("Invalid JSON response from users API");
             }
 
-            const tableBody = document.getElementById('usersTableBody');
-            tableBody.innerHTML = '';
+            const tableBody = document.getElementById("usersTableBody");
+            tableBody.innerHTML = "";
 
-            users.forEach(user => {
-                const canEditUser = this.userRole === 'admin' || user.id === this.userInfo.id;
-                const canDeleteUser = this.userRole === 'admin' && user.id !== this.userInfo.id;
+            users.forEach((user) => {
+                const canEditUser =
+                    this.userRole === "admin" || user.id === this.userInfo.id;
+                const canDeleteUser =
+                    this.userRole === "admin" && user.id !== this.userInfo.id;
 
-                const row = document.createElement('tr');
+                const row = document.createElement("tr");
                 row.innerHTML = `
                     <td>${user.username}</td>
                     <td>${user.email}</td>
                     <td>
                         <span class="role-badge role-${user.role}">
-                            ${user.role === 'admin' ? 'Administrator' : 'Editor'}
+                            ${user.role === "admin" ? "Administrator" : "Editor"}
                         </span>
                     </td>
-                    <td>${new Date(user.created).toLocaleDateString('nl-NL')}</td>
+                    <td>${new Date(user.created).toLocaleDateString("nl-NL")}</td>
                     <td class="action-buttons">
-                        ${canEditUser ? `<button class="action-btn edit-btn" onclick="editUser(${user.id})">Bewerken</button>` : ''}
-                        ${canDeleteUser ? `<button class="action-btn delete-btn" onclick="deleteUser(${user.id})">Verwijderen</button>` : ''}
-                        ${!canEditUser && !canDeleteUser ? '<span style="color: #999;">Geen acties beschikbaar</span>' : ''}
+                        ${canEditUser ? `<button class="action-btn edit-btn" onclick="editUser(${user.id})">Bewerken</button>` : ""}
+                        ${canDeleteUser ? `<button class="action-btn delete-btn" onclick="deleteUser(${user.id})">Verwijderen</button>` : ""}
+                        ${!canEditUser && !canDeleteUser ? '<span style="color: #999;">Geen acties beschikbaar</span>' : ""}
                     </td>
                 `;
                 tableBody.appendChild(row);
             });
         } catch (error) {
-            console.error('Error loading users:', error);
-            alert('Fout bij het laden van gebruikers');
+            console.error("Error loading users:", error);
+            alert("Fout bij het laden van gebruikers");
         }
     }
 
     openUserModal(userId = null) {
         // Check permissions
-        if (this.userRole !== 'admin') {
-            alert('Alleen administrators kunnen gebruikers aanmaken of bewerken.');
+        if (this.userRole !== "admin") {
+            alert(
+                "Alleen administrators kunnen gebruikers aanmaken of bewerken.",
+            );
             return;
         }
 
@@ -545,21 +596,21 @@ class AdminDashboard {
             <div id="userModal" class="modal-overlay">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>${isEdit ? 'Gebruiker bewerken' : 'Nieuwe gebruiker toevoegen'}</h3>
+                        <h3>${isEdit ? "Gebruiker bewerken" : "Nieuwe gebruiker toevoegen"}</h3>
                         <button class="modal-close" onclick="closeModal()">×</button>
                     </div>
                     <form id="userForm" class="modal-form">
                         <div class="form-group">
                             <label for="username">Gebruikersnaam *</label>
-                            <input type="text" id="username" name="username" required ${isEdit ? 'readonly' : ''}>
+                            <input type="text" id="username" name="username" required ${isEdit ? "readonly" : ""}>
                         </div>
                         <div class="form-group">
                             <label for="email">Email *</label>
                             <input type="email" id="email" name="email" required>
                         </div>
                         <div class="form-group">
-                            <label for="password">Wachtwoord ${isEdit ? '(laat leeg om niet te wijzigen)' : '*'}</label>
-                            <input type="password" id="password" name="password" ${isEdit ? '' : 'required'}>
+                            <label for="password">Wachtwoord ${isEdit ? "(laat leeg om niet te wijzigen)" : "*"}</label>
+                            <input type="password" id="password" name="password" ${isEdit ? "" : "required"}>
                             <small>Minimaal 8 karakters, moet hoofdletters, kleine letters, cijfers en speciale karakters bevatten</small>
                         </div>
                         <div class="form-group">
@@ -576,17 +627,17 @@ class AdminDashboard {
                         </div>
                         <div class="modal-actions">
                             <button type="button" class="btn btn-secondary" onclick="closeModal()">Annuleren</button>
-                            <button type="submit" class="btn btn-primary">${isEdit ? 'Opslaan' : 'Toevoegen'}</button>
+                            <button type="submit" class="btn btn-primary">${isEdit ? "Opslaan" : "Toevoegen"}</button>
                         </div>
                     </form>
                 </div>
             </div>
         `;
 
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        document.body.insertAdjacentHTML("beforeend", modalHTML);
 
-        const form = document.getElementById('userForm');
-        form.addEventListener('submit', (e) => {
+        const form = document.getElementById("userForm");
+        form.addEventListener("submit", (e) => {
             e.preventDefault();
             if (isEdit) {
                 this.updateUser(userId);
@@ -602,47 +653,47 @@ class AdminDashboard {
 
     async loadUserData(userId) {
         try {
-            const response = await fetch('/admin/api/users', {
+            const response = await fetch("/admin/api/users", {
                 headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
+                    Authorization: `Bearer ${this.token}`,
+                },
             });
 
             if (!response.ok) {
-                throw new Error('Failed to load user data');
+                throw new Error("Failed to load user data");
             }
 
             const users = await response.json();
-            const user = users.find(u => u.id === userId);
+            const user = users.find((u) => u.id === userId);
 
             if (user) {
-                document.getElementById('username').value = user.username;
-                document.getElementById('email').value = user.email;
-                document.getElementById('role').value = user.role;
+                document.getElementById("username").value = user.username;
+                document.getElementById("email").value = user.email;
+                document.getElementById("role").value = user.role;
             }
         } catch (error) {
-            console.error('Error loading user data:', error);
-            alert('Fout bij het laden van gebruikersgegevens');
+            console.error("Error loading user data:", error);
+            alert("Fout bij het laden van gebruikersgegevens");
         }
     }
 
     async createUser() {
-        const formData = new FormData(document.getElementById('userForm'));
+        const formData = new FormData(document.getElementById("userForm"));
         const userData = {
-            username: formData.get('username'),
-            email: formData.get('email'),
-            password: formData.get('password'),
-            role: formData.get('role')
+            username: formData.get("username"),
+            email: formData.get("email"),
+            password: formData.get("password"),
+            role: formData.get("role"),
         };
 
         try {
-            const response = await fetch('/admin/api/users', {
-                method: 'POST',
+            const response = await fetch("/admin/api/users", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.token}`,
                 },
-                body: JSON.stringify(userData)
+                body: JSON.stringify(userData),
             });
 
             const result = await response.json();
@@ -651,34 +702,34 @@ class AdminDashboard {
                 closeModal();
                 this.loadUsers();
             } else {
-                alert(`Fout: ${result.error || 'Onbekende fout'}`);
+                alert(`Fout: ${result.error || "Onbekende fout"}`);
             }
         } catch (error) {
-            console.error('Error creating user:', error);
-            alert('Fout bij het toevoegen van gebruiker');
+            console.error("Error creating user:", error);
+            alert("Fout bij het toevoegen van gebruiker");
         }
     }
 
     async updateUser(userId) {
-        const formData = new FormData(document.getElementById('userForm'));
+        const formData = new FormData(document.getElementById("userForm"));
         const userData = {
-            email: formData.get('email'),
-            role: formData.get('role')
+            email: formData.get("email"),
+            role: formData.get("role"),
         };
 
-        const password = formData.get('password');
+        const password = formData.get("password");
         if (password) {
             userData.password = password;
         }
 
         try {
             const response = await fetch(`/admin/api/users/${userId}`, {
-                method: 'PUT',
+                method: "PUT",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.token}`,
                 },
-                body: JSON.stringify(userData)
+                body: JSON.stringify(userData),
             });
 
             const result = await response.json();
@@ -687,21 +738,21 @@ class AdminDashboard {
                 closeModal();
                 this.loadUsers();
             } else {
-                alert(`Fout: ${result.error || 'Onbekende fout'}`);
+                alert(`Fout: ${result.error || "Onbekende fout"}`);
             }
         } catch (error) {
-            console.error('Error updating user:', error);
-            alert('Fout bij het bijwerken van gebruiker');
+            console.error("Error updating user:", error);
+            alert("Fout bij het bijwerken van gebruiker");
         }
     }
 
     async deleteUser(userId) {
         try {
             const response = await fetch(`/admin/api/users/${userId}`, {
-                method: 'DELETE',
+                method: "DELETE",
                 headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
+                    Authorization: `Bearer ${this.token}`,
+                },
             });
 
             const result = await response.json();
@@ -709,23 +760,26 @@ class AdminDashboard {
             if (response.ok) {
                 this.loadUsers();
             } else {
-                alert(`Fout: ${result.error || 'Onbekende fout'}`);
+                alert(`Fout: ${result.error || "Onbekende fout"}`);
             }
         } catch (error) {
-            console.error('Error deleting user:', error);
-            alert('Fout bij het verwijderen van gebruiker');
+            console.error("Error deleting user:", error);
+            alert("Fout bij het verwijderen van gebruiker");
         }
     }
 
     saveSettings() {
-        const appTitle = document.getElementById('appTitle').value;
-        const defaultZoom = document.getElementById('defaultZoom').value;
+        const appTitle = document.getElementById("appTitle").value;
+        const defaultZoom = document.getElementById("defaultZoom").value;
 
         // Save settings to localStorage for now
-        localStorage.setItem('app_settings', JSON.stringify({
-            appTitle,
-            defaultZoom: parseInt(defaultZoom)
-        }));
+        localStorage.setItem(
+            "app_settings",
+            JSON.stringify({
+                appTitle,
+                defaultZoom: parseInt(defaultZoom),
+            }),
+        );
 
         // Settings saved silently
     }
@@ -733,31 +787,33 @@ class AdminDashboard {
     exportData() {
         // Export all data as JSON
         Promise.all([
-            fetch('/data/opportunities.json').then(r => r.json()),
-            fetch('/data/filters.json').then(r => r.json()),
-            fetch('/data/municipalities.json').then(r => r.json())
+            fetch("/data/opportunities.json").then((r) => r.json()),
+            fetch("/data/filters.json").then((r) => r.json()),
+            fetch("/data/municipalities.json").then((r) => r.json()),
         ]).then(([opportunities, filters, municipalities]) => {
             const exportData = {
                 opportunities,
                 filters,
                 municipalities,
-                exportDate: new Date().toISOString()
+                exportDate: new Date().toISOString(),
             };
 
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+                type: "application/json",
+            });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            const a = document.createElement("a");
             a.href = url;
-            a.download = `hbm-data-export-${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `hbm-data-export-${new Date().toISOString().split("T")[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
         });
     }
 
     importData() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".json";
         input.onchange = (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -765,10 +821,14 @@ class AdminDashboard {
                 reader.onload = (e) => {
                     try {
                         const data = JSON.parse(e.target.result);
-                        console.log('Imported data:', data);
-                        alert('Data geïmporteerd! (Implementatie vereist voor opslaan naar server)');
+                        console.log("Imported data:", data);
+                        alert(
+                            "Data geïmporteerd! (Implementatie vereist voor opslaan naar server)",
+                        );
                     } catch (error) {
-                        alert('Fout bij het importeren van data. Controleer het bestand.');
+                        alert(
+                            "Fout bij het importeren van data. Controleer het bestand.",
+                        );
                     }
                 };
                 reader.readAsText(file);
@@ -791,7 +851,7 @@ class AdminDashboard {
             <div id="municipalityModal" class="modal-overlay">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>${isEdit ? 'Gemeente bewerken' : 'Nieuwe gemeente toevoegen'}</h3>
+                        <h3>${isEdit ? "Gemeente bewerken" : "Nieuwe gemeente toevoegen"}</h3>
                         <button class="modal-close" onclick="closeModal('municipalityModal')">×</button>
                     </div>
                     <form id="municipalityForm" class="modal-form">
@@ -830,37 +890,37 @@ class AdminDashboard {
                         </div>
                         <div class="modal-actions">
                             <button type="button" class="btn btn-secondary" onclick="closeModal('municipalityModal')">Annuleren</button>
-                            <button type="submit" class="btn btn-primary">${isEdit ? 'Opslaan' : 'Toevoegen'}</button>
+                            <button type="submit" class="btn btn-primary">${isEdit ? "Opslaan" : "Toevoegen"}</button>
                         </div>
                     </form>
                 </div>
             </div>
         `;
 
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        document.body.insertAdjacentHTML("beforeend", modalHTML);
 
         // Set up country-code synchronization
-        const countrySelect = document.getElementById('municipalityCountry');
-        const codeSelect = document.getElementById('municipalityCode');
+        const countrySelect = document.getElementById("municipalityCountry");
+        const codeSelect = document.getElementById("municipalityCode");
 
-        countrySelect.addEventListener('change', () => {
-            if (countrySelect.value === 'Netherlands') {
-                codeSelect.value = 'NL';
-            } else if (countrySelect.value === 'Germany') {
-                codeSelect.value = 'DE';
+        countrySelect.addEventListener("change", () => {
+            if (countrySelect.value === "Netherlands") {
+                codeSelect.value = "NL";
+            } else if (countrySelect.value === "Germany") {
+                codeSelect.value = "DE";
             }
         });
 
-        codeSelect.addEventListener('change', () => {
-            if (codeSelect.value === 'NL') {
-                countrySelect.value = 'Netherlands';
-            } else if (codeSelect.value === 'DE') {
-                countrySelect.value = 'Germany';
+        codeSelect.addEventListener("change", () => {
+            if (codeSelect.value === "NL") {
+                countrySelect.value = "Netherlands";
+            } else if (codeSelect.value === "DE") {
+                countrySelect.value = "Germany";
             }
         });
 
-        const form = document.getElementById('municipalityForm');
-        form.addEventListener('submit', (e) => {
+        const form = document.getElementById("municipalityForm");
+        form.addEventListener("submit", (e) => {
             e.preventDefault();
             if (isEdit) {
                 this.updateMunicipality(municipalityName);
@@ -876,117 +936,138 @@ class AdminDashboard {
 
     async loadMunicipalityData(municipalityName) {
         try {
-            const response = await fetch('/data/municipalities.json');
+            const response = await fetch("/data/municipalities.json");
             const data = await response.json();
-            const municipality = data.municipalities.find(m => m.name === municipalityName);
+            const municipality = data.municipalities.find(
+                (m) => m.name === municipalityName,
+            );
 
             if (municipality) {
-                document.getElementById('municipalityName').value = municipality.name;
-                document.getElementById('municipalityCountry').value = municipality.country;
-                document.getElementById('municipalityCode').value = municipality.code;
-                document.getElementById('municipalityPopulation').value = municipality.population || '';
-                document.getElementById('municipalityArea').value = municipality.area || '';
-                document.getElementById('municipalityPlaces').value = municipality.largest_places ? municipality.largest_places.join(', ') : '';
+                document.getElementById("municipalityName").value =
+                    municipality.name;
+                document.getElementById("municipalityCountry").value =
+                    municipality.country;
+                document.getElementById("municipalityCode").value =
+                    municipality.code;
+                document.getElementById("municipalityPopulation").value =
+                    municipality.population || "";
+                document.getElementById("municipalityArea").value =
+                    municipality.area || "";
+                document.getElementById("municipalityPlaces").value =
+                    municipality.largest_places
+                        ? municipality.largest_places.join(", ")
+                        : "";
             }
         } catch (error) {
-            console.error('Error loading municipality data:', error);
-            alert('Fout bij het laden van gemeente gegevens');
+            console.error("Error loading municipality data:", error);
+            alert("Fout bij het laden van gemeente gegevens");
         }
     }
 
     async createMunicipality() {
-        const formData = new FormData(document.getElementById('municipalityForm'));
+        const formData = new FormData(
+            document.getElementById("municipalityForm"),
+        );
         const municipalityData = {
-            name: formData.get('name'),
-            country: formData.get('country'),
-            code: formData.get('code'),
-            population: formData.get('population'),
-            area: formData.get('area'),
-            largest_places: formData.get('largest_places')
+            name: formData.get("name"),
+            country: formData.get("country"),
+            code: formData.get("code"),
+            population: formData.get("population"),
+            area: formData.get("area"),
+            largest_places: formData.get("largest_places"),
         };
 
         try {
-            const response = await fetch('/admin/api/municipalities', {
-                method: 'POST',
+            const response = await fetch("/admin/api/municipalities", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.token}`,
                 },
-                body: JSON.stringify(municipalityData)
+                body: JSON.stringify(municipalityData),
             });
 
             const result = await response.json();
 
             if (response.ok) {
-                closeModal('municipalityModal');
+                closeModal("municipalityModal");
                 this.loadMunicipalities();
             } else {
-                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+                alert(`Fout: ${result.message || "Onbekende fout"}`);
             }
         } catch (error) {
-            console.error('Error creating municipality:', error);
-            alert('Fout bij het toevoegen van gemeente');
+            console.error("Error creating municipality:", error);
+            alert("Fout bij het toevoegen van gemeente");
         }
     }
 
     async updateMunicipality(municipalityName) {
-        const formData = new FormData(document.getElementById('municipalityForm'));
+        const formData = new FormData(
+            document.getElementById("municipalityForm"),
+        );
         const municipalityData = {
-            name: formData.get('name'),
-            country: formData.get('country'),
-            code: formData.get('code'),
-            population: formData.get('population'),
-            area: formData.get('area'),
-            largest_places: formData.get('largest_places')
+            name: formData.get("name"),
+            country: formData.get("country"),
+            code: formData.get("code"),
+            population: formData.get("population"),
+            area: formData.get("area"),
+            largest_places: formData.get("largest_places"),
         };
 
         try {
-            const response = await fetch(`/admin/api/municipalities/${encodeURIComponent(municipalityName)}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`
+            const response = await fetch(
+                `/admin/api/municipalities/${encodeURIComponent(municipalityName)}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                    body: JSON.stringify(municipalityData),
                 },
-                body: JSON.stringify(municipalityData)
-            });
+            );
 
             const result = await response.json();
 
             if (response.ok) {
-                closeModal('municipalityModal');
+                closeModal("municipalityModal");
                 this.loadMunicipalities();
             } else {
-                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+                alert(`Fout: ${result.message || "Onbekende fout"}`);
             }
         } catch (error) {
-            console.error('Error updating municipality:', error);
-            alert('Fout bij het bijwerken van gemeente');        }
+            console.error("Error updating municipality:", error);
+            alert("Fout bij het bijwerken van gemeente");
+        }
     }
 
     async deleteMunicipality(municipalityName) {
-        if (this.userRole !== 'admin') {
-            alert('Alleen administrators kunnen gemeenten verwijderen.');
+        if (this.userRole !== "admin") {
+            alert("Alleen administrators kunnen gemeenten verwijderen.");
             return;
         }
 
         try {
-            const response = await fetch(`/admin/api/municipalities/${encodeURIComponent(municipalityName)}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
-            });
+            const response = await fetch(
+                `/admin/api/municipalities/${encodeURIComponent(municipalityName)}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                },
+            );
 
             const result = await response.json();
 
             if (response.ok) {
                 this.loadMunicipalities();
             } else {
-                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+                alert(`Fout: ${result.message || "Onbekende fout"}`);
             }
         } catch (error) {
-            console.error('Error deleting municipality:', error);
-            alert('Fout bij het verwijderen van gemeente');
+            console.error("Error deleting municipality:", error);
+            alert("Fout bij het verwijderen van gemeente");
         }
     }
 
@@ -997,27 +1078,27 @@ class AdminDashboard {
             <div id="filterModal" class="modal-overlay">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>${isEdit ? 'Filter item bewerken' : 'Nieuw filter item toevoegen'} - ${this.getCategoryDisplayName(category)}</h3>
+                        <h3>${isEdit ? "Filter item bewerken" : "Nieuw filter item toevoegen"} - ${this.getCategoryDisplayName(category)}</h3>
                         <button class="modal-close" onclick="closeModal('filterModal')">×</button>
                     </div>
                     <form id="filterForm" class="modal-form">
                         <div class="form-group">
                             <label for="filterItem">Filter item *</label>
-                            <input type="text" id="filterItem" name="item" required value="${existingItem || ''}">
+                            <input type="text" id="filterItem" name="item" required value="${existingItem || ""}">
                         </div>
                         <div class="modal-actions">
                             <button type="button" class="btn btn-secondary" onclick="closeModal('filterModal')">Annuleren</button>
-                            <button type="submit" class="btn btn-primary">${isEdit ? 'Opslaan' : 'Toevoegen'}</button>
+                            <button type="submit" class="btn btn-primary">${isEdit ? "Opslaan" : "Toevoegen"}</button>
                         </div>
                     </form>
                 </div>
             </div>
         `;
 
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        document.body.insertAdjacentHTML("beforeend", modalHTML);
 
-        const form = document.getElementById('filterForm');
-        form.addEventListener('submit', (e) => {
+        const form = document.getElementById("filterForm");
+        form.addEventListener("submit", (e) => {
             e.preventDefault();
             if (isEdit) {
                 this.updateFilterItem(category, existingItem);
@@ -1028,8 +1109,8 @@ class AdminDashboard {
     }
 
     async deleteFilterItem(category, item) {
-        if (this.userRole !== 'admin') {
-            alert('Alleen administrators kunnen filter items verwijderen.');
+        if (this.userRole !== "admin") {
+            alert("Alleen administrators kunnen filter items verwijderen.");
             return;
         }
 
@@ -1038,41 +1119,44 @@ class AdminDashboard {
         }
 
         try {
-            const response = await fetch(`/admin/api/filters/${category}/${encodeURIComponent(item)}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
-            });
+            const response = await fetch(
+                `/admin/api/filters/${category}/${encodeURIComponent(item)}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                },
+            );
 
             const result = await response.json();
 
             if (response.ok) {
                 this.loadFilters();
             } else {
-                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+                alert(`Fout: ${result.message || "Onbekende fout"}`);
             }
         } catch (error) {
-            console.error('Error deleting filter item:', error);
-            alert('Fout bij het verwijderen van filter item');
+            console.error("Error deleting filter item:", error);
+            alert("Fout bij het verwijderen van filter item");
         }
     }
 
     // Filter Management Functions
     openAddFilterItemModal(containerId) {
         const categoryMap = {
-            'projectTypesFilter': 'ProjectType',
-            'organizationTypesFilter': 'OrganizationType',
-            'hbmTopicsFilter': 'HBMTopic',
-            'hbmSectorsFilter': 'HBMSector'
+            projectTypesFilter: "ProjectType",
+            organizationTypesFilter: "OrganizationType",
+            hbmTopicsFilter: "HBMTopic",
+            hbmSectorsFilter: "HBMSector",
         };
 
         const category = categoryMap[containerId];
         const categoryDisplayName = {
-            'ProjectType': 'Project Types',
-            'OrganizationType': 'Organisatie Types',
-            'HBMTopic': 'HBM Topics',
-            'HBMSector': 'HBM Sectoren'
+            ProjectType: "Project Types",
+            OrganizationType: "Organisatie Types",
+            HBMTopic: "HBM Topics",
+            HBMSector: "HBM Sectoren",
         }[category];
 
         const modalHTML = `
@@ -1096,10 +1180,10 @@ class AdminDashboard {
             </div>
         `;
 
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        document.body.insertAdjacentHTML("beforeend", modalHTML);
 
-        const form = document.getElementById('filterForm');
-        form.addEventListener('submit', (e) => {
+        const form = document.getElementById("filterForm");
+        form.addEventListener("submit", (e) => {
             e.preventDefault();
             this.createFilterItem(category);
         });
@@ -1107,18 +1191,18 @@ class AdminDashboard {
 
     openEditFilterItemModal(containerId, item) {
         const categoryMap = {
-            'projectTypesFilter': 'ProjectType',
-            'organizationTypesFilter': 'OrganizationType',
-            'hbmTopicsFilter': 'HBMTopic',
-            'hbmSectorsFilter': 'HBMSector'
+            projectTypesFilter: "ProjectType",
+            organizationTypesFilter: "OrganizationType",
+            hbmTopicsFilter: "HBMTopic",
+            hbmSectorsFilter: "HBMSector",
         };
 
         const category = categoryMap[containerId];
         const categoryDisplayName = {
-            'ProjectType': 'Project Types',
-            'OrganizationType': 'Organisatie Types',
-            'HBMTopic': 'HBM Topics',
-            'HBMSector': 'HBM Sectoren'
+            ProjectType: "Project Types",
+            OrganizationType: "Organisatie Types",
+            HBMTopic: "HBM Topics",
+            HBMSector: "HBM Sectoren",
         }[category];
 
         const modalHTML = `
@@ -1142,124 +1226,138 @@ class AdminDashboard {
             </div>
         `;
 
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        document.body.insertAdjacentHTML("beforeend", modalHTML);
 
-        const form = document.getElementById('filterForm');
-        form.addEventListener('submit', (e) => {
+        const form = document.getElementById("filterForm");
+        form.addEventListener("submit", (e) => {
             e.preventDefault();
             this.updateFilterItem(category, item);
         });
     }
 
     async createFilterItem(category) {
-        const formData = new FormData(document.getElementById('filterForm'));
+        const formData = new FormData(document.getElementById("filterForm"));
         const itemData = {
-            item: formData.get('item')
+            item: formData.get("item"),
         };
 
         try {
             const response = await fetch(`/admin/api/filters/${category}`, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.token}`,
                 },
-                body: JSON.stringify(itemData)
+                body: JSON.stringify(itemData),
             });
 
             const result = await response.json();
 
             if (response.ok) {
-                closeModal('filterModal');
+                closeModal("filterModal");
                 this.loadFilters();
             } else {
-                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+                alert(`Fout: ${result.message || "Onbekende fout"}`);
             }
         } catch (error) {
-            console.error('Error creating filter item:', error);
-            alert('Fout bij het toevoegen van filter item');
+            console.error("Error creating filter item:", error);
+            alert("Fout bij het toevoegen van filter item");
         }
     }
 
     async updateFilterItem(category, oldItem) {
-        const formData = new FormData(document.getElementById('filterForm'));
+        const formData = new FormData(document.getElementById("filterForm"));
         const itemData = {
-            item: formData.get('item')
+            item: formData.get("item"),
         };
 
         try {
-            const response = await fetch(`/admin/api/filters/${category}/${encodeURIComponent(oldItem)}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`
+            const response = await fetch(
+                `/admin/api/filters/${category}/${encodeURIComponent(oldItem)}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                    body: JSON.stringify(itemData),
                 },
-                body: JSON.stringify(itemData)
-            });
+            );
 
             const result = await response.json();
 
             if (response.ok) {
-                closeModal('filterModal');
+                closeModal("filterModal");
                 this.loadFilters();
             } else {
-                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+                alert(`Fout: ${result.message || "Onbekende fout"}`);
             }
         } catch (error) {
-            console.error('Error updating filter item:', error);
-            alert('Fout bij het bijwerken van filter item');
+            console.error("Error updating filter item:", error);
+            alert("Fout bij het bijwerken van filter item");
         }
     }
 
     getCategoryDisplayName(category) {
         const categoryDisplayNames = {
-            'ProjectType': 'Project Types',
-            'OrganizationType': 'Organisatie Types',
-            'HBMTopic': 'HBM Topics',
-            'HBMSector': 'HBM Sectoren'
+            ProjectType: "Project Types",
+            OrganizationType: "Organisatie Types",
+            HBMTopic: "HBM Topics",
+            HBMSector: "HBM Sectoren",
         };
         return categoryDisplayNames[category] || category;
     }
 
     async saveFiltersToJson() {
-        if (!confirm('Weet je zeker dat je de huidige filters wilt opslaan naar filters.json? Er wordt automatisch een backup gemaakt van de huidige versie.')) {
+        if (
+            !confirm(
+                "Weet je zeker dat je de huidige filters wilt opslaan naar filters.json? Er wordt automatisch een backup gemaakt van de huidige versie.",
+            )
+        ) {
             return;
         }
 
         try {
             // Get current filters from database
-            const response = await fetch('/admin/api/filters', {
+            const response = await fetch("/admin/api/filters", {
                 headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
+                    Authorization: `Bearer ${this.token}`,
+                },
             });
 
             if (!response.ok) {
-                throw new Error('Failed to load current filters');
+                throw new Error("Failed to load current filters");
             }
 
             const currentFilters = await response.json();
 
             // Save to filters.json with backup
-            const saveResponse = await fetch('/admin/api/filters/save-to-json', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`
+            const saveResponse = await fetch(
+                "/admin/api/filters/save-to-json",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                    body: JSON.stringify(currentFilters),
                 },
-                body: JSON.stringify(currentFilters)
-            });
+            );
 
             const result = await saveResponse.json();
 
             if (saveResponse.ok) {
-                alert('Filters succesvol opgeslagen naar filters.json! Er is automatisch een backup gemaakt.');
+                alert(
+                    "Filters succesvol opgeslagen naar filters.json! Er is automatisch een backup gemaakt.",
+                );
             } else {
-                alert(`Fout bij opslaan: ${result.message || result.error || 'Onbekende fout'}`);
+                alert(
+                    `Fout bij opslaan: ${result.message || result.error || "Onbekende fout"}`,
+                );
             }
         } catch (error) {
-            console.error('Error saving filters to JSON:', error);
-            alert('Fout bij opslaan van filters naar JSON bestand');
+            console.error("Error saving filters to JSON:", error);
+            alert("Fout bij opslaan van filters naar JSON bestand");
         }
     }
 
@@ -1268,34 +1366,40 @@ class AdminDashboard {
         console.log(`[TABS] Switching to tab: ${tabName}`);
 
         // Remove active class from all tab buttons
-        document.querySelectorAll('.municipality-tabs .tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
+        document
+            .querySelectorAll(".municipality-tabs .tab-btn")
+            .forEach((btn) => {
+                btn.classList.remove("active");
+            });
 
         // Hide all tab contents
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.remove('active');
+        document.querySelectorAll(".tab-content").forEach((tab) => {
+            tab.classList.remove("active");
         });
 
         // Add active class to clicked button (find by onclick attribute)
-        const clickedButton = document.querySelector(`[onclick="window.adminApp.switchMunicipalityTab('${tabName}')"]`);
+        const clickedButton = document.querySelector(
+            `[onclick="window.adminApp.switchMunicipalityTab('${tabName}')"]`,
+        );
         if (clickedButton) {
-            clickedButton.classList.add('active');
+            clickedButton.classList.add("active");
         }
 
         // Show selected tab content
-        const targetTab = document.getElementById(`municipality-${tabName}-tab`);
+        const targetTab = document.getElementById(
+            `municipality-${tabName}-tab`,
+        );
         if (targetTab) {
-            targetTab.classList.add('active');
+            targetTab.classList.add("active");
             console.log(`[TABS] Activated tab: municipality-${tabName}-tab`);
         } else {
             console.error(`[TABS] Tab not found: municipality-${tabName}-tab`);
         }
 
         // Load tab-specific content
-        if (tabName === 'visibility') {
+        if (tabName === "visibility") {
             this.initializeMunicipalityVisibilityMap();
-        } else if (tabName === 'data') {
+        } else if (tabName === "data") {
             this.loadMunicipalities();
             if (this.municipalityLayers) {
                 this.refreshMunicipalityDataTab();
@@ -1309,13 +1413,15 @@ class AdminDashboard {
 
         // Get currently visible municipalities
         const visibleMunicipalities = Object.keys(this.municipalityLayers)
-            .filter(name => this.municipalityLayers[name].visible)
-            .map(name => ({ name }));
+            .filter((name) => this.municipalityLayers[name].visible)
+            .map((name) => ({ name }));
 
         // Update the data table to only show visible municipalities
-        const tableBody = document.querySelector('#municipalitiesTable tbody');
+        const tableBody = document.querySelector("#municipalitiesTable tbody");
         if (tableBody && visibleMunicipalities.length > 0) {
-            console.log(`[REFRESH] Refreshing data tab with ${visibleMunicipalities.length} visible municipalities`);
+            console.log(
+                `[REFRESH] Refreshing data tab with ${visibleMunicipalities.length} visible municipalities`,
+            );
             // Reload municipalities but filter by visible ones
             this.loadMunicipalities();
         }
@@ -1323,22 +1429,23 @@ class AdminDashboard {
 
     // Initialize municipality visibility map
     async initializeMunicipalityVisibilityMap() {
-        const mapContainer = document.getElementById('municipalityMap');
+        const mapContainer = document.getElementById("municipalityMap");
         if (!mapContainer) return;
 
         // Clear any existing content
-        mapContainer.innerHTML = '';
+        mapContainer.innerHTML = "";
 
         // Initialize Leaflet map
-        if (typeof L === 'undefined') {
+        if (typeof L === "undefined") {
             // Load Leaflet if not available
-            const leafletCSS = document.createElement('link');
-            leafletCSS.rel = 'stylesheet';
-            leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            const leafletCSS = document.createElement("link");
+            leafletCSS.rel = "stylesheet";
+            leafletCSS.href =
+                "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
             document.head.appendChild(leafletCSS);
 
-            const leafletJS = document.createElement('script');
-            leafletJS.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            const leafletJS = document.createElement("script");
+            leafletJS.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
             document.head.appendChild(leafletJS);
 
             leafletJS.onload = () => {
@@ -1350,49 +1457,62 @@ class AdminDashboard {
     }
 
     async createVisibilityMap() {
-        const mapContainer = document.getElementById('municipalityMap');
+        const mapContainer = document.getElementById("municipalityMap");
         if (!mapContainer) return;
 
         try {
             // Initialize map
-            this.visibilityMap = L.map('municipalityMap', {
+            this.visibilityMap = L.map("municipalityMap", {
                 center: [51.2, 6.0],
                 zoom: 8,
-                zoomControl: true
+                zoomControl: true,
             });
 
             // Add base tile layer
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '© OpenStreetMap contributors © CARTO',
-                maxZoom: 18
-            }).addTo(this.visibilityMap);
+            L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+                    attribution: "© OpenStreetMap contributors © CARTO",
+                    maxZoom: 18,
+                },
+            ).addTo(this.visibilityMap);
 
             // Load existing selected municipalities from database
             let selectedMunicipalities = [];
             try {
-                const municipalitiesResponse = await fetch('/admin/api/municipalities', {
-                    headers: {
-                        'Authorization': `Bearer ${this.token}`
-                    }
-                });
+                const municipalitiesResponse = await fetch(
+                    "/admin/api/municipalities",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${this.token}`,
+                        },
+                    },
+                );
                 if (municipalitiesResponse.ok) {
-                    const municipalitiesData = await municipalitiesResponse.json();
-                    selectedMunicipalities = municipalitiesData.municipalities || [];
+                    const municipalitiesData =
+                        await municipalitiesResponse.json();
+                    selectedMunicipalities =
+                        municipalitiesData.municipalities || [];
                 }
             } catch (error) {
-                console.log('No existing municipalities found, starting fresh');
+                console.log("No existing municipalities found, starting fresh");
             }
 
             // Load and display Dutch municipalities
-            await this.loadVisibilityMunicipalities('dutch', selectedMunicipalities);
+            await this.loadVisibilityMunicipalities(
+                "dutch",
+                selectedMunicipalities,
+            );
 
-            // Load and display German municipalities  
-            await this.loadVisibilityMunicipalities('german', selectedMunicipalities);
+            // Load and display German municipalities
+            await this.loadVisibilityMunicipalities(
+                "german",
+                selectedMunicipalities,
+            );
 
-            console.log('Municipality visibility map initialized');
-
+            console.log("Municipality visibility map initialized");
         } catch (error) {
-            console.error('Error initializing visibility map:', error);
+            console.error("Error initializing visibility map:", error);
             mapContainer.innerHTML = `
                 <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;">
                     <p style="color: #dc3545; font-size: 16px;">Fout bij laden van kaart: ${error.message}</p>
@@ -1403,63 +1523,70 @@ class AdminDashboard {
 
     async loadVisibilityMunicipalities(country, selectedMunicipalities) {
         try {
-            const geoJsonPath = country === 'dutch' ? 
-                '/data/geojson/nl-gemeenten.geojson' : 
-                '/data/geojson/de-gemeenten.geojson';
+            const geoJsonPath =
+                country === "dutch"
+                    ? "/data/geojson/nl-gemeenten.geojson"
+                    : "/data/geojson/de-gemeenten.geojson";
 
             const response = await fetch(geoJsonPath);
             const geoJsonData = await response.json();
 
-            geoJsonData.features.forEach(feature => {
-                const municipalityName = country === 'dutch' ? 
-                    feature.properties.name : 
-                    feature.properties.NAME_4;
+            geoJsonData.features.forEach((feature) => {
+                const municipalityName =
+                    country === "dutch"
+                        ? feature.properties.name
+                        : feature.properties.NAME_4;
 
                 if (!municipalityName) return;
 
                 // Check if municipality is in selected list (green if selected, red if not)
-                const isVisible = selectedMunicipalities.some(m => m.name === municipalityName);
+                const isVisible = selectedMunicipalities.some(
+                    (m) => m.name === municipalityName,
+                );
 
                 const layer = L.geoJSON(feature, {
                     style: {
-                        color: isVisible ? '#28a745' : '#dc3545',
-                        weight: country === 'dutch' ? 2 : 1,
+                        color: isVisible ? "#28a745" : "#dc3545",
+                        weight: country === "dutch" ? 2 : 1,
                         opacity: 0.8,
-                        fillColor: isVisible ? '#28a745' : '#dc3545',
-                        fillOpacity: 0.3
+                        fillColor: isVisible ? "#28a745" : "#dc3545",
+                        fillOpacity: 0.3,
                     },
                     onEachFeature: (feature, layer) => {
                         // Add click handler to toggle visibility
-                        layer.on('click', () => {
-                            this.toggleMunicipalityVisibility(municipalityName, layer);
+                        layer.on("click", () => {
+                            this.toggleMunicipalityVisibility(
+                                municipalityName,
+                                layer,
+                            );
                         });
 
                         // Bind tooltip with municipality name
                         layer.bindTooltip(municipalityName, {
                             permanent: false,
-                            direction: 'top',
-                            offset: [0, -10]
+                            direction: "top",
+                            offset: [0, -10],
                         });
 
                         // Add hover effects
-                        layer.on('mouseover', () => {
+                        layer.on("mouseover", () => {
                             layer.setStyle({
-                                weight: country === 'dutch' ? 4 : 2,
+                                weight: country === "dutch" ? 4 : 2,
                                 opacity: 1,
-                                fillOpacity: 0.5
+                                fillOpacity: 0.5,
                             });
                             layer.openTooltip();
                         });
 
-                        layer.on('mouseout', () => {
+                        layer.on("mouseout", () => {
                             layer.setStyle({
-                                weight: country === 'dutch' ? 2 : 1,
+                                weight: country === "dutch" ? 2 : 1,
                                 opacity: 0.8,
-                                fillOpacity: 0.3
+                                fillOpacity: 0.3,
                             });
                             layer.closeTooltip();
                         });
-                    }
+                    },
                 }).addTo(this.visibilityMap);
 
                 // Store reference for toggle functionality
@@ -1468,29 +1595,32 @@ class AdminDashboard {
                 }
                 this.municipalityLayers[municipalityName] = {
                     layer: layer,
-                    visible: isVisible
+                    visible: isVisible,
                 };
             });
-
         } catch (error) {
-            console.error(`Error loading ${country} municipalities for visibility:`, error);
+            console.error(
+                `Error loading ${country} municipalities for visibility:`,
+                error,
+            );
         }
     }
 
     toggleMunicipalityVisibility(municipalityName, layer) {
         if (!this.municipalityLayers[municipalityName]) return;
 
-        const currentVisibility = this.municipalityLayers[municipalityName].visible;
+        const currentVisibility =
+            this.municipalityLayers[municipalityName].visible;
         const newVisibility = !currentVisibility;
 
         // Update layer style
-        const color = newVisibility ? '#28a745' : '#dc3545';
+        const color = newVisibility ? "#28a745" : "#dc3545";
         layer.setStyle({
             color: color,
             fillColor: color,
             weight: 2,
             opacity: 0.8,
-            fillOpacity: 0.3
+            fillOpacity: 0.3,
         });
 
         // Update local state
@@ -1499,11 +1629,13 @@ class AdminDashboard {
         // Update tooltip content
         layer.setTooltipContent(municipalityName);
 
-        console.log(`Municipality ${municipalityName} visibility changed to: ${newVisibility}`);
+        console.log(
+            `Municipality ${municipalityName} visibility changed to: ${newVisibility}`,
+        );
 
         // If we're currently viewing the data tab, refresh it to show updated selection
-        const dataTab = document.getElementById('municipality-data-tab');
-        if (dataTab && dataTab.classList.contains('active')) {
+        const dataTab = document.getElementById("municipality-data-tab");
+        if (dataTab && dataTab.classList.contains("active")) {
             this.refreshMunicipalityDataTab();
         }
     }
@@ -1515,8 +1647,8 @@ function showSection(sectionName) {
 }
 
 function logout() {
-    localStorage.removeItem('admin_token');
-    window.location.href = '/admin/index.html';
+    localStorage.removeItem("admin_token");
+    window.location.href = "/admin/index.html";
 }
 
 function refreshData() {
@@ -1536,40 +1668,43 @@ window.adminApp = null;
 
 // User Management Functions
 function openAddUserModal() {
-    if (window.adminDashboard.userRole !== 'admin') {
-        alert('Alleen administrators kunnen nieuwe gebruikers toevoegen.');
+    if (window.adminDashboard.userRole !== "admin") {
+        alert("Alleen administrators kunnen nieuwe gebruikers toevoegen.");
         return;
     }
     window.adminDashboard.openUserModal();
 }
 
 function editUser(userId) {
-    if (window.adminDashboard.userRole !== 'admin' && userId !== window.adminDashboard.userInfo.id) {
-        alert('Je kunt alleen je eigen profiel bewerken.');
+    if (
+        window.adminDashboard.userRole !== "admin" &&
+        userId !== window.adminDashboard.userInfo.id
+    ) {
+        alert("Je kunt alleen je eigen profiel bewerken.");
         return;
     }
     window.adminDashboard.openUserModal(userId);
 }
 
 async function deleteUser(userId) {
-    if (window.adminDashboard.userRole !== 'admin') {
-        alert('Alleen administrators kunnen gebruikers verwijderen.');
+    if (window.adminDashboard.userRole !== "admin") {
+        alert("Alleen administrators kunnen gebruikers verwijderen.");
         return;
     }
 
     if (userId === window.adminDashboard.userInfo.id) {
-        alert('Je kunt jezelf niet verwijderen.');
+        alert("Je kunt jezelf niet verwijderen.");
         return;
     }
 
-    if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
+    if (confirm("Weet je zeker dat je deze gebruiker wilt verwijderen?")) {
         await window.adminDashboard.deleteUser(userId);
     }
 }
 
 // Modal functions
 function openAddOpportunityModal() {
-    alert('Toevoegen van nieuwe kansen - implementatie volgt');
+    alert("Toevoegen van nieuwe kansen - implementatie volgt");
 }
 
 function openAddFilterModal() {
@@ -1611,10 +1746,15 @@ function deleteFilterItem(containerId, item) {
 }
 
 function closeModal(modalId = null) {
-    const modals = modalId ? [document.getElementById(modalId)] : 
-                  [document.getElementById('userModal'), document.getElementById('municipalityModal'), document.getElementById('filterModal')];
+    const modals = modalId
+        ? [document.getElementById(modalId)]
+        : [
+              document.getElementById("userModal"),
+              document.getElementById("municipalityModal"),
+              document.getElementById("filterModal"),
+          ];
 
-    modals.forEach(modal => {
+    modals.forEach((modal) => {
         if (modal) {
             modal.remove();
         }
@@ -1622,7 +1762,7 @@ function closeModal(modalId = null) {
 }
 
 // Initialize dashboard when page loads
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener("DOMContentLoaded", function () {
     window.adminDashboard = new AdminDashboard();
     window.adminApp = window.adminDashboard; // Make available globally for onclick handlers
 });
@@ -1631,114 +1771,134 @@ document.addEventListener('DOMContentLoaded', function() {
 function toggleAllMunicipalities(visible) {
     if (!window.adminDashboard.municipalityLayers) return;
 
-    Object.keys(window.adminDashboard.municipalityLayers).forEach(municipalityName => {
-        const municipalityData = window.adminDashboard.municipalityLayers[municipalityName];
-        const layer = municipalityData.layer;
+    Object.keys(window.adminDashboard.municipalityLayers).forEach(
+        (municipalityName) => {
+            const municipalityData =
+                window.adminDashboard.municipalityLayers[municipalityName];
+            const layer = municipalityData.layer;
 
-        // Update layer style
-        const color = visible ? '#28a745' : '#dc3545';
-        layer.setStyle({
-            color: color,
-            fillColor: color,
-            weight: 2,
-            opacity: 0.8,
-            fillOpacity: 0.3
-        });
+            // Update layer style
+            const color = visible ? "#28a745" : "#dc3545";
+            layer.setStyle({
+                color: color,
+                fillColor: color,
+                weight: 2,
+                opacity: 0.8,
+                fillOpacity: 0.3,
+            });
 
-        // Update local state
-        municipalityData.visible = visible;
+            // Update local state
+            municipalityData.visible = visible;
 
-        // Update tooltip content if needed
-        layer.setTooltipContent(municipalityName);
-    });
+            // Update tooltip content if needed
+            layer.setTooltipContent(municipalityName);
+        },
+    );
 
-    console.log(`All municipalities set to: ${visible ? 'visible' : 'hidden'}`);
+    console.log(`All municipalities set to: ${visible ? "visible" : "hidden"}`);
 }
 
 async function saveMunicipalityVisibility() {
     if (!window.adminDashboard.municipalityLayers) {
-        alert('Geen gemeente data beschikbaar om op te slaan');
+        alert("Geen gemeente data beschikbaar om op te slaan");
         return;
     }
 
     try {
         const visibilityData = {};
 
-        Object.keys(window.adminDashboard.municipalityLayers).forEach(municipalityName => {
-            const isVisible = window.adminDashboard.municipalityLayers[municipalityName].visible;
-            // Store all values explicitly (true = visible, false = hidden)
-            visibilityData[municipalityName] = isVisible;
-        });
-
-        const response = await fetch('/admin/api/municipality-visibility', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${window.adminDashboard.token}`
+        Object.keys(window.adminDashboard.municipalityLayers).forEach(
+            (municipalityName) => {
+                const isVisible =
+                    window.adminDashboard.municipalityLayers[municipalityName]
+                        .visible;
+                // Store all values explicitly (true = visible, false = hidden)
+                visibilityData[municipalityName] = isVisible;
             },
-            body: JSON.stringify(visibilityData)
+        );
+
+        const response = await fetch("/admin/api/municipality-visibility", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${window.adminDashboard.token}`,
+            },
+            body: JSON.stringify(visibilityData),
         });
 
         const result = await response.json();
 
         if (response.ok) {
-            alert('Gemeente zichtbaarheid succesvol opgeslagen!');
+            alert("Gemeente zichtbaarheid succesvol opgeslagen!");
 
             // Reload the municipalities data table to reflect changes
             window.adminDashboard.loadMunicipalities();
 
             // Generate new visible municipalities GeoJSON for main application
-            const generateResponse = await fetch('/admin/api/generate-visible-geojson', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${window.adminDashboard.token}`
-                }
-            });
+            const generateResponse = await fetch(
+                "/admin/api/generate-visible-geojson",
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${window.adminDashboard.token}`,
+                    },
+                },
+            );
 
             if (generateResponse.ok) {
                 const generateResult = await generateResponse.json();
-                console.log(`Generated visible municipalities GeoJSON with ${generateResult.count} municipalities`);
+                console.log(
+                    `Generated visible municipalities GeoJSON with ${generateResult.count} municipalities`,
+                );
             }
         } else {
             alert(`Fout bij opslaan: ${result.message || result.error}`);
         }
     } catch (error) {
-        console.error('Error saving municipality visibility:', error);
-        alert('Fout bij opslaan van gemeente zichtbaarheid');
+        console.error("Error saving municipality visibility:", error);
+        alert("Fout bij opslaan van gemeente zichtbaarheid");
     }
 }
 
 async function saveMunicipalitiesForKansenkaart() {
-        if (!window.adminDashboard.municipalityLayers) {
-            alert('Geen gemeente data beschikbaar om op te slaan');
-            return;
-        }
+    if (!window.adminDashboard.municipalityLayers) {
+        alert("Geen gemeente data beschikbaar om op te slaan");
+        return;
+    }
 
-        if (!confirm('Weet je zeker dat je alle zichtbare gemeenten wilt opslaan naar municipalities.json? Er wordt automatisch een backup gemaakt van de huidige versie.')) {
-            return;
-        }
+    if (
+        !confirm(
+            "Weet je zeker dat je alle zichtbare gemeenten wilt opslaan naar municipalities.json? Er wordt automatisch een backup gemaakt van de huidige versie.",
+        )
+    ) {
+        return;
+    }
 
-        try {
-            const response = await fetch('/admin/api/save-municipalities-for-kansenkaart', {
-                method: 'POST',
+    try {
+        const response = await fetch(
+            "/admin/api/save-municipalities-for-kansenkaart",
+            {
+                method: "POST",
                 headers: {
-                    'Authorization': `Bearer ${window.adminDashboard.token}`
-                }
-            });
+                    Authorization: `Bearer ${window.adminDashboard.token}`,
+                },
+            },
+        );
 
-            const result = await response.json();
+        const result = await response.json();
 
-            if (response.ok) {
-                alert(`Succesvol ${result.count} zichtbare gemeenten opgeslagen naar municipalities.json!`);
+        if (response.ok) {
+            alert(
+                `Succesvol ${result.count} zichtbare gemeenten opgeslagen naar municipalities.json!`,
+            );
 
-                // Reload the municipalities data table to reflect changes
-                window.adminDashboard.loadMunicipalities();
-            } else {
-                alert(`Fout bij opslaan: ${result.message}`);
-            }
-        } catch (error) {
-            console.error('Error saving municipalities for kansenkaart:', error);
-            alert('Fout bij opslaan van gemeenten voor kansenkaart');
+            // Reload the municipalities data table to reflect changes
+            window.adminDashboard.loadMunicipalities();
+        } else {
+            alert(`Fout bij opslaan: ${result.message}`);
         }
+    } catch (error) {
+        console.error("Error saving municipalities for kansenkaart:", error);
+        alert("Fout bij opslaan van gemeenten voor kansenkaart");
     }
 }
