@@ -1,4 +1,3 @@
-
 {
   "ProjectType": [
     "Haalbaarheidsstudie / Concept",
@@ -13,17 +12,17 @@
     "Sloop & Herontwikkeling"
   ],
   "OrganizationType": [
-    "Architect",
-    "Bouwbedrijf",
     "Arbeidsdeskundige",
-    "Ingenieursbureau",
-    "Overheid / non-profit",
-    "Installatiebedrijf",
+    "Architect2",
     "Binnenhuisarchitect",
+    "Bouwbedrijf",
     "Fabrikant",
+    "Ingenieursbureau",
+    "Installatiebedrijf",
+    "Leverancier",
     "Onderzoeksinstelling",
-    "Strategisch adviseur",
-    "Leverancier"
+    "Overheid / non-profit",
+    "Strategisch adviseur"
   ],
   "OrganizationField": [
     "Architectuur",
