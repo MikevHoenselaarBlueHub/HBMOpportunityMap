@@ -4,9 +4,11 @@
   "description": "HBM Kansenkaart - Opportunity Map",
   "main": "index.html",
   "scripts": {
+    "setup": "npm install && echo 'Setup voltooid! Start de applicatie met npm run dev'",
     "start": "node server.js",
     "dev": "node server.js",
-    "admin": "node server.js"
+    "admin": "node server.js",
+    "postinstall": "echo 'Dependencies geïnstalleerd. Server kan worden gestart.'"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",
