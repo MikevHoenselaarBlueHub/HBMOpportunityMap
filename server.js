@@ -907,6 +907,43 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: "Er is een serverfout opgetreden" });
 });
 
+// Municipality visibility endpoint
+app.post('/admin/api/municipality-visibility', authenticateToken, async (req, res) => {
+    try {
+        const visibilityData = req.body;
+        console.log(`[VISIBILITY] Saving visibility data for ${Object.keys(visibilityData).length} municipalities`);
+
+        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
+        
+        // Create backup of current file if it exists
+        const backupDir = path.join(__dirname, 'backup');
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+        }
+
+        if (fs.existsSync(visibilityPath)) {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const backupPath = path.join(backupDir, `municipality-visibility-${timestamp}.json`);
+            fs.copyFileSync(visibilityPath, backupPath);
+        }
+
+        // Save visibility data
+        fs.writeFileSync(visibilityPath, JSON.stringify(visibilityData, null, 2));
+
+        res.json({
+            success: true,
+            message: "Gemeente zichtbaarheid succesvol opgeslagen"
+        });
+
+    } catch (error) {
+        console.error('[VISIBILITY] Error saving municipality visibility:', error);
+        res.status(500).json({
+            success: false,
+            message: "Fout bij opslaan van gemeente zichtbaarheid"
+        });
+    }
+});
+
 app.post('/admin/api/generate-visible-municipalities', authenticateToken, async (req, res) => {
     try {
         const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');

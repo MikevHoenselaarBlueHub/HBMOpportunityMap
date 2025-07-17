@@ -1282,6 +1282,11 @@ class AdminDashboard {
         if (tabName === 'visibility') {
             this.initializeMunicipalityVisibilityMap();
         }
+
+        // Refresh data tab if switching to data tab and we have visibility selections
+        if (tabName === 'data' && this.municipalityLayers) {
+            this.refreshMunicipalityDataTab();
+        }
     }
 
     // Initialize municipality visibility map
@@ -1397,8 +1402,12 @@ class AdminDashboard {
                             this.toggleMunicipalityVisibility(municipalityName, layer);
                         });
 
-                        // Update tooltip content if needed
-                        layer.setTooltipContent(municipalityName);
+                        // Bind tooltip with municipality name
+                        layer.bindTooltip(municipalityName, {
+                            permanent: false,
+                            direction: 'top',
+                            offset: [0, -10]
+                        });
 
                         // Add hover effects
                         layer.on('mouseover', () => {
@@ -1407,6 +1416,7 @@ class AdminDashboard {
                                 opacity: 1,
                                 fillOpacity: 0.5
                             });
+                            layer.openTooltip();
                         });
 
                         layer.on('mouseout', () => {
@@ -1415,6 +1425,7 @@ class AdminDashboard {
                                 opacity: 0.8,
                                 fillOpacity: 0.3
                             });
+                            layer.closeTooltip();
                         });
                     }
                 }).addTo(this.visibilityMap);
@@ -1453,10 +1464,16 @@ class AdminDashboard {
         // Update local state
         this.municipalityLayers[municipalityName].visible = newVisibility;
 
-        // Update tooltip content if needed
+        // Update tooltip content
         layer.setTooltipContent(municipalityName);
 
         console.log(`Municipality ${municipalityName} visibility changed to: ${newVisibility}`);
+
+        // If we're currently viewing the data tab, refresh it to show updated selection
+        const dataTab = document.getElementById('municipality-data-tab');
+        if (dataTab && dataTab.classList.contains('active')) {
+            this.refreshMunicipalityDataTab();
+        }
     }
 }
 
@@ -1603,6 +1620,64 @@ function toggleAllMunicipalities(visible) {
     });
 
     console.log(`All municipalities set to: ${visible ? 'visible' : 'hidden'}`);
+}
+
+// Method to refresh the municipality data tab with current selections
+    refreshMunicipalityDataTab() {
+        if (!this.municipalityLayers) return;
+
+        // Get currently visible municipalities
+        const visibleMunicipalities = [];
+        Object.keys(this.municipalityLayers).forEach(municipalityName => {
+            if (this.municipalityLayers[municipalityName].visible) {
+                // Create a municipality object similar to the database format
+                visibleMunicipalities.push({
+                    name: municipalityName,
+                    country: municipalityName.endsWith('(DE)') ? 'Germany' : 
+                             municipalityName.includes('ü') || municipalityName.includes('ß') || 
+                             municipalityName.includes('ö') || municipalityName.includes('ä') ? 'Germany' : 'Netherlands',
+                    code: municipalityName.endsWith('(DE)') || municipalityName.includes('ü') || 
+                          municipalityName.includes('ß') || municipalityName.includes('ö') || 
+                          municipalityName.includes('ä') ? 'DE' : 'NL',
+                    population: '',
+                    area: '',
+                    largest_places: []
+                });
+            }
+        });
+
+        // Update the data tab table with visible municipalities
+        const tableBody = document.querySelector('#municipalitiesTable tbody');
+        if (tableBody) {
+            tableBody.innerHTML = '';
+
+            visibleMunicipalities.forEach(municipality => {
+                const row = document.createElement('tr');
+
+                const canEdit = this.userRole === 'admin' || this.userRole === 'editor';
+                const canDelete = this.userRole === 'admin';
+
+                row.innerHTML = `
+                    <td>
+                        <div class="municipality-info">
+                            <div class="municipality-name">${municipality.name}</div>
+                            <div class="municipality-places" style="color: #28a745; font-size: 0.9em;">Geselecteerd op kaart</div>
+                        </div>
+                    </td>
+                    <td>${municipality.country}</td>
+                    <td>${municipality.code}</td>
+                    <td>${municipality.population || 'Niet ingevuld'}</td>
+                    <td>${municipality.area || 'Niet ingevuld'}</td>
+                    <td>
+                        ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openMunicipalityModal('${municipality.name}')" title="Bewerken">✏️</button>` : ''}
+                        ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteMunicipality('${municipality.name}')">Verwijderen</button>` : ''}
+                        ${!canEdit && !canDelete ? '<span style="color: #999;">Geen acties beschikbaar</span>' : ''}
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+    }
 }
 
 async function saveMunicipalityVisibility() {
