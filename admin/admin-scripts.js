@@ -293,14 +293,14 @@ class AdminDashboard {
     async loadFilters() {
         try {
             const response = await fetch('/data/filters.json');
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
+
             const responseText = await response.text();
             let filters;
-            
+
             try {
                 filters = JSON.parse(responseText);
             } catch (parseError) {
@@ -403,7 +403,7 @@ class AdminDashboard {
 
             const responseText = await response.text();
             let data;
-            
+
             try {
                 data = JSON.parse(responseText);
             } catch (parseError) {
@@ -487,7 +487,7 @@ class AdminDashboard {
 
             const responseText = await response.text();
             let users;
-            
+
             try {
                 users = JSON.parse(responseText);
             } catch (parseError) {
@@ -1330,19 +1330,27 @@ class AdminDashboard {
                 maxZoom: 18
             }).addTo(this.visibilityMap);
 
-            // Load visibility settings
-            const visibilityResponse = await fetch('/admin/api/municipality-visibility', {
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
+            // Load existing selected municipalities from database
+            let selectedMunicipalities = [];
+            try {
+                const municipalitiesResponse = await fetch('/admin/api/municipalities', {
+                    headers: {
+                        'Authorization': `Bearer ${this.token}`
+                    }
+                });
+                if (municipalitiesResponse.ok) {
+                    const municipalitiesData = await municipalitiesResponse.json();
+                    selectedMunicipalities = municipalitiesData.municipalities || [];
                 }
-            });
-            const visibilityData = await visibilityResponse.json();
+            } catch (error) {
+                console.log('No existing municipalities found, starting fresh');
+            }
 
             // Load and display Dutch municipalities
-            await this.loadVisibilityMunicipalities('dutch', visibilityData);
-            
+            await this.loadVisibilityMunicipalities('dutch', selectedMunicipalities);
+
             // Load and display German municipalities  
-            await this.loadVisibilityMunicipalities('german', visibilityData);
+            await this.loadVisibilityMunicipalities('german', selectedMunicipalities);
 
             console.log('Municipality visibility map initialized');
 
@@ -1356,7 +1364,7 @@ class AdminDashboard {
         }
     }
 
-    async loadVisibilityMunicipalities(country, visibilityData) {
+    async loadVisibilityMunicipalities(country, selectedMunicipalities) {
         try {
             const geoJsonPath = country === 'dutch' ? 
                 '/data/geojson/nl-gemeenten.geojson' : 
@@ -1372,8 +1380,8 @@ class AdminDashboard {
 
                 if (!municipalityName) return;
 
-                // Default to NOT visible (red), only visible if explicitly set to true
-                const isVisible = visibilityData[municipalityName] === true;
+                // Check if municipality is in selected list (green if selected, red if not)
+                const isVisible = selectedMunicipalities.some(m => m.name === municipalityName);
 
                 const layer = L.geoJSON(feature, {
                     style: {
@@ -1389,16 +1397,8 @@ class AdminDashboard {
                             this.toggleMunicipalityVisibility(municipalityName, layer);
                         });
 
-                        // Add popup with municipality info
-                        const status = isVisible ? 'Zichtbaar' : 'Verborgen';
-                        layer.bindPopup(`
-                            <div>
-                                <h4>${municipalityName}</h4>
-                                <p>Land: ${country === 'dutch' ? 'Nederland' : 'Duitsland'}</p>
-                                <p>Status: <strong style="color: ${isVisible ? '#28a745' : '#dc3545'}">${status}</strong></p>
-                                <p><small>Klik om status te wijzigen</small></p>
-                            </div>
-                        `);
+                        // Update tooltip content if needed
+                        layer.setTooltipContent(municipalityName);
 
                         // Add hover effects
                         layer.on('mouseover', () => {
@@ -1453,17 +1453,8 @@ class AdminDashboard {
         // Update local state
         this.municipalityLayers[municipalityName].visible = newVisibility;
 
-        // Update popup
-        const status = newVisibility ? 'Zichtbaar' : 'Verborgen';
-        const country = municipalityName.includes('ü') || municipalityName.includes('ß') ? 'Duitsland' : 'Nederland';
-        layer.setPopupContent(`
-            <div>
-                <h4>${municipalityName}</h4>
-                <p>Land: ${country}</p>
-                <p>Status: <strong style="color: ${color}">${status}</strong></p>
-                <p><small>Klik om status te wijzigen</small></p>
-            </div>
-        `);
+        // Update tooltip content if needed
+        layer.setTooltipContent(municipalityName);
 
         console.log(`Municipality ${municipalityName} visibility changed to: ${newVisibility}`);
     }
@@ -1607,17 +1598,8 @@ function toggleAllMunicipalities(visible) {
         // Update local state
         municipalityData.visible = visible;
 
-        // Update popup
-        const status = visible ? 'Zichtbaar' : 'Verborgen';
-        const country = municipalityName.includes('ü') || municipalityName.includes('ß') ? 'Duitsland' : 'Nederland';
-        layer.setPopupContent(`
-            <div>
-                <h4>${municipalityName}</h4>
-                <p>Land: ${country}</p>
-                <p>Status: <strong style="color: ${color}">${status}</strong></p>
-                <p><small>Klik om status te wijzigen</small></p>
-            </div>
-        `);
+        // Update tooltip content if needed
+        layer.setTooltipContent(municipalityName);
     });
 
     console.log(`All municipalities set to: ${visible ? 'visible' : 'hidden'}`);
@@ -1631,7 +1613,7 @@ async function saveMunicipalityVisibility() {
 
     try {
         const visibilityData = {};
-        
+
         Object.keys(window.adminDashboard.municipalityLayers).forEach(municipalityName => {
             const isVisible = window.adminDashboard.municipalityLayers[municipalityName].visible;
             // Store all values explicitly (true = visible, false = hidden)
@@ -1651,10 +1633,10 @@ async function saveMunicipalityVisibility() {
 
         if (response.ok) {
             alert('Gemeente zichtbaarheid succesvol opgeslagen!');
-            
+
             // Reload the municipalities data table to reflect changes
             window.adminDashboard.loadMunicipalities();
-            
+
             // Generate new visible municipalities GeoJSON for main application
             const generateResponse = await fetch('/admin/api/generate-visible-geojson', {
                 method: 'POST',
@@ -1698,7 +1680,7 @@ async function saveMunicipalitiesForKansenkaart() {
 
         if (response.ok) {
             alert(`Succesvol ${result.count} zichtbare gemeenten opgeslagen naar municipalities.json!`);
-            
+
             // Reload the municipalities data table to reflect changes
             window.adminDashboard.loadMunicipalities();
         } else {

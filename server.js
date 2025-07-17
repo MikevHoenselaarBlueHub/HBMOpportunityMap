@@ -670,31 +670,48 @@ app.delete("/admin/api/filters/:category/:item", authenticateToken, (req, res) =
     }
 });
 
-// Municipality visibility endpoints
-app.get('/admin/api/municipality-visibility', authenticateToken, (req, res) => {
+// Save selected municipalities to database (simplified approach)
+app.post('/admin/api/save-selected-municipalities', authenticateToken, (req, res) => {
     try {
-        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
-        if (!fs.existsSync(visibilityPath)) {
-            // Return empty object if file doesn't exist (all visible by default)
-            return res.json({});
+        const { municipalities } = req.body;
+        console.log(`[SAVE_SELECTED] Saving ${municipalities.length} selected municipalities`);
+
+        const municipalitiesPath = path.join(__dirname, 'data', 'municipalities.json');
+        
+        // Create backup of current file if it exists
+        const backupDir = path.join(__dirname, 'backup');
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
         }
 
-        const visibilityData = JSON.parse(fs.readFileSync(visibilityPath, 'utf8'));
-        res.json(visibilityData);
-    } catch (error) {
-        console.error('Error loading municipality visibility:', error);
-        res.status(500).json({ error: 'Failed to load municipality visibility' });
-    }
-});
+        if (fs.existsSync(municipalitiesPath)) {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const backupPath = path.join(backupDir, `municipalities-${timestamp}.json`);
+            fs.copyFileSync(municipalitiesPath, backupPath);
+        }
 
-app.post('/admin/api/municipality-visibility', authenticateToken, (req, res) => {
-    try {
-        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
-        fs.writeFileSync(visibilityPath, JSON.stringify(req.body, null, 2));
-        res.json({ success: true, message: 'Municipality visibility saved' });
+        // Save selected municipalities to database
+        const municipalitiesData = {
+            municipalities: municipalities,
+            lastUpdated: new Date().toISOString(),
+            totalCount: municipalities.length,
+            source: 'admin_selection'
+        };
+
+        fs.writeFileSync(municipalitiesPath, JSON.stringify(municipalitiesData, null, 2));
+
+        res.json({
+            success: true,
+            message: `${municipalities.length} geselecteerde gemeenten opgeslagen`,
+            count: municipalities.length
+        });
+
     } catch (error) {
-        console.error('Error saving municipality visibility:', error);
-        res.status(500).json({ error: 'Failed to save municipality visibility' });
+        console.error('[SAVE_SELECTED] Error saving selected municipalities:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Fout bij opslaan van geselecteerde gemeenten'
+        });
     }
 });
 
