@@ -6,6 +6,9 @@ const path = require("path");
 const rateLimit = require("express-rate-limit");
 const app = express();
 
+// Trust proxy voor Replit environment
+app.set('trust proxy', true);
+
 // Rate limiting voor login attempts
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minuten
@@ -25,6 +28,7 @@ app.use(generalLimiter);
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
+app.use('/admin', express.static(__dirname));
 app.use(express.static("."));
 
 // Input sanitatie functie
