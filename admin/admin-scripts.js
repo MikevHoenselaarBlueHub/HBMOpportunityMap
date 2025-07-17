@@ -427,63 +427,40 @@ class AdminDashboard {
 
     async loadMunicipalities() {
         try {
-            // Check if we're in data tab and have visibility layers to filter by
-            const isDataTab = document.getElementById("municipality-data-tab")?.classList.contains("active");
-            let municipalitiesToShow = [];
+            // Always load only municipalities that are in the database with visibility=true
+            const response = await fetch("/admin/api/municipalities", {
+                headers: {
+                    Authorization: `Bearer ${this.token}`,
+                },
+            });
 
-            if (isDataTab && this.municipalityLayers) {
-                // Show only visible municipalities from the visibility map
-                const visibleMunicipalityNames = Object.keys(this.municipalityLayers)
-                    .filter(name => this.municipalityLayers[name].visible);
-
-                // Load current municipalities and filter
-                const response = await fetch("/admin/api/municipalities", {
-                    headers: {
-                        Authorization: `Bearer ${this.token}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Failed to load municipalities: ${response.status}`);
-                }
-
-                const data = await response.json();
-                // Filter municipalities that are visible AND have visibility=true in database
-                municipalitiesToShow = (data.municipalities || []).filter(
-                    municipality => visibleMunicipalityNames.includes(municipality.name) && municipality.visibility !== false
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Municipality API error:", errorText);
+                throw new Error(
+                    `Failed to load municipalities: ${response.status}`,
                 );
-            } else {
-                // Load all municipalities normally
-                const response = await fetch("/admin/api/municipalities", {
-                    headers: {
-                        Authorization: `Bearer ${this.token}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error("Municipality API error:", errorText);
-                    throw new Error(
-                        `Failed to load municipalities: ${response.status}`,
-                    );
-                }
-
-                const responseText = await response.text();
-                let data;
-
-                try {
-                    data = JSON.parse(responseText);
-                } catch (parseError) {
-                    console.error(
-                        "Failed to parse municipalities JSON:",
-                        responseText,
-                    );
-                    throw new Error(
-                        "Invalid JSON response from municipalities API",
-                    );
-                }
-                municipalitiesToShow = data.municipalities || [];
             }
+
+            const responseText = await response.text();
+            let data;
+
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error(
+                    "Failed to parse municipalities JSON:",
+                    responseText,
+                );
+                throw new Error(
+                    "Invalid JSON response from municipalities API",
+                );
+            }
+
+            // Only show municipalities that have visibility=true (or undefined, which means visible)
+            const municipalitiesToShow = (data.municipalities || []).filter(
+                municipality => municipality.visibility !== false
+            );
 
             const tableBody = document.querySelector(
                 "#municipalitiesTable tbody",

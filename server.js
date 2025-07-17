@@ -1170,10 +1170,7 @@ app.post('/admin/api/generate-visible-municipalities', authenticateToken, async 
 
 app.post('/admin/api/save-municipalities-for-kansenkaart', authenticateToken, async (req, res) => {
     try {
-        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
         const municipalitiesPath = path.join(__dirname, 'data', 'municipalities.json');
-        const nlGeoJsonPath = path.join(__dirname, 'data', 'geojson', 'nl-gemeenten.geojson');
-        const deGeoJsonPath = path.join(__dirname, 'data', 'geojson', 'de-gemeenten.geojson');
         const backupDir = path.join(__dirname, 'backup');
 
         // Ensure backup directory exists
@@ -1188,77 +1185,32 @@ app.post('/admin/api/save-municipalities-for-kansenkaart', authenticateToken, as
             fs.copyFileSync(municipalitiesPath, backupPath);
         }
 
-        // Load visibility settings (default to visible = true for new approach)
-        let visibilityData = {};
-        if (fs.existsSync(visibilityPath)) {
-            visibilityData = JSON.parse(fs.readFileSync(visibilityPath, 'utf8'));
+        // Load existing municipalities data - keep the current data structure
+        let municipalitiesData = { municipalities: [] };
+        if (fs.existsSync(municipalitiesPath)) {
+            municipalitiesData = JSON.parse(fs.readFileSync(municipalitiesPath, 'utf8'));
         }
 
-        // Load GeoJSON files
-        const nlData = JSON.parse(fs.readFileSync(nlGeoJsonPath, 'utf8'));
-        const deData = JSON.parse(fs.readFileSync(deGeoJsonPath, 'utf8'));
+        // Count municipalities that have visibility=true (or undefined which means visible)
+        const visibleMunicipalities = municipalitiesData.municipalities.filter(
+            municipality => municipality.visibility !== false
+        );
 
-        const municipalities = [];
+        // Update metadata only
+        municipalitiesData.lastUpdated = new Date().toISOString();
+        municipalitiesData.totalCount = municipalitiesData.municipalities.length;
+        municipalitiesData.visibleCount = visibleMunicipalities.length;
 
-        // Process Dutch municipalities
-        nlData.features.forEach(feature => {
-            const municipalityName = feature.properties.name;
-            if (municipalityName) {
-                // Check if municipality is visible (green on map)
-                const isVisible = visibilityData[municipalityName] === true;
-
-                if (isVisible) {
-                    municipalities.push({
-                        name: municipalityName,
-                        country: "Netherlands",
-                        code: "NL",
-                        population: feature.properties.population || 0,
-                        area: feature.properties.area || "",
-                        largest_places: feature.properties.largest_places || []
-                    });
-                }
-            }
-        });
-
-        // Process German municipalities
-        deData.features.forEach(feature => {
-            const municipalityName = feature.properties.NAME_4;
-            if (municipalityName) {
-                // Check if municipality is visible (green on map)
-                const isVisible = visibilityData[municipalityName] === true;
-
-                if (isVisible) {
-                    municipalities.push({
-                        name: municipalityName,
-                        country: "Germany",
-                        code: "DE",
-                        population: feature.properties.population || 0,
-                        area: feature.properties.area || "",
-                        largest_places: feature.properties.largest_places || []
-                    });
-                }
-            }
-        });
-
-        // Sort municipalities by name
-        municipalities.sort((a, b) => a.name.localeCompare(b.name));
-
-        // Create new municipalities.json structure
-        const municipalitiesData = {
-            municipalities: municipalities,
-            lastUpdated: new Date().toISOString(),
-            totalCount: municipalities.length
-        };
-
-        // Save to municipalities.json
+        // Save updated metadata to municipalities.json (data remains the same)
         fs.writeFileSync(municipalitiesPath, JSON.stringify(municipalitiesData, null, 2));
 
-        console.log(`[SAVE_KANSENKAART] Saved ${municipalities.length} visible municipalities to municipalities.json`);
+        console.log(`[SAVE_KANSENKAART] Updated municipalities metadata - ${visibleMunicipalities.length} visible out of ${municipalitiesData.municipalities.length} total`);
 
         res.json({
             success: true,
-            message: `${municipalities.length} zichtbare gemeenten opgeslagen naar municipalities.json`,
-            count: municipalities.length,
+            message: `${visibleMunicipalities.length} zichtbare gemeenten bevestigd in municipalities.json`,
+            count: visibleMunicipalities.length,
+            totalCount: municipalitiesData.municipalities.length,
             backupPath: backupPath
         });
     } catch (error) {
