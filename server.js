@@ -931,6 +931,108 @@ app.post('/admin/api/generate-visible-municipalities', authenticateToken, async 
     }
 });
 
+app.post('/admin/api/save-municipalities-for-kansenkaart', authenticateToken, async (req, res) => {
+    try {
+        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
+        const municipalitiesPath = path.join(__dirname, 'data', 'municipalities.json');
+        const nlGeoJsonPath = path.join(__dirname, 'data', 'geojson', 'nl-gemeenten.geojson');
+        const deGeoJsonPath = path.join(__dirname, 'data', 'geojson', 'de-gemeenten.geojson');
+        const backupDir = path.join(__dirname, 'backup');
+
+        // Ensure backup directory exists
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+        }
+
+        // Create backup of current municipalities.json
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupPath = path.join(backupDir, `municipalities-${timestamp}.json`);
+        if (fs.existsSync(municipalitiesPath)) {
+            fs.copyFileSync(municipalitiesPath, backupPath);
+        }
+
+        // Load visibility settings (default to visible = true for new approach)
+        let visibilityData = {};
+        if (fs.existsSync(visibilityPath)) {
+            visibilityData = JSON.parse(fs.readFileSync(visibilityPath, 'utf8'));
+        }
+
+        // Load GeoJSON files
+        const nlData = JSON.parse(fs.readFileSync(nlGeoJsonPath, 'utf8'));
+        const deData = JSON.parse(fs.readFileSync(deGeoJsonPath, 'utf8'));
+
+        const municipalities = [];
+
+        // Process Dutch municipalities
+        nlData.features.forEach(feature => {
+            const municipalityName = feature.properties.name;
+            if (municipalityName) {
+                // Check if municipality is visible (green on map)
+                const isVisible = visibilityData[municipalityName] === true;
+                
+                if (isVisible) {
+                    municipalities.push({
+                        name: municipalityName,
+                        country: "Netherlands",
+                        code: "NL",
+                        population: feature.properties.population || 0,
+                        area: feature.properties.area || "",
+                        largest_places: feature.properties.largest_places || []
+                    });
+                }
+            }
+        });
+
+        // Process German municipalities
+        deData.features.forEach(feature => {
+            const municipalityName = feature.properties.NAME_4;
+            if (municipalityName) {
+                // Check if municipality is visible (green on map)
+                const isVisible = visibilityData[municipalityName] === true;
+                
+                if (isVisible) {
+                    municipalities.push({
+                        name: municipalityName,
+                        country: "Germany",
+                        code: "DE",
+                        population: feature.properties.population || 0,
+                        area: feature.properties.area || "",
+                        largest_places: feature.properties.largest_places || []
+                    });
+                }
+            }
+        });
+
+        // Sort municipalities by name
+        municipalities.sort((a, b) => a.name.localeCompare(b.name));
+
+        // Create new municipalities.json structure
+        const municipalitiesData = {
+            municipalities: municipalities,
+            lastUpdated: new Date().toISOString(),
+            totalCount: municipalities.length
+        };
+
+        // Save to municipalities.json
+        fs.writeFileSync(municipalitiesPath, JSON.stringify(municipalitiesData, null, 2));
+
+        console.log(`[SAVE_KANSENKAART] Saved ${municipalities.length} visible municipalities to municipalities.json`);
+
+        res.json({
+            success: true,
+            message: `${municipalities.length} zichtbare gemeenten opgeslagen naar municipalities.json`,
+            count: municipalities.length,
+            backupPath: backupPath
+        });
+    } catch (error) {
+        console.error('[SAVE_KANSENKAART] Error saving municipalities for kansenkaart:', error);
+        res.status(500).json({
+            success: false,
+            message: "Fout bij opslaan gemeenten voor kansenkaart"
+        });
+    }
+});
+
 // Start server - Fixed port configuration
 const PORT = 5000; // Fixed port voor consistentie  
 app.listen(PORT, "0.0.0.0", () => {

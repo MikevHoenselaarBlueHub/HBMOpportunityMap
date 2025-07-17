@@ -572,7 +572,7 @@ async function loadGermanMunicipalities() {
     const response = await fetch("data/geojson/de-gemeenten.geojson");
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const geojsonData = await response.json();
@@ -595,124 +595,132 @@ async function loadGermanMunicipalities() {
       .filter((m) => m.code === "DE")
       .map((m) => m.name);
 
-    geojsonData.features.forEach((feature) => {
-      // GADM format uses NAME_4 for municipality names
+    // Process in smaller batches to avoid blocking the UI
+    const batchSize = 10;
+    const features = geojsonData.features.filter(feature => {
       const municipalityName = feature.properties?.NAME_4;
-      const state = feature.properties?.NAME_1;
-
-      // Only show municipalities that are in our configuration
-      if (
-        municipalityName &&
-        feature.geometry &&
-        allowedMunicipalities.includes(municipalityName)
-      ) {
-        try {
-          const geoJsonLayer = L.geoJSON(feature, {
-            style: {
-              color: "rgb(38, 123, 41)",
-              weight: 4,
-              opacity: 0.9,
-              fillColor: "rgb(38, 123, 41)",
-              fillOpacity: 0.1,
-              smoothFactor: 0.5,
-              dashArray: "5, 8",
-            },
-            onEachFeature: function (feature, layer) {
-              layer.on({
-                mouseover: function (e) {
-                  const layer = e.target;
-                  layer.setStyle({
-                    color: "rgb(38, 123, 41)",
-                    weight: 6,
-                    opacity: 1,
-                    fillColor: "rgb(38, 123, 41)",
-                    fillOpacity: 0.3,
-                    dashArray: "5, 8",
-                  });
-                  layer.bringToFront();
-
-                  // Show hover label with municipality name
-                  showHoverLabel(e, municipalityName);
-                },
-                mouseout: function (e) {
-                  const layer = e.target;
-                  layer.setStyle({
-                    color: "rgb(38, 123, 41)",
-                    weight: 4,
-                    opacity: 0.9,
-                    fillColor: "rgb(38, 123, 41)",
-                    fillOpacity: 0.1,
-                    dashArray: "5, 8",
-                  });
-
-                  // Hide hover label
-                  hideHoverLabel();
-                },
-                click: function (e) {
-                  // Zoom to municipality and filter
-                  const bounds = layer.getBounds();
-                  map.fitBounds(bounds);
-
-                  // Apply municipality filter
-                  filterByMunicipality(municipalityName);
-
-                  // Track event
-                  trackEvent("municipality_click", {
-                    municipality: municipalityName,
-                    country: "Germany",
-                    state: state,
-                  });
-                },
-              });
-
-              // Find municipality data for additional info
-              const municipalityData = municipalitiesConfig.municipalities.find(
-                (m) => m.name === municipalityName,
-              );
-              let municipalityInfo = "";
-              if (municipalityData && municipalityData.population) {
-                const places = municipalityData.largest_places
-                  ? municipalityData.largest_places.join(", ")
-                  : "";
-                municipalityInfo = `<p><small>${municipalityName} heeft ${municipalityData.population.toLocaleString("nl-NL")} inwoners en een oppervlakte van ${municipalityData.area}${places ? ` en de grootste plaatsen zijn ${places}` : ""}.</small></p>`;
-              }
-
-              // Add popup with municipality info
-              layer.bindPopup(`
-                <div class="municipality-popup">
-                  <h3>${municipalityName}</h3>
-                  ${municipalityInfo}
-                  <p><a href="#" class="municipality-filter-link" onclick="filterByMunicipalityAndZoom('${municipalityName}'); return false;">Bekijk alle projecten en bedrijven in deze gemeente</a></p>
-                </div>
-              `, {
-                maxWidth: 280,
-                minWidth: 200,
-                autoPan: true,
-                autoPanPadding: [20, 20],
-                keepInView: true,
-                closeOnEscapeKey: true
-              });
-            },
-          });
-
-          municipalityLayer.addLayer(geoJsonLayer);
-          loadedCount++;
-
-          // Store municipality for filter dropdown
-          municipalities.push({
-            name: municipalityName,
-            country: "Germany",
-            state: state,
-            bounds: geoJsonLayer.getBounds(),
-          });
-        } catch (layerError) {
-          console.warn(
-            `Error creating layer for German municipality ${municipalityName}:`,
-            layerError,
-          );
-        }
-      }
+      return municipalityName && allowedMunicipalities.includes(municipalityName);
     });
+
+    for (let i = 0; i < features.length; i += batchSize) {
+      const batch = features.slice(i, i + batchSize);
+      
+      await new Promise(resolve => {
+        setTimeout(() => {
+          batch.forEach((feature) => {
+            const municipalityName = feature.properties?.NAME_4;
+            const state = feature.properties?.NAME_1;
+
+            try {
+              const geoJsonLayer = L.geoJSON(feature, {
+                style: {
+                  color: "rgb(38, 123, 41)",
+                  weight: 2,
+                  opacity: 0.8,
+                  fillColor: "rgb(38, 123, 41)",
+                  fillOpacity: 0.1,
+                  smoothFactor: 1,
+                  dashArray: "5, 8",
+                },
+                onEachFeature: function (feature, layer) {
+                  layer.on({
+                    mouseover: function (e) {
+                      const layer = e.target;
+                      layer.setStyle({
+                        color: "rgb(38, 123, 41)",
+                        weight: 4,
+                        opacity: 1,
+                        fillColor: "rgb(38, 123, 41)",
+                        fillOpacity: 0.3,
+                        dashArray: "5, 8",
+                      });
+                      layer.bringToFront();
+
+                      // Show hover label with municipality name
+                      showHoverLabel(e, `${municipalityName} (DE)`);
+                    },
+                    mouseout: function (e) {
+                      const layer = e.target;
+                      layer.setStyle({
+                        color: "rgb(38, 123, 41)",
+                        weight: 2,
+                        opacity: 0.8,
+                        fillColor: "rgb(38, 123, 41)",
+                        fillOpacity: 0.1,
+                        dashArray: "5, 8",
+                      });
+
+                      // Hide hover label
+                      hideHoverLabel();
+                    },
+                    click: function (e) {
+                      // Zoom to municipality and filter
+                      const bounds = layer.getBounds();
+                      map.fitBounds(bounds);
+
+                      // Apply municipality filter
+                      filterByMunicipality(municipalityName);
+
+                      // Track event
+                      trackEvent("municipality_click", {
+                        municipality: municipalityName,
+                        country: "Germany",
+                        state: state,
+                      });
+                    },
+                  });
+
+                  // Find municipality data for additional info
+                  const municipalityData = municipalitiesConfig.municipalities.find(
+                    (m) => m.name === municipalityName,
+                  );
+                  let municipalityInfo = "";
+                  if (municipalityData && municipalityData.population) {
+                    const places = municipalityData.largest_places
+                      ? municipalityData.largest_places.join(", ")
+                      : "";
+                    municipalityInfo = `<p><small>${municipalityName} heeft ${municipalityData.population.toLocaleString("nl-NL")} inwoners en een oppervlakte van ${municipalityData.area}${places ? ` en de grootste plaatsen zijn ${places}` : ""}.</small></p>`;
+                  }
+
+                  // Add popup with municipality info
+                  layer.bindPopup(`
+                    <div class="municipality-popup">
+                      <h3>${municipalityName}</h3>
+                      ${municipalityInfo}
+                      <p><a href="#" class="municipality-filter-link" onclick="filterByMunicipalityAndZoom('${municipalityName}'); return false;">Bekijk alle projecten en bedrijven in deze gemeente</a></p>
+                    </div>
+                  `, {
+                    maxWidth: 280,
+                    minWidth: 200,
+                    autoPan: true,
+                    autoPanPadding: [20, 20],
+                    keepInView: true,
+                    closeOnEscapeKey: true
+                  });
+                },
+              });
+
+              municipalityLayer.addLayer(geoJsonLayer);
+              loadedCount++;
+
+              // Store municipality for filter dropdown
+              municipalities.push({
+                name: municipalityName,
+                country: "Germany",
+                state: state,
+                bounds: geoJsonLayer.getBounds(),
+              });
+            } catch (layerError) {
+              console.warn(
+                `Error creating layer for German municipality ${municipalityName}:`,
+                layerError,
+              );
+            }
+          });
+          resolve();
+        }, 10);
+      });
+    }
 
     console.log(`Successfully loaded ${loadedCount} German municipalities`);
   } catch (error) {

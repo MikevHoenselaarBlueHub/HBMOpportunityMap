@@ -82,7 +82,8 @@ class DatabaseManager {
 
     // Valideer wachtwoord
     async validatePassword(username, password) {
-        const user = this.findUserByUsername(username);
+        const db = this.loadDatabase();
+        const user = db.users.find(u => u.username.toLowerCase() === username.toLowerCase());
         if (!user) return null;
 
         const isValid = await bcrypt.compare(password, user.password);

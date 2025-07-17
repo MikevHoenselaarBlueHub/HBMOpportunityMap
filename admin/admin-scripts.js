@@ -1372,7 +1372,8 @@ class AdminDashboard {
 
                 if (!municipalityName) return;
 
-                const isVisible = visibilityData[municipalityName] !== false; // Default visible
+                // Default to NOT visible (red), only visible if explicitly set to true
+                const isVisible = visibilityData[municipalityName] === true;
 
                 const layer = L.geoJSON(feature, {
                     style: {
@@ -1633,10 +1634,8 @@ async function saveMunicipalityVisibility() {
         
         Object.keys(window.adminDashboard.municipalityLayers).forEach(municipalityName => {
             const isVisible = window.adminDashboard.municipalityLayers[municipalityName].visible;
-            // Only store if not visible (default is visible)
-            if (!isVisible) {
-                visibilityData[municipalityName] = false;
-            }
+            // Store all values explicitly (true = visible, false = hidden)
+            visibilityData[municipalityName] = isVisible;
         });
 
         const response = await fetch('/admin/api/municipality-visibility', {
@@ -1652,6 +1651,9 @@ async function saveMunicipalityVisibility() {
 
         if (response.ok) {
             alert('Gemeente zichtbaarheid succesvol opgeslagen!');
+            
+            // Reload the municipalities data table to reflect changes
+            window.adminDashboard.loadMunicipalities();
             
             // Generate new visible municipalities GeoJSON
             const generateResponse = await fetch('/admin/api/generate-visible-municipalities', {
@@ -1671,6 +1673,40 @@ async function saveMunicipalityVisibility() {
     } catch (error) {
         console.error('Error saving municipality visibility:', error);
         alert('Fout bij opslaan van gemeente zichtbaarheid');
+    }
+}
+
+async function saveMunicipalitiesForKansenkaart() {
+    if (!window.adminDashboard.municipalityLayers) {
+        alert('Geen gemeente data beschikbaar om op te slaan');
+        return;
+    }
+
+    if (!confirm('Weet je zeker dat je alle zichtbare gemeenten wilt opslaan naar municipalities.json? Er wordt automatisch een backup gemaakt van de huidige versie.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/admin/api/save-municipalities-for-kansenkaart', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${window.adminDashboard.token}`
+            }
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert(`Succesvol ${result.count} zichtbare gemeenten opgeslagen naar municipalities.json!`);
+            
+            // Reload the municipalities data table to reflect changes
+            window.adminDashboard.loadMunicipalities();
+        } else {
+            alert(`Fout bij opslaan: ${result.message}`);
+        }
+    } catch (error) {
+        console.error('Error saving municipalities for kansenkaart:', error);
+        alert('Fout bij opslaan van gemeenten voor kansenkaart');
     }
 }
 });
