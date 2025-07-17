@@ -18,8 +18,21 @@ const adminProxy = createProxyMiddleware({
     }
 });
 
-// Admin routes proxy
-app.use('/admin', adminProxy);
+// Admin routes proxy - alleen voor admin server requests
+app.use('/admin/api', adminProxy);
+app.use('/admin/admin-styles.css', adminProxy);
+app.use('/admin/admin-scripts.js', adminProxy);
+app.use('/admin/index.html', adminProxy);
+app.use('/admin/dashboard.html', adminProxy);
+
+// Redirect /admin/ naar login page
+app.get('/admin', (req, res) => {
+    res.redirect('/admin/index.html');
+});
+
+app.get('/admin/', (req, res) => {
+    res.redirect('/admin/index.html');
+});
 
 // Serve static files voor de hoofdapplicatie
 app.use(express.static('.', {
