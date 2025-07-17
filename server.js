@@ -1222,6 +1222,76 @@ app.post('/admin/api/save-municipalities-for-kansenkaart', authenticateToken, as
     }
 });
 
+// One-time populate database from municipalities.json
+app.post('/admin/api/populate-municipalities-database', authenticateToken, async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: "Alleen administrators kunnen de database vullen"
+            });
+        }
+
+        // Load municipalities from JSON file
+        const municipalitiesPath = path.join(__dirname, 'data', 'municipalities.json');
+        if (!fs.existsSync(municipalitiesPath)) {
+            return res.status(404).json({
+                success: false,
+                message: "municipalities.json niet gevonden"
+            });
+        }
+
+        const municipalitiesData = JSON.parse(fs.readFileSync(municipalitiesPath, 'utf8'));
+        const municipalities = municipalitiesData.municipalities || [];
+
+        // Store municipalities in database with visibility: false
+        const municipalitiesWithVisibility = municipalities.map(municipality => ({
+            ...municipality,
+            visibility: false
+        }));
+
+        // Save to database
+        const updatedData = {
+            municipalities: municipalitiesWithVisibility,
+            lastUpdated: new Date().toISOString(),
+            totalCount: municipalitiesWithVisibility.length,
+            visibleCount: 0,
+            source: 'populated_from_json'
+        };
+
+        // Create backup first
+        const backupDir = path.join(__dirname, 'backup');
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+        }
+        
+        if (fs.existsSync(municipalitiesPath)) {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const backupPath = path.join(backupDir, `municipalities-before-populate-${timestamp}.json`);
+            fs.copyFileSync(municipalitiesPath, backupPath);
+        }
+
+        // Save updated data
+        fs.writeFileSync(municipalitiesPath, JSON.stringify(updatedData, null, 2));
+
+        console.log(`[POPULATE_DB] Populated database with ${municipalitiesWithVisibility.length} municipalities (all visibility: false)`);
+
+        res.json({
+            success: true,
+            message: `Database gevuld met ${municipalitiesWithVisibility.length} gemeenten (allemaal zichtbaar: false)`,
+            totalCount: municipalitiesWithVisibility.length,
+            visibleCount: 0
+        });
+
+    } catch (error) {
+        console.error('[POPULATE_DB] Error populating database:', error);
+        res.status(500).json({
+            success: false,
+            message: "Fout bij vullen van database"
+        });
+    }
+});
+
 // Create a filtered GeoJSON file with only visible municipalities for the main application
 app.post('/admin/api/generate-visible-geojson', authenticateToken, async (req, res) => {
     try {

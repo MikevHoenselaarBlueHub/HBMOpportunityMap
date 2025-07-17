@@ -427,7 +427,7 @@ class AdminDashboard {
 
     async loadMunicipalities() {
         try {
-            // Always load only municipalities that are in the database with visibility=true
+            // Load municipalities from database
             const response = await fetch("/admin/api/municipalities", {
                 headers: {
                     Authorization: `Bearer ${this.token}`,
@@ -457,10 +457,8 @@ class AdminDashboard {
                 );
             }
 
-            // Only show municipalities that have visibility=true (or undefined, which means visible)
-            const municipalitiesToShow = (data.municipalities || []).filter(
-                municipality => municipality.visibility !== false
-            );
+            // Get all municipalities from database
+            const allMunicipalities = data.municipalities || [];
 
             const tableBody = document.querySelector(
                 "#municipalitiesTable tbody",
@@ -469,7 +467,28 @@ class AdminDashboard {
 
             tableBody.innerHTML = "";
 
-            municipalitiesToShow.forEach((municipality) => {
+            // Check if database is empty and show populate option
+            if (allMunicipalities.length === 0) {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td colspan="6" style="text-align: center; padding: 2rem;">
+                        <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 10px;">
+                            <h4 style="color: #495057; margin-bottom: 15px;">Database is leeg</h4>
+                            <p style="color: #6c757d; margin-bottom: 20px;">Er zijn nog geen gemeenten in de database. Klik op de knop hieronder om de database eenmalig te vullen met gegevens uit municipalities.json.</p>
+                            ${this.userRole === 'admin' ? 
+                                `<button class="btn btn-primary" onclick="adminApp.populateMunicipalitiesDatabase()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                                    Database vullen met gemeenten
+                                </button>` : 
+                                '<p style="color: #dc3545;">Alleen administrators kunnen de database vullen.</p>'
+                            }
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+                return;
+            }
+
+            allMunicipalities.forEach((municipality) => {
                 const row = document.createElement("tr");
 
                 const canEdit =
@@ -492,12 +511,18 @@ class AdminDashboard {
 
                 municipalityDisplay += "</div>";
 
+                // Show visibility status
+                const visibilityStatus = municipality.visibility !== false ? 
+                    '<span style="color: #28a745; font-weight: bold;">✓ Zichtbaar</span>' : 
+                    '<span style="color: #dc3545;">✗ Verborgen</span>';
+
                 row.innerHTML = `
                     <td>${municipalityDisplay}</td>
                     <td>${municipality.country}</td>
                     <td>${municipality.code || ""}</td>
                     <td>${municipality.population ? municipality.population.toLocaleString() : ""}</td>
                     <td>${municipality.area || ""}</td>
+                    <td>${visibilityStatus}</td>
                     <td>
                         ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openMunicipalityModal('${municipality.name}')" title="Bewerken">✏️</button>` : ""}
                         ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteMunicipality('${municipality.name}')">Verwijderen</button>` : ""}
@@ -509,6 +534,38 @@ class AdminDashboard {
         } catch (error) {
             console.error("Error loading municipalities:", error);
             alert("Fout bij het laden van gemeenten");
+        }
+    }
+
+    async populateMunicipalitiesDatabase() {
+        if (this.userRole !== 'admin') {
+            alert('Alleen administrators kunnen de database vullen.');
+            return;
+        }
+
+        if (!confirm('Weet je zeker dat je de database wilt vullen met gemeenten uit municipalities.json? Alle gemeenten krijgen visibility: false.')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/admin/api/populate-municipalities-database', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert(`Database succesvol gevuld! ${result.totalCount} gemeenten toegevoegd (allemaal zichtbaar: false).`);
+                this.loadMunicipalities(); // Reload the table
+            } else {
+                alert(`Fout bij vullen database: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error populating database:', error);
+            alert('Fout bij vullen van database');
         }
     }
 
