@@ -8,7 +8,7 @@ channel = "stable-24_05"
 run = ["sh", "-c", "npm run dev"]
 
 [workflows]
-runButton = "Start Webserver"
+runButton = "Start Webserver with Admin"
 
 [[workflows.workflow]]
 name = "Start Webserver"
@@ -35,6 +35,19 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "cd admin && node server.js"
+
+[[workflows.workflow]]
+name = "Start Webserver with Admin"
+author = 45113069
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node admin/server.js"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node proxy-server.js"
 
 [[ports]]
 localPort = 3000
