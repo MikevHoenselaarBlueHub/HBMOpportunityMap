@@ -504,14 +504,16 @@ app.use((err, req, res, next) => {
     res.status(500).json({ error: "Er is een serverfout opgetreden" });
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
+// Start server - Fixed port configuration
+const PORT = 5000; // Fixed port voor consistentie
 app.listen(PORT, "0.0.0.0", () => {
+    const replUrl = process.env.REPLIT_DEV_DOMAIN || `${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.replit.dev`;
+    
     console.log(`========================================`);
     console.log(`🚀 Server succesvol gestart op poort ${PORT}`);
     console.log(`📍 Server luistert op: 0.0.0.0:${PORT}`);
-    console.log(`🌐 Hoofdapplicatie: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/`);
-    console.log(`⚙️  Admin CMS: https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/admin/`);
+    console.log(`🌐 Hoofdapplicatie: https://${replUrl}/`);
+    console.log(`⚙️  Admin CMS: https://${replUrl}/admin/`);
     console.log(`========================================`);
     
     // Log data file status for debugging
