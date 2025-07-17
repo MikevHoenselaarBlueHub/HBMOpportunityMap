@@ -11,58 +11,6 @@ run = ["sh", "-c", "npm run dev"]
 runButton = "App with Admin"
 
 [[workflows.workflow]]
-name = "Start Webserver"
-author = 44801690
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm install"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm install -g serve"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run start"
-
-[[workflows.workflow]]
-name = "Admin Server"
-author = 45113069
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd admin && node server.js"
-
-[[workflows.workflow]]
-name = "Start Webserver with Admin"
-author = 45113069
-mode = "parallel"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node admin/server.js"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "node proxy-server.js"
-
-[[workflows.workflow]]
-name = "Start with Dependencies"
-author = 45148110
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm install && node admin/server.js"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm install && node proxy-server.js"
-
-[[workflows.workflow]]
 name = "App Only"
 author = 45148110
 mode = "sequential"
