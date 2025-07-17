@@ -1,4 +1,3 @@
-
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -162,7 +161,7 @@ app.post("/admin/api/users", authenticateToken, async (req, res) => {
 
     try {
         const newUser = await db.createUser({ username, email, password, role });
-        
+
         res.status(201).json({
             success: true,
             message: "Gebruiker succesvol aangemaakt",
@@ -171,7 +170,7 @@ app.post("/admin/api/users", authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error(`[CREATE_USER] Fout bij aanmaken gebruiker:`, error);
-        
+
         if (error.message.includes('bestaat al') || error.message.includes('Ongeldige rol') || error.message.includes('vereist')) {
             res.status(400).json({
                 success: false,
@@ -194,7 +193,7 @@ app.put("/admin/api/users/:id", authenticateToken, async (req, res) => {
 
     try {
         const updatedUser = await db.updateUser(userId, { username, email, password, role });
-        
+
         res.json({
             success: true,
             message: "Gebruiker succesvol bijgewerkt",
@@ -203,7 +202,7 @@ app.put("/admin/api/users/:id", authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error(`[UPDATE_USER] Fout bij bijwerken gebruiker ${userId}:`, error);
-        
+
         if (error.message.includes('niet gevonden')) {
             res.status(404).json({
                 success: false,
@@ -239,7 +238,7 @@ app.delete("/admin/api/users/:id", authenticateToken, (req, res) => {
         }
 
         const success = db.deleteUser(userId);
-        
+
         if (success) {
             res.json({
                 success: true,
@@ -254,7 +253,7 @@ app.delete("/admin/api/users/:id", authenticateToken, (req, res) => {
 
     } catch (error) {
         console.error(`[DELETE_USER] Fout bij verwijderen gebruiker ${userId}:`, error);
-        
+
         if (error.message.includes('niet gevonden')) {
             res.status(404).json({
                 success: false,
@@ -352,7 +351,7 @@ app.post("/admin/api/municipalities", authenticateToken, (req, res) => {
     try {
         const municipalitiesPath = path.join(__dirname, "data/municipalities.json");
         const data = JSON.parse(fs.readFileSync(municipalitiesPath, "utf8"));
-        
+
         // Check if municipality already exists
         const existingMunicipality = data.municipalities.find(m => m.name.toLowerCase() === name.toLowerCase());
         if (existingMunicipality) {
@@ -379,12 +378,12 @@ app.post("/admin/api/municipalities", authenticateToken, (req, res) => {
         });
 
         data.municipalities.push(newMunicipality);
-        
+
         // Sort municipalities by name
         data.municipalities.sort((a, b) => a.name.localeCompare(b.name));
-        
+
         fs.writeFileSync(municipalitiesPath, JSON.stringify(data, null, 2));
-        
+
         res.status(201).json({
             success: true,
             message: "Gemeente succesvol toegevoegd",
@@ -408,7 +407,7 @@ app.put("/admin/api/municipalities/:name", authenticateToken, (req, res) => {
     try {
         const municipalitiesPath = path.join(__dirname, "data/municipalities.json");
         const data = JSON.parse(fs.readFileSync(municipalitiesPath, "utf8"));
-        
+
         const municipalityIndex = data.municipalities.findIndex(m => m.name === municipalityName);
         if (municipalityIndex === -1) {
             return res.status(404).json({
@@ -445,12 +444,12 @@ app.put("/admin/api/municipalities/:name", authenticateToken, (req, res) => {
         });
 
         data.municipalities[municipalityIndex] = updatedMunicipality;
-        
+
         // Sort municipalities by name
         data.municipalities.sort((a, b) => a.name.localeCompare(b.name));
-        
+
         fs.writeFileSync(municipalitiesPath, JSON.stringify(data, null, 2));
-        
+
         res.json({
             success: true,
             message: "Gemeente succesvol bijgewerkt",
@@ -481,7 +480,7 @@ app.delete("/admin/api/municipalities/:name", authenticateToken, (req, res) => {
     try {
         const municipalitiesPath = path.join(__dirname, "data/municipalities.json");
         const data = JSON.parse(fs.readFileSync(municipalitiesPath, "utf8"));
-        
+
         const municipalityIndex = data.municipalities.findIndex(m => m.name === municipalityName);
         if (municipalityIndex === -1) {
             return res.status(404).json({
@@ -492,7 +491,7 @@ app.delete("/admin/api/municipalities/:name", authenticateToken, (req, res) => {
 
         data.municipalities.splice(municipalityIndex, 1);
         fs.writeFileSync(municipalitiesPath, JSON.stringify(data, null, 2));
-        
+
         res.json({
             success: true,
             message: "Gemeente succesvol verwijderd"
@@ -523,7 +522,7 @@ app.post("/admin/api/filters/:category", authenticateToken, (req, res) => {
     try {
         const filtersPath = path.join(__dirname, "data/filters.json");
         const data = JSON.parse(fs.readFileSync(filtersPath, "utf8"));
-        
+
         if (!data[category]) {
             return res.status(400).json({
                 success: false,
@@ -532,7 +531,7 @@ app.post("/admin/api/filters/:category", authenticateToken, (req, res) => {
         }
 
         const trimmedItem = item.trim();
-        
+
         // Check if item already exists
         if (data[category].includes(trimmedItem)) {
             return res.status(400).json({
@@ -543,9 +542,9 @@ app.post("/admin/api/filters/:category", authenticateToken, (req, res) => {
 
         data[category].push(trimmedItem);
         data[category].sort();
-        
+
         fs.writeFileSync(filtersPath, JSON.stringify(data, null, 2));
-        
+
         res.status(201).json({
             success: true,
             message: "Filter item succesvol toegevoegd",
@@ -577,7 +576,7 @@ app.put("/admin/api/filters/:category/:item", authenticateToken, (req, res) => {
     try {
         const filtersPath = path.join(__dirname, "data/filters.json");
         const data = JSON.parse(fs.readFileSync(filtersPath, "utf8"));
-        
+
         if (!data[category]) {
             return res.status(400).json({
                 success: false,
@@ -594,7 +593,7 @@ app.put("/admin/api/filters/:category/:item", authenticateToken, (req, res) => {
         }
 
         const trimmedNewItem = newItem.trim();
-        
+
         // Check if new item already exists (and is not the same as old)
         if (trimmedNewItem !== oldItem && data[category].includes(trimmedNewItem)) {
             return res.status(400).json({
@@ -605,9 +604,9 @@ app.put("/admin/api/filters/:category/:item", authenticateToken, (req, res) => {
 
         data[category][itemIndex] = trimmedNewItem;
         data[category].sort();
-        
+
         fs.writeFileSync(filtersPath, JSON.stringify(data, null, 2));
-        
+
         res.json({
             success: true,
             message: "Filter item succesvol bijgewerkt",
@@ -631,7 +630,7 @@ app.delete("/admin/api/filters/:category/:item", authenticateToken, (req, res) =
     try {
         const filtersPath = path.join(__dirname, "data/filters.json");
         const data = JSON.parse(fs.readFileSync(filtersPath, "utf8"));
-        
+
         if (!data[category]) {
             return res.status(400).json({
                 success: false,
@@ -649,7 +648,7 @@ app.delete("/admin/api/filters/:category/:item", authenticateToken, (req, res) =
 
         data[category].splice(itemIndex, 1);
         fs.writeFileSync(filtersPath, JSON.stringify(data, null, 2));
-        
+
         res.json({
             success: true,
             message: "Filter item succesvol verwijderd"
@@ -694,16 +693,16 @@ app.get('/data/opportunities.json', (req, res) => {
     try {
         console.log(`[DATA] Loading opportunities.json for ${req.ip}`);
         const dataPath = path.join(__dirname, "data/opportunities.json");
-        
+
         // Check of bestand bestaat
         if (!fs.existsSync(dataPath)) {
             console.error(`[DATA] File not found: ${dataPath}`);
             return res.status(404).json({ error: "Opportunities data file not found" });
         }
-        
+
         const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
         console.log(`[DATA] Successfully loaded ${data.length} opportunities`);
-        
+
         // Ensure proper headers
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Cache-Control', 'no-cache');
@@ -718,15 +717,15 @@ app.get('/data/filters.json', (req, res) => {
     try {
         console.log(`[DATA] Loading filters.json for ${req.ip}`);
         const dataPath = path.join(__dirname, "data/filters.json");
-        
+
         if (!fs.existsSync(dataPath)) {
             console.error(`[DATA] File not found: ${dataPath}`);
             return res.status(404).json({ error: "Filters data file not found" });
         }
-        
+
         const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
         console.log(`[DATA] Successfully loaded filters data`);
-        
+
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Cache-Control', 'no-cache');
         res.json(data);
@@ -740,15 +739,15 @@ app.get('/data/municipalities.json', (req, res) => {
     try {
         console.log(`[DATA] Loading municipalities.json for ${req.ip}`);
         const dataPath = path.join(__dirname, "data/municipalities.json");
-        
+
         if (!fs.existsSync(dataPath)) {
             console.error(`[DATA] File not found: ${dataPath}`);
             return res.status(404).json({ error: "Municipalities data file not found" });
         }
-        
+
         const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
         console.log(`[DATA] Successfully loaded municipalities data`);
-        
+
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Cache-Control', 'no-cache');
         res.json(data);
@@ -763,19 +762,19 @@ app.get('/data/*', (req, res) => {
     try {
         const filePath = path.join(__dirname, req.path);
         console.log(`[DATA] Fallback request for: ${req.path}`);
-        
+
         if (!fs.existsSync(filePath)) {
             console.error(`[DATA] File not found: ${filePath}`);
             return res.status(404).json({ error: "Data file not found" });
         }
-        
+
         // Serve the file with proper content type
         if (req.path.endsWith('.json')) {
             res.setHeader('Content-Type', 'application/json');
         } else if (req.path.endsWith('.geojson')) {
             res.setHeader('Content-Type', 'application/geo+json');
         }
-        
+
         res.setHeader('Cache-Control', 'no-cache');
         res.sendFile(filePath);
     } catch (error) {
@@ -833,14 +832,120 @@ app.use((err, req, res, next) => {
     console.error(`[ERROR] ${err.stack}`);
     console.error(`[ERROR] Request: ${req.method} ${req.url}`);
     console.error(`[ERROR] Body:`, req.body);
+Adding municipality visibility endpoints and updating the server startup log.```text
     res.status(500).json({ error: "Er is een serverfout opgetreden" });
+});
+
+// Municipality visibility endpoints
+app.get('/admin/api/municipality-visibility', authenticateToken, (req, res) => {
+    try {
+        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
+
+        if (!fs.existsSync(visibilityPath)) {
+            // Return empty object if file doesn't exist (all visible by default)
+            return res.json({});
+        }
+
+        const visibilityData = JSON.parse(fs.readFileSync(visibilityPath, 'utf8'));
+        res.json(visibilityData);
+    } catch (error) {
+        console.error('[VISIBILITY] Error loading municipality visibility:', error);
+        res.status(500).json({
+            success: false,
+            message: "Fout bij het laden van gemeente zichtbaarheid"
+        });
+    }
+});
+
+app.post('/admin/api/municipality-visibility', authenticateToken, (req, res) => {
+    try {
+        const visibilityData = req.body;
+        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
+
+        // Save visibility data
+        fs.writeFileSync(visibilityPath, JSON.stringify(visibilityData, null, 2));
+
+        console.log('[VISIBILITY] Municipality visibility updated');
+
+        res.json({
+            success: true,
+            message: "Gemeente zichtbaarheid succesvol opgeslagen"
+        });
+    } catch (error) {
+        console.error('[VISIBILITY] Error saving municipality visibility:', error);
+        res.status(500).json({
+            success: false,
+            message: "Fout bij het opslaan van gemeente zichtbaarheid"
+        });
+    }
+});
+
+app.post('/admin/api/generate-visible-municipalities', authenticateToken, async (req, res) => {
+    try {
+        const visibilityPath = path.join(__dirname, 'data', 'municipality-visibility.json');
+        const nlGeoJsonPath = path.join(__dirname, 'data', 'geojson', 'nl-gemeenten.geojson');
+        const deGeoJsonPath = path.join(__dirname, 'data', 'geojson', 'de-gemeenten.geojson');
+        const outputPath = path.join(__dirname, 'data', 'geojson', 'visible-municipalities.geojson');
+
+        // Load visibility settings
+        let visibilityData = {};
+        if (fs.existsSync(visibilityPath)) {
+            visibilityData = JSON.parse(fs.readFileSync(visibilityPath, 'utf8'));
+        }
+
+        // Load original GeoJSON files
+        const nlData = JSON.parse(fs.readFileSync(nlGeoJsonPath, 'utf8'));
+        const deData = JSON.parse(fs.readFileSync(deGeoJsonPath, 'utf8'));
+
+        // Filter visible municipalities
+        const visibleFeatures = [];
+
+        // Filter Dutch municipalities
+        nlData.features.forEach(feature => {
+            const municipalityName = feature.properties.name;
+            if (visibilityData[municipalityName] !== false) { // Default visible
+                visibleFeatures.push(feature);
+            }
+        });
+
+        // Filter German municipalities
+        deData.features.forEach(feature => {
+            const municipalityName = feature.properties.NAME_4;
+            if (visibilityData[municipalityName] !== false) { // Default visible
+                visibleFeatures.push(feature);
+            }
+        });
+
+        // Create new GeoJSON with only visible municipalities
+        const visibleGeoJSON = {
+            type: "FeatureCollection",
+            features: visibleFeatures
+        };
+
+        // Save visible municipalities GeoJSON
+        fs.writeFileSync(outputPath, JSON.stringify(visibleGeoJSON, null, 2));
+
+        console.log(`[VISIBILITY] Generated visible municipalities GeoJSON with ${visibleFeatures.length} municipalities`);
+
+        res.json({
+            success: true,
+            message: "Zichtbare gemeenten GeoJSON succesvol gegenereerd",
+            count: visibleFeatures.length
+        });
+    } catch (error) {
+        console.error('[VISIBILITY] Error generating visible municipalities GeoJSON:', error);
+        res.status(500).json({
+            success: false,
+            message: "Fout bij het genereren van zichtbare gemeenten GeoJSON"
+        });
+    }
 });
 
 // Start server - Fixed port configuration
 const PORT = 5000; // Fixed port voor consistentie  
 app.listen(PORT, "0.0.0.0", () => {
     const replUrl = process.env.REPLIT_DEV_DOMAIN || `${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.replit.dev`;
-    
+
     console.log(`========================================`);
     console.log(`🚀 Server succesvol gestart op poort ${PORT}`);
     console.log(`📍 Server luistert op: 0.0.0.0:${PORT}`);
@@ -848,7 +953,7 @@ app.listen(PORT, "0.0.0.0", () => {
     console.log(`⚙️  Admin CMS: https://${replUrl}/admin/`);
     console.log(`🔧 Data API: https://${replUrl}/data/`);
     console.log(`========================================`);
-    
+
     // Log data file status for debugging
     try {
         const opportunitiesData = JSON.parse(fs.readFileSync(path.join(__dirname, "data/opportunities.json"), "utf8"));
@@ -856,14 +961,14 @@ app.listen(PORT, "0.0.0.0", () => {
     } catch (error) {
         console.error(`❌ Error loading opportunities data:`, error.message);
     }
-    
+
     try {
         const filtersData = JSON.parse(fs.readFileSync(path.join(__dirname, "data/filters.json"), "utf8"));
         console.log(`✅ Filters data loaded successfully`);
     } catch (error) {
         console.error(`❌ Error loading filters data:`, error.message);
     }
-    
+
     try {
         const municipalitiesData = JSON.parse(fs.readFileSync(path.join(__dirname, "data/municipalities.json"), "utf8"));
         console.log(`✅ Municipalities data loaded: ${municipalitiesData.municipalities.length} items`);

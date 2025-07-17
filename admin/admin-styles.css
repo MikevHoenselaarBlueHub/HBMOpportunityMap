@@ -452,6 +452,63 @@ tr:hover {
     font-style: italic;
 }
 
+/* Municipality tabs */
+.municipality-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+    border-bottom-color: rgb(38, 123, 41);
+    color: rgb(38, 123, 41);
+    font-weight: bold;
+}
+
+.tab-btn:hover {
+    background-color: #f5f5f5;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.visibility-controls {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.visibility-controls h3 {
+    margin: 0 0 10px 0;
+    color: rgb(38, 123, 41);
+}
+
+.visibility-controls p {
+    margin: 0 0 15px 0;
+    color: #666;
+}
+
+.visibility-buttons {
+    display: flex;
+    gap: 10px;
+}
+
 /* Settings */
 .settings-grid {
     display: grid;

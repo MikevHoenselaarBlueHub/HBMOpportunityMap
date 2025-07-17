@@ -911,8 +911,7 @@ class AdminDashboard {
             }
         } catch (error) {
             console.error('Error updating municipality:', error);
-            alert('Fout bij het bijwerken van gemeente');
-        }
+            alert('Fout bij het bijwerken van gemeente');        }
     }
 
     async deleteMunicipality(municipalityName) {
@@ -940,6 +939,75 @@ class AdminDashboard {
         } catch (error) {
             console.error('Error deleting municipality:', error);
             alert('Fout bij het verwijderen van gemeente');
+        }
+    }
+
+    openFilterModal(category, existingItem = null) {
+        const isEdit = existingItem !== null;
+
+        const modalHTML = `
+            <div id="filterModal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>${isEdit ? 'Filter item bewerken' : 'Nieuw filter item toevoegen'} - ${this.getCategoryDisplayName(category)}</h3>
+                        <button class="modal-close" onclick="closeModal('filterModal')">×</button>
+                    </div>
+                    <form id="filterForm" class="modal-form">
+                        <div class="form-group">
+                            <label for="filterItem">Filter item *</label>
+                            <input type="text" id="filterItem" name="item" required value="${existingItem || ''}">
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('filterModal')">Annuleren</button>
+                            <button type="submit" class="btn btn-primary">${isEdit ? 'Opslaan' : 'Toevoegen'}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        const form = document.getElementById('filterForm');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (isEdit) {
+                this.updateFilterItem(category, existingItem);
+            } else {
+                this.createFilterItem(category);
+            }
+        });
+    }
+
+    async deleteFilterItem(category, item) {
+        if (this.userRole !== 'admin') {
+            alert('Alleen administrators kunnen filter items verwijderen.');
+            return;
+        }
+
+        if (!confirm(`Weet je zeker dat je "${item}" wilt verwijderen?`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/admin/api/filters/${category}/${encodeURIComponent(item)}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert('Filter item succesvol verwijderd!');
+                this.loadFilters();
+            } else {
+                alert(`Fout: ${result.message || 'Onbekende fout'}`);
+            }
+        } catch (error) {
+            console.error('Error deleting filter item:', error);
+            alert('Fout bij het verwijderen van filter item');
         }
     }
 
@@ -1095,38 +1163,6 @@ class AdminDashboard {
         } catch (error) {
             console.error('Error updating filter item:', error);
             alert('Fout bij het bijwerken van filter item');
-        }
-    }
-
-    async deleteFilterItem(containerId, item) {
-        const categoryMap = {
-            'projectTypesFilter': 'ProjectType',
-            'organizationTypesFilter': 'OrganizationType',
-            'hbmTopicsFilter': 'HBMTopic',
-            'hbmSectorsFilter': 'HBMSector'
-        };
-
-        const category = categoryMap[containerId];
-
-        try {
-            const response = await fetch(`/admin/api/filters/${category}/${encodeURIComponent(item)}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`
-                }
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                alert('Filter item succesvol verwijderd!');
-                this.loadFilters();
-            } else {
-                alert(`Fout: ${result.message || 'Onbekende fout'}`);
-            }
-        } catch (error) {
-            console.error('Error deleting filter item:', error);
-            alert('Fout bij het verwijderen van filter item');
         }
     }
 

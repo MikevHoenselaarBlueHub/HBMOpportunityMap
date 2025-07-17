@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HBM Admin Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="admin-styles.css">
 </head>
 <body>
@@ -124,21 +125,41 @@
                         <button class="add-item-btn" onclick="openAddMunicipalityModal()" title="Nieuwe gemeente toevoegen">+</button>
                     </div>
 
-                    <div class="table-container">
-                        <table id="municipalitiesTable">
-                            <thead>
-                                <tr>
-                                    <th>Naam</th>
-                                    <th>Land</th>
-                                    <th>Inwoners</th>
-                                    <th>Oppervlakte</th>
-                                    <th>Acties</th>
-                                </tr>
-                            </thead>
-                            <tbody id="municipalitiesTableBody">
-                                <!-- Data will be loaded here -->
-                            </tbody>
-                        </table>
+                    <div class="municipality-tabs">
+                        <button class="tab-btn active" onclick="switchMunicipalityTab('data')">Gegevens beheer</button>
+                        <button class="tab-btn" onclick="switchMunicipalityTab('visibility')">Zichtbaarheid configuratie</button>
+                    </div>
+
+                    <div id="municipality-data-tab" class="tab-content active">
+                        <div class="table-container">
+                            <table id="municipalitiesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Naam</th>
+                                        <th>Land</th>
+                                        <th>Inwoners</th>
+                                        <th>Oppervlakte</th>
+                                        <th>Acties</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="municipalitiesTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="municipality-visibility-tab" class="tab-content">
+                        <div class="visibility-controls">
+                            <h3>Configureer welke gemeenten zichtbaar zijn op de hoofdapplicatie</h3>
+                            <p>Groene gemeenten zijn zichtbaar, rode zijn verborgen. Klik op een gemeente om de status te wijzigen.</p>
+                            <div class="visibility-buttons">
+                                <button class="btn btn-primary" onclick="toggleAllMunicipalities(true)">Alle zichtbaar</button>
+                                <button class="btn btn-secondary" onclick="toggleAllMunicipalities(false)">Alle verbergen</button>
+                                <button class="btn btn-primary" onclick="saveMunicipalityVisibility()">Opslaan</button>
+                            </div>
+                        </div>
+                        <div id="municipalityMap" style="height: 600px; margin-top: 20px;"></div>
                     </div>
                 </section>
 
@@ -205,6 +226,7 @@
     <!-- Modals will be added here -->
     <div id="modalContainer"></div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="admin-scripts.js"></script>
 </body>
 </html>
