@@ -295,7 +295,7 @@ class AdminDashboard {
         }
     }
 
-    
+
 
     async loadFilters() {
         try {
@@ -1417,10 +1417,10 @@ class AdminDashboard {
     // Translate array of comma-separated values
     translateCommaSeparatedValues(category, commaSeparatedString) {
         if (!commaSeparatedString) return null;
-        
+
         const values = commaSeparatedString.split(',').map(v => v.trim());
         const translatedValues = values.map(value => this.translateValue(category, value));
-        
+
         return translatedValues.length === 1 ? translatedValues[0] : translatedValues;
     }
 
@@ -1445,7 +1445,7 @@ class AdminDashboard {
                                 <li>Adressen worden automatisch gecodeerd naar coördinaten</li>
                             </ul>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="importFile">Selecteer XLS/XLSX bestand *</label>
                             <input type="file" id="importFile" accept=".xls,.xlsx" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
@@ -1453,14 +1453,14 @@ class AdminDashboard {
                                 Ondersteunde formaten: .xlsx, .xls (max 10MB)
                             </small>
                         </div>
-                        
+
                         <div id="importProgress" style="display: none; margin-top: 1rem;">
                             <div style="background: #e9ecef; border-radius: 4px; overflow: hidden;">
                                 <div id="importProgressBar" style="height: 20px; background: #007bff; width: 0%; transition: width 0.3s;"></div>
                             </div>
                             <div id="importStatus" style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;"></div>
                         </div>
-                        
+
                         <div id="importResults" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 4px;"></div>
                     </div>
                     <div class="modal-actions">
@@ -1478,7 +1478,7 @@ class AdminDashboard {
     async processImport() {
         const fileInput = document.getElementById("importFile");
         const file = fileInput.files[0];
-        
+
         if (!file) {
             alert("Selecteer eerst een bestand");
             return;
@@ -1490,10 +1490,10 @@ class AdminDashboard {
         const progressBar = document.getElementById("importProgressBar");
         const statusDiv = document.getElementById("importStatus");
         const resultsDiv = document.getElementById("importResults");
-        
+
         progressContainer.style.display = "block";
         resultsDiv.style.display = "none";
-        
+
         try {
             // Validate file type
             if (!file.name.toLowerCase().match(/\.(xlsx|xls)$/)) {
@@ -1507,34 +1507,34 @@ class AdminDashboard {
 
             // Update progress
             this.updateImportProgress(5, "Bestand wordt gecontroleerd...");
-            
+
             // Small delay to show progress
             await new Promise(resolve => setTimeout(resolve, 200));
-            
+
             this.updateImportProgress(8, "Excel library wordt geladen...");
-            
+
             // Ensure XLSX library is loaded first
             await this.ensureXLSXLoaded();
-            
+
             this.updateImportProgress(15, "Bestand wordt gelezen...");
-            
+
             // Read file
             const data = await this.readExcelFile(file);
             console.log("File read successfully, processing data...");
-            
+
             this.updateImportProgress(30, "Data wordt gevalideerd...");
-            
+
             // Process data
             const processedData = await this.processImportData(data);
             this.updateImportProgress(90, "Import wordt afgerond...");
-            
+
             // Show results
             this.showImportResults(processedData);
             this.updateImportProgress(100, "Import voltooid!");
-            
+
             // Reload opportunities
             await this.loadOpportunities();
-            
+
         } catch (error) {
             console.error("Import error:", error);
             this.updateImportProgress(0, "Fout opgetreden");
@@ -1551,7 +1551,7 @@ class AdminDashboard {
     updateImportProgress(percentage, status) {
         const progressBar = document.getElementById("importProgressBar");
         const statusDiv = document.getElementById("importStatus");
-        
+
         if (progressBar) progressBar.style.width = percentage + "%";
         if (statusDiv) statusDiv.textContent = status;
     }
@@ -1593,7 +1593,7 @@ class AdminDashboard {
             }
 
             console.log("Loading XLSX library...");
-            
+
             // Try multiple CDN sources for better reliability
             const cdnUrls = [
                 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
@@ -1611,7 +1611,7 @@ class AdminDashboard {
 
                 const script = document.createElement('script');
                 script.src = cdnUrls[currentIndex];
-                
+
                 script.onload = () => {
                     console.log(`XLSX library loaded successfully from: ${cdnUrls[currentIndex]}`);
                     // Add small delay to ensure library is fully initialized
@@ -1626,7 +1626,7 @@ class AdminDashboard {
                         }
                     }, 200);
                 };
-                
+
                 script.onerror = () => {
                     console.error(`Failed to load XLSX from: ${cdnUrls[currentIndex]}`);
                     currentIndex++;
@@ -1652,14 +1652,14 @@ class AdminDashboard {
     parseExcelData(data, resolve, reject) {
         try {
             console.log("Starting Excel parsing...");
-            
+
             if (typeof XLSX === 'undefined') {
                 reject(new Error("XLSX library is niet beschikbaar. Herlaad de pagina en probeer opnieuw."));
                 return;
             }
 
             console.log("Reading workbook...");
-            
+
             // Try different read options for better compatibility
             let workbook;
             try {
@@ -1673,9 +1673,9 @@ class AdminDashboard {
                     workbook = XLSX.read(data, { type: 'array' });
                 }
             }
-            
+
             console.log("Workbook sheets:", workbook.SheetNames);
-            
+
             if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
                 reject(new Error("Geen werkbladen gevonden in het Excel bestand. Controleer of het bestand geldig is."));
                 return;
@@ -1690,9 +1690,9 @@ class AdminDashboard {
                 targetSheetName = workbook.SheetNames[0];
                 console.log("No 'Data' sheet found, using first sheet:", targetSheetName);
             }
-            
+
             const worksheet = workbook.Sheets[targetSheetName];
-            
+
             if (!worksheet) {
                 reject(new Error("Werkblad kon niet worden gelezen. Controleer of het Excel bestand geldig is."));
                 return;
@@ -1705,9 +1705,9 @@ class AdminDashboard {
                 blankrows: false,
                 raw: false
             });
-            
+
             console.log("Raw data rows:", jsonData.length);
-            
+
             if (jsonData.length < 2) {
                 reject(new Error("Excel bestand bevat geen data. Controleer of er data in het bestand staat."));
                 return;
@@ -1715,32 +1715,32 @@ class AdminDashboard {
 
             // Log first few rows for debugging (but limit to avoid console spam)
             console.log("First 3 rows:", jsonData.slice(0, 3));
-            
+
             // Skip header row and filter for approved records
             const dataRows = jsonData.slice(1).filter(row => row.some(cell => cell !== null && cell !== ""));
-            
+
             // Debug: log first few status values
             console.log("First 10 status values:", dataRows.slice(0, 10).map(row => row[0]));
-            
+
             const approvedRecords = dataRows.filter(row => {
                 const status = row[0] ? row[0].toString().toLowerCase().trim() : '';
                 console.log(`Row status: '${row[0]}' -> normalized: '${status}'`);
                 return status === 'approved';
             });
-            
+
             console.log(`Found ${approvedRecords.length} approved records out of ${dataRows.length} total rows`);
-            
+
             // More detailed error message
             if (approvedRecords.length === 0) {
                 const uniqueStatuses = [...new Set(dataRows.map(row => row[0]).filter(status => status !== null && status !== ""))];
                 reject(new Error(`Geen records met status 'Approved' gevonden in het bestand. Gevonden statuswaarden in eerste kolom: ${uniqueStatuses.join(', ')}. Controleer of er records zijn met exact de tekst 'Approved' in de eerste kolom.`));
                 return;
             }
-            
+
             resolve(approvedRecords);
         } catch (error) {
             console.error("Excel parsing error:", error);
-            
+
             // More specific error messages
             if (error.message.includes("corrupted")) {
                 reject(new Error("Excel bestand is beschadigd. Probeer het bestand opnieuw op te slaan."));
@@ -1764,25 +1764,25 @@ class AdminDashboard {
 
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
-            
+
             try {
                 this.updateImportProgress(20 + ((i / data.length) * 60), `Verwerken record ${i + 1} van ${data.length}...`);
-                
+
                 // Log raw row data for debugging
                 console.log(`Processing row ${i + 1}:`, row);
-                
+
                 const opportunity = await this.processOpportunityRow(row);
-                
+
                 if (opportunity) {
                     console.log(`Processed opportunity for row ${i + 1}:`, {
                         name: opportunity.Name,
                         type: opportunity.HBMType,
                         municipality: opportunity.Municipality
                     });
-                    
+
                     // Check if opportunity exists by name
                     const existingOpportunity = this.allOpportunities.find(o => o.Name === opportunity.Name);
-                    
+
                     if (existingOpportunity) {
                         await this.updateExistingOpportunity(opportunity);
                         results.updated++;
@@ -1814,18 +1814,18 @@ class AdminDashboard {
     async processOpportunityRow(row) {
         try {
             console.log(`Processing opportunity row with ${row.length} columns:`, row);
-            
+
             // Validate row has minimum required data
             if (!row || row.length < 12) {
                 throw new Error(`Row has insufficient data: ${row.length} columns found, minimum 12 required`);
             }
-            
+
             // Validate required fields and clean up the name
             let opportunityName = (row[1] || "").toString().trim();
             if (!opportunityName || opportunityName === '') {
                 throw new Error(`Missing required field: Name (column 1) is empty`);
             }
-            
+
             // Skip test/demo entries that might cause issues
             if (opportunityName.toLowerCase().includes('prev.end') || 
                 opportunityName.toLowerCase().includes('example') ||
@@ -1833,13 +1833,13 @@ class AdminDashboard {
                 console.log(`Skipping test/demo opportunity: ${opportunityName}`);
                 return null;
             }
-            
+
             // Clean up the name to remove any problematic characters
             opportunityName = opportunityName.replace(/[^\w\s\-\(\)\.]/g, '').trim();
             if (!opportunityName) {
                 throw new Error(`Invalid opportunity name after cleanup: "${row[1]}"`);
             }
-            
+
             // Map columns to opportunity object
             const opportunity = {
                 Name: opportunityName,
@@ -1922,7 +1922,7 @@ class AdminDashboard {
             if (response.ok) {
                 const data = await response.json();
                 const existingMunicipality = data.municipalities.find(m => m.name === municipalityName);
-                
+
                 if (!existingMunicipality) {
                     // Create new municipality
                     const municipalityData = {
@@ -1952,7 +1952,7 @@ class AdminDashboard {
         try {
             const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
             const data = await response.json();
-            
+
             if (data && data.length > 0) {
                 return {
                     lat: parseFloat(data[0].lat),
@@ -1988,19 +1988,19 @@ class AdminDashboard {
                 name: opportunity.Name,
                 data: opportunity
             });
-            
+
             // Additional validation before sending to API
             if (!opportunity.Name || opportunity.Name.trim() === '') {
                 throw new Error('Opportunity name is required');
             }
-            
+
             // Ensure required fields have default values
             const cleanOpportunity = {
                 ...opportunity,
                 Description: opportunity.Description || `${opportunity.HBMType || 'Kans'} in ${opportunity.Municipality || opportunity.City || 'onbekende locatie'}`,
                 HBMType: opportunity.HBMType || 'Project'
             };
-            
+
             const response = await fetch("/admin/api/opportunities", {
                 method: "POST",
                 headers: {
@@ -2017,7 +2017,7 @@ class AdminDashboard {
                     statusText: response.statusText,
                     errorText: errorText
                 });
-                
+
                 // More specific error handling
                 if (response.status === 400) {
                     throw new Error(`Validation error for ${opportunity.Name}: ${errorText}`);
@@ -2027,7 +2027,7 @@ class AdminDashboard {
                     throw new Error(`Server error creating ${opportunity.Name}: ${response.status} ${errorText}`);
                 }
             }
-            
+
             const result = await response.json();
             console.log(`Successfully created opportunity: ${opportunity.Name}`, result);
         } catch (error) {
@@ -2039,7 +2039,7 @@ class AdminDashboard {
     // Show import results
     showImportResults(results) {
         const resultsDiv = document.getElementById("importResults");
-        
+
         let resultHTML = `
             <div style="color: #28a745; padding: 1rem; background: #d4edda; border-radius: 4px; margin-bottom: 1rem;">
                 <strong>Import voltooid!</strong>
@@ -2082,14 +2082,14 @@ class AdminDashboard {
     // Debug function to test XLSX library
     testXLSXLibrary() {
         console.log("Testing XLSX library availability...");
-        
+
         if (typeof XLSX !== 'undefined') {
             console.log("✅ XLSX library is available");
             console.log("XLSX version:", XLSX.version);
             return true;
         } else {
             console.log("❌ XLSX library is not available, attempting to load...");
-            
+
             const script = document.createElement('script');
             script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
             script.onload = () => {
@@ -2100,7 +2100,7 @@ class AdminDashboard {
                 console.error("❌ Failed to load XLSX library");
             };
             document.head.appendChild(script);
-            
+
             return false;
         }
     }
@@ -2131,7 +2131,7 @@ class AdminDashboard {
             this.allOpportunities = opportunities;
             this.filteredOpportunities = opportunities;
 
-            this.renderOpportunities(opportunities);
+            this.renderOpportunityTable(opportunities);
         } catch (error) {
             console.error("Error loading opportunities:", error);
             alert("Fout bij het laden van kansen");
@@ -2147,7 +2147,7 @@ class AdminDashboard {
         // Add search and import container
         const section = document.getElementById("opportunities-section");
         const sectionHeader = section.querySelector(".section-header");
-        
+
         const searchDiv = document.createElement("div");
         searchDiv.id = "opportunitySearchContainer";
         searchDiv.innerHTML = `
@@ -2166,27 +2166,27 @@ class AdminDashboard {
                 Zoeken...
             </div>
         `;
-        
+
         sectionHeader.parentNode.insertBefore(searchDiv, sectionHeader.nextSibling);
 
         // Add event listeners with debouncing
         setTimeout(() => {
             const searchInput = document.getElementById("opportunitySearch");
             const typeFilter = document.getElementById("opportunityTypeFilter");
-            
+
             if (searchInput) {
                 let searchTimeout;
                 searchInput.addEventListener("input", () => {
                     // Clear previous timeout
                     clearTimeout(searchTimeout);
-                    
+
                     // Show searching status
                     const statusDiv = document.getElementById("searchStatus");
                     if (statusDiv) {
                         statusDiv.style.display = "block";
                         statusDiv.textContent = "Zoeken...";
                     }
-                    
+
                     // Set new timeout for 2 seconds
                     searchTimeout = setTimeout(() => {
                         this.filterOpportunities();
@@ -2209,7 +2209,7 @@ class AdminDashboard {
     filterOpportunities() {
         const searchInput = document.getElementById("opportunitySearch");
         const typeFilterSelect = document.getElementById("opportunityTypeFilter");
-        
+
         if (!searchInput || !typeFilterSelect) {
             console.error("Search elements not found");
             return;
@@ -2229,12 +2229,15 @@ class AdminDashboard {
             const matchesSearch = !searchTerm || 
                 (opp.Name && opp.Name.toLowerCase().includes(searchTerm)) ||
                 (opp.Municipality && opp.Municipality.toLowerCase().includes(searchTerm)) ||
-                (opp.HBMSector && opp.HBMSector.toLowerCase().includes(searchTerm)) ||
-                (opp.OrganizationType && opp.OrganizationType.toLowerCase().includes(searchTerm)) ||
-                (opp.ProjectType && opp.ProjectType.toLowerCase().includes(searchTerm)) ||
-                (opp.HBMTopic && Array.isArray(opp.HBMTopic) && opp.HBMTopic.some(topic => topic.toLowerCase().includes(searchTerm))) ||
-                (opp.HBMCharacteristics && Array.isArray(opp.HBMCharacteristics) && opp.HBMCharacteristics.some(char => char.toLowerCase().includes(searchTerm))) ||
-                (opp.Description && opp.Description.toLowerCase().includes(searchTerm));
+                (opp.HBMSector && this.arrayOrStringIncludes(opp.HBMSector, searchTerm)) ||
+                (opp.OrganizationType && this.arrayOrStringIncludes(opp.OrganizationType, searchTerm)) ||
+                (opp.ProjectType && this.arrayOrStringIncludes(opp.ProjectType, searchTerm)) ||
+                (opp.HBMTopic && this.arrayOrStringIncludes(opp.HBMTopic, searchTerm)) ||
+                (opp.HBMCharacteristics && this.arrayOrStringIncludes(opp.HBMCharacteristics, searchTerm)) ||
+                (opp.OrganizationField && this.arrayOrStringIncludes(opp.OrganizationField, searchTerm)) ||
+                (opp.Description && opp.Description.toLowerCase().includes(searchTerm)) ||
+                (opp.City && opp.City.toLowerCase().includes(searchTerm)) ||
+                (opp.Street && opp.Street.toLowerCase().includes(searchTerm));
 
             const matchesType = !typeFilter || opp.HBMType === typeFilter;
 
@@ -2244,17 +2247,29 @@ class AdminDashboard {
         console.log(`Filter result: ${filtered.length} opportunities found`);
 
         this.filteredOpportunities = filtered;
-        this.renderOpportunities(filtered);
+        this.renderOpportunityTable(filtered);
+    }
+
+    arrayOrStringIncludes(value, searchTerm) {
+        if (!value) return false;
+
+        if (Array.isArray(value)) {
+            return value.some(item => 
+                item && item.toString().toLowerCase().includes(searchTerm)
+            );
+        } else {
+            return value.toString().toLowerCase().includes(searchTerm);
+        }
     }
 
     clearOpportunityFilters() {
         document.getElementById("opportunitySearch").value = "";
         document.getElementById("opportunityTypeFilter").value = "";
         this.filteredOpportunities = this.allOpportunities;
-        this.renderOpportunities(this.allOpportunities);
+        this.renderOpportunityTable(this.allOpportunities);
     }
 
-    renderOpportunities(opportunities) {
+    renderOpportunityTable(opportunities) {
         const tableBody = document.getElementById("opportunitiesTableBody");
         tableBody.innerHTML = "";
 
@@ -2269,31 +2284,46 @@ class AdminDashboard {
             return;
         }
 
+        const tableHeader = `
+            <tr>
+                <th>Naam</th>
+                <th>Type</th>
+                <th>Gebruik</th>
+                <th>Gemeente</th>
+                <th>Sector</th>
+                <th>Organisatie</th>
+                <th>Coördinaten</th>
+                <th>Acties</th>
+            </tr>
+        `;
+
+        const headerRow = document.createElement('tr');
+        headerRow.innerHTML = tableHeader;
+        tableBody.appendChild(headerRow);
+
         opportunities.forEach((opportunity) => {
             const row = document.createElement("tr");
-            
-            const canEdit = this.userRole === "admin" || this.userRole === "editor";
-            const canDelete = this.userRole === "admin" || this.userRole === "editor";
-
             row.innerHTML = `
+                <td>${opportunity.Name || 'Onbekend'}</td>
                 <td>
-                    <div>
-                        <strong>${opportunity.Name || "Onbekend"}</strong>
-                        ${opportunity.Municipality ? `<br><small style="color: #666;">${opportunity.Municipality}</small>` : ""}
-                    </div>
+                    <span class="type-badge ${(opportunity.HBMType || '').toLowerCase()}">${opportunity.HBMType || 'Onbekend'}</span>
                 </td>
                 <td>
-                    <span class="type-badge ${opportunity.HBMType?.toLowerCase() || "unknown"}">
-                        ${opportunity.HBMType || "Onbekend"}
-                    </span>
+                    <span class="use-badge ${(opportunity.HBMUse || 'external').toLowerCase()}">${opportunity.HBMUse || 'external'}</span>
                 </td>
-                <td>${opportunity.Municipality || "Onbekend"}</td>
-                <td>${opportunity.HBMSector || "Onbekend"}</td>
-                <td class="action-buttons">
-                    ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openOpportunityModal('${opportunity.Name}')" title="Bewerken">✏️</button>` : ""}
-                    ${canEdit ? `<button class="action-btn filter-btn" onclick="adminApp.openFilterSelectionModal('${opportunity.Name}')" title="Filters instellen">🔧</button>` : ""}
-                    ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteOpportunity('${opportunity.Name}')">Verwijderen</button>` : ""}
-                    ${!canEdit && !canDelete ? '<span style="color: #999;">Geen acties beschikbaar</span>' : ""}
+                <td>${opportunity.Municipality || 'Onbekend'}</td>
+                <td>${this.formatArrayValue(opportunity.HBMSector)}</td>
+                <td>${this.formatArrayValue(opportunity.OrganizationType)}</td>
+                <td>
+                    ${opportunity.Latitude && opportunity.Longitude 
+                        ? `${parseFloat(opportunity.Latitude).toFixed(4)}, ${parseFloat(opportunity.Longitude).toFixed(4)}`
+                        : 'Geen coördinaten'
+                    }
+                </td>
+                <td>
+                    <button onclick="adminApp.openOpportunityModal('${this.escapeHtml(opportunity.Name)}')" class="btn btn-primary btn-sm">Bewerken</button>
+                    <button onclick="adminApp.openFilterSelectionModal('${this.escapeHtml(opportunity.Name)}')" class="btn btn-secondary btn-sm">Filters</button>
+                    <button onclick="adminApp.deleteOpportunity('${this.escapeHtml(opportunity.Name)}')" class="btn btn-danger btn-sm">Verwijderen</button>
                 </td>
             `;
             tableBody.appendChild(row);
@@ -2308,9 +2338,25 @@ class AdminDashboard {
             infoDiv.style.cssText = "margin-bottom: 1rem; color: #666; font-size: 0.9rem;";
             searchContainer.appendChild(infoDiv);
         }
-        
+
         document.getElementById("opportunityResultsInfo").textContent = 
             `${opportunities.length} van ${this.allOpportunities.length} kansen`;
+    }
+
+    formatArrayValue(value) {
+        if (Array.isArray(value)) {
+            return value.join(', ');
+        }
+        return value || 'Onbekend';
+    }
+
+    escapeHtml(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
     openOpportunityModal(opportunityName = null) {
@@ -2337,6 +2383,20 @@ class AdminDashboard {
                                     <option value="Bedrijf">Bedrijf</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="opportunityUse">Gebruik</label>
+                            <select id="opportunityUse" name="HBMUse">
+                                <option value="external">External (zichtbaar in hoofdapplicatie)</option>
+                                <option value="internal">Internal (alleen in CMS)</option>
+                                <option value="both">Both (beide)</option>
+                            </select>
+                            <small style="color: #666; font-size: 0.9em;">
+                                External: zichtbaar in hoofdapplicatie<br>
+                                Internal: alleen zichtbaar in CMS<br>
+                                Both: zichtbaar in beide
+                            </small>
                         </div>
 
                         <div class="form-group">
@@ -2408,6 +2468,7 @@ class AdminDashboard {
             if (opportunity) {
                 document.getElementById("opportunityName").value = opportunity.Name || "";
                 document.getElementById("opportunityType").value = opportunity.HBMType || "";
+                document.getElementById("opportunityUse").value = opportunity.HBMUse || "";
                 // Load municipality dropdown
                 await this.loadMunicipalityDropdown();
                 document.getElementById("opportunityMunicipality").value = opportunity.Municipality || "";
@@ -2433,11 +2494,11 @@ class AdminDashboard {
             if (response.ok) {
                 const data = await response.json();
                 const municipalitySelect = document.getElementById("opportunityMunicipality");
-                
+
                 if (municipalitySelect) {
                     // Clear existing options except the first one
                     municipalitySelect.innerHTML = '<option value="">Selecteer gemeente</option>';
-                    
+
                     // Add municipalities
                     data.municipalities.forEach(municipality => {
                         const option = document.createElement("option");
@@ -2558,7 +2619,7 @@ class AdminDashboard {
     async createOpportunity() {
         const formData = new FormData(document.getElementById("opportunityForm"));
         const opportunityData = {};
-        
+
         for (let [key, value] of formData.entries()) {
             if (value.trim()) {
                 if (key === "Latitude" || key === "Longitude") {
@@ -2597,7 +2658,7 @@ class AdminDashboard {
     async updateOpportunity(originalName) {
         const formData = new FormData(document.getElementById("opportunityForm"));
         const opportunityData = {};
-        
+
         for (let [key, value] of formData.entries()) {
             if (value.trim()) {
                 if (key === "Latitude" || key === "Longitude") {
@@ -2668,13 +2729,13 @@ class AdminDashboard {
                     Authorization: `Bearer ${this.token}`,
                 },
             });
-            
+
             if (!filtersResponse.ok) {
                 throw new Error("Failed to load filters");
             }
-            
+
             const filters = await filtersResponse.json();
-            
+
             // Find the opportunity
             const opportunity = this.allOpportunities.find(o => o.Name === opportunityName);
             if (!opportunity) {
@@ -2692,7 +2753,7 @@ class AdminDashboard {
                         </div>
                         <div class="modal-body">
                             <p style="margin-bottom: 1rem; color: #666;">Selecteer de filters waar deze kans onder gevonden moet worden:</p>
-                            
+
                             <div class="filter-categories">
                                 ${this.renderFilterCategory('HBMSector', 'Sectoren', filters.HBMSector, opportunity.HBMSector)}
                                 ${this.renderFilterCategory('OrganizationType', 'Organisatie Types', filters.OrganizationType, opportunity.OrganizationType)}
@@ -2711,7 +2772,7 @@ class AdminDashboard {
             `;
 
             document.body.insertAdjacentHTML("beforeend", modalHTML);
-            
+
         } catch (error) {
             console.error("Error opening filter selection modal:", error);
             alert("Fout bij het laden van filters");
@@ -2721,7 +2782,7 @@ class AdminDashboard {
     renderFilterCategory(categoryKey, categoryName, filterOptions, currentValues) {
         const currentArray = Array.isArray(currentValues) ? currentValues : 
                            (currentValues ? [currentValues] : []);
-        
+
         return `
             <div class="filter-category" style="margin-bottom: 1.5rem; border: 1px solid #ddd; border-radius: 8px; padding: 1rem;">
                 <h4 style="margin: 0 0 0.75rem 0; color: rgb(38, 123, 41);">${categoryName}</h4>
@@ -2745,15 +2806,15 @@ class AdminDashboard {
         try {
             const modal = document.getElementById('filterSelectionModal');
             const formData = new FormData();
-            
+
             // Collect all checked values for each category
             const categories = ['HBMSector', 'OrganizationType', 'OrganizationField', 'ProjectType', 'HBMTopic', 'HBMCharacteristics'];
             const updatedOpportunity = {};
-            
+
             categories.forEach(category => {
                 const checkboxes = modal.querySelectorAll(`input[name="${category}"]:checked`);
                 const values = Array.from(checkboxes).map(cb => cb.value);
-                
+
                 if (values.length > 0) {
                     updatedOpportunity[category] = values.length === 1 ? values[0] : values;
                 }
@@ -2894,7 +2955,7 @@ class AdminDashboard {
         this.locationPickerMap.on('move', () => {
             const center = this.locationPickerMap.getCenter();
             this.centerMarker.setLatLng(center);
-            
+
             const coordinatesElement = document.getElementById("currentCoordinates");
             if (coordinatesElement) {
                 coordinatesElement.textContent = `${center.lat.toFixed(6)}, ${center.lng.toFixed(6)}`;
@@ -2911,16 +2972,16 @@ class AdminDashboard {
     saveSelectedLocation() {
         if (this.locationPickerMap) {
             const center = this.locationPickerMap.getCenter();
-            
+
             // Update the form fields
             document.getElementById("opportunityLat").value = center.lat.toFixed(6);
             document.getElementById("opportunityLng").value = center.lng.toFixed(6);
-            
+
             // Clean up map
             this.locationPickerMap.remove();
             this.locationPickerMap = null;
             this.centerMarker = null;
-            
+
             // Close modal
             closeModal("locationPickerModal");
         }
@@ -2983,7 +3044,7 @@ class AdminDashboard {
         console.log(
             `[REFRESH] Refreshing data tab with ${visibleMunicipalities.length} visible municipalities`,
         );
-        
+
         // Reload municipalities with filtering
         this.loadMunicipalities();
     }

@@ -246,24 +246,33 @@ tr:hover {
     flex: 1;
 }
 
-.type-badge {
+.type-badge, .use-badge {
     padding: 0.25rem 0.5rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: bold;
+    border-radius: 0.25rem;
     color: white;
+    font-size: 0.75rem;
+    font-weight: 500;
 }
 
 .type-badge.project {
-    background-color: #8bb311;
+    background-color: #28a745;
 }
 
 .type-badge.bedrijf {
-    background-color: #164194;
+    background-color: #007bff;
 }
 
-.type-badge.unknown {
-    background-color: #666;
+.use-badge.external {
+    background-color: #28a745;
+}
+
+.use-badge.internal {
+    background-color: #dc3545;
+}
+
+.use-badge.both {
+    background-color: #ffc107;
+    color: #000;
 }
 
 /* Forms */
@@ -1189,6 +1198,7 @@ tr:hover {
 .municipality-tooltip {
     background: rgba(0, 0, 0, 0.8);
     border: none;
+```text
     border-radius: 4px;
     color: white;
     font-size: 12px;

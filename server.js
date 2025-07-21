@@ -273,12 +273,8 @@ app.get('/admin/api/opportunities', authenticateToken, (req, res) => {
     try {
         const opportunities = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/opportunities.json'), 'utf8'));
 
-        // Filter out internal opportunities for main application
-        const filteredOpportunities = opportunities.filter(opp => {
-            return !opp.HBMUse || opp.HBMUse.toLowerCase() !== 'internal';
-        });
-
-        res.json(filteredOpportunities);
+        // Admin should see all opportunities including internal ones
+        res.json(opportunities);
     } catch (error) {
         console.error('Error loading opportunities:', error);
         res.status(500).json({ error: 'Failed to load opportunities' });
@@ -848,11 +844,18 @@ app.get('/api/opportunities', (req, res) => {
         }
 
         const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
-        console.log(`[API] Successfully loaded ${data.length} opportunities`);
+        
+        // Filter out internal opportunities for main application
+        const filteredData = data.filter(opp => {
+            const hbmUse = opp.HBMUse || 'external';
+            return hbmUse === 'external' || hbmUse === 'both';
+        });
+        
+        console.log(`[API] Successfully loaded ${data.length} total opportunities, ${filteredData.length} visible to public`);
 
         res.setHeader('Content-Type', 'application/json');
         res.setHeader('Cache-Control', 'no-cache');
-        res.json(data);
+        res.json(filteredData);
     } catch (error) {
         console.error(`[API] Error loading opportunities:`, error);
         res.status(500).json({ error: "Failed to load opportunities data", details: error.message });
