@@ -2335,14 +2335,19 @@ class AdminDashboard {
         try {
             console.log("[RESOURCE_CHECK] Checking resource versions...");
             
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            
             const response = await fetch("/admin/api/check-resource-versions", {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${this.token}`,
                     'Content-Type': 'application/json'
                 },
-                timeout: 15000 // 15 second timeout
+                signal: controller.signal
             });
+            
+            clearTimeout(timeoutId);
 
             console.log("[RESOURCE_CHECK] Response status:", response.status);
 

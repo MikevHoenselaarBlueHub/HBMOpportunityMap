@@ -1304,9 +1304,14 @@ app.use(
 
 // Fallback voor SPA routing
 app.get("*", (req, res) => {
-    // Voorkom dat admin routes hier terechtkomen
-    if (req.path.startsWith("/admin")) {
+    // Voorkom dat admin routes hier terechtkomen, behalve admin static files
+    if (req.path.startsWith("/admin/api/")) {
+        return res.status(404).json({ error: "API endpoint not found" });
+    } else if (req.path.startsWith("/admin") && !req.path.includes(".")) {
         return res.status(404).send("Admin page not found");
+    } else if (req.path.startsWith("/admin")) {
+        // Let static files through to admin static handler
+        return res.status(404).send("Admin file not found");
     }
     res.sendFile(path.join(__dirname, "index.html"));
 });
