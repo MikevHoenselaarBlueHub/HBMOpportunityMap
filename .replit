@@ -17,12 +17,29 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
+args = "npm install"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
 args = "node server.js"
 
 [[workflows.workflow]]
 name = "Restart Server"
 author = 45315476
 mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node server.js"
+
+[[workflows.workflow]]
+name = "Quick Restart"
+author = 45318480
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
