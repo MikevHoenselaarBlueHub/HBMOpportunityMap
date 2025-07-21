@@ -295,8 +295,6 @@ class AdminDashboard {
         }
     }
 
-
-
     async loadFilters() {
         try {
             const response = await fetch("/data/filters.json");
@@ -447,11 +445,12 @@ class AdminDashboard {
                         <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 10px;">
                             <h4 style="color: #495057; margin-bottom: 15px;">Database is leeg</h4>
                             <p style="color: #6c757d; margin-bottom: 20px;">Er zijn nog geen gemeenten in de database. Klik op de knop hieronder om de database eenmalig te vullen met gegevens uit municipalities.json.</p>
-                            ${this.userRole === 'admin' ? 
-                                `<button class="btn btn-primary" onclick="adminApp.populateMunicipalitiesDatabase()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
+                            ${
+                                this.userRole === "admin"
+                                    ? `<button class="btn btn-primary" onclick="adminApp.populateMunicipalitiesDatabase()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
                                     Database vullen met gemeenten
-                                </button>` : 
-                                '<p style="color: #dc3545;">Alleen administrators kunnen de database vullen.</p>'
+                                </button>`
+                                    : '<p style="color: #dc3545;">Alleen administrators kunnen de database vullen.</p>'
                             }
                         </div>
                     </td>
@@ -484,9 +483,10 @@ class AdminDashboard {
                 municipalityDisplay += "</div>";
 
                 // Show visibility status
-                const visibilityStatus = municipality.visibility !== false ? 
-                    '<span style="color: #28a745; font-weight: bold;">✓ Zichtbaar</span>' : 
-                    '<span style="color: #dc3545;">✗ Verborgen</span>';
+                const visibilityStatus =
+                    municipality.visibility !== false
+                        ? '<span style="color: #28a745; font-weight: bold;">✓ Zichtbaar</span>'
+                        : '<span style="color: #dc3545;">✗ Verborgen</span>';
 
                 row.innerHTML = `
                     <td>${municipalityDisplay}</td>
@@ -510,34 +510,43 @@ class AdminDashboard {
     }
 
     async populateMunicipalitiesDatabase() {
-        if (this.userRole !== 'admin') {
-            alert('Alleen administrators kunnen de database vullen.');
+        if (this.userRole !== "admin") {
+            alert("Alleen administrators kunnen de database vullen.");
             return;
         }
 
-        if (!confirm('Weet je zeker dat je de database wilt vullen met gemeenten uit municipalities.json? Alle gemeenten krijgen visibility: false.')) {
+        if (
+            !confirm(
+                "Weet je zeker dat je de database wilt vullen met gemeenten uit municipalities.json? Alle gemeenten krijgen visibility: false.",
+            )
+        ) {
             return;
         }
 
         try {
-            const response = await fetch('/admin/api/populate-municipalities-database', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.token}`,
-                }
-            });
+            const response = await fetch(
+                "/admin/api/populate-municipalities-database",
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                },
+            );
 
             const result = await response.json();
 
             if (response.ok) {
-                alert(`Database succesvol gevuld! ${result.totalCount} gemeenten toegevoegd (allemaal zichtbaar: false).`);
+                alert(
+                    `Database succesvol gevuld! ${result.totalCount} gemeenten toegevoegd (allemaal zichtbaar: false).`,
+                );
                 this.loadMunicipalities(); // Reload the table
             } else {
                 alert(`Fout bij vullen database: ${result.message}`);
             }
         } catch (error) {
-            console.error('Error populating database:', error);
-            alert('Fout bij vullen van database');
+            console.error("Error populating database:", error);
+            alert("Fout bij vullen van database");
         }
     }
 
@@ -1346,40 +1355,42 @@ class AdminDashboard {
     getTranslationMappings() {
         return {
             OrganizationType: {
-                "Designer": "Architect2",
-                "Contractor": "Aannemer",
-                "Supplier": "Leverancier",
+                Designer: "Architect2",
+                Contractor: "Aannemer",
+                Supplier: "Leverancier",
                 "Research Institute": "Onderzoeksinstelling",
-                "Government": "Overheid / non-profit"
+                Government: "Overheid / non-profit",
             },
             ProjectType: {
                 "Feasibility Study": "Haalbaarheidsstudie / Concept",
-                "Initiative & Vision Development": "Initiatief & Visie Ontwikkeling",
-                "Design": "Ontwerp",
+                "Initiative & Vision Development":
+                    "Initiatief & Visie Ontwikkeling",
+                Design: "Ontwerp",
                 "Tender & Selection": "Aanbesteding & selectie",
                 "Construction & Realization": "Constructie & Realisatie",
-                "Installation & Commissioning": "Inrichting & Inbedrijfstelling",
+                "Installation & Commissioning":
+                    "Inrichting & Inbedrijfstelling",
                 "Use & Management": "Gebruik & Beheer",
                 "Aftercare / Monitoring": "Nazorg / Monitoring",
-                "Renovation": "Renovatie",
-                "Demolition & Redevelopment": "Sloop & Herontwikkeling"
+                Renovation: "Renovatie",
+                "Demolition & Redevelopment": "Sloop & Herontwikkeling",
             },
             HBMTopic: {
-                "Acoustics": "Akoestiek",
+                Acoustics: "Akoestiek",
                 "Active Design": "Actief Ontwerp",
                 "Indoor Air Quality": "Binnenluchtkwaliteit",
-                "Light": "Licht",
+                Light: "Licht",
                 "Look & Feel": "Uiterlijk & Gevoel",
-                "Thermal Comfort": "Thermisch Comfort"
+                "Thermal Comfort": "Thermisch Comfort",
             },
             HBMCharacteristics: {
                 "Bio-based materials": "Biobased materialen",
                 "Biophilic design": "Biofiel ontwerp",
-                "Certification": "Certificering",
-                "Circular": "Circulair",
+                Certification: "Certificering",
+                Circular: "Circulair",
                 "Climate adaptive": "Klimaatadaptief",
                 "Design for disassembly": "Ontwerp voor demontage",
-                "Education": "Onderwijs",
+                Education: "Onderwijs",
                 "Green roofs": "Groene daken",
                 "Inclusive design": "Inclusief ontwerp",
                 "Life cycle analysis (LCA)": "Levenscyclusanalyse (LCA)",
@@ -1390,18 +1401,18 @@ class AdminDashboard {
                 "Net zero energy": "Netto-nul energie",
                 "Passive house": "Passiefhuis",
                 "Prefab & modular construction": "Prefab & modulaire bouw",
-                "Scientific": "Wetenschappelijk",
-                "Sensors": "Sensoren"
+                Scientific: "Wetenschappelijk",
+                Sensors: "Sensoren",
             },
             HBMSector: {
-                "Education": "Onderwijs",
-                "Government": "Overheid",
-                "Healthcare": "Zorg",
-                "Hospitality": "Horeca",
-                "Living": "Wonen",
-                "Recreation": "Recreatie",
-                "Office": "Kantoor"
-            }
+                Education: "Onderwijs",
+                Government: "Overheid",
+                Healthcare: "Zorg",
+                Hospitality: "Horeca",
+                Living: "Wonen",
+                Recreation: "Recreatie",
+                Office: "Kantoor",
+            },
         };
     }
 
@@ -1418,10 +1429,14 @@ class AdminDashboard {
     translateCommaSeparatedValues(category, commaSeparatedString) {
         if (!commaSeparatedString) return null;
 
-        const values = commaSeparatedString.split(',').map(v => v.trim());
-        const translatedValues = values.map(value => this.translateValue(category, value));
+        const values = commaSeparatedString.split(",").map((v) => v.trim());
+        const translatedValues = values.map((value) =>
+            this.translateValue(category, value),
+        );
 
-        return translatedValues.length === 1 ? translatedValues[0] : translatedValues;
+        return translatedValues.length === 1
+            ? translatedValues[0]
+            : translatedValues;
     }
 
     // Open import modal
@@ -1484,7 +1499,14 @@ class AdminDashboard {
             return;
         }
 
-        console.log("Starting import process for file:", file.name, "Size:", file.size, "Type:", file.type);
+        console.log(
+            "Starting import process for file:",
+            file.name,
+            "Size:",
+            file.size,
+            "Type:",
+            file.type,
+        );
 
         const progressContainer = document.getElementById("importProgress");
         const progressBar = document.getElementById("importProgressBar");
@@ -1497,19 +1519,23 @@ class AdminDashboard {
         try {
             // Validate file type
             if (!file.name.toLowerCase().match(/\.(xlsx|xls)$/)) {
-                throw new Error("Alleen Excel bestanden (.xlsx, .xls) worden ondersteund");
+                throw new Error(
+                    "Alleen Excel bestanden (.xlsx, .xls) worden ondersteund",
+                );
             }
 
             // Validate file size (max 10MB)
             if (file.size > 10 * 1024 * 1024) {
-                throw new Error("Bestand is te groot. Maximum grootte is 10MB.");
+                throw new Error(
+                    "Bestand is te groot. Maximum grootte is 10MB.",
+                );
             }
 
             // Update progress
             this.updateImportProgress(5, "Bestand wordt gecontroleerd...");
 
             // Small delay to show progress
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await new Promise((resolve) => setTimeout(resolve, 200));
 
             this.updateImportProgress(8, "Excel library wordt geladen...");
 
@@ -1534,7 +1560,6 @@ class AdminDashboard {
 
             // Reload opportunities
             await this.loadOpportunities();
-
         } catch (error) {
             console.error("Import error:", error);
             this.updateImportProgress(0, "Fout opgetreden");
@@ -1560,33 +1585,43 @@ class AdminDashboard {
     async readExcelFile(file) {
         return new Promise((resolve, reject) => {
             // First ensure XLSX library is loaded
-            this.ensureXLSXLoaded().then(() => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        console.log("File read, parsing Excel data...");
-                        this.parseExcelData(e.target.result, resolve, reject);
-                    } catch (error) {
-                        console.error("Error in readExcelFile:", error);
-                        reject(error);
-                    }
-                };
-                reader.onerror = () => {
-                    console.error("FileReader error");
-                    reject(new Error("Fout bij lezen van bestand"));
-                };
-                reader.readAsArrayBuffer(file);
-            }).catch((error) => {
-                console.error("Failed to load XLSX library:", error);
-                reject(new Error("Fout bij laden van Excel library. Controleer je internetverbinding en probeer opnieuw."));
-            });
+            this.ensureXLSXLoaded()
+                .then(() => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            console.log("File read, parsing Excel data...");
+                            this.parseExcelData(
+                                e.target.result,
+                                resolve,
+                                reject,
+                            );
+                        } catch (error) {
+                            console.error("Error in readExcelFile:", error);
+                            reject(error);
+                        }
+                    };
+                    reader.onerror = () => {
+                        console.error("FileReader error");
+                        reject(new Error("Fout bij lezen van bestand"));
+                    };
+                    reader.readAsArrayBuffer(file);
+                })
+                .catch((error) => {
+                    console.error("Failed to load XLSX library:", error);
+                    reject(
+                        new Error(
+                            "Fout bij laden van Excel library. Controleer je internetverbinding en probeer opnieuw.",
+                        ),
+                    );
+                });
         });
     }
 
     // Ensure XLSX library is loaded
     ensureXLSXLoaded() {
         return new Promise((resolve, reject) => {
-            if (typeof XLSX !== 'undefined') {
+            if (typeof XLSX !== "undefined") {
                 console.log("XLSX library already available");
                 resolve();
                 return;
@@ -1596,9 +1631,9 @@ class AdminDashboard {
 
             // Try multiple CDN sources for better reliability
             const cdnUrls = [
-                'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
-                'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
-                'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
+                "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",
+                "https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js",
+                "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",
             ];
 
             let currentIndex = 0;
@@ -1609,18 +1644,22 @@ class AdminDashboard {
                     return;
                 }
 
-                const script = document.createElement('script');
+                const script = document.createElement("script");
                 script.src = cdnUrls[currentIndex];
 
                 script.onload = () => {
-                    console.log(`XLSX library loaded successfully from: ${cdnUrls[currentIndex]}`);
+                    console.log(
+                        `XLSX library loaded successfully from: ${cdnUrls[currentIndex]}`,
+                    );
                     // Add small delay to ensure library is fully initialized
                     setTimeout(() => {
-                        if (typeof XLSX !== 'undefined') {
+                        if (typeof XLSX !== "undefined") {
                             console.log("XLSX version:", XLSX.version);
                             resolve();
                         } else {
-                            console.error("XLSX still undefined after script load");
+                            console.error(
+                                "XLSX still undefined after script load",
+                            );
                             currentIndex++;
                             tryLoadScript();
                         }
@@ -1628,15 +1667,19 @@ class AdminDashboard {
                 };
 
                 script.onerror = () => {
-                    console.error(`Failed to load XLSX from: ${cdnUrls[currentIndex]}`);
+                    console.error(
+                        `Failed to load XLSX from: ${cdnUrls[currentIndex]}`,
+                    );
                     currentIndex++;
                     tryLoadScript();
                 };
 
                 // Set timeout for script loading
                 setTimeout(() => {
-                    if (typeof XLSX === 'undefined') {
-                        console.error(`Timeout loading XLSX from: ${cdnUrls[currentIndex]}`);
+                    if (typeof XLSX === "undefined") {
+                        console.error(
+                            `Timeout loading XLSX from: ${cdnUrls[currentIndex]}`,
+                        );
                         script.onerror();
                     }
                 }, 10000);
@@ -1653,8 +1696,12 @@ class AdminDashboard {
         try {
             console.log("Starting Excel parsing...");
 
-            if (typeof XLSX === 'undefined') {
-                reject(new Error("XLSX library is niet beschikbaar. Herlaad de pagina en probeer opnieuw."));
+            if (typeof XLSX === "undefined") {
+                reject(
+                    new Error(
+                        "XLSX library is niet beschikbaar. Herlaad de pagina en probeer opnieuw.",
+                    ),
+                );
                 return;
             }
 
@@ -1663,53 +1710,80 @@ class AdminDashboard {
             // Try different read options for better compatibility
             let workbook;
             try {
-                workbook = XLSX.read(data, { type: 'array', cellDates: true, cellNF: false, cellText: false });
+                workbook = XLSX.read(data, {
+                    type: "array",
+                    cellDates: true,
+                    cellNF: false,
+                    cellText: false,
+                });
             } catch (firstError) {
-                console.log("First read attempt failed, trying alternative method...");
+                console.log(
+                    "First read attempt failed, trying alternative method...",
+                );
                 try {
-                    workbook = XLSX.read(data, { type: 'buffer', cellDates: true });
+                    workbook = XLSX.read(data, {
+                        type: "buffer",
+                        cellDates: true,
+                    });
                 } catch (secondError) {
-                    console.log("Second read attempt failed, trying basic method...");
-                    workbook = XLSX.read(data, { type: 'array' });
+                    console.log(
+                        "Second read attempt failed, trying basic method...",
+                    );
+                    workbook = XLSX.read(data, { type: "array" });
                 }
             }
 
             console.log("Workbook sheets:", workbook.SheetNames);
 
             if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
-                reject(new Error("Geen werkbladen gevonden in het Excel bestand. Controleer of het bestand geldig is."));
+                reject(
+                    new Error(
+                        "Geen werkbladen gevonden in het Excel bestand. Controleer of het bestand geldig is.",
+                    ),
+                );
                 return;
             }
 
             // Look for 'Data' sheet first, fallback to first sheet
             let targetSheetName = null;
-            if (workbook.SheetNames.includes('Data')) {
-                targetSheetName = 'Data';
+            if (workbook.SheetNames.includes("Data")) {
+                targetSheetName = "Data";
                 console.log("Found 'Data' sheet, using it for import");
             } else {
                 targetSheetName = workbook.SheetNames[0];
-                console.log("No 'Data' sheet found, using first sheet:", targetSheetName);
+                console.log(
+                    "No 'Data' sheet found, using first sheet:",
+                    targetSheetName,
+                );
             }
 
             const worksheet = workbook.Sheets[targetSheetName];
 
             if (!worksheet) {
-                reject(new Error("Werkblad kon niet worden gelezen. Controleer of het Excel bestand geldig is."));
+                reject(
+                    new Error(
+                        "Werkblad kon niet worden gelezen. Controleer of het Excel bestand geldig is.",
+                    ),
+                );
                 return;
             }
 
             // Convert to JSON with more options for better data handling
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
-                header: 1, 
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                header: 1,
                 defval: "",
                 blankrows: false,
-                raw: false
+                raw: false,
             });
 
             console.log("Raw data rows:", jsonData.length);
 
             if (jsonData.length < 2) {
-                reject(new Error("Excel bestand bevat geen data. Controleer of er data in het bestand staat."));
+                reject(
+                    new Error(
+                        "Excel bestand bevat geen data. Controleer of er data in het bestand staat.",
+                    ),
+                );
                 return;
             }
 
@@ -1717,23 +1791,48 @@ class AdminDashboard {
             console.log("First 3 rows:", jsonData.slice(0, 3));
 
             // Skip header row and filter for approved records
-            const dataRows = jsonData.slice(1).filter(row => row.some(cell => cell !== null && cell !== ""));
+            const dataRows = jsonData
+                .slice(1)
+                .filter((row) =>
+                    row.some((cell) => cell !== null && cell !== ""),
+                );
 
             // Debug: log first few status values
-            console.log("First 10 status values:", dataRows.slice(0, 10).map(row => row[0]));
+            console.log(
+                "First 10 status values:",
+                dataRows.slice(0, 10).map((row) => row[0]),
+            );
 
-            const approvedRecords = dataRows.filter(row => {
-                const status = row[0] ? row[0].toString().toLowerCase().trim() : '';
-                console.log(`Row status: '${row[0]}' -> normalized: '${status}'`);
-                return status === 'approved';
+            const approvedRecords = dataRows.filter((row) => {
+                const status = row[0]
+                    ? row[0].toString().toLowerCase().trim()
+                    : "";
+                console.log(
+                    `Row status: '${row[0]}' -> normalized: '${status}'`,
+                );
+                return status === "approved";
             });
 
-            console.log(`Found ${approvedRecords.length} approved records out of ${dataRows.length} total rows`);
+            console.log(
+                `Found ${approvedRecords.length} approved records out of ${dataRows.length} total rows`,
+            );
 
             // More detailed error message
             if (approvedRecords.length === 0) {
-                const uniqueStatuses = [...new Set(dataRows.map(row => row[0]).filter(status => status !== null && status !== ""))];
-                reject(new Error(`Geen records met status 'Approved' gevonden in het bestand. Gevonden statuswaarden in eerste kolom: ${uniqueStatuses.join(', ')}. Controleer of er records zijn met exact de tekst 'Approved' in de eerste kolom.`));
+                const uniqueStatuses = [
+                    ...new Set(
+                        dataRows
+                            .map((row) => row[0])
+                            .filter(
+                                (status) => status !== null && status !== "",
+                            ),
+                    ),
+                ];
+                reject(
+                    new Error(
+                        `Geen records met status 'Approved' gevonden in het bestand. Gevonden statuswaarden in eerste kolom: ${uniqueStatuses.join(", ")}. Controleer of er records zijn met exact de tekst 'Approved' in de eerste kolom.`,
+                    ),
+                );
                 return;
             }
 
@@ -1743,11 +1842,25 @@ class AdminDashboard {
 
             // More specific error messages
             if (error.message.includes("corrupted")) {
-                reject(new Error("Excel bestand is beschadigd. Probeer het bestand opnieuw op te slaan."));
+                reject(
+                    new Error(
+                        "Excel bestand is beschadigd. Probeer het bestand opnieuw op te slaan.",
+                    ),
+                );
             } else if (error.message.includes("format")) {
-                reject(new Error("Excel bestand formaat wordt niet ondersteund. Gebruik .xlsx of .xls bestand."));
+                reject(
+                    new Error(
+                        "Excel bestand formaat wordt niet ondersteund. Gebruik .xlsx of .xls bestand.",
+                    ),
+                );
             } else {
-                reject(new Error("Fout bij verwerken van Excel data: " + error.message + ". Controleer of het bestand geldig is."));
+                reject(
+                    new Error(
+                        "Fout bij verwerken van Excel data: " +
+                            error.message +
+                            ". Controleer of het bestand geldig is.",
+                    ),
+                );
             }
         }
     }
@@ -1759,14 +1872,17 @@ class AdminDashboard {
             added: 0,
             updated: 0,
             failed: 0,
-            errors: []
+            errors: [],
         };
 
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
 
             try {
-                this.updateImportProgress(20 + ((i / data.length) * 60), `Verwerken record ${i + 1} van ${data.length}...`);
+                this.updateImportProgress(
+                    20 + (i / data.length) * 60,
+                    `Verwerken record ${i + 1} van ${data.length}...`,
+                );
 
                 // Log raw row data for debugging
                 console.log(`Processing row ${i + 1}:`, row);
@@ -1777,30 +1893,38 @@ class AdminDashboard {
                     console.log(`Processed opportunity for row ${i + 1}:`, {
                         name: opportunity.Name,
                         type: opportunity.HBMType,
-                        municipality: opportunity.Municipality
+                        municipality: opportunity.Municipality,
                     });
 
                     // Check if opportunity exists by name
-                    const existingOpportunity = this.allOpportunities.find(o => o.Name === opportunity.Name);
+                    const existingOpportunity = this.allOpportunities.find(
+                        (o) => o.Name === opportunity.Name,
+                    );
 
                     if (existingOpportunity) {
                         await this.updateExistingOpportunity(opportunity);
                         results.updated++;
-                        console.log(`Updated existing opportunity: ${opportunity.Name}`);
+                        console.log(
+                            `Updated existing opportunity: ${opportunity.Name}`,
+                        );
                     } else {
                         await this.createNewOpportunity(opportunity);
                         results.added++;
-                        console.log(`Created new opportunity: ${opportunity.Name}`);
+                        console.log(
+                            `Created new opportunity: ${opportunity.Name}`,
+                        );
                     }
                 } else {
-                    console.log(`Row ${i + 1} skipped (HBMUse = internal or missing data)`);
+                    console.log(
+                        `Row ${i + 1} skipped (HBMUse = internal or missing data)`,
+                    );
                 }
             } catch (error) {
                 console.error(`Error processing row ${i + 1}:`, {
                     error: error,
                     errorMessage: error.message,
                     errorStack: error.stack,
-                    rowData: row
+                    rowData: row,
                 });
                 results.failed++;
                 results.errors.push(`Rij ${i + 1}: ${error.message}`);
@@ -1813,31 +1937,45 @@ class AdminDashboard {
     // Process single opportunity row
     async processOpportunityRow(row) {
         try {
-            console.log(`Processing opportunity row with ${row.length} columns:`, row);
+            console.log(
+                `Processing opportunity row with ${row.length} columns:`,
+                row,
+            );
 
             // Validate row has minimum required data
             if (!row || row.length < 12) {
-                throw new Error(`Row has insufficient data: ${row.length} columns found, minimum 12 required`);
+                throw new Error(
+                    `Row has insufficient data: ${row.length} columns found, minimum 12 required`,
+                );
             }
 
             // Validate required fields and clean up the name
             let opportunityName = (row[1] || "").toString().trim();
-            if (!opportunityName || opportunityName === '') {
-                throw new Error(`Missing required field: Name (column 1) is empty`);
+            if (!opportunityName || opportunityName === "") {
+                throw new Error(
+                    `Missing required field: Name (column 1) is empty`,
+                );
             }
 
             // Skip test/demo entries that might cause issues
-            if (opportunityName.toLowerCase().includes('prev.end') || 
-                opportunityName.toLowerCase().includes('example') ||
-                opportunityName.toLowerCase().includes('test')) {
-                console.log(`Skipping test/demo opportunity: ${opportunityName}`);
+            if (
+                opportunityName.toLowerCase().includes("example") ||
+                opportunityName.toLowerCase().includes("test")
+            ) {
+                console.log(
+                    `Skipping test/demo opportunity: ${opportunityName}`,
+                );
                 return null;
             }
 
             // Clean up the name to remove any problematic characters
-            opportunityName = opportunityName.replace(/[^\w\s\-\(\)\.]/g, '').trim();
+            opportunityName = opportunityName
+                .replace(/[^\w\s\-\(\)\.]/g, "")
+                .trim();
             if (!opportunityName) {
-                throw new Error(`Invalid opportunity name after cleanup: "${row[1]}"`);
+                throw new Error(
+                    `Invalid opportunity name after cleanup: "${row[1]}"`,
+                );
             }
 
             // Map columns to opportunity object
@@ -1848,53 +1986,85 @@ class AdminDashboard {
                 City: (row[4] || "").toString().trim(),
                 Country: (row[5] || "").toString().trim(),
                 Municipality: (row[6] || "").toString().trim(),
-                OrganizationType: this.translateCommaSeparatedValues('OrganizationType', row[7]),
-                ProjectType: this.translateCommaSeparatedValues('ProjectType', row[8]),
+                OrganizationType: this.translateCommaSeparatedValues(
+                    "OrganizationType",
+                    row[7],
+                ),
+                ProjectType: this.translateCommaSeparatedValues(
+                    "ProjectType",
+                    row[8],
+                ),
                 ProjectPhase: (row[9] || "").toString().trim(),
                 HBMUse: (row[10] || "").toString().trim(),
                 HBMType: (row[11] || "").toString().trim(),
-                HBMTopic: this.translateCommaSeparatedValues('HBMTopic', row[12]),
-                HBMCharacteristics: this.translateCommaSeparatedValues('HBMCharacteristics', row[13]),
-                HBMSector: this.translateCommaSeparatedValues('HBMSector', row[14]),
+                HBMTopic: this.translateCommaSeparatedValues(
+                    "HBMTopic",
+                    row[12],
+                ),
+                HBMCharacteristics: this.translateCommaSeparatedValues(
+                    "HBMCharacteristics",
+                    row[13],
+                ),
+                HBMSector: this.translateCommaSeparatedValues(
+                    "HBMSector",
+                    row[14],
+                ),
                 ContactPerson: (row[15] || "").toString().trim(),
                 ContactEmail: (row[16] || "").toString().trim(),
                 ContactPhone: (row[17] || "").toString().trim(),
                 ContactWebsite: (row[18] || "").toString().trim(),
                 Latitude: row[19] ? parseFloat(row[19]) : null,
                 Longitude: row[20] ? parseFloat(row[20]) : null,
-                Remarks: (row[21] || "").toString().trim()
+                Remarks: (row[21] || "").toString().trim(),
             };
 
             console.log(`Mapped opportunity object:`, opportunity);
 
             // Skip if HBMUse is 'internal'
-            if (opportunity.HBMUse && opportunity.HBMUse.toLowerCase() === 'internal') {
-                console.log(`Skipping opportunity ${opportunity.Name} - HBMUse is internal`);
+            if (
+                opportunity.HBMUse &&
+                opportunity.HBMUse.toLowerCase() === "internal"
+            ) {
+                console.log(
+                    `Skipping opportunity ${opportunity.Name} - HBMUse is internal`,
+                );
                 return null;
             }
 
             // Validate that we have enough data to create a meaningful opportunity
-            if (!opportunity.HBMType || (!opportunity.Municipality && !opportunity.City)) {
-                console.log(`Skipping opportunity ${opportunity.Name} - insufficient location or type data`);
+            if (
+                !opportunity.HBMType ||
+                (!opportunity.Municipality && !opportunity.City)
+            ) {
+                console.log(
+                    `Skipping opportunity ${opportunity.Name} - insufficient location or type data`,
+                );
                 return null;
             }
 
             // Add municipality if it doesn't exist
             if (opportunity.Municipality) {
-                await this.ensureMunicipalityExists(opportunity.Municipality, opportunity.Country);
+                await this.ensureMunicipalityExists(
+                    opportunity.Municipality,
+                    opportunity.Country,
+                );
             }
 
             // Geocode if coordinates are missing
             if (!opportunity.Latitude || !opportunity.Longitude) {
                 if (opportunity.Address && opportunity.City) {
-                    console.log(`Geocoding address for ${opportunity.Name}: ${opportunity.Address}, ${opportunity.PostalCode} ${opportunity.City}, ${opportunity.Country}`);
+                    console.log(
+                        `Geocoding address for ${opportunity.Name}: ${opportunity.Address}, ${opportunity.PostalCode} ${opportunity.City}, ${opportunity.Country}`,
+                    );
                     const coords = await this.geocodeAddress(
-                        `${opportunity.Address}, ${opportunity.PostalCode} ${opportunity.City}, ${opportunity.Country}`
+                        `${opportunity.Address}, ${opportunity.PostalCode} ${opportunity.City}, ${opportunity.Country}`,
                     );
                     if (coords) {
                         opportunity.Latitude = coords.lat;
                         opportunity.Longitude = coords.lng;
-                        console.log(`Geocoded coordinates: ${coords.lat}, ${coords.lng}`);
+                        console.log(
+                            `Geocoded coordinates: ${coords.lat}, ${coords.lng}`,
+                        );
                     }
                 }
             }
@@ -1904,7 +2074,7 @@ class AdminDashboard {
             console.error(`Error in processOpportunityRow:`, {
                 error: error.message,
                 stack: error.stack,
-                rowData: row
+                rowData: row,
             });
             throw error;
         }
@@ -1921,15 +2091,27 @@ class AdminDashboard {
 
             if (response.ok) {
                 const data = await response.json();
-                const existingMunicipality = data.municipalities.find(m => m.name === municipalityName);
+                const existingMunicipality = data.municipalities.find(
+                    (m) => m.name === municipalityName,
+                );
 
                 if (!existingMunicipality) {
                     // Create new municipality
                     const municipalityData = {
                         name: municipalityName,
-                        country: country === 'NL' ? 'Netherlands' : country === 'DE' ? 'Germany' : country,
-                        code: country === 'NL' ? 'NL' : country === 'DE' ? 'DE' : country,
-                        visibility: false // New municipalities start as not visible
+                        country:
+                            country === "NL"
+                                ? "Netherlands"
+                                : country === "DE"
+                                  ? "Germany"
+                                  : country,
+                        code:
+                            country === "NL"
+                                ? "NL"
+                                : country === "DE"
+                                  ? "DE"
+                                  : country,
+                        visibility: false, // New municipalities start as not visible
                     };
 
                     await fetch("/admin/api/municipalities", {
@@ -1950,13 +2132,15 @@ class AdminDashboard {
     // Geocode address
     async geocodeAddress(address) {
         try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`,
+            );
             const data = await response.json();
 
             if (data && data.length > 0) {
                 return {
                     lat: parseFloat(data[0].lat),
-                    lng: parseFloat(data[0].lon)
+                    lng: parseFloat(data[0].lon),
                 };
             }
         } catch (error) {
@@ -1967,17 +2151,22 @@ class AdminDashboard {
 
     // Update existing opportunity
     async updateExistingOpportunity(opportunity) {
-        const response = await fetch(`/admin/api/opportunities/${encodeURIComponent(opportunity.Name)}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${this.token}`,
+        const response = await fetch(
+            `/admin/api/opportunities/${encodeURIComponent(opportunity.Name)}`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.token}`,
+                },
+                body: JSON.stringify(opportunity),
             },
-            body: JSON.stringify(opportunity),
-        });
+        );
 
         if (!response.ok) {
-            throw new Error(`Failed to update opportunity: ${opportunity.Name}`);
+            throw new Error(
+                `Failed to update opportunity: ${opportunity.Name}`,
+            );
         }
     }
 
@@ -1986,19 +2175,21 @@ class AdminDashboard {
         try {
             console.log(`Creating new opportunity:`, {
                 name: opportunity.Name,
-                data: opportunity
+                data: opportunity,
             });
 
             // Additional validation before sending to API
-            if (!opportunity.Name || opportunity.Name.trim() === '') {
-                throw new Error('Opportunity name is required');
+            if (!opportunity.Name || opportunity.Name.trim() === "") {
+                throw new Error("Opportunity name is required");
             }
 
             // Ensure required fields have default values
             const cleanOpportunity = {
                 ...opportunity,
-                Description: opportunity.Description || `${opportunity.HBMType || 'Kans'} in ${opportunity.Municipality || opportunity.City || 'onbekende locatie'}`,
-                HBMType: opportunity.HBMType || 'Project'
+                Description:
+                    opportunity.Description ||
+                    `${opportunity.HBMType || "Kans"} in ${opportunity.Municipality || opportunity.City || "onbekende locatie"}`,
+                HBMType: opportunity.HBMType || "Project",
             };
 
             const response = await fetch("/admin/api/opportunities", {
@@ -2012,27 +2203,44 @@ class AdminDashboard {
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error(`API Error creating opportunity ${opportunity.Name}:`, {
-                    status: response.status,
-                    statusText: response.statusText,
-                    errorText: errorText
-                });
+                console.error(
+                    `API Error creating opportunity ${opportunity.Name}:`,
+                    {
+                        status: response.status,
+                        statusText: response.statusText,
+                        errorText: errorText,
+                    },
+                );
 
                 // More specific error handling
                 if (response.status === 400) {
-                    throw new Error(`Validation error for ${opportunity.Name}: ${errorText}`);
+                    throw new Error(
+                        `Validation error for ${opportunity.Name}: ${errorText}`,
+                    );
                 } else if (response.status === 409) {
-                    throw new Error(`Duplicate opportunity: ${opportunity.Name} already exists`);
+                    throw new Error(
+                        `Duplicate opportunity: ${opportunity.Name} already exists`,
+                    );
                 } else {
-                    throw new Error(`Server error creating ${opportunity.Name}: ${response.status} ${errorText}`);
+                    throw new Error(
+                        `Server error creating ${opportunity.Name}: ${response.status} ${errorText}`,
+                    );
                 }
             }
 
             const result = await response.json();
-            console.log(`Successfully created opportunity: ${opportunity.Name}`, result);
+            console.log(
+                `Successfully created opportunity: ${opportunity.Name}`,
+                result,
+            );
         } catch (error) {
-            console.error(`Exception creating opportunity ${opportunity.Name}:`, error);
-            throw new Error(`Failed to create opportunity "${opportunity.Name}": ${error.message}`);
+            console.error(
+                `Exception creating opportunity ${opportunity.Name}:`,
+                error,
+            );
+            throw new Error(
+                `Failed to create opportunity "${opportunity.Name}": ${error.message}`,
+            );
         }
     }
 
@@ -2069,7 +2277,7 @@ class AdminDashboard {
                 <div style="margin-top: 1rem;">
                     <h4>Fouten tijdens import:</h4>
                     <div style="max-height: 200px; overflow-y: auto; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
-                        ${results.errors.map(error => `<div style="margin-bottom: 0.5rem; color: #dc3545;">${error}</div>`).join('')}
+                        ${results.errors.map((error) => `<div style="margin-bottom: 0.5rem; color: #dc3545;">${error}</div>`).join("")}
                     </div>
                 </div>
             `;
@@ -2083,15 +2291,18 @@ class AdminDashboard {
     testXLSXLibrary() {
         console.log("Testing XLSX library availability...");
 
-        if (typeof XLSX !== 'undefined') {
+        if (typeof XLSX !== "undefined") {
             console.log("✅ XLSX library is available");
             console.log("XLSX version:", XLSX.version);
             return true;
         } else {
-            console.log("❌ XLSX library is not available, attempting to load...");
+            console.log(
+                "❌ XLSX library is not available, attempting to load...",
+            );
 
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+            const script = document.createElement("script");
+            script.src =
+                "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
             script.onload = () => {
                 console.log("✅ XLSX library loaded successfully");
                 console.log("XLSX version:", XLSX.version);
@@ -2114,7 +2325,9 @@ class AdminDashboard {
             });
 
             if (!response.ok) {
-                throw new Error(`Failed to load opportunities: ${response.status}`);
+                throw new Error(
+                    `Failed to load opportunities: ${response.status}`,
+                );
             }
 
             const opportunities = await response.json();
@@ -2139,7 +2352,9 @@ class AdminDashboard {
     }
 
     renderOpportunitySearch() {
-        const existingContainer = document.getElementById("opportunitySearchContainer");
+        const existingContainer = document.getElementById(
+            "opportunitySearchContainer",
+        );
         if (existingContainer) {
             existingContainer.remove();
         }
@@ -2167,7 +2382,10 @@ class AdminDashboard {
             </div>
         `;
 
-        sectionHeader.parentNode.insertBefore(searchDiv, sectionHeader.nextSibling);
+        sectionHeader.parentNode.insertBefore(
+            searchDiv,
+            sectionHeader.nextSibling,
+        );
 
         // Add event listeners with debouncing
         setTimeout(() => {
@@ -2208,7 +2426,9 @@ class AdminDashboard {
 
     filterOpportunities() {
         const searchInput = document.getElementById("opportunitySearch");
-        const typeFilterSelect = document.getElementById("opportunityTypeFilter");
+        const typeFilterSelect = document.getElementById(
+            "opportunityTypeFilter",
+        );
 
         if (!searchInput || !typeFilterSelect) {
             console.error("Search elements not found");
@@ -2223,19 +2443,39 @@ class AdminDashboard {
         const searchTerm = searchInput.value.toLowerCase().trim();
         const typeFilter = typeFilterSelect.value;
 
-        console.log(`Filtering opportunities: search="${searchTerm}", type="${typeFilter}", total=${this.allOpportunities.length}`);
+        console.log(
+            `Filtering opportunities: search="${searchTerm}", type="${typeFilter}", total=${this.allOpportunities.length}`,
+        );
 
-        let filtered = this.allOpportunities.filter(opp => {
-            const matchesSearch = !searchTerm || 
+        let filtered = this.allOpportunities.filter((opp) => {
+            const matchesSearch =
+                !searchTerm ||
                 (opp.Name && opp.Name.toLowerCase().includes(searchTerm)) ||
-                (opp.Municipality && opp.Municipality.toLowerCase().includes(searchTerm)) ||
-                (opp.HBMSector && this.arrayOrStringIncludes(opp.HBMSector, searchTerm)) ||
-                (opp.OrganizationType && this.arrayOrStringIncludes(opp.OrganizationType, searchTerm)) ||
-                (opp.ProjectType && this.arrayOrStringIncludes(opp.ProjectType, searchTerm)) ||
-                (opp.HBMTopic && this.arrayOrStringIncludes(opp.HBMTopic, searchTerm)) ||
-                (opp.HBMCharacteristics && this.arrayOrStringIncludes(opp.HBMCharacteristics, searchTerm)) ||
-                (opp.OrganizationField && this.arrayOrStringIncludes(opp.OrganizationField, searchTerm)) ||
-                (opp.Description && opp.Description.toLowerCase().includes(searchTerm)) ||
+                (opp.Municipality &&
+                    opp.Municipality.toLowerCase().includes(searchTerm)) ||
+                (opp.HBMSector &&
+                    this.arrayOrStringIncludes(opp.HBMSector, searchTerm)) ||
+                (opp.OrganizationType &&
+                    this.arrayOrStringIncludes(
+                        opp.OrganizationType,
+                        searchTerm,
+                    )) ||
+                (opp.ProjectType &&
+                    this.arrayOrStringIncludes(opp.ProjectType, searchTerm)) ||
+                (opp.HBMTopic &&
+                    this.arrayOrStringIncludes(opp.HBMTopic, searchTerm)) ||
+                (opp.HBMCharacteristics &&
+                    this.arrayOrStringIncludes(
+                        opp.HBMCharacteristics,
+                        searchTerm,
+                    )) ||
+                (opp.OrganizationField &&
+                    this.arrayOrStringIncludes(
+                        opp.OrganizationField,
+                        searchTerm,
+                    )) ||
+                (opp.Description &&
+                    opp.Description.toLowerCase().includes(searchTerm)) ||
                 (opp.City && opp.City.toLowerCase().includes(searchTerm)) ||
                 (opp.Street && opp.Street.toLowerCase().includes(searchTerm));
 
@@ -2254,8 +2494,9 @@ class AdminDashboard {
         if (!value) return false;
 
         if (Array.isArray(value)) {
-            return value.some(item => 
-                item && item.toString().toLowerCase().includes(searchTerm)
+            return value.some(
+                (item) =>
+                    item && item.toString().toLowerCase().includes(searchTerm),
             );
         } else {
             return value.toString().toLowerCase().includes(searchTerm);
@@ -2287,20 +2528,21 @@ class AdminDashboard {
         opportunities.forEach((opportunity) => {
             const row = document.createElement("tr");
             row.innerHTML = `
-                <td>${opportunity.Name || 'Onbekend'}</td>
+                <td>${opportunity.Name || "Onbekend"}</td>
                 <td>
-                    <span class="type-badge ${(opportunity.HBMType || '').toLowerCase()}">${opportunity.HBMType || 'Onbekend'}</span>
+                    <span class="type-badge ${(opportunity.HBMType || "").toLowerCase()}">${opportunity.HBMType || "Onbekend"}</span>
                 </td>
                 <td>
-                    <span class="use-badge ${(opportunity.HBMUse || 'external').toLowerCase()}">${opportunity.HBMUse || 'external'}</span>
+                    <span class="use-badge ${(opportunity.HBMUse || "external").toLowerCase()}">${opportunity.HBMUse || "external"}</span>
                 </td>
-                <td>${opportunity.Municipality || 'Onbekend'}</td>
+                <td>${opportunity.Municipality || "Onbekend"}</td>
                 <td>${this.formatArrayValue(opportunity.HBMSector)}</td>
                 <td>${this.formatArrayValue(opportunity.OrganizationType)}</td>
                 <td>
-                    ${opportunity.Latitude && opportunity.Longitude 
-                        ? `${parseFloat(opportunity.Latitude).toFixed(4)}, ${parseFloat(opportunity.Longitude).toFixed(4)}`
-                        : 'Geen coördinaten'
+                    ${
+                        opportunity.Latitude && opportunity.Longitude
+                            ? `${parseFloat(opportunity.Latitude).toFixed(4)}, ${parseFloat(opportunity.Longitude).toFixed(4)}`
+                            : "Geen coördinaten"
                     }
                 </td>
                 <td>
@@ -2315,22 +2557,25 @@ class AdminDashboard {
         // Update results count
         const resultsInfo = document.getElementById("opportunityResultsInfo");
         if (!resultsInfo) {
-            const searchContainer = document.getElementById("opportunitySearchContainer");
+            const searchContainer = document.getElementById(
+                "opportunitySearchContainer",
+            );
             const infoDiv = document.createElement("div");
             infoDiv.id = "opportunityResultsInfo";
-            infoDiv.style.cssText = "margin-bottom: 1rem; color: #666; font-size: 0.9rem;";
+            infoDiv.style.cssText =
+                "margin-bottom: 1rem; color: #666; font-size: 0.9rem;";
             searchContainer.appendChild(infoDiv);
         }
 
-        document.getElementById("opportunityResultsInfo").textContent = 
+        document.getElementById("opportunityResultsInfo").textContent =
             `${opportunities.length} van ${this.allOpportunities.length} kansen`;
     }
 
     formatArrayValue(value) {
         if (Array.isArray(value)) {
-            return value.join(', ');
+            return value.join(", ");
         }
-        return value || 'Onbekend';
+        return value || "Onbekend";
     }
 
     escapeHtml(text) {
@@ -2446,19 +2691,29 @@ class AdminDashboard {
 
     async loadOpportunityData(opportunityName) {
         try {
-            const opportunity = this.allOpportunities.find(o => o.Name === opportunityName);
+            const opportunity = this.allOpportunities.find(
+                (o) => o.Name === opportunityName,
+            );
 
             if (opportunity) {
-                document.getElementById("opportunityName").value = opportunity.Name || "";
-                document.getElementById("opportunityType").value = opportunity.HBMType || "";
-                document.getElementById("opportunityUse").value = opportunity.HBMUse || "";
+                document.getElementById("opportunityName").value =
+                    opportunity.Name || "";
+                document.getElementById("opportunityType").value =
+                    opportunity.HBMType || "";
+                document.getElementById("opportunityUse").value =
+                    opportunity.HBMUse || "";
                 // Load municipality dropdown
                 await this.loadMunicipalityDropdown();
-                document.getElementById("opportunityMunicipality").value = opportunity.Municipality || "";
-                document.getElementById("opportunityDescription").value = opportunity.Description || "";
-                document.getElementById("opportunityLat").value = opportunity.Latitude || "";
-                document.getElementById("opportunityLng").value = opportunity.Longitude || "";
-                document.getElementById("opportunityLogo").value = opportunity.Logo || "";
+                document.getElementById("opportunityMunicipality").value =
+                    opportunity.Municipality || "";
+                document.getElementById("opportunityDescription").value =
+                    opportunity.Description || "";
+                document.getElementById("opportunityLat").value =
+                    opportunity.Latitude || "";
+                document.getElementById("opportunityLng").value =
+                    opportunity.Longitude || "";
+                document.getElementById("opportunityLogo").value =
+                    opportunity.Logo || "";
             }
         } catch (error) {
             console.error("Error loading opportunity data:", error);
@@ -2476,14 +2731,17 @@ class AdminDashboard {
 
             if (response.ok) {
                 const data = await response.json();
-                const municipalitySelect = document.getElementById("opportunityMunicipality");
+                const municipalitySelect = document.getElementById(
+                    "opportunityMunicipality",
+                );
 
                 if (municipalitySelect) {
                     // Clear existing options except the first one
-                    municipalitySelect.innerHTML = '<option value="">Selecteer gemeente</option>';
+                    municipalitySelect.innerHTML =
+                        '<option value="">Selecteer gemeente</option>';
 
                     // Add municipalities
-                    data.municipalities.forEach(municipality => {
+                    data.municipalities.forEach((municipality) => {
                         const option = document.createElement("option");
                         option.value = municipality.name;
                         option.textContent = municipality.name;
@@ -2564,7 +2822,9 @@ class AdminDashboard {
     }
 
     async createNewMunicipality() {
-        const formData = new FormData(document.getElementById("newMunicipalityForm"));
+        const formData = new FormData(
+            document.getElementById("newMunicipalityForm"),
+        );
         const municipalityData = {
             name: formData.get("name"),
             country: formData.get("country"),
@@ -2588,7 +2848,8 @@ class AdminDashboard {
                 // Reload the municipality dropdown
                 await this.loadMunicipalityDropdown();
                 // Select the newly added municipality
-                document.getElementById("opportunityMunicipality").value = municipalityData.name;
+                document.getElementById("opportunityMunicipality").value =
+                    municipalityData.name;
                 alert("Gemeente succesvol toegevoegd!");
             } else {
                 alert(`Fout: ${result.message || "Onbekende fout"}`);
@@ -2600,7 +2861,9 @@ class AdminDashboard {
     }
 
     async createOpportunity() {
-        const formData = new FormData(document.getElementById("opportunityForm"));
+        const formData = new FormData(
+            document.getElementById("opportunityForm"),
+        );
         const opportunityData = {};
 
         for (let [key, value] of formData.entries()) {
@@ -2639,7 +2902,9 @@ class AdminDashboard {
     }
 
     async updateOpportunity(originalName) {
-        const formData = new FormData(document.getElementById("opportunityForm"));
+        const formData = new FormData(
+            document.getElementById("opportunityForm"),
+        );
         const opportunityData = {};
 
         for (let [key, value] of formData.entries()) {
@@ -2653,14 +2918,17 @@ class AdminDashboard {
         }
 
         try {
-            const response = await fetch(`/admin/api/opportunities/${encodeURIComponent(originalName)}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${this.token}`,
+            const response = await fetch(
+                `/admin/api/opportunities/${encodeURIComponent(originalName)}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                    body: JSON.stringify(opportunityData),
                 },
-                body: JSON.stringify(opportunityData),
-            });
+            );
 
             const result = await response.json();
 
@@ -2678,17 +2946,24 @@ class AdminDashboard {
     }
 
     async deleteOpportunity(opportunityName) {
-        if (!confirm(`Weet je zeker dat je "${opportunityName}" wilt verwijderen?`)) {
+        if (
+            !confirm(
+                `Weet je zeker dat je "${opportunityName}" wilt verwijderen?`,
+            )
+        ) {
             return;
         }
 
         try {
-            const response = await fetch(`/admin/api/opportunities/${encodeURIComponent(opportunityName)}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${this.token}`,
+            const response = await fetch(
+                `/admin/api/opportunities/${encodeURIComponent(opportunityName)}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${this.token}`,
+                    },
                 },
-            });
+            );
 
             const result = await response.json();
 
@@ -2720,7 +2995,9 @@ class AdminDashboard {
             const filters = await filtersResponse.json();
 
             // Find the opportunity
-            const opportunity = this.allOpportunities.find(o => o.Name === opportunityName);
+            const opportunity = this.allOpportunities.find(
+                (o) => o.Name === opportunityName,
+            );
             if (!opportunity) {
                 alert("Kans niet gevonden");
                 return;
@@ -2738,12 +3015,12 @@ class AdminDashboard {
                             <p style="margin-bottom: 1rem; color: #666;">Selecteer de filters waar deze kans onder gevonden moet worden:</p>
 
                             <div class="filter-categories">
-                                ${this.renderFilterCategory('HBMSector', 'Sectoren', filters.HBMSector, opportunity.HBMSector)}
-                                ${this.renderFilterCategory('OrganizationType', 'Organisatie Types', filters.OrganizationType, opportunity.OrganizationType)}
-                                ${this.renderFilterCategory('OrganizationField', 'Vakgebieden', filters.OrganizationField, opportunity.OrganizationField)}
-                                ${this.renderFilterCategory('ProjectType', 'Project Types', filters.ProjectType, opportunity.ProjectType)}
-                                ${this.renderFilterCategory('HBMTopic', 'HBM Topics', filters.HBMTopic, opportunity.HBMTopic)}
-                                ${this.renderFilterCategory('HBMCharacteristics', 'HBM Karakteristieken', filters.HBMCharacteristics, opportunity.HBMCharacteristics)}
+                                ${this.renderFilterCategory("HBMSector", "Sectoren", filters.HBMSector, opportunity.HBMSector)}
+                                ${this.renderFilterCategory("OrganizationType", "Organisatie Types", filters.OrganizationType, opportunity.OrganizationType)}
+                                ${this.renderFilterCategory("OrganizationField", "Vakgebieden", filters.OrganizationField, opportunity.OrganizationField)}
+                                ${this.renderFilterCategory("ProjectType", "Project Types", filters.ProjectType, opportunity.ProjectType)}
+                                ${this.renderFilterCategory("HBMTopic", "HBM Topics", filters.HBMTopic, opportunity.HBMTopic)}
+                                ${this.renderFilterCategory("HBMCharacteristics", "HBM Karakteristieken", filters.HBMCharacteristics, opportunity.HBMCharacteristics)}
                             </div>
                         </div>
                         <div class="modal-actions">
@@ -2755,31 +3032,42 @@ class AdminDashboard {
             `;
 
             document.body.insertAdjacentHTML("beforeend", modalHTML);
-
         } catch (error) {
             console.error("Error opening filter selection modal:", error);
             alert("Fout bij het laden van filters");
         }
     }
 
-    renderFilterCategory(categoryKey, categoryName, filterOptions, currentValues) {
-        const currentArray = Array.isArray(currentValues) ? currentValues : 
-                           (currentValues ? [currentValues] : []);
+    renderFilterCategory(
+        categoryKey,
+        categoryName,
+        filterOptions,
+        currentValues,
+    ) {
+        const currentArray = Array.isArray(currentValues)
+            ? currentValues
+            : currentValues
+              ? [currentValues]
+              : [];
 
         return `
             <div class="filter-category" style="margin-bottom: 1.5rem; border: 1px solid #ddd; border-radius: 8px; padding: 1rem;">
                 <h4 style="margin: 0 0 0.75rem 0; color: rgb(38, 123, 41);">${categoryName}</h4>
                 <div class="filter-options" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem;">
-                    ${filterOptions.map(option => `
+                    ${filterOptions
+                        .map(
+                            (option) => `
                         <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.25rem;">
                             <input type="checkbox" 
                                    name="${categoryKey}" 
                                    value="${option}" 
-                                   ${currentArray.includes(option) ? 'checked' : ''}
+                                   ${currentArray.includes(option) ? "checked" : ""}
                                    style="margin: 0;">
                             <span style="font-size: 0.9rem;">${option}</span>
                         </label>
-                    `).join('')}
+                    `,
+                        )
+                        .join("")}
                 </div>
             </div>
         `;
@@ -2787,24 +3075,36 @@ class AdminDashboard {
 
     async saveOpportunityFilters(opportunityName) {
         try {
-            const modal = document.getElementById('filterSelectionModal');
+            const modal = document.getElementById("filterSelectionModal");
             const formData = new FormData();
 
             // Collect all checked values for each category
-            const categories = ['HBMSector', 'OrganizationType', 'OrganizationField', 'ProjectType', 'HBMTopic', 'HBMCharacteristics'];
+            const categories = [
+                "HBMSector",
+                "OrganizationType",
+                "OrganizationField",
+                "ProjectType",
+                "HBMTopic",
+                "HBMCharacteristics",
+            ];
             const updatedOpportunity = {};
 
-            categories.forEach(category => {
-                const checkboxes = modal.querySelectorAll(`input[name="${category}"]:checked`);
-                const values = Array.from(checkboxes).map(cb => cb.value);
+            categories.forEach((category) => {
+                const checkboxes = modal.querySelectorAll(
+                    `input[name="${category}"]:checked`,
+                );
+                const values = Array.from(checkboxes).map((cb) => cb.value);
 
                 if (values.length > 0) {
-                    updatedOpportunity[category] = values.length === 1 ? values[0] : values;
+                    updatedOpportunity[category] =
+                        values.length === 1 ? values[0] : values;
                 }
             });
 
             // Find the original opportunity to preserve other data
-            const originalOpportunity = this.allOpportunities.find(o => o.Name === opportunityName);
+            const originalOpportunity = this.allOpportunities.find(
+                (o) => o.Name === opportunityName,
+            );
             if (!originalOpportunity) {
                 alert("Kans niet gevonden");
                 return;
@@ -2813,18 +3113,21 @@ class AdminDashboard {
             // Merge with existing data
             const completeOpportunityData = {
                 ...originalOpportunity,
-                ...updatedOpportunity
+                ...updatedOpportunity,
             };
 
             // Save via API
-            const response = await fetch(`/admin/api/opportunities/${encodeURIComponent(opportunityName)}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${this.token}`,
+            const response = await fetch(
+                `/admin/api/opportunities/${encodeURIComponent(opportunityName)}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${this.token}`,
+                    },
+                    body: JSON.stringify(completeOpportunityData),
                 },
-                body: JSON.stringify(completeOpportunityData),
-            });
+            );
 
             const result = await response.json();
 
@@ -2843,8 +3146,10 @@ class AdminDashboard {
 
     openLocationPicker() {
         // Get current values if they exist
-        const currentLat = document.getElementById("opportunityLat").value || 51.2;
-        const currentLng = document.getElementById("opportunityLng").value || 6.0;
+        const currentLat =
+            document.getElementById("opportunityLat").value || 51.2;
+        const currentLng =
+            document.getElementById("opportunityLng").value || 6.0;
 
         const modalHTML = `
             <div id="locationPickerModal" class="modal-overlay">
@@ -2876,7 +3181,10 @@ class AdminDashboard {
 
         // Initialize map after modal is added to DOM
         setTimeout(() => {
-            this.initLocationPickerMap(parseFloat(currentLat), parseFloat(currentLng));
+            this.initLocationPickerMap(
+                parseFloat(currentLat),
+                parseFloat(currentLng),
+            );
         }, 100);
     }
 
@@ -2885,7 +3193,8 @@ class AdminDashboard {
             // Load Leaflet if not available
             const leafletCSS = document.createElement("link");
             leafletCSS.rel = "stylesheet";
-            leafletCSS.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+            leafletCSS.href =
+                "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
             document.head.appendChild(leafletCSS);
 
             const leafletJS = document.createElement("script");
@@ -2924,29 +3233,33 @@ class AdminDashboard {
         this.centerMarker = L.marker([lat, lng], {
             draggable: false,
             icon: L.icon({
-                iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+                iconUrl:
+                    "data:image/svg+xml;base64," +
+                    btoa(`
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="12" cy="12" r="8" fill="#dc3545" stroke="#fff" stroke-width="2"/>
                     </svg>
                 `),
                 iconSize: [24, 24],
                 iconAnchor: [12, 12],
-            })
+            }),
         }).addTo(this.locationPickerMap);
 
         // Update coordinates on map move
-        this.locationPickerMap.on('move', () => {
+        this.locationPickerMap.on("move", () => {
             const center = this.locationPickerMap.getCenter();
             this.centerMarker.setLatLng(center);
 
-            const coordinatesElement = document.getElementById("currentCoordinates");
+            const coordinatesElement =
+                document.getElementById("currentCoordinates");
             if (coordinatesElement) {
                 coordinatesElement.textContent = `${center.lat.toFixed(6)}, ${center.lng.toFixed(6)}`;
             }
         });
 
         // Set initial coordinates display
-        const coordinatesElement = document.getElementById("currentCoordinates");
+        const coordinatesElement =
+            document.getElementById("currentCoordinates");
         if (coordinatesElement) {
             coordinatesElement.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
         }
@@ -2957,8 +3270,10 @@ class AdminDashboard {
             const center = this.locationPickerMap.getCenter();
 
             // Update the form fields
-            document.getElementById("opportunityLat").value = center.lat.toFixed(6);
-            document.getElementById("opportunityLng").value = center.lng.toFixed(6);
+            document.getElementById("opportunityLat").value =
+                center.lat.toFixed(6);
+            document.getElementById("opportunityLng").value =
+                center.lng.toFixed(6);
 
             // Clean up map
             this.locationPickerMap.remove();
@@ -3021,8 +3336,9 @@ class AdminDashboard {
         if (!this.municipalityLayers) return;
 
         // Get currently visible municipalities
-        const visibleMunicipalities = Object.keys(this.municipalityLayers)
-            .filter((name) => this.municipalityLayers[name].visible);
+        const visibleMunicipalities = Object.keys(
+            this.municipalityLayers,
+        ).filter((name) => this.municipalityLayers[name].visible);
 
         console.log(
             `[REFRESH] Refreshing data tab with ${visibleMunicipalities.length} visible municipalities`,
@@ -3146,7 +3462,9 @@ class AdminDashboard {
             // Load current visibility data
             let visibilityData = {};
             try {
-                const visibilityResponse = await fetch("/data/municipality-visibility.json");
+                const visibilityResponse = await fetch(
+                    "/data/municipality-visibility.json",
+                );
                 if (visibilityResponse.ok) {
                     visibilityData = await visibilityResponse.json();
                 }
@@ -3419,14 +3737,17 @@ async function saveMunicipalityVisibility() {
 
         if (response.ok) {
             // Update municipality database with visibility changes
-            const updateResponse = await fetch("/admin/api/update-municipality-visibility", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${window.adminDashboard.token}`,
+            const updateResponse = await fetch(
+                "/admin/api/update-municipality-visibility",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${window.adminDashboard.token}`,
+                    },
+                    body: JSON.stringify(visibilityData),
                 },
-                body: JSON.stringify(visibilityData),
-            });
+            );
 
             if (updateResponse.ok) {
                 alert("Gemeente zichtbaarheid succesvol opgeslagen!");
@@ -3452,7 +3773,9 @@ async function saveMunicipalityVisibility() {
                     );
                 }
             } else {
-                alert("Gemeente zichtbaarheid opgeslagen, maar database update gefaald");
+                alert(
+                    "Gemeente zichtbaarheid opgeslagen, maar database update gefaald",
+                );
             }
         } else {
             alert(`Fout bij opslaan: ${result.message || result.error}`);
