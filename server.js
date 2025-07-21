@@ -405,7 +405,13 @@ app.post("/admin/api/opportunities", authenticateToken, (req, res) => {
         opportunities.push(newOpportunity);
 
         // Create backup
-        createBackup("opportunities");
+        const backupDir = path.join(__dirname, "backup");
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+        }
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const backupPath = path.join(backupDir, `opportunities-${timestamp}.json`);
+        fs.copyFileSync(path.join(__dirname, "data/opportunities.json"), backupPath);
 
         // Save updated opportunities
         fs.writeFileSync(
@@ -547,7 +553,13 @@ app.put("/admin/api/opportunities/:name", authenticateToken, (req, res) => {
         opportunities[opportunityIndex] = updatedOpportunity;
 
         // Create backup
-        createBackup("opportunities");
+        const backupDir = path.join(__dirname, "backup");
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+        }
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const backupPath = path.join(backupDir, `opportunities-${timestamp}.json`);
+        fs.copyFileSync(path.join(__dirname, "data/opportunities.json"), backupPath);
 
         // Save updated opportunities
         fs.writeFileSync(
@@ -916,6 +928,8 @@ app.put("/admin/api/filters/:category/:item", authenticateToken, (req, res) => {
                 success: false,
                 message: "Ongeldige filter categorie",
             });
+        ```text
+
         }
 
         const itemIndex = data[category].indexOf(oldItem);
@@ -1947,7 +1961,8 @@ app.get("/admin/api/check-resources", authenticateToken, async (req, res) => {
                             });
                         },
                     )
-                    .on("error", reject);
+                    .```text
+on("error", reject);
             });
         };
 
@@ -1976,10 +1991,7 @@ app.get("/admin/api/check-resources", authenticateToken, async (req, res) => {
 });
 
 // Update resources
-app.post("/admin/api/update-resources", authenticateToken, async changes related to fixing template literal syntax and ensuring the application runs smoothly after local file modifications.
-
-```javascript
- (req, res) => {
+app.post("/admin/api/update-resources", authenticateToken, async (req, res) => {
     try {
         const https = require("https");
         const fs = require("fs");
