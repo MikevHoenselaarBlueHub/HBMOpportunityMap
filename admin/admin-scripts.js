@@ -3138,6 +3138,7 @@ class AdminDashboard {
                                 ${this.renderFilterCategory("OrganizationType", "Organisatie Types", filters.OrganizationType, opportunity.OrganizationType)}
                                 ${this.renderFilterCategory("OrganizationField", "Vakgebieden", filters.OrganizationField, opportunity.OrganizationField)}
                                 ${this.renderFilterCategory("ProjectType", "Project Types", filters.ProjectType, opportunity.ProjectType)}
+                                ${this.renderFilterCategory("ProjectPhase", "Project Fases", filters.ProjectPhase, opportunity.ProjectPhase)}
                                 ${this.renderFilterCategory("HBMTopic", "HBM Topics", filters.HBMTopic, opportunity.HBMTopic)}
                                 ${this.renderFilterCategory("HBMCharacteristics", "HBM Karakteristieken", filters.HBMCharacteristics, opportunity.HBMCharacteristics)}
                             </div>
@@ -3203,6 +3204,7 @@ class AdminDashboard {
                 "OrganizationType",
                 "OrganizationField",
                 "ProjectType",
+                "ProjectPhase",
                 "HBMTopic",
                 "HBMCharacteristics",
             ];
