@@ -807,5 +807,21 @@
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
     "Latitude": 51.227725,
     "Longitude": 6.037414
+  },
+  {
+    "Name": "Test Geocoding Location (Eindhoven)",
+    "ProjectType": "Nieuwbouw",
+    "OrganizationType": "Architect",
+    "OrganizationField": "Architectuur",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Passiefhuis",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Test locatie om geocoding functionaliteit te demonstreren.",
+    "Street": "Rachelsmolen 1",
+    "Zip": "5612MA",
+    "City": "Eindhoven",
+    "Latitude": null,
+    "Longitude": null
   }
 ]

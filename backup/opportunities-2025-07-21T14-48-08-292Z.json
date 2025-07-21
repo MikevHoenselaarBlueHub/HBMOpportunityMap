@@ -287,6 +287,19 @@
     "Longitude": 5.983776
   },
   {
+    "Name": "Demo Project 35 (Mönchengladbach)",
+    "ProjectType": "Frisse Scholen",
+    "OrganizationType": "Installatiebedrijf",
+    "OrganizationField": "Modulair",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Biobased materialen",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.230088,
+    "Longitude": 6.474245
+  },
+  {
     "Name": "Demo Locatie 36 (Venlo)",
     "ProjectType": "Nieuwbouw",
     "OrganizationType": "Architect",
@@ -380,6 +393,32 @@
     "Longitude": 6.398399
   },
   {
+    "Name": "Demo Project 43 (Maastricht)",
+    "ProjectType": "Renovatie",
+    "OrganizationType": "Architect",
+    "OrganizationField": "Bouwservices",
+    "HBMTopic": "Akoestiek",
+    "HBMCharacteristics": "Passiefhuis",
+    "HBMSector": "Zorg",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.806015,
+    "Longitude": 5.649094
+  },
+  {
+    "Name": "Demo Project 44 (Mönchengladbach)",
+    "ProjectType": "Frisse Scholen",
+    "OrganizationType": "Installatiebedrijf",
+    "OrganizationField": "Architectuur",
+    "HBMTopic": "Licht",
+    "HBMCharacteristics": "Biobased materialen",
+    "HBMSector": "Zorg",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.191357,
+    "Longitude": 6.429966
+  },
+  {
     "Name": "Demo Locatie 45 (Aachen)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Architect",
@@ -406,6 +445,32 @@
     "Longitude": 6.444612
   },
   {
+    "Name": "Demo Project 47 (Maastricht)",
+    "ProjectType": "Nieuwbouw",
+    "OrganizationType": "Onderzoeksinstituut",
+    "OrganizationField": "Architectuur",
+    "HBMTopic": "Akoestiek",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.82356,
+    "Longitude": 5.739572
+  },
+  {
+    "Name": "Demo Project 48 (Krefeld)",
+    "ProjectType": "Frisse Scholen",
+    "OrganizationType": "Aannemer",
+    "OrganizationField": "Zonne-energie",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Zorg",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.311314,
+    "Longitude": 6.579286
+  },
+  {
     "Name": "Demo Locatie 49 (Venlo)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Aannemer",
@@ -417,6 +482,19 @@
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
     "Latitude": 51.406501,
     "Longitude": 6.154458
+  },
+  {
+    "Name": "Demo Project 50 (Aachen)",
+    "ProjectType": "Nieuwbouw",
+    "OrganizationType": "Architect",
+    "OrganizationField": "Bouwservices",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Zorg",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.776179,
+    "Longitude": 6.091611
   },
   {
     "Name": "Demo Locatie 51 (Mönchengladbach)",
@@ -445,6 +523,32 @@
     "Longitude": 6.512566
   },
   {
+    "Name": "Demo Project 53 (Mönchengladbach)",
+    "ProjectType": "Circulair",
+    "OrganizationType": "Installatiebedrijf",
+    "OrganizationField": "Modulair",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Biobased materialen",
+    "HBMSector": "Wonen",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.195553,
+    "Longitude": 6.465329
+  },
+  {
+    "Name": "Demo Project 54 (Venlo)",
+    "ProjectType": "Renovatie",
+    "OrganizationType": "Installatiebedrijf",
+    "OrganizationField": "Modulair",
+    "HBMTopic": "Licht",
+    "HBMCharacteristics": "Passiefhuis",
+    "HBMSector": "Zorg",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.331661,
+    "Longitude": 6.133946
+  },
+  {
     "Name": "Demo Locatie 55 (Mönchengladbach)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Installatiebedrijf",
@@ -456,6 +560,19 @@
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
     "Latitude": 51.191721,
     "Longitude": 6.435992
+  },
+  {
+    "Name": "Demo Project 56 (Aachen)",
+    "ProjectType": "Frisse Scholen",
+    "OrganizationType": "Onderzoeksinstituut",
+    "OrganizationField": "Architectuur",
+    "HBMTopic": "Licht",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Wonen",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.790608,
+    "Longitude": 6.138306
   },
   {
     "Name": "Demo Locatie 57 (Mönchengladbach)",
@@ -497,6 +614,19 @@
     "Longitude": 6.083119
   },
   {
+    "Name": "Demo Project 60 (Krefeld)",
+    "ProjectType": "Frisse Scholen",
+    "OrganizationType": "Aannemer",
+    "OrganizationField": "Bouwservices",
+    "HBMTopic": "Licht",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Zorg",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.308099,
+    "Longitude": 6.566675
+  },
+  {
     "Name": "Demo Locatie 61 (Aachen)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Onderzoeksinstituut",
@@ -523,6 +653,32 @@
     "Longitude": 6.404626
   },
   {
+    "Name": "Demo Project 63 (Maastricht)",
+    "ProjectType": "Circulair",
+    "OrganizationType": "Installatiebedrijf",
+    "OrganizationField": "Modulair",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Wonen",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.805529,
+    "Longitude": 5.70717
+  },
+  {
+    "Name": "Demo Project 64 (Maastricht)",
+    "ProjectType": "Renovatie",
+    "OrganizationType": "Aannemer",
+    "OrganizationField": "Modulair",
+    "HBMTopic": "Akoestiek",
+    "HBMCharacteristics": "Passiefhuis",
+    "HBMSector": "Wonen",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.89573,
+    "Longitude": 5.67207
+  },
+  {
     "Name": "Demo Locatie 65 (Maastricht)",
     "ProjectType": "Renovatie",
     "OrganizationType": "Onderzoeksinstituut",
@@ -534,6 +690,19 @@
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
     "Latitude": 50.861487,
     "Longitude": 5.671534
+  },
+  {
+    "Name": "Demo Project 66 (Roermond)",
+    "ProjectType": "Circulair",
+    "OrganizationType": "Aannemer",
+    "OrganizationField": "Architectuur",
+    "HBMTopic": "Akoestiek",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.201548,
+    "Longitude": 6.008702
   },
   {
     "Name": "Demo Locatie 67 (Venlo)",
@@ -560,6 +729,19 @@
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
     "Latitude": 51.340011,
     "Longitude": 6.188931
+  },
+  {
+    "Name": "Demo Project 69 (Venlo)",
+    "ProjectType": "Nieuwbouw",
+    "OrganizationType": "Onderzoeksinstituut",
+    "OrganizationField": "Modulair",
+    "HBMTopic": "Akoestiek",
+    "HBMCharacteristics": "Biobased materialen",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.385319,
+    "Longitude": 6.140312
   },
   {
     "Name": "Demo Locatie 70 (Maastricht)",
@@ -614,6 +796,19 @@
     "Longitude": 6.138764
   },
   {
+    "Name": "Demo Project 74 (Maastricht)",
+    "ProjectType": "Frisse Scholen",
+    "OrganizationType": "Aannemer",
+    "OrganizationField": "Bouwservices",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Biobased materialen",
+    "HBMSector": "Zorg",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.803748,
+    "Longitude": 5.718245
+  },
+  {
     "Name": "Demo Locatie 75 (Aachen)",
     "ProjectType": "Nieuwbouw",
     "OrganizationType": "Architect",
@@ -627,6 +822,19 @@
     "Longitude": 6.090321
   },
   {
+    "Name": "Demo Project 76 (Maastricht)",
+    "ProjectType": "Frisse Scholen",
+    "OrganizationType": "Onderzoeksinstituut",
+    "OrganizationField": "Zonne-energie",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Biobased materialen",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.874265,
+    "Longitude": 5.713941
+  },
+  {
     "Name": "Demo Locatie 77 (Venlo)",
     "ProjectType": "Nieuwbouw",
     "OrganizationType": "Architect",
@@ -638,6 +846,32 @@
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
     "Latitude": 51.325487,
     "Longitude": 6.124466
+  },
+  {
+    "Name": "Demo Project 78 (Maastricht)",
+    "ProjectType": "Frisse Scholen",
+    "OrganizationType": "Architect",
+    "OrganizationField": "Modulair",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.827211,
+    "Longitude": 5.683955
+  },
+  {
+    "Name": "Demo Project 79 (Mönchengladbach)",
+    "ProjectType": "Renovatie",
+    "OrganizationType": "Architect",
+    "OrganizationField": "Zonne-energie",
+    "HBMTopic": "Licht",
+    "HBMCharacteristics": "Passiefhuis",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.185471,
+    "Longitude": 6.402808
   },
   {
     "Name": "Demo Locatie 80 (Aachen)",
@@ -692,6 +926,32 @@
     "Longitude": 6.581794
   },
   {
+    "Name": "Demo Project 84 (Aachen)",
+    "ProjectType": "Frisse Scholen",
+    "OrganizationType": "Aannemer",
+    "OrganizationField": "Modulair",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Zorg",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.732373,
+    "Longitude": 6.074813
+  },
+  {
+    "Name": "Demo Project 85 (Krefeld)",
+    "ProjectType": "Renovatie",
+    "OrganizationType": "Architect",
+    "OrganizationField": "Bouwservices",
+    "HBMTopic": "Licht",
+    "HBMCharacteristics": "Passiefhuis",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.368764,
+    "Longitude": 6.553339
+  },
+  {
     "Name": "Demo Locatie 86 (Heinsberg)",
     "ProjectType": "Circulair",
     "OrganizationType": "Aannemer",
@@ -716,6 +976,45 @@
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
     "Latitude": 50.784069,
     "Longitude": 6.120865
+  },
+  {
+    "Name": "Demo Project 88 (Venlo)",
+    "ProjectType": "Nieuwbouw",
+    "OrganizationType": "Installatiebedrijf",
+    "OrganizationField": "Bouwservices",
+    "HBMTopic": "Licht",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.368717,
+    "Longitude": 6.123531
+  },
+  {
+    "Name": "Demo Project 89 (Aachen)",
+    "ProjectType": "Circulair",
+    "OrganizationType": "Installatiebedrijf",
+    "OrganizationField": "Architectuur",
+    "HBMTopic": "Licht",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Wonen",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.808376,
+    "Longitude": 6.122649
+  },
+  {
+    "Name": "Demo Project 90 (Venlo)",
+    "ProjectType": "Circulair",
+    "OrganizationType": "Onderzoeksinstituut",
+    "OrganizationField": "Architectuur",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Wonen",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.35933,
+    "Longitude": 6.144798
   },
   {
     "Name": "Demo Locatie 91 (Mönchengladbach)",
@@ -744,6 +1043,19 @@
     "Longitude": 6.108789
   },
   {
+    "Name": "Demo Project 93 (Heinsberg)",
+    "ProjectType": "Circulair",
+    "OrganizationType": "Aannemer",
+    "OrganizationField": "Modulair",
+    "HBMTopic": "Licht",
+    "HBMCharacteristics": "Passiefhuis",
+    "HBMSector": "Zorg",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.046112,
+    "Longitude": 6.116633
+  },
+  {
     "Name": "Demo Locatie 94 (Roermond)",
     "ProjectType": "Nieuwbouw",
     "OrganizationType": "Architect",
@@ -757,6 +1069,19 @@
     "Longitude": 6.005542
   },
   {
+    "Name": "Demo Project 95 (Aachen)",
+    "ProjectType": "Renovatie",
+    "OrganizationType": "Installatiebedrijf",
+    "OrganizationField": "Modulair",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Passiefhuis",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.780709,
+    "Longitude": 6.052277
+  },
+  {
     "Name": "Demo Locatie 96 (Heinsberg)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Architect",
@@ -768,6 +1093,19 @@
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
     "Latitude": 51.074277,
     "Longitude": 6.065009
+  },
+  {
+    "Name": "Demo Project 97 (Heinsberg)",
+    "ProjectType": "Frisse Scholen",
+    "OrganizationType": "Onderzoeksinstituut",
+    "OrganizationField": "Zonne-energie",
+    "HBMTopic": "Licht",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.075289,
+    "Longitude": 6.116044
   },
   {
     "Name": "Demo Locatie 98 (Roermond)",
@@ -807,5 +1145,21 @@
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
     "Latitude": 51.227725,
     "Longitude": 6.037414
+  },
+  {
+    "Name": "Test Geocoding Location (Eindhoven)",
+    "ProjectType": "Nieuwbouw",
+    "OrganizationType": "Architect",
+    "OrganizationField": "Architectuur",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Passiefhuis",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Test locatie om geocoding functionaliteit te demonstreren.",
+    "Street": "Rachelsmolen 1",
+    "Zip": "5612MA",
+    "City": "Eindhoven",
+    "Latitude": null,
+    "Longitude": null
   }
 ]

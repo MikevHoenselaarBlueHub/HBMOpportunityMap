@@ -1294,15 +1294,6 @@ tr:hover {
     border-top-color: rgba(0, 0, 0, 0.8);
 }
 
-/* Bulk selection styles */
-.bulk-select-header {
-    width: 120px;
-    text-align: center;
-}
-
-.bulk-select-header input[type="checkbox"] {
-    margin-right: 0.5rem;
-}
 
 .opportunity-checkbox {
     cursor: pointer;

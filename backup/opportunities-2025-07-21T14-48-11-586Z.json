@@ -757,6 +757,19 @@
     "Longitude": 6.005542
   },
   {
+    "Name": "Demo Project 95 (Aachen)",
+    "ProjectType": "Renovatie",
+    "OrganizationType": "Installatiebedrijf",
+    "OrganizationField": "Modulair",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Passiefhuis",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 50.780709,
+    "Longitude": 6.052277
+  },
+  {
     "Name": "Demo Locatie 96 (Heinsberg)",
     "ProjectType": "Frisse Scholen",
     "OrganizationType": "Architect",
@@ -768,6 +781,19 @@
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
     "Latitude": 51.074277,
     "Longitude": 6.065009
+  },
+  {
+    "Name": "Demo Project 97 (Heinsberg)",
+    "ProjectType": "Frisse Scholen",
+    "OrganizationType": "Onderzoeksinstituut",
+    "OrganizationField": "Zonne-energie",
+    "HBMTopic": "Licht",
+    "HBMCharacteristics": "Circulair",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Latitude": 51.075289,
+    "Longitude": 6.116044
   },
   {
     "Name": "Demo Locatie 98 (Roermond)",
@@ -807,5 +833,21 @@
     "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
     "Latitude": 51.227725,
     "Longitude": 6.037414
+  },
+  {
+    "Name": "Test Geocoding Location (Eindhoven)",
+    "ProjectType": "Nieuwbouw",
+    "OrganizationType": "Architect",
+    "OrganizationField": "Architectuur",
+    "HBMTopic": "Binnenluchtkwaliteit",
+    "HBMCharacteristics": "Passiefhuis",
+    "HBMSector": "Onderwijs",
+    "HBMType": "Project",
+    "Description": "Test locatie om geocoding functionaliteit te demonstreren.",
+    "Street": "Rachelsmolen 1",
+    "Zip": "5612MA",
+    "City": "Eindhoven",
+    "Latitude": null,
+    "Longitude": null
   }
 ]
