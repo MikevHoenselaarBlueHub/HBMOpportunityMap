@@ -170,6 +170,12 @@ body {
 
 .section-header h2 {
     color: rgb(38, 123, 41);
+    font-size: 2rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
 }
 
 /* Stats Grid */
@@ -686,23 +692,78 @@ tr:hover {
 
 /* Role badges */
 .role-badge {
-    display: inline-block;
-    padding: 0.25rem 0.75rem;
+    padding: 0.25rem 0.5rem;
     border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-.role-admin {
-    background: #ff5722;
+.role-badge.role-admin {
+    background-color: #dc3545;
     color: white;
 }
 
-.role-editor {
-    background: #4caf50;
+.role-badge.role-editor {
+    background-color: #28a745;
     color: white;
+}
+
+/* Import modal styles */
+.import-progress {
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 20px;
+}
+
+.import-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+.import-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.import-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.import-stat-card {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+.import-stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.import-stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
 }
 
 /* User info in sidebar */

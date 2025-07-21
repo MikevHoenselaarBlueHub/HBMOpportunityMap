@@ -1342,6 +1342,458 @@ class AdminDashboard {
         return categoryDisplayNames[category] || category;
     }
 
+    // Translation mappings for English to Dutch
+    getTranslationMappings() {
+        return {
+            OrganizationType: {
+                "Designer": "Architect2",
+                "Contractor": "Aannemer",
+                "Supplier": "Leverancier",
+                "Research Institute": "Onderzoeksinstelling",
+                "Government": "Overheid / non-profit"
+            },
+            ProjectType: {
+                "Feasibility Study": "Haalbaarheidsstudie / Concept",
+                "Initiative & Vision Development": "Initiatief & Visie Ontwikkeling",
+                "Design": "Ontwerp",
+                "Tender & Selection": "Aanbesteding & selectie",
+                "Construction & Realization": "Constructie & Realisatie",
+                "Installation & Commissioning": "Inrichting & Inbedrijfstelling",
+                "Use & Management": "Gebruik & Beheer",
+                "Aftercare / Monitoring": "Nazorg / Monitoring",
+                "Renovation": "Renovatie",
+                "Demolition & Redevelopment": "Sloop & Herontwikkeling"
+            },
+            HBMTopic: {
+                "Acoustics": "Akoestiek",
+                "Active Design": "Actief Ontwerp",
+                "Indoor Air Quality": "Binnenluchtkwaliteit",
+                "Light": "Licht",
+                "Look & Feel": "Uiterlijk & Gevoel",
+                "Thermal Comfort": "Thermisch Comfort"
+            },
+            HBMCharacteristics: {
+                "Bio-based materials": "Biobased materialen",
+                "Biophilic design": "Biofiel ontwerp",
+                "Certification": "Certificering",
+                "Circular": "Circulair",
+                "Climate adaptive": "Klimaatadaptief",
+                "Design for disassembly": "Ontwerp voor demontage",
+                "Education": "Onderwijs",
+                "Green roofs": "Groene daken",
+                "Inclusive design": "Inclusief ontwerp",
+                "Life cycle analysis (LCA)": "Levenscyclusanalyse (LCA)",
+                "Low carbon": "Koolstofarm",
+                "Low EMF": "Laag-EMV",
+                "Low VOC": "Laag-VOS",
+                "Nature inclusive": "Natuurinclusief",
+                "Net zero energy": "Netto-nul energie",
+                "Passive house": "Passiefhuis",
+                "Prefab & modular construction": "Prefab & modulaire bouw",
+                "Scientific": "Wetenschappelijk",
+                "Sensors": "Sensoren"
+            },
+            HBMSector: {
+                "Education": "Onderwijs",
+                "Government": "Overheid",
+                "Healthcare": "Zorg",
+                "Hospitality": "Horeca",
+                "Living": "Wonen",
+                "Recreation": "Recreatie",
+                "Office": "Kantoor"
+            }
+        };
+    }
+
+    // Translate English values to Dutch
+    translateValue(category, englishValue) {
+        const mappings = this.getTranslationMappings();
+        if (mappings[category] && mappings[category][englishValue]) {
+            return mappings[category][englishValue];
+        }
+        return englishValue; // Return original if no translation found
+    }
+
+    // Translate array of comma-separated values
+    translateCommaSeparatedValues(category, commaSeparatedString) {
+        if (!commaSeparatedString) return null;
+        
+        const values = commaSeparatedString.split(',').map(v => v.trim());
+        const translatedValues = values.map(value => this.translateValue(category, value));
+        
+        return translatedValues.length === 1 ? translatedValues[0] : translatedValues;
+    }
+
+    // Open import modal
+    openImportModal() {
+        const modalHTML = `
+            <div id="importModal" class="modal-overlay">
+                <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+                    <div class="modal-header">
+                        <h3>Import XLS Bestand</h3>
+                        <button class="modal-close" onclick="closeModal('importModal')">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                            <h4>Instructies:</h4>
+                            <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                                <li>Selecteer een XLS of XLSX bestand</li>
+                                <li>Alleen records met status 'Approved' worden geïmporteerd</li>
+                                <li>Bestaande kansen worden bijgewerkt op basis van de naam</li>
+                                <li>Nieuwe gemeenten worden automatisch toegevoegd</li>
+                                <li>Engelse waarden worden automatisch vertaald naar Nederlands</li>
+                                <li>Adressen worden automatisch gecodeerd naar coördinaten</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="importFile">Selecteer XLS/XLSX bestand *</label>
+                            <input type="file" id="importFile" accept=".xls,.xlsx" required style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        
+                        <div id="importProgress" style="display: none; margin-top: 1rem;">
+                            <div style="background: #e9ecef; border-radius: 4px; overflow: hidden;">
+                                <div id="importProgressBar" style="height: 20px; background: #007bff; width: 0%; transition: width 0.3s;"></div>
+                            </div>
+                            <div id="importStatus" style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;"></div>
+                        </div>
+                        
+                        <div id="importResults" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: 4px;"></div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('importModal')">Annuleren</button>
+                        <button type="button" class="btn btn-primary" onclick="adminApp.processImport()">Import Starten</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML("beforeend", modalHTML);
+    }
+
+    // Process import
+    async processImport() {
+        const fileInput = document.getElementById("importFile");
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            alert("Selecteer eerst een bestand");
+            return;
+        }
+
+        const progressContainer = document.getElementById("importProgress");
+        const progressBar = document.getElementById("importProgressBar");
+        const statusDiv = document.getElementById("importStatus");
+        const resultsDiv = document.getElementById("importResults");
+        
+        progressContainer.style.display = "block";
+        resultsDiv.style.display = "none";
+        
+        try {
+            // Update progress
+            this.updateImportProgress(10, "Bestand wordt gelezen...");
+            
+            // Read file
+            const data = await this.readExcelFile(file);
+            this.updateImportProgress(20, "Data wordt verwerkt...");
+            
+            // Process data
+            const processedData = await this.processImportData(data);
+            this.updateImportProgress(90, "Import wordt afgerond...");
+            
+            // Show results
+            this.showImportResults(processedData);
+            this.updateImportProgress(100, "Import voltooid!");
+            
+            // Reload opportunities
+            await this.loadOpportunities();
+            
+        } catch (error) {
+            console.error("Import error:", error);
+            resultsDiv.innerHTML = `<div style="color: #dc3545; padding: 1rem; background: #f8d7da; border-radius: 4px;">
+                <strong>Fout bij import:</strong> ${error.message}
+            </div>`;
+            resultsDiv.style.display = "block";
+        }
+    }
+
+    // Update import progress
+    updateImportProgress(percentage, status) {
+        const progressBar = document.getElementById("importProgressBar");
+        const statusDiv = document.getElementById("importStatus");
+        
+        if (progressBar) progressBar.style.width = percentage + "%";
+        if (statusDiv) statusDiv.textContent = status;
+    }
+
+    // Read Excel file
+    async readExcelFile(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    // Load SheetJS if not available
+                    if (typeof XLSX === 'undefined') {
+                        const script = document.createElement('script');
+                        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                        script.onload = () => {
+                            this.parseExcelData(e.target.result, resolve, reject);
+                        };
+                        document.head.appendChild(script);
+                    } else {
+                        this.parseExcelData(e.target.result, resolve, reject);
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            reader.onerror = () => reject(new Error("Fout bij lezen van bestand"));
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    // Parse Excel data
+    parseExcelData(data, resolve, reject) {
+        try {
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            
+            // Skip header row and filter for approved records
+            const approvedRecords = jsonData.slice(1).filter(row => {
+                return row[0] && row[0].toString().toLowerCase() === 'approved';
+            });
+            
+            resolve(approvedRecords);
+        } catch (error) {
+            reject(new Error("Fout bij verwerken van Excel data: " + error.message));
+        }
+    }
+
+    // Process import data
+    async processImportData(data) {
+        const results = {
+            total: data.length,
+            added: 0,
+            updated: 0,
+            failed: 0,
+            errors: []
+        };
+
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
+            
+            try {
+                this.updateImportProgress(20 + ((i / data.length) * 60), `Verwerken record ${i + 1} van ${data.length}...`);
+                
+                const opportunity = await this.processOpportunityRow(row);
+                
+                if (opportunity) {
+                    // Check if opportunity exists by name
+                    const existingOpportunity = this.allOpportunities.find(o => o.Name === opportunity.Name);
+                    
+                    if (existingOpportunity) {
+                        await this.updateExistingOpportunity(opportunity);
+                        results.updated++;
+                    } else {
+                        await this.createNewOpportunity(opportunity);
+                        results.added++;
+                    }
+                }
+            } catch (error) {
+                console.error(`Error processing row ${i + 1}:`, error);
+                results.failed++;
+                results.errors.push(`Rij ${i + 1}: ${error.message}`);
+            }
+        }
+
+        return results;
+    }
+
+    // Process single opportunity row
+    async processOpportunityRow(row) {
+        // Map columns to opportunity object
+        const opportunity = {
+            Name: row[1] || "",
+            Address: row[2] || "",
+            PostalCode: row[3] || "",
+            City: row[4] || "",
+            Country: row[5] || "",
+            Municipality: row[6] || "",
+            OrganizationType: this.translateCommaSeparatedValues('OrganizationType', row[7]),
+            ProjectType: this.translateCommaSeparatedValues('ProjectType', row[8]),
+            ProjectPhase: row[9] || "",
+            HBMUse: row[10] || "",
+            HBMType: row[11] || "",
+            HBMTopic: this.translateCommaSeparatedValues('HBMTopic', row[12]),
+            HBMCharacteristics: this.translateCommaSeparatedValues('HBMCharacteristics', row[13]),
+            HBMSector: this.translateCommaSeparatedValues('HBMSector', row[14]),
+            ContactPerson: row[15] || "",
+            ContactEmail: row[16] || "",
+            ContactPhone: row[17] || "",
+            ContactWebsite: row[18] || "",
+            Latitude: row[19] || null,
+            Longitude: row[20] || null,
+            Remarks: row[21] || ""
+        };
+
+        // Skip if HBMUse is 'internal'
+        if (opportunity.HBMUse && opportunity.HBMUse.toLowerCase() === 'internal') {
+            return null;
+        }
+
+        // Add municipality if it doesn't exist
+        if (opportunity.Municipality) {
+            await this.ensureMunicipalityExists(opportunity.Municipality, opportunity.Country);
+        }
+
+        // Geocode if coordinates are missing
+        if (!opportunity.Latitude || !opportunity.Longitude) {
+            if (opportunity.Address && opportunity.City) {
+                const coords = await this.geocodeAddress(
+                    `${opportunity.Address}, ${opportunity.PostalCode} ${opportunity.City}, ${opportunity.Country}`
+                );
+                if (coords) {
+                    opportunity.Latitude = coords.lat;
+                    opportunity.Longitude = coords.lng;
+                }
+            }
+        }
+
+        return opportunity;
+    }
+
+    // Ensure municipality exists
+    async ensureMunicipalityExists(municipalityName, country) {
+        try {
+            const response = await fetch("/admin/api/municipalities", {
+                headers: {
+                    Authorization: `Bearer ${this.token}`,
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const existingMunicipality = data.municipalities.find(m => m.name === municipalityName);
+                
+                if (!existingMunicipality) {
+                    // Create new municipality
+                    const municipalityData = {
+                        name: municipalityName,
+                        country: country === 'NL' ? 'Netherlands' : country === 'DE' ? 'Germany' : country,
+                        code: country === 'NL' ? 'NL' : country === 'DE' ? 'DE' : country,
+                        visibility: false // New municipalities start as not visible
+                    };
+
+                    await fetch("/admin/api/municipalities", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${this.token}`,
+                        },
+                        body: JSON.stringify(municipalityData),
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error ensuring municipality exists:", error);
+        }
+    }
+
+    // Geocode address
+    async geocodeAddress(address) {
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`);
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+                return {
+                    lat: parseFloat(data[0].lat),
+                    lng: parseFloat(data[0].lon)
+                };
+            }
+        } catch (error) {
+            console.error("Geocoding error:", error);
+        }
+        return null;
+    }
+
+    // Update existing opportunity
+    async updateExistingOpportunity(opportunity) {
+        const response = await fetch(`/admin/api/opportunities/${encodeURIComponent(opportunity.Name)}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.token}`,
+            },
+            body: JSON.stringify(opportunity),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to update opportunity: ${opportunity.Name}`);
+        }
+    }
+
+    // Create new opportunity
+    async createNewOpportunity(opportunity) {
+        const response = await fetch("/admin/api/opportunities", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.token}`,
+            },
+            body: JSON.stringify(opportunity),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to create opportunity: ${opportunity.Name}`);
+        }
+    }
+
+    // Show import results
+    showImportResults(results) {
+        const resultsDiv = document.getElementById("importResults");
+        
+        let resultHTML = `
+            <div style="color: #28a745; padding: 1rem; background: #d4edda; border-radius: 4px; margin-bottom: 1rem;">
+                <strong>Import voltooid!</strong>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div style="text-align: center; padding: 1rem; background: #e3f2fd; border-radius: 4px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #1976d2;">${results.total}</div>
+                    <div>Totaal verwerkt</div>
+                </div>
+                <div style="text-align: center; padding: 1rem; background: #e8f5e9; border-radius: 4px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #388e3c;">${results.added}</div>
+                    <div>Nieuwe kansen</div>
+                </div>
+                <div style="text-align: center; padding: 1rem; background: #fff3e0; border-radius: 4px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #f57c00;">${results.updated}</div>
+                    <div>Bijgewerkt</div>
+                </div>
+                <div style="text-align: center; padding: 1rem; background: #ffebee; border-radius: 4px;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #d32f2f;">${results.failed}</div>
+                    <div>Gefaald</div>
+                </div>
+            </div>
+        `;
+
+        if (results.errors.length > 0) {
+            resultHTML += `
+                <div style="margin-top: 1rem;">
+                    <h4>Fouten tijdens import:</h4>
+                    <div style="max-height: 200px; overflow-y: auto; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                        ${results.errors.map(error => `<div style="margin-bottom: 0.5rem; color: #dc3545;">${error}</div>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        resultsDiv.innerHTML = resultHTML;
+        resultsDiv.style.display = "block";
+    }
+
     async loadOpportunities() {
         try {
             const response = await fetch("/admin/api/opportunities", {
@@ -1381,7 +1833,7 @@ class AdminDashboard {
             existingContainer.remove();
         }
 
-        // Add search container
+        // Add search and import container
         const section = document.getElementById("opportunities-section");
         const sectionHeader = section.querySelector(".section-header");
         
@@ -1397,6 +1849,7 @@ class AdminDashboard {
                     <option value="Bedrijf">Bedrijf</option>
                 </select>
                 <button onclick="adminApp.clearOpportunityFilters()" class="btn btn-secondary">Wissen</button>
+                <button onclick="adminApp.openImportModal()" class="btn btn-primary" style="background: #28a745;">Import XLS</button>
             </div>
         `;
         

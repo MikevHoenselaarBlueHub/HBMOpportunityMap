@@ -268,119 +268,124 @@ app.delete("/admin/api/users/:id", authenticateToken, (req, res) => {
     }
 });
 
-app.get("/admin/api/opportunities", authenticateToken, (req, res) => {
-    console.log(`[OPPORTUNITIES] Loading opportunities requested by: ${req.user.username}`);
+// Opportunities API
+app.get('/admin/api/opportunities', authenticateToken, (req, res) => {
     try {
-        const dataPath = path.join(__dirname, "data/opportunities.json");
-        if (!fs.existsSync(dataPath)) {
-            console.error(`[OPPORTUNITIES] File not found: ${dataPath}`);
-            return res.status(404).json({ error: "Opportunities data file not found" });
-        }
+        const opportunities = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/opportunities.json'), 'utf8'));
 
-        const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
-        console.log(`[OPPORTUNITIES] Successfully loaded ${data.length} opportunities`);
-        res.json(data);
+        // Filter out internal opportunities for main application
+        const filteredOpportunities = opportunities.filter(opp => {
+            return !opp.HBMUse || opp.HBMUse.toLowerCase() !== 'internal';
+        });
+
+        res.json(filteredOpportunities);
     } catch (error) {
-        console.error(`[OPPORTUNITIES] Error loading opportunities:`, error);
-        res.status(500).json({ error: "Fout bij het laden van kansen" });
+        console.error('Error loading opportunities:', error);
+        res.status(500).json({ error: 'Failed to load opportunities' });
     }
 });
 
-app.post("/admin/api/opportunities", authenticateToken, (req, res) => {
-    console.log(`[CREATE_OPPORTUNITY] Creating opportunity by: ${req.user.username}`);
-    console.log(`[CREATE_OPPORTUNITY] Data:`, req.body);
-
+app.post('/admin/api/opportunities', authenticateToken, (req, res) => {
     try {
-        const dataPath = path.join(__dirname, "data/opportunities.json");
-        const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
-        
-        // Validation
-        if (!req.body.Name || !req.body.HBMType) {
-            return res.status(400).json({ error: "Naam en type zijn verplichte velden" });
-        }
+        const opportunities = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/opportunities.json'), 'utf8'));
 
-        // Check if name already exists
-        const existingOpportunity = data.find(item => item.Name === req.body.Name);
-        if (existingOpportunity) {
-            return res.status(400).json({ error: "Een kans met deze naam bestaat al" });
-        }
-
+        // Add new opportunity with all supported fields
         const newOpportunity = {
-            ...req.body,
-            // Ensure proper data types
-            Latitude: req.body.Latitude ? parseFloat(req.body.Latitude) : null,
-            Longitude: req.body.Longitude ? parseFloat(req.body.Longitude) : null,
+            Name: req.body.Name || '',
+            ProjectType: req.body.ProjectType || '',
+            OrganizationType: req.body.OrganizationType || '',
+            OrganizationField: req.body.OrganizationField || '',
+            HBMTopic: req.body.HBMTopic || '',
+            HBMCharacteristics: req.body.HBMCharacteristics || '',
+            HBMSector: req.body.HBMSector || '',
+            HBMType: req.body.HBMType || '',
+            HBMUse: req.body.HBMUse || 'external',
+            Description: req.body.Description || '',
+            Logo: req.body.Logo || '',
+            ProjectImage: req.body.ProjectImage || '',
+            Street: req.body.Street || req.body.Address || '',
+            Zip: req.body.Zip || req.body.PostalCode || '',
+            City: req.body.City || '',
+            Municipality: req.body.Municipality || '',
+            Country: req.body.Country || '',
+            ContactPerson: req.body.ContactPerson || '',
+            ContactEmail: req.body.ContactEmail || '',
+            ContactPhone: req.body.ContactPhone || '',
+            ContactWebsite: req.body.ContactWebsite || '',
+            ProjectPhase: req.body.ProjectPhase || '',
+            Remarks: req.body.Remarks || '',
+            Latitude: req.body.Latitude || null,
+            Longitude: req.body.Longitude || null
         };
 
-        data.push(newOpportunity);
-        
-        // Create backup
-        const backupDir = path.join(__dirname, 'backup');
-        if (!fs.existsSync(backupDir)) {
-            fs.mkdirSync(backupDir, { recursive: true });
-        }
-        
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const backupPath = path.join(backupDir, `opportunities-${timestamp}.json`);
-        fs.copyFileSync(dataPath, backupPath);
+        opportunities.push(newOpportunity);
 
-        fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
-        
-        console.log(`[CREATE_OPPORTUNITY] Successfully created opportunity: ${newOpportunity.Name}`);
-        res.status(201).json(newOpportunity);
+        // Create backup
+        createBackup('opportunities');
+
+        // Save updated opportunities
+        fs.writeFileSync(path.join(__dirname, 'data/opportunities.json'), JSON.stringify(opportunities, null, 2));
+
+        res.json({ success: true, message: 'Kans succesvol toegevoegd' });
     } catch (error) {
-        console.error(`[CREATE_OPPORTUNITY] Error:`, error);
-        res.status(500).json({ error: "Fout bij het toevoegen van kans" });
+        console.error('Error creating opportunity:', error);
+        res.status(500).json({ error: 'Failed to create opportunity' });
     }
 });
 
-app.put("/admin/api/opportunities/:name", authenticateToken, (req, res) => {
-    const opportunityName = decodeURIComponent(req.params.name);
-    console.log(`[UPDATE_OPPORTUNITY] Updating opportunity ${opportunityName} by: ${req.user.username}`);
-
+app.put('/admin/api/opportunities/:name', authenticateToken, (req, res) => {
     try {
-        const dataPath = path.join(__dirname, "data/opportunities.json");
-        const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
-        
-        const index = data.findIndex((item) => item.Name === opportunityName);
-        if (index === -1) {
-            return res.status(404).json({ error: "Kans niet gevonden" });
+        const opportunityName = decodeURIComponent(req.params.name);
+        const opportunities = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/opportunities.json'), 'utf8'));
+
+        const opportunityIndex = opportunities.findIndex(o => o.Name === opportunityName);
+
+        if (opportunityIndex === -1) {
+            return res.status(404).json({ error: 'Kans niet gevonden' });
         }
 
-        // Check if new name conflicts with existing (if name changed)
-        if (req.body.Name && req.body.Name !== opportunityName) {
-            const existingOpportunity = data.find(item => item.Name === req.body.Name);
-            if (existingOpportunity) {
-                return res.status(400).json({ error: "Een kans met deze naam bestaat al" });
-            }
-        }
-
-        // Create backup
-        const backupDir = path.join(__dirname, 'backup');
-        if (!fs.existsSync(backupDir)) {
-            fs.mkdirSync(backupDir, { recursive: true });
-        }
-        
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const backupPath = path.join(backupDir, `opportunities-${timestamp}.json`);
-        fs.copyFileSync(dataPath, backupPath);
-
-        // Update opportunity
-        data[index] = {
-            ...data[index],
-            ...req.body,
-            // Ensure proper data types
-            Latitude: req.body.Latitude ? parseFloat(req.body.Latitude) : data[index].Latitude,
-            Longitude: req.body.Longitude ? parseFloat(req.body.Longitude) : data[index].Longitude,
+        // Update opportunity with all supported fields
+        const updatedOpportunity = {
+            ...opportunities[opportunityIndex],
+            Name: req.body.Name || opportunities[opportunityIndex].Name,
+            ProjectType: req.body.ProjectType !== undefined ? req.body.ProjectType : opportunities[opportunityIndex].ProjectType,
+            OrganizationType: req.body.OrganizationType !== undefined ? req.body.OrganizationType : opportunities[opportunityIndex].OrganizationType,
+            OrganizationField: req.body.OrganizationField !== undefined ? req.body.OrganizationField : opportunities[opportunityIndex].OrganizationField,
+            HBMTopic: req.body.HBMTopic !== undefined ? req.body.HBMTopic : opportunities[opportunityIndex].HBMTopic,
+            HBMCharacteristics: req.body.HBMCharacteristics !== undefined ? req.body.HBMCharacteristics : opportunities[opportunityIndex].HBMCharacteristics,
+            HBMSector: req.body.HBMSector !== undefined ? req.body.HBMSector : opportunities[opportunityIndex].HBMSector,
+            HBMType: req.body.HBMType !== undefined ? req.body.HBMType : opportunities[opportunityIndex].HBMType,
+            HBMUse: req.body.HBMUse !== undefined ? req.body.HBMUse : opportunities[opportunityIndex].HBMUse,
+            Description: req.body.Description !== undefined ? req.body.Description : opportunities[opportunityIndex].Description,
+            Logo: req.body.Logo !== undefined ? req.body.Logo : opportunities[opportunityIndex].Logo,
+            ProjectImage: req.body.ProjectImage !== undefined ? req.body.ProjectImage : opportunities[opportunityIndex].ProjectImage,
+            Street: req.body.Street !== undefined ? req.body.Street : req.body.Address !== undefined ? req.body.Address : opportunities[opportunityIndex].Street,
+            Zip: req.body.Zip !== undefined ? req.body.Zip : req.body.PostalCode !== undefined ? req.body.PostalCode : opportunities[opportunityIndex].Zip,
+            City: req.body.City !== undefined ? req.body.City : opportunities[opportunityIndex].City,
+            Municipality: req.body.Municipality !== undefined ? req.body.Municipality : opportunities[opportunityIndex].Municipality,
+            Country: req.body.Country !== undefined ? req.body.Country : opportunities[opportunityIndex].Country,
+            ContactPerson: req.body.ContactPerson !== undefined ? req.body.ContactPerson : opportunities[opportunityIndex].ContactPerson,
+            ContactEmail: req.body.ContactEmail !== undefined ? req.body.ContactEmail : opportunities[opportunityIndex].ContactEmail,
+            ContactPhone: req.body.ContactPhone !== undefined ? req.body.ContactPhone : opportunities[opportunityIndex].ContactPhone,
+            ContactWebsite: req.body.ContactWebsite !== undefined ? req.body.ContactWebsite : opportunities[opportunityIndex].ContactWebsite,
+            ProjectPhase: req.body.ProjectPhase !== undefined ? req.body.ProjectPhase : opportunities[opportunityIndex].ProjectPhase,
+            Remarks: req.body.Remarks !== undefined ? req.body.Remarks : opportunities[opportunityIndex].Remarks,
+            Latitude: req.body.Latitude !== undefined ? req.body.Latitude : opportunities[opportunityIndex].Latitude,
+            Longitude: req.body.Longitude !== undefined ? req.body.Longitude : opportunities[opportunityIndex].Longitude
         };
 
-        fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
-        
-        console.log(`[UPDATE_OPPORTUNITY] Successfully updated opportunity: ${data[index].Name}`);
-        res.json(data[index]);
+        opportunities[opportunityIndex] = updatedOpportunity;
+
+        // Create backup
+        createBackup('opportunities');
+
+        // Save updated opportunities
+        fs.writeFileSync(path.join(__dirname, 'data/opportunities.json'), JSON.stringify(opportunities, null, 2));
+
+        res.json({ success: true, message: 'Kans succesvol bijgewerkt' });
     } catch (error) {
-        console.error(`[UPDATE_OPPORTUNITY] Error:`, error);
-        res.status(500).json({ error: "Fout bij het bijwerken van kans" });
+        console.error('Error updating opportunity:', error);
+        res.status(500).json({ error: 'Failed to update opportunity' });
     }
 });
 
@@ -391,10 +396,10 @@ app.delete("/admin/api/opportunities/:name", authenticateToken, (req, res) => {
     try {
         const dataPath = path.join(__dirname, "data/opportunities.json");
         const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
-        
+
         const originalLength = data.length;
         const filteredData = data.filter((item) => item.Name !== opportunityName);
-        
+
         if (filteredData.length === originalLength) {
             return res.status(404).json({ error: "Kans niet gevonden" });
         }
@@ -404,13 +409,13 @@ app.delete("/admin/api/opportunities/:name", authenticateToken, (req, res) => {
         if (!fs.existsSync(backupDir)) {
             fs.mkdirSync(backupDir, { recursive: true });
         }
-        
+
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const backupPath = path.join(backupDir, `opportunities-${timestamp}.json`);
         fs.copyFileSync(dataPath, backupPath);
 
         fs.writeFileSync(dataPath, JSON.stringify(filteredData, null, 2));
-        
+
         console.log(`[DELETE_OPPORTUNITY] Successfully deleted opportunity: ${opportunityName}`);
         res.json({ message: "Kans succesvol verwijderd" });
     } catch (error) {
@@ -1058,7 +1063,7 @@ app.post('/admin/api/update-municipality-visibility', authenticateToken, async (
 
         // Process all municipalities from GeoJSON files
         const allMunicipalities = [];
-        
+
         // Process Dutch municipalities
         nlData.features.forEach(feature => {
             const municipalityName = feature.properties.name;
@@ -1308,7 +1313,7 @@ app.post('/admin/api/populate-municipalities-database', authenticateToken, async
         if (!fs.existsSync(backupDir)) {
             fs.mkdirSync(backupDir, { recursive: true });
         }
-        
+
         if (fs.existsSync(municipalitiesPath)) {
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const backupPath = path.join(backupDir, `municipalities-before-populate-${timestamp}.json`);
