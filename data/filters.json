@@ -1,13 +1,13 @@
 {
   "ProjectType": [
-    "Haalbaarheidsstudie / Concept",
-    "Initiatief & Visie Ontwikkeling",
-    "Ontwerp",
     "Aanbesteding & selectie",
     "Constructie & Realisatie",
-    "Inrichting & Inbedrijfstelling",
     "Gebruik & Beheer",
+    "Haalbaarheidsstudie / Concept",
+    "Initiatief & Visie Ontwikkeling",
+    "Inrichting & Inbedrijfstelling",
     "Nazorg / Monitoring",
+    "Ontwerp",
     "Renovatie",
     "Sloop & Herontwikkeling"
   ],
