@@ -4,7 +4,7 @@ class AdminDashboard {
         this.currentSection = "dashboard";
         this.token = localStorage.getItem("admin_token");
         this.userRole = null;
-        this.userInfo = null;
+        this.userInfo = nulll;
         this.init();
     }
 
@@ -2641,7 +2641,7 @@ class AdminDashboard {
                             <label for="opportunityLogo">Logo</label>
                             <div style="display: flex; gap: 0.5rem; align-items: end;">
                                 <div style="flex: 1;">
-                                    <input type="url" id="opportunityLogo" name="Logo" placeholder="Logo URL of upload een bestand">
+                                    <input type="text" id="opportunityLogo" name="Logo" placeholder="Logo URL of upload een bestand">
                                 </div>
                                 <button type="button" class="btn btn-secondary" onclick="adminApp.openLogoUploadModal()" style="white-space: nowrap;">Logo toevoegen</button>
                             </div>
@@ -2676,7 +2676,7 @@ class AdminDashboard {
         setTimeout(() => {
             const logoInput = document.getElementById("opportunityLogo");
             if (logoInput) {
-                logoInput.addEventListener('input', (e) => {
+                logoInput.addEventListener("input", (e) => {
                     this.updateLogoPreview(e.target.value);
                 });
             }
@@ -2693,7 +2693,7 @@ class AdminDashboard {
     updateLogoPreview(url) {
         const preview = document.getElementById("logoPreview");
         const previewImage = document.getElementById("logoPreviewImage");
-        
+
         if (url && this.isValidImageUrl(url)) {
             previewImage.src = url;
             previewImage.onload = () => {
@@ -2732,7 +2732,7 @@ class AdminDashboard {
                     opportunity.Longitude || "";
                 const logoUrl = opportunity.Logo || "";
                 document.getElementById("opportunityLogo").value = logoUrl;
-                
+
                 // Show logo preview if URL exists
                 if (logoUrl) {
                     this.updateLogoPreview(logoUrl);
@@ -3370,43 +3370,49 @@ class AdminDashboard {
         document.body.insertAdjacentHTML("beforeend", modalHTML);
 
         // Add radio button listeners
-        document.querySelectorAll('input[name="logoMethod"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                this.toggleLogoInputMethod(e.target.value);
+        document
+            .querySelectorAll('input[name="logoMethod"]')
+            .forEach((radio) => {
+                radio.addEventListener("change", (e) => {
+                    this.toggleLogoInputMethod(e.target.value);
+                });
             });
-        });
 
         // Add URL input listener for preview
-        document.getElementById("logoUrlInput").addEventListener('input', (e) => {
-            this.previewUrlImage(e.target.value);
-        });
+        document
+            .getElementById("logoUrlInput")
+            .addEventListener("input", (e) => {
+                this.previewUrlImage(e.target.value);
+            });
 
         // Add file change listener for preview
-        document.getElementById("logoUploadFile").addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                this.previewUploadedFile(file);
-            }
-        });
+        document
+            .getElementById("logoUploadFile")
+            .addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    this.previewUploadedFile(file);
+                }
+            });
     }
 
     toggleLogoInputMethod(method) {
-        const urlSection = document.getElementById('urlSection');
-        const uploadSection = document.getElementById('uploadSection');
-        
-        if (method === 'url') {
-            urlSection.style.display = 'block';
-            uploadSection.style.display = 'none';
+        const urlSection = document.getElementById("urlSection");
+        const uploadSection = document.getElementById("uploadSection");
+
+        if (method === "url") {
+            urlSection.style.display = "block";
+            uploadSection.style.display = "none";
         } else {
-            urlSection.style.display = 'none';
-            uploadSection.style.display = 'block';
+            urlSection.style.display = "none";
+            uploadSection.style.display = "block";
         }
     }
 
     previewUrlImage(url) {
         const preview = document.getElementById("urlPreview");
         const previewImage = document.getElementById("urlPreviewImage");
-        
+
         if (url && this.isValidImageUrl(url)) {
             previewImage.src = url;
             previewImage.onload = () => {
@@ -3424,7 +3430,9 @@ class AdminDashboard {
         const reader = new FileReader();
         reader.onload = (e) => {
             const preview = document.getElementById("logoUploadPreview");
-            const previewImage = document.getElementById("logoUploadPreviewImage");
+            const previewImage = document.getElementById(
+                "logoUploadPreviewImage",
+            );
             previewImage.src = e.target.result;
             preview.style.display = "block";
         };
@@ -3441,28 +3449,30 @@ class AdminDashboard {
     }
 
     async processLogo() {
-        const selectedMethod = document.querySelector('input[name="logoMethod"]:checked').value;
-        
-        if (selectedMethod === 'url') {
-            const url = document.getElementById('logoUrlInput').value.trim();
+        const selectedMethod = document.querySelector(
+            'input[name="logoMethod"]:checked',
+        ).value;
+
+        if (selectedMethod === "url") {
+            const url = document.getElementById("logoUrlInput").value.trim();
             if (!url) {
-                alert('Voer een URL in');
+                alert("Voer een URL in");
                 return;
             }
             if (!this.isValidImageUrl(url)) {
-                alert('Voer een geldige afbeeldings-URL in');
+                alert("Voer een geldige afbeeldings-URL in");
                 return;
             }
             this.setLogoUrl(url);
         } else {
             const fileInput = document.getElementById("logoUploadFile");
             const file = fileInput.files[0];
-            
+
             if (!file) {
                 alert("Selecteer eerst een bestand");
                 return;
             }
-            
+
             await this.uploadLogo();
         }
     }
@@ -3472,16 +3482,17 @@ class AdminDashboard {
         const logoInput = document.getElementById("opportunityLogo");
         if (logoInput) {
             logoInput.value = url;
-            
+
             // Show preview in main form
             const mainPreview = document.getElementById("logoPreview");
-            const mainPreviewImage = document.getElementById("logoPreviewImage");
+            const mainPreviewImage =
+                document.getElementById("logoPreviewImage");
             if (mainPreview && mainPreviewImage) {
                 mainPreviewImage.src = url;
                 mainPreview.style.display = "block";
             }
         }
-        
+
         closeModal("logoUploadModal");
         alert("Logo URL succesvol toegevoegd!");
     }
