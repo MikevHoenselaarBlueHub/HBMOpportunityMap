@@ -4,7 +4,7 @@ class AdminDashboard {
         this.currentSection = "dashboard";
         this.token = localStorage.getItem("admin_token");
         this.userRole = null;
-        this.userInfo = nulll;
+        this.userInfo = null;
         this.init();
     }
 
