@@ -1342,16 +1342,6 @@ tr:hover {
     background-color: rgb(28, 103, 31);
 }
 
-.action-btn.filter-btn::before {
-    content: '';
-    width: 16px;
-    height: 16px;
-    background-image: url('../icons/filter-setting.svg');
-    background-size: contain;
-    background-repeat: no-repeat;
-    filter: brightness(0) invert(1);
-}
-
 .filter-categories {
     max-height: 500px;
     overflow-y: auto;

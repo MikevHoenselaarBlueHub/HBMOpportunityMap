@@ -1432,20 +1432,20 @@
   },
   {
     "Name": "prev.end",
-    "ProjectType": "Frisse Scholen",
-    "OrganizationType": "Construction company",
+    "ProjectType": "",
+    "OrganizationType": "",
     "OrganizationField": "",
-    "HBMTopic": null,
-    "HBMCharacteristics": null,
-    "HBMSector": null,
-    "HBMType": "",
-    "HBMUse": "",
+    "HBMTopic": "",
+    "HBMCharacteristics": "",
+    "HBMSector": "",
+    "HBMType": "Project",
+    "HBMUse": "external",
     "Description": "Kans in Mönchengladbach",
     "Logo": "",
     "ProjectImage": "",
     "Street": "Egerstraße 2",
     "Zip": "41236",
-    "City": "Mönchengladbachh",
+    "City": "Mönchengladbach",
     "Municipality": "",
     "Country": "DE",
     "ContactPerson": "",
@@ -1454,7 +1454,7 @@
     "ContactWebsite": "",
     "ProjectPhase": "",
     "Remarks": "",
-    "Latitude": null,
-    "Longitude": null
+    "Latitude": 51.1593845,
+    "Longitude": 6.4459317
   }
 ]

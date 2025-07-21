@@ -23,8 +23,7 @@
     "Municipality": "Maastricht",
     "Country": "Netherlands",
     "Latitude": 50.890741,
-    "Longitude": 5.73584,
-    "HBMUse": "both"
+    "Longitude": 5.73584
   },
   {
     "Name": "Demo Locatie 2 (Krefeld)",
@@ -49,8 +48,7 @@
     "Municipality": "Krefeld",
     "Country": "Germany",
     "Latitude": 51.374155,
-    "Longitude": 6.558629,
-    "HBMUse": "both"
+    "Longitude": 6.558629
   },
   {
     "Name": "Demo Project 3 (Maastricht)",
@@ -1427,33 +1425,6 @@
     "Street": "Rachelsmolen 1",
     "Zip": "5612MA",
     "City": "Eindhoven",
-    "Latitude": null,
-    "Longitude": null
-  },
-  {
-    "Name": "prev.end",
-    "ProjectType": "Frisse Scholen",
-    "OrganizationType": "Construction company",
-    "OrganizationField": "",
-    "HBMTopic": null,
-    "HBMCharacteristics": null,
-    "HBMSector": null,
-    "HBMType": "",
-    "HBMUse": "",
-    "Description": "Kans in Mönchengladbach",
-    "Logo": "",
-    "ProjectImage": "",
-    "Street": "Egerstraße 2",
-    "Zip": "41236",
-    "City": "Mönchengladbachh",
-    "Municipality": "",
-    "Country": "DE",
-    "ContactPerson": "",
-    "ContactEmail": "",
-    "ContactPhone": "",
-    "ContactWebsite": "",
-    "ProjectPhase": "",
-    "Remarks": "",
     "Latitude": null,
     "Longitude": null
   }

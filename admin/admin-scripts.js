@@ -2016,21 +2016,10 @@ class AdminDashboard {
 
             console.log(`Mapped opportunity object:`, opportunity);
 
-            // Skip if HBMUse is 'internal'
-            if (
-                opportunity.HBMUse &&
-                opportunity.HBMUse.toLowerCase() === "internal"
-            ) {
-                console.log(
-                    `Skipping opportunity ${opportunity.Name} - HBMUse is internal`,
-                );
-                return null;
-            }
-
-            // Validate that we have enough data to create a meaningful opportunity
+            //Validate that we have enough data to create a meaningful opportunity
             if (
                 !opportunity.HBMType ||
-                (!opportunity.Municipality && !opportunity.City)
+                (!opportunity.City)
             ) {
                 console.log(
                     `Skipping opportunity ${opportunity.Name} - insufficient location or type data`,
@@ -2319,13 +2308,20 @@ class AdminDashboard {
             return;
         }
 
-        if (!confirm("Weet je zeker dat je de nieuwste versies van Leaflet en MarkerCluster wilt downloaden?")) {
+        if (
+            !confirm(
+                "Weet je zeker dat je de nieuwste versies van Leaflet en MarkerCluster wilt downloaden?",
+            )
+        ) {
             return;
         }
 
-        const updateResourcesBtn = document.getElementById("updateResourcesBtn");
+        const updateResourcesBtn =
+            document.getElementById("updateResourcesBtn");
         const leafletStatus = document.getElementById("leafletStatus");
-        const markerclusterStatus = document.getElementById("markerclusterStatus");
+        const markerclusterStatus = document.getElementById(
+            "markerclusterStatus",
+        );
 
         // Update UI to show progress
         if (updateResourcesBtn) {
@@ -2333,8 +2329,10 @@ class AdminDashboard {
             updateResourcesBtn.textContent = "Downloaden...";
         }
 
-        if (leafletStatus) leafletStatus.innerHTML = `<span style="color: #007bff;">Downloaden...</span>`;
-        if (markerclusterStatus) markerclusterStatus.innerHTML = `<span style="color: #007bff;">Downloaden...</span>`;
+        if (leafletStatus)
+            leafletStatus.innerHTML = `<span style="color: #007bff;">Downloaden...</span>`;
+        if (markerclusterStatus)
+            markerclusterStatus.innerHTML = `<span style="color: #007bff;">Downloaden...</span>`;
 
         try {
             const response = await fetch("/admin/api/update-resources", {
@@ -2347,22 +2345,25 @@ class AdminDashboard {
             const data = await response.json();
 
             if (response.ok && data.success) {
-                alert("Resources succesvol gedownload! Herlaad de pagina om de nieuwe versies te gebruiken.");
-                
-                if (leafletStatus) leafletStatus.innerHTML = `<span style="color: #28a745; font-weight: bold;">✓ Geüpdatet naar nieuwste versie</span>`;
-                if (markerclusterStatus) markerclusterStatus.innerHTML = `<span style="color: #28a745; font-weight: bold;">✓ Geüpdatet naar nieuwste versie</span>`;
+                alert(
+                    "Resources succesvol gedownload! Herlaad de pagina om de nieuwe versies te gebruiken.",
+                );
 
+                if (leafletStatus)
+                    leafletStatus.innerHTML = `<span style="color: #28a745; font-weight: bold;">✓ Geüpdatet naar nieuwste versie</span>`;
+                if (markerclusterStatus)
+                    markerclusterStatus.innerHTML = `<span style="color: #28a745; font-weight: bold;">✓ Geüpdatet naar nieuwste versie</span>`;
             } else {
                 throw new Error(data.message || "Update failed");
             }
-
         } catch (error) {
             console.error("Error updating resources:", error);
             alert(`Fout bij het updaten van resources: ${error.message}`);
-            
-            if (leafletStatus) leafletStatus.innerHTML = `<span style="color: #dc3545;">Download gefaald</span>`;
-            if (markerclusterStatus) markerclusterStatus.innerHTML = `<span style="color: #dc3545;">Download gefaald</span>`;
 
+            if (leafletStatus)
+                leafletStatus.innerHTML = `<span style="color: #dc3545;">Download gefaald</span>`;
+            if (markerclusterStatus)
+                markerclusterStatus.innerHTML = `<span style="color: #dc3545;">Download gefaald</span>`;
         } finally {
             if (updateResourcesBtn) {
                 updateResourcesBtn.disabled = false;
@@ -2378,15 +2379,18 @@ class AdminDashboard {
             return;
         }
 
-        const updateResourcesBtn = document.getElementById("updateResourcesBtn");
+        const updateResourcesBtn =
+            document.getElementById("updateResourcesBtn");
         const leafletStatus = document.getElementById("leafletStatus");
-        const markerclusterStatus = document.getElementById("markerclusterStatus");
+        const markerclusterStatus = document.getElementById(
+            "markerclusterStatus",
+        );
 
         // Show current status and make update button visible
         if (leafletStatus) {
             leafletStatus.innerHTML = `<span style="color: #6c757d;">Lokale versie geladen - klik update voor nieuwste versie</span>`;
         }
-        
+
         if (markerclusterStatus) {
             markerclusterStatus.innerHTML = `<span style="color: #6c757d;">Lokale versie geladen - klik update voor nieuwste versie</span>`;
         }
@@ -2620,8 +2624,8 @@ class AdminDashboard {
                 <td>${this.formatArrayValue(opportunity.HBMSector)}</td>
                 <td>${this.formatArrayValue(opportunity.OrganizationType)}</td>
                 <td>
-                    <button class="action-btn edit-btn" onclick="adminApp.openOpportunityModal('${this.escapeHtml(opportunity.Name)}')" title="Bewerken"></button>
-                    <button class="action-btn filter-btn" onclick="adminApp.openFilterSelectionModal('${this.escapeHtml(opportunity.Name)}')" title="Filters"></button>
+                    <button class="action-btn edit-btn" onclick="adminApp.openOpportunityModal('${this.escapeHtml(opportunity.Name)}')" title="Bewerken"><img src="/admin/icons/edit.svg" alt="Bewerken" style="width: 14px; height: 14px;"></button>
+                    <button class="action-btn filter-btn" onclick="adminApp.openFilterSelectionModal('${this.escapeHtml(opportunity.Name)}')" title="Filters"><img src="/admin/icons/filter-setting.svg" alt="Bewerken" style="width: 14px; height: 14px;"></button>
                     <button onclick="adminApp.deleteOpportunity('${this.escapeHtml(opportunity.Name)}')" class="btn btn-danger btn-sm">Verwijderen</button>
                 </td>
             `;
