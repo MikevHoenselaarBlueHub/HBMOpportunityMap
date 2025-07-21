@@ -1967,26 +1967,45 @@ app.post("/admin/api/update-resources", authenticateToken, async (req, res) => {
             fs.mkdirSync(libDir);
         }
 
-        // Function to download file
+        // Function to download file with redirect handling
         const downloadFile = (url, filepath) => {
             return new Promise((resolve, reject) => {
                 const file = fs.createWriteStream(filepath);
-                https
-                    .get(url, (response) => {
-                        if (response.statusCode !== 200) {
-                            reject(new Error(`HTTP ${response.statusCode}`));
+                
+                const makeRequest = (requestUrl) => {
+                    https.get(requestUrl, (response) => {
+                        // Handle redirects
+                        if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                            file.destroy();
+                            fs.unlink(filepath, () => {}); // Clean up partial file
+                            makeRequest(response.headers.location);
                             return;
                         }
+                        
+                        if (response.statusCode !== 200) {
+                            file.destroy();
+                            fs.unlink(filepath, () => {}); 
+                            reject(new Error(`HTTP ${response.statusCode} for ${requestUrl}`));
+                            return;
+                        }
+                        
                         response.pipe(file);
                         file.on("finish", () => {
                             file.close();
                             resolve();
                         });
-                    })
-                    .on("error", (err) => {
-                        fs.unlink(filepath, () => {}); // Delete the file async
+                        file.on("error", (err) => {
+                            fs.unlink(filepath, () => {});
+                            reject(err);
+                        });
+                    }).on("error", (err) => {
+                        file.destroy();
+                        fs.unlink(filepath, () => {});
                         reject(err);
                     });
+                };
+                
+                makeRequest(url);
             });
         };
 
@@ -2064,26 +2083,26 @@ app.post("/admin/api/update-resources", authenticateToken, async (req, res) => {
             });
         };
 
-        // Download latest Leaflet
+        // Download latest Leaflet with specific versions to avoid redirects
         await Promise.all([
             downloadFile(
-                "https://unpkg.com/leaflet@latest/dist/leaflet.js",
+                "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
                 path.join(libDir, "leaflet.js"),
             ),
             downloadFile(
-                "https://unpkg.com/leaflet@latest/dist/leaflet.css",
+                "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
                 path.join(libDir, "leaflet.css"),
             ),
             downloadFile(
-                "https://unpkg.com/leaflet.markercluster@latest/dist/leaflet.markercluster.js",
+                "https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js",
                 path.join(libDir, "leaflet.markercluster.js"),
             ),
             downloadFile(
-                "https://unpkg.com/leaflet.markercluster@latest/dist/MarkerCluster.css",
+                "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css",
                 path.join(libDir, "MarkerCluster.css"),
             ),
             downloadFile(
-                "https://unpkg.com/leaflet.markercluster@latest/dist/MarkerCluster.Default.css",
+                "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css",
                 path.join(libDir, "MarkerCluster.Default.css"),
             ),
         ]);
