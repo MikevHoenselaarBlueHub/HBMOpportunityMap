@@ -3,11 +3,11 @@
     {
       "id": 1,
       "username": "admin",
-      "password": "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "password": "$2b$10$1ZnRrkuI6g3SN98TiyRRY.gFUDgYbj80NcRGEIsdjtUhgvnVGgJ/i",
       "email": "mike@bluehub.nl",
       "role": "admin",
       "created": "2024-01-01T00:00:00.000Z",
-      "updated": "2024-01-01T00:00:00.000Z"
+      "updated": "2025-07-21T12:46:18.590Z"
     },
     {
       "id": 2,
@@ -30,5 +30,5 @@
   ],
   "lastId": 3,
   "created": "2024-01-01T00:00:00.000Z",
-  "updated": "2025-07-17T09:39:44.129Z"
+  "updated": "2025-07-21T12:46:18.590Z"
 }

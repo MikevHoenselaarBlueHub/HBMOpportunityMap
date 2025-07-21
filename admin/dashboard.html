@@ -165,34 +165,6 @@
                                 </tbody>
                             </table>
                         </div>
-<div class="opportunities-controls">
-                            <div class="button-group">
-                                <button
-                                    class="edit-opportunities-btn"
-                                    onclick="toggleOpportunityEdit()"
-                                    title="Kansen bewerken"
-                                >
-                                    <img
-                                        src="icons/edit.svg"
-                                        alt="Bewerken"
-                                        class="edit-icon"
-                                    />
-                                    Bewerken
-                                </button>
-                                <button
-                                    class="filter-opportunities-btn"
-                                    onclick="toggleOpportunityFilter()"
-                                    title="Filter kansen"
-                                >
-                                    <img
-                                        src="icons/filter-setting.svg"
-                                        alt="Filter"
-                                        class="filter-icon"
-                                    />
-                                    Filters
-                                </button>
-                            </div>
-</div>
                     </section>
 
                     <!-- Filters Section -->
@@ -406,15 +378,26 @@
 
                             <div class="setting-item">
                                 <h3>Externe resources</h3>
-                                <p>Update externe libraries (Leaflet, MarkerCluster) naar lokale versies voor offline gebruik</p>
-                                <div class="resource-status" id="resourceStatus">
+                                <p>
+                                    Update externe libraries (Leaflet,
+                                    MarkerCluster) naar lokale versies voor
+                                    offline gebruik
+                                </p>
+                                <div
+                                    class="resource-status"
+                                    id="resourceStatus"
+                                >
                                     <div class="status-item">
-                                        <span>Leaflet:</span> 
-                                        <span id="leafletStatus">Checking...</span>
+                                        <span>Leaflet:</span>
+                                        <span id="leafletStatus"
+                                            >Checking...</span
+                                        >
                                     </div>
                                     <div class="status-item">
-                                        <span>MarkerCluster:</span> 
-                                        <span id="markerclusterStatus">Checking...</span>
+                                        <span>MarkerCluster:</span>
+                                        <span id="markerclusterStatus"
+                                            >Checking...</span
+                                        >
                                     </div>
                                 </div>
                                 <div class="resource-actions">
@@ -429,7 +412,7 @@
                                         class="btn btn-success"
                                         onclick="updateResources()"
                                         id="updateResourcesBtn"
-                                        style="display: none;"
+                                        style="display: none"
                                     >
                                         Update Resources
                                     </button>
