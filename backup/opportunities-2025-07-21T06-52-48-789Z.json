@@ -1,7 +1,10 @@
 [
   {
     "Name": "Demo Locatie 1 (MMaastricht)",
-    "ProjectType": "Renovatie",
+    "ProjectType": [
+      "Renovatie",
+      "Circulair"
+    ],
     "OrganizationType": "Aannemer",
     "OrganizationField": "Architectuur,Bouwservices",
     "HBMTopic": [
@@ -9,9 +12,8 @@
       "Binnenluchtkwaliteit"
     ],
     "HBMCharacteristics": [
-      "Circulair",
       "Passiefhuis",
-      "WELL"
+      "Circulair"
     ],
     "HBMSector": "Wonen",
     "HBMType": "Bedrijf",
