@@ -1967,17 +1967,27 @@ app.post("/admin/api/update-resources", authenticateToken, async (req, res) => {
             fs.mkdirSync(libDir);
         }
 
-        // Function to download file with redirect handling
+        // Function to download file with proper redirect handling
         const downloadFile = (url, filepath) => {
             return new Promise((resolve, reject) => {
-                const file = fs.createWriteStream(filepath);
+                let redirectCount = 0;
+                const maxRedirects = 5;
                 
                 const makeRequest = (requestUrl) => {
+                    if (redirectCount > maxRedirects) {
+                        reject(new Error("Too many redirects"));
+                        return;
+                    }
+                    
+                    const file = fs.createWriteStream(filepath);
+                    
                     https.get(requestUrl, (response) => {
-                        // Handle redirects
+                        // Handle redirects properly
                         if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
                             file.destroy();
                             fs.unlink(filepath, () => {}); // Clean up partial file
+                            redirectCount++;
+                            console.log(`Following redirect ${redirectCount}: ${response.headers.location}`);
                             makeRequest(response.headers.location);
                             return;
                         }
@@ -2083,28 +2093,30 @@ app.post("/admin/api/update-resources", authenticateToken, async (req, res) => {
             });
         };
 
-        // Download latest Leaflet with specific versions to avoid redirects
+        // Download latest stable versions
+        console.log("[RESOURCE_UPDATE] Starting downloads...");
+        
         await Promise.all([
             downloadFile(
                 "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
                 path.join(libDir, "leaflet.js"),
-            ),
+            ).then(() => console.log("[RESOURCE_UPDATE] leaflet.js downloaded")),
             downloadFile(
                 "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
                 path.join(libDir, "leaflet.css"),
-            ),
+            ).then(() => console.log("[RESOURCE_UPDATE] leaflet.css downloaded")),
             downloadFile(
                 "https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js",
                 path.join(libDir, "leaflet.markercluster.js"),
-            ),
+            ).then(() => console.log("[RESOURCE_UPDATE] leaflet.markercluster.js downloaded")),
             downloadFile(
                 "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css",
                 path.join(libDir, "MarkerCluster.css"),
-            ),
+            ).then(() => console.log("[RESOURCE_UPDATE] MarkerCluster.css downloaded")),
             downloadFile(
                 "https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css",
                 path.join(libDir, "MarkerCluster.Default.css"),
-            ),
+            ).then(() => console.log("[RESOURCE_UPDATE] MarkerCluster.Default.css downloaded")),
         ]);
 
         res.json({ success: true, message: "Resources updated successfully" });
