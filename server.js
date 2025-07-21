@@ -410,8 +410,14 @@ app.post("/admin/api/opportunities", authenticateToken, (req, res) => {
             fs.mkdirSync(backupDir, { recursive: true });
         }
         const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-        const backupPath = path.join(backupDir, `opportunities-${timestamp}.json`);
-        fs.copyFileSync(path.join(__dirname, "data/opportunities.json"), backupPath);
+        const backupPath = path.join(
+            backupDir,
+            `opportunities-${timestamp}.json`,
+        );
+        fs.copyFileSync(
+            path.join(__dirname, "data/opportunities.json"),
+            backupPath,
+        );
 
         // Save updated opportunities
         fs.writeFileSync(
@@ -558,8 +564,14 @@ app.put("/admin/api/opportunities/:name", authenticateToken, (req, res) => {
             fs.mkdirSync(backupDir, { recursive: true });
         }
         const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-        const backupPath = path.join(backupDir, `opportunities-${timestamp}.json`);
-        fs.copyFileSync(path.join(__dirname, "data/opportunities.json"), backupPath);
+        const backupPath = path.join(
+            backupDir,
+            `opportunities-${timestamp}.json`,
+        );
+        fs.copyFileSync(
+            path.join(__dirname, "data/opportunities.json"),
+            backupPath,
+        );
 
         // Save updated opportunities
         fs.writeFileSync(
@@ -928,8 +940,6 @@ app.put("/admin/api/filters/:category/:item", authenticateToken, (req, res) => {
                 success: false,
                 message: "Ongeldige filter categorie",
             });
-        ```text
-
         }
 
         const itemIndex = data[category].indexOf(oldItem);
@@ -1961,8 +1971,7 @@ app.get("/admin/api/check-resources", authenticateToken, async (req, res) => {
                             });
                         },
                     )
-                    .```text
-on("error", reject);
+                    .on("error", reject);
             });
         };
 
@@ -2064,7 +2073,9 @@ app.use("/lib", express.static(path.join(__dirname, "lib")));
 // Start server - Fixed port configuration
 const PORT = 5000; // Fixed port voor consistentie
 app.listen(PORT, "0.0.0.0", () => {
-    const replUrl = process.env.REPLIT_DEV_DOMAIN || `${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.replit.dev`;
+    const replUrl =
+        process.env.REPLIT_DEV_DOMAIN ||
+        `${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.replit.dev`;
 
     console.log(`========================================`);
     console.log(`🚀 Server succesvol gestart op poort ${PORT}`);
