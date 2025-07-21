@@ -11,6 +11,14 @@
     "Renovatie",
     "Sloop & Herontwikkeling"
   ],
+  "ProjectPhase": [
+    "Concept",
+    "Definitief Ontwerp",
+    "Uitvoering",
+    "Oplevering",
+    "Beheer & Onderhoud",
+    "Evaluatie"
+  ],
   "OrganizationType": [
     "Arbeidsdeskundige",
     "Architect2",
