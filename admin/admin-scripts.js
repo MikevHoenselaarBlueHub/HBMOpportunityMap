@@ -1422,15 +1422,24 @@ class AdminDashboard {
     }
 
     filterOpportunities() {
-        const searchTerm = document.getElementById("opportunitySearch").value.toLowerCase();
-        const typeFilter = document.getElementById("opportunityTypeFilter").value;
+        const searchInput = document.getElementById("opportunitySearch");
+        const typeFilterSelect = document.getElementById("opportunityTypeFilter");
+        
+        if (!searchInput || !typeFilterSelect) {
+            console.error("Search elements not found");
+            return;
+        }
+
+        const searchTerm = searchInput.value.toLowerCase();
+        const typeFilter = typeFilterSelect.value;
 
         let filtered = this.allOpportunities.filter(opp => {
             const matchesSearch = !searchTerm || 
                 (opp.Name && opp.Name.toLowerCase().includes(searchTerm)) ||
                 (opp.Municipality && opp.Municipality.toLowerCase().includes(searchTerm)) ||
                 (opp.HBMSector && opp.HBMSector.toLowerCase().includes(searchTerm)) ||
-                (opp.OrganizationType && opp.OrganizationType.toLowerCase().includes(searchTerm));
+                (opp.OrganizationType && opp.OrganizationType.toLowerCase().includes(searchTerm)) ||
+                (opp.Description && opp.Description.toLowerCase().includes(searchTerm));
 
             const matchesType = !typeFilter || opp.HBMType === typeFilter;
 
@@ -2057,7 +2066,7 @@ class AdminDashboard {
         // Initialize map
         this.locationPickerMap = L.map("locationPickerMap", {
             center: [lat, lng],
-            zoom: 13,
+            zoom: 16,
             zoomControl: true,
         });
 
@@ -2117,8 +2126,6 @@ class AdminDashboard {
             
             // Close modal
             closeModal("locationPickerModal");
-            
-            alert("Locatie succesvol ingesteld!");
         }
     }
 
