@@ -318,16 +318,6 @@ class AdminDashboard {
 
             container.innerHTML = "";
 
-            // Add filter management header
-            const filterHeader = document.createElement("div");
-            filterHeader.innerHTML = `
-                <div style="margin-bottom: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px;">
-                    <h3 style="margin: 0 0 10px 0; color: rgb(38, 123, 41);">Filter beheer</h3>
-                    <p style="margin: 0 0 15px 0; color: #666;">Beheer de filtercategorieën en hun items. Wijzigingen worden automatisch opgeslagen.</p>
-                </div>
-            `;
-            container.appendChild(filterHeader);
-
             Object.keys(filters).forEach((category) => {
                 const section = document.createElement("div");
                 section.className = "filter-section";
@@ -468,7 +458,7 @@ class AdminDashboard {
 
                 // Format municipality name with largest places
                 let municipalityDisplay = `<div class="municipality-info">
-                    <div class="municipality-name">${municipality.name}${municipality.country === 'Netherlands' ? ' (NL)' : municipality.country === 'Germany' ? ' (DE)' : ''}</div>`;
+                    <div class="municipality-name">${municipality.name}${municipality.country === "Netherlands" ? " (NL)" : municipality.country === "Germany" ? " (DE)" : ""}</div>`;
 
                 if (
                     municipality.largest_places &&
@@ -866,7 +856,7 @@ class AdminDashboard {
                         const data = JSON.parse(e.target.result);
                         console.log("Imported data:", data);
                         alert(
-                            "Data geïmporteerd! (Implementatie vereist voor opslaan naar server)",
+                            "Data ge �mporteerd! (Implementatie vereist voor opslaan naar server)",
                         );
                     } catch (error) {
                         alert(
@@ -2375,8 +2365,6 @@ class AdminDashboard {
                     <option value="Bedrijf">Bedrijf</option>
                 </select>
                 <button onclick="adminApp.clearOpportunityFilters()" class="btn btn-secondary">Wissen</button>
-                <button onclick="adminApp.addNewOpportunity()" class="btn btn-primary">Nieuwe kans toevoegen</button>
-                <button onclick="adminApp.openImportModal()" class="btn btn-primary" style="background: #28a745;">Import XLS</button>
             </div>
             <div id="searchStatus" style="display: none; color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
                 Zoeken...
@@ -2528,8 +2516,8 @@ class AdminDashboard {
 
         opportunities.forEach((opportunity) => {
             const row = document.createElement("tr");
-            if (opportunity.HBMUse === 'internal'){
-              row.style.backgroundColor = '#f0f0f0'
+            if (opportunity.HBMUse === "internal") {
+                row.style.backgroundColor = "#f0f0f0";
             }
             row.innerHTML = `
                 <td>${opportunity.Name || "Onbekend"}</td>
@@ -3574,7 +3562,7 @@ class AdminDashboard {
     }
 
     addNewOpportunity() {
-      this.openOpportunityModal();
+        this.openOpportunityModal();
     }
 }
 
