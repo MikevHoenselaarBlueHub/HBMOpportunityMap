@@ -1954,10 +1954,10 @@ app.get("/admin/api/user", authenticateToken, (req, res) => {
     res.json({ username: req.user.username });
 });
 
-// Simple resource update - just download latest versions
+// Update resources - download latest stable versions
 app.post("/admin/api/update-resources", authenticateToken, async (req, res) => {
     try {
-        console.log("[RESOURCE_UPDATE] Starting simple resource update...");
+        console.log("[RESOURCE_UPDATE] Starting resource update...");
         
         const https = require("https");
         
@@ -2019,83 +2019,9 @@ app.post("/admin/api/update-resources", authenticateToken, async (req, res) => {
             });
         };
 
-        console.log("[RESOURCE_UPDATE] Downloading latest Leaflet and MarkerCluster...");
+        console.log("[RESOURCE_UPDATE] Downloading stable versions...");
 
-        // Download latest versions from unpkg CDN
-        await Promise.all([
-            downloadFile(
-                "https://unpkg.com/leaflet@latest/dist/leaflet.js",
-                path.join(libDir, "leaflet.js"),
-            ),
-            downloadFile(
-                "https://unpkg.com/leaflet@latest/dist/leaflet.css",
-                path.join(libDir, "leaflet.css"),
-            ),
-            downloadFile(
-                "https://unpkg.com/leaflet.markercluster@latest/dist/leaflet.markercluster.js",
-                path.join(libDir, "leaflet.markercluster.js"),
-            ),
-            downloadFile(
-                "https://unpkg.com/leaflet.markercluster@latest/dist/MarkerCluster.css",
-                path.join(libDir, "MarkerCluster.css"),
-            ),
-            downloadFile(
-                "https://unpkg.com/leaflet.markercluster@latest/dist/MarkerCluster.Default.css",
-                path.join(libDir, "MarkerCluster.Default.css"),
-            ),
-        ]);
-
-        console.log("[RESOURCE_UPDATE] All resources updated successfully!");
-        res.json({ 
-            success: true, 
-            message: "Resources succesvol geüpdatet naar nieuwste versies!",
-            timestamp: new Date().toISOString()
-        });
-
-    } catch (error) {
-        console.error("[RESOURCE_UPDATE] Error updating resources:", error);
-        res.status(500).json({
-            success: false,
-            message: "Fout bij het updaten van resources: " + error.message,
-        });
-    }
-});
-
-// Update resources
-app.post("/admin/api/update-resources", authenticateToken, async (req, res) => {
-    try {
-        const https = require("https");
-        const fs = require("fs");
-        const path = require("path");
-
-        // Create lib directory if it doesn't exist
-        const libDir = path.join(__dirname, "lib");
-        if (!fs.existsSync(libDir)) {
-            fs.mkdirSync(libDir);
-        }
-
-        // Function to download file
-        const downloadFile = (url, filepath) => {
-            return new Promise((resolve, reject) => {
-                const file = fs.createWriteStream(filepath);
-                https
-                    .get(url, (response) => {
-                        response.pipe(file);
-                        file.on("finish", () => {
-                            file.close();
-                            resolve();
-                        });
-                    })
-                    .on("error", (err) => {
-                        fs.unlink(filepath, () => {}); // Delete the file async
-                        reject(err);
-                    });
-            });
-        };
-
-        // Download latest stable versions
-        console.log("[RESOURCE_UPDATE] Starting downloads...");
-        
+        // Download stable versions to avoid redirect issues
         await Promise.all([
             downloadFile(
                 "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
@@ -2119,12 +2045,18 @@ app.post("/admin/api/update-resources", authenticateToken, async (req, res) => {
             ).then(() => console.log("[RESOURCE_UPDATE] MarkerCluster.Default.css downloaded")),
         ]);
 
-        res.json({ success: true, message: "Resources updated successfully" });
+        console.log("[RESOURCE_UPDATE] All resources updated successfully!");
+        res.json({ 
+            success: true, 
+            message: "Resources succesvol geüpdatet!",
+            timestamp: new Date().toISOString()
+        });
+
     } catch (error) {
-        console.error("Error updating resources:", error);
+        console.error("[RESOURCE_UPDATE] Error updating resources:", error);
         res.status(500).json({
             success: false,
-            message: "Failed to update resources: " + error.message,
+            message: "Fout bij het updaten van resources: " + error.message,
         });
     }
 });
