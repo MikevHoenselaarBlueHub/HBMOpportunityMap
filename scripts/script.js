@@ -12,7 +12,7 @@ let hoverLabel;
 let municipalities = [];
 let translations = {};
 let currentLanguage = "nl";
-let currentBaseLayer = 'street';
+let currentBaseLayer = "street";
 
 // Filter state management
 let filterState = {
@@ -153,10 +153,10 @@ if (isMapPage) {
     // Wait for Leaflet to load
     let leafletCheckAttempts = 0;
     const maxAttempts = 50; // 5 seconds max
-    
+
     const checkLeaflet = setInterval(() => {
       leafletCheckAttempts++;
-      
+
       if (typeof L !== "undefined") {
         console.log("Leaflet loaded successfully");
         clearInterval(checkLeaflet);
@@ -165,13 +165,15 @@ if (isMapPage) {
         let markerClusterAttempts = 0;
         const checkMarkerCluster = setInterval(() => {
           markerClusterAttempts++;
-          
+
           if (typeof L.markerClusterGroup !== "undefined") {
             console.log("MarkerCluster loaded successfully");
             clearInterval(checkMarkerCluster);
             initializeApp();
           } else if (markerClusterAttempts >= maxAttempts) {
-            console.warn("MarkerCluster failed to load, continuing without clustering");
+            console.warn(
+              "MarkerCluster failed to load, continuing without clustering",
+            );
             clearInterval(checkMarkerCluster);
             // Initialize without clustering
             initializeApp();
@@ -180,7 +182,9 @@ if (isMapPage) {
       } else if (leafletCheckAttempts >= maxAttempts) {
         console.error("Leaflet failed to load after 5 seconds");
         clearInterval(checkLeaflet);
-        alert("Er is een probleem met het laden van de kaart. Probeer de pagina te verversen.");
+        alert(
+          "Er is een probleem met het laden van de kaart. Probeer de pagina te verversen.",
+        );
       }
     }, 100);
   });
@@ -383,22 +387,23 @@ function initMap() {
     .addTo(map);
 
   // Listen for base layer changes to update municipality colors
-  map.on('baselayerchange', function(e) {
-    if (e.name === 'Satelliet') {
-      currentBaseLayer = 'satellite';
-      updateMunicipalityColors('satellite');
+  map.on("baselayerchange", function (e) {
+    if (e.name === "Satelliet") {
+      currentBaseLayer = "satellite";
+      updateMunicipalityColors("satellite");
     } else {
-      currentBaseLayer = 'street';
-      updateMunicipalityColors('street');
+      currentBaseLayer = "street";
+      updateMunicipalityColors("street");
     }
   });
 
   // Function to update municipality colors based on base layer
   function updateMunicipalityColors(layerType) {
-    const color = layerType === 'satellite' ? '#FFD700' : 'rgb(38, 123, 41)';
-    const fillColor = layerType === 'satellite' ? '#FFD700' : 'rgb(38, 123, 41)';
-    
-    municipalityLayer.eachLayer(function(layer) {
+    const color = layerType === "satellite" ? "#FFD700" : "rgb(38, 123, 41)";
+    const fillColor =
+      layerType === "satellite" ? "#FFD700" : "rgb(38, 123, 41)";
+
+    municipalityLayer.eachLayer(function (layer) {
       if (layer.setStyle) {
         layer.setStyle({
           color: color,
@@ -446,8 +451,10 @@ async function loadMunicipalitiesFromOverpass() {
 
 async function loadFilteredMunicipalities() {
   try {
-    console.log("Loading filtered municipalities from visible-municipalities.geojson...");
-    
+    console.log(
+      "Loading filtered municipalities from visible-municipalities.geojson...",
+    );
+
     // Try to load the filtered municipalities file first
     let response;
     try {
@@ -456,7 +463,9 @@ async function loadFilteredMunicipalities() {
         throw new Error("Filtered municipalities file not found");
       }
     } catch (error) {
-      console.log("Filtered municipalities file not available, loading all municipalities...");
+      console.log(
+        "Filtered municipalities file not available, loading all municipalities...",
+      );
       // Fallback to loading all municipalities
       await loadAllMunicipalities();
       return;
@@ -465,12 +474,16 @@ async function loadFilteredMunicipalities() {
     const geojsonData = await response.json();
 
     if (!geojsonData.features || geojsonData.features.length === 0) {
-      console.log("No visible municipalities found, loading all municipalities...");
+      console.log(
+        "No visible municipalities found, loading all municipalities...",
+      );
       await loadAllMunicipalities();
       return;
     }
 
-    console.log(`Processing ${geojsonData.features.length} visible municipalities...`);
+    console.log(
+      `Processing ${geojsonData.features.length} visible municipalities...`,
+    );
     let loadedCount = 0;
 
     // Load municipalities configuration for additional info
@@ -481,12 +494,14 @@ async function loadFilteredMunicipalities() {
 
     geojsonData.features.forEach((feature) => {
       if (feature.properties) {
-        const municipalityName = feature.properties.name || feature.properties.NAME_4;
+        const municipalityName =
+          feature.properties.name || feature.properties.NAME_4;
         const country = feature.properties.name ? "Netherlands" : "Germany";
 
         if (municipalityName && feature.geometry) {
           try {
-            const baseColor = currentBaseLayer === 'satellite' ? '#FFD700' : 'rgb(38, 123, 41)';
+            const baseColor =
+              currentBaseLayer === "satellite" ? "#FFD700" : "rgb(38, 123, 41)";
             const geoJsonLayer = L.geoJSON(feature, {
               style: {
                 color: baseColor,
@@ -501,7 +516,10 @@ async function loadFilteredMunicipalities() {
                 layer.on({
                   mouseover: function (e) {
                     const layer = e.target;
-                    const hoverColor = currentBaseLayer === 'satellite' ? '#FFD700' : 'rgb(38, 123, 41)';
+                    const hoverColor =
+                      currentBaseLayer === "satellite"
+                        ? "#FFD700"
+                        : "rgb(38, 123, 41)";
                     layer.setStyle({
                       color: hoverColor,
                       weight: 4,
@@ -513,11 +531,17 @@ async function loadFilteredMunicipalities() {
                     layer.bringToFront();
 
                     // Show hover label with municipality name
-                    showHoverLabel(e, `${municipalityName}${country === "Germany" ? " (DE)" : ""}`);
+                    showHoverLabel(
+                      e,
+                      `${municipalityName}${country === "Germany" ? " (DE)" : ""}`,
+                    );
                   },
                   mouseout: function (e) {
                     const layer = e.target;
-                    const baseColor = currentBaseLayer === 'satellite' ? '#FFD700' : 'rgb(38, 123, 41)';
+                    const baseColor =
+                      currentBaseLayer === "satellite"
+                        ? "#FFD700"
+                        : "rgb(38, 123, 41)";
                     layer.setStyle({
                       color: baseColor,
                       weight: 2,
@@ -547,9 +571,10 @@ async function loadFilteredMunicipalities() {
                 });
 
                 // Find municipality data for additional info
-                const municipalityData = municipalitiesConfig.municipalities.find(
-                  (m) => m.name === municipalityName,
-                );
+                const municipalityData =
+                  municipalitiesConfig.municipalities.find(
+                    (m) => m.name === municipalityName,
+                  );
                 let municipalityInfo = "";
                 if (municipalityData && municipalityData.population) {
                   const places = municipalityData.largest_places
@@ -559,20 +584,23 @@ async function loadFilteredMunicipalities() {
                 }
 
                 // Add popup with municipality info
-                layer.bindPopup(`
+                layer.bindPopup(
+                  `
                   <div class="municipality-popup">
                     <h3>${municipalityName}</h3>
                     ${municipalityInfo}
                     <p><a href="#" class="municipality-filter-link" onclick="filterByMunicipalityAndZoom('${municipalityName}'); return false;">Bekijk alle projecten en bedrijven in deze gemeente</a></p>
                   </div>
-                `, {
-                  maxWidth: 280,
-                  minWidth: 200,
-                  autoPan: true,
-                  autoPanPadding: [20, 20],
-                  keepInView: true,
-                  closeOnEscapeKey: true
-                });
+                `,
+                  {
+                    maxWidth: 280,
+                    minWidth: 200,
+                    autoPan: true,
+                    autoPanPadding: [20, 20],
+                    keepInView: true,
+                    closeOnEscapeKey: true,
+                  },
+                );
               },
             });
 
@@ -719,20 +747,23 @@ async function loadDutchMunicipalities() {
                 }
 
                 // Add popup with municipality info
-                layer.bindPopup(`
+                layer.bindPopup(
+                  `
                   <div class="municipality-popup">
                     <h3>${municipalityName}</h3>
                     ${municipalityInfo}
                     <p><a href="#" class="municipality-filter-link" onclick="filterByMunicipalityAndZoom('${municipalityName}'); return false;">Bekijk alle projecten en bedrijven in deze gemeente</a></p>
                   </div>
-                `, {
-                  maxWidth: 280,
-                  minWidth: 200,
-                  autoPan: true,
-                  autoPanPadding: [20, 20],
-                  keepInView: true,
-                  closeOnEscapeKey: true
-                });
+                `,
+                  {
+                    maxWidth: 280,
+                    minWidth: 200,
+                    autoPan: true,
+                    autoPanPadding: [20, 20],
+                    keepInView: true,
+                    closeOnEscapeKey: true,
+                  },
+                );
               },
             });
 
@@ -793,15 +824,17 @@ async function loadGermanMunicipalities() {
 
     // Process in smaller batches to avoid blocking the UI
     const batchSize = 10;
-    const features = geojsonData.features.filter(feature => {
+    const features = geojsonData.features.filter((feature) => {
       const municipalityName = feature.properties?.NAME_4;
-      return municipalityName && allowedMunicipalities.includes(municipalityName);
+      return (
+        municipalityName && allowedMunicipalities.includes(municipalityName)
+      );
     });
 
     for (let i = 0; i < features.length; i += batchSize) {
       const batch = features.slice(i, i + batchSize);
-      
-      await new Promise(resolve => {
+
+      await new Promise((resolve) => {
         setTimeout(() => {
           batch.forEach((feature) => {
             const municipalityName = feature.properties?.NAME_4;
@@ -867,9 +900,10 @@ async function loadGermanMunicipalities() {
                   });
 
                   // Find municipality data for additional info
-                  const municipalityData = municipalitiesConfig.municipalities.find(
-                    (m) => m.name === municipalityName,
-                  );
+                  const municipalityData =
+                    municipalitiesConfig.municipalities.find(
+                      (m) => m.name === municipalityName,
+                    );
                   let municipalityInfo = "";
                   if (municipalityData && municipalityData.population) {
                     const places = municipalityData.largest_places
@@ -879,20 +913,23 @@ async function loadGermanMunicipalities() {
                   }
 
                   // Add popup with municipality info
-                  layer.bindPopup(`
+                  layer.bindPopup(
+                    `
                     <div class="municipality-popup">
                       <h3>${municipalityName}</h3>
                       ${municipalityInfo}
                       <p><a href="#" class="municipality-filter-link" onclick="filterByMunicipalityAndZoom('${municipalityName}'); return false;">Bekijk alle projecten en bedrijven in deze gemeente</a></p>
                     </div>
-                  `, {
-                    maxWidth: 280,
-                    minWidth: 200,
-                    autoPan: true,
-                    autoPanPadding: [20, 20],
-                    keepInView: true,
-                    closeOnEscapeKey: true
-                  });
+                  `,
+                    {
+                      maxWidth: 280,
+                      minWidth: 200,
+                      autoPan: true,
+                      autoPanPadding: [20, 20],
+                      keepInView: true,
+                      closeOnEscapeKey: true,
+                    },
+                  );
                 },
               });
 
@@ -1121,16 +1158,15 @@ function createMarkers(data) {
 
       if (hasImage) {
         // Create custom image marker
-        let imageUrl = item.HBMType === "Bedrijf" ? item.Logo : item.ProjectImage;
-        
+        let imageUrl =
+          item.HBMType === "Bedrijf" ? item.Logo : item.ProjectImage;
+
         // Ensure absolute URL for uploads - convert relative paths to absolute
-        if (imageUrl && imageUrl.startsWith('/uploads/')) {
+        if (imageUrl && imageUrl.startsWith("/uploads/")) {
           imageUrl = window.location.origin + imageUrl;
         }
         const borderColor =
-          item.HBMType === "Project"
-            ? "rgb(139, 179, 17)"
-            : "rgb(33, 150, 243)";
+          item.HBMType === "Project" ? "rgb(139, 179, 17)" : "rgb(22, 65, 148)";
 
         const customIcon = L.divIcon({
           className:
@@ -1743,7 +1779,9 @@ async function populateFilters(data) {
     // Try to load filter options from admin API first (latest database version)
     let filterOptions;
     try {
-      const adminFiltersResponse = await fetch(`/admin/api/filters?nocache=${Date.now()}&v=${APP_VERSION}`);
+      const adminFiltersResponse = await fetch(
+        `/admin/api/filters?nocache=${Date.now()}&v=${APP_VERSION}`,
+      );
       if (adminFiltersResponse.ok) {
         filterOptions = await adminFiltersResponse.json();
         console.log("Loaded filters from admin API (database)");
@@ -1776,8 +1814,14 @@ async function populateFilters(data) {
 
     // Populate filter sections
     populateFilterSection("ProjectType", filterOptions.ProjectType || []);
-    populateFilterSection("OrganizationType", filterOptions.OrganizationType || []);
-    populateFilterSection("OrganizationField", filterOptions.OrganizationField || []);
+    populateFilterSection(
+      "OrganizationType",
+      filterOptions.OrganizationType || [],
+    );
+    populateFilterSection(
+      "OrganizationField",
+      filterOptions.OrganizationField || [],
+    );
     populateFilterSection("HBMTopic", filterOptions.HBMTopic || []);
     populateFilterSection(
       "HBMCharacteristics",
@@ -2038,7 +2082,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (dropdown) {
         dropdown.classList.remove("open");
       }
-      
+
       resetAllFilters(event);
     });
   }
@@ -2473,8 +2517,8 @@ function createListItem(item) {
       <h3 class="card-title">${item.Name || "Onbekend"}</h3>
       <span class="card-type-badge ${item.HBMType?.toLowerCase() || "unknown"}">${item.HBMType || "Onbekend"}</span>
     </div>
-    ${item.Logo ? `<img src="${item.Logo.startsWith('/uploads/') ? window.location.origin + item.Logo : item.Logo}" alt="Logo" class="card-logo" onerror="this.style.display='none'">` : ""}
-    ${item.ProjectImage ? `<img src="${item.ProjectImage.startsWith('/uploads/') ? window.location.origin + item.ProjectImage : item.ProjectImage}" alt="Project" class="card-image" onerror="this.style.display='none'">` : ""}
+    ${item.Logo ? `<img src="${item.Logo.startsWith("/uploads/") ? window.location.origin + item.Logo : item.Logo}" alt="Logo" class="card-logo" onerror="this.style.display='none'">` : ""}
+    ${item.ProjectImage ? `<img src="${item.ProjectImage.startsWith("/uploads/") ? window.location.origin + item.ProjectImage : item.ProjectImage}" alt="Project" class="card-image" onerror="this.style.display='none'">` : ""}
     <div class="card-details">
       ${item.OrganizationType ? `<div class="card-detail-row"><span class="card-detail-label">Type:</span><span class="card-detail-value">${item.OrganizationType}</span></div>` : ""}
       ${item.HBMSector ? `<div class="card-detail-row"><span class="card-detail-label">Sector:</span><span class="card-detail-value">${item.HBMSector}</span></div>` : ""}
@@ -2585,8 +2629,8 @@ function openDetailPanel(item) {
       </div>
 
       <div class="detail-images">
-        ${item.Logo ? `<img src="${item.Logo.startsWith('/uploads/') ? window.location.origin + item.Logo : item.Logo}" alt="Logo" class="detail-logo" onerror="this.style.display='none'">` : ""}
-        ${item.ProjectImage ? `<img src="${item.ProjectImage.startsWith('/uploads/') ? window.location.origin + item.ProjectImage : item.ProjectImage}" alt="Project" class="detail-image" onerror="this.style.display='none'">` : ""}
+        ${item.Logo ? `<img src="${item.Logo.startsWith("/uploads/") ? window.location.origin + item.Logo : item.Logo}" alt="Logo" class="detail-logo" onerror="this.style.display='none'">` : ""}
+        ${item.ProjectImage ? `<img src="${item.ProjectImage.startsWith("/uploads/") ? window.location.origin + item.ProjectImage : item.ProjectImage}" alt="Project" class="detail-image" onerror="this.style.display='none'">` : ""}
       </div>
 
       <div class="detail-info">
@@ -4079,12 +4123,12 @@ function resetAllFilters(event) {
     event.preventDefault();
     event.stopPropagation();
   }
-  
+
   // Check if popup already exists to prevent double popups
   if (document.querySelector(".reset-confirmation-popup")) {
     return;
   }
-  
+
   // Show confirmation popup
   showResetConfirmationPopup();
 }
@@ -4096,7 +4140,7 @@ function showResetConfirmationPopup() {
   if (existingPopup) {
     return;
   }
-  
+
   const popupHTML = `
     <div class="reset-confirmation-popup">
       <div class="reset-confirmation-content">
@@ -4120,7 +4164,7 @@ function showResetConfirmationPopup() {
   // Add event listener to close popup when clicking outside
   const popup = document.querySelector(".reset-confirmation-popup");
   if (popup) {
-    popup.addEventListener("click", function(e) {
+    popup.addEventListener("click", function (e) {
       if (e.target === popup) {
         closeResetConfirmationPopup();
       }
@@ -4143,10 +4187,10 @@ function confirmResetAllFilters(event) {
     event.preventDefault();
     event.stopPropagation();
   }
-  
+
   // Close popup first
   closeResetConfirmationPopup();
-  
+
   // Execute the actual reset
   executeResetAllFilters();
 }
@@ -4156,10 +4200,12 @@ function executeResetAllFilters() {
   // Clear all checkboxes in the filter form
   const filterForm = document.getElementById("filtersForm");
   if (filterForm) {
-    filterForm.querySelectorAll('input[type="checkbox"]').forEach((checkbox) => {
-      checkbox.checked = false;
-    });
-    
+    filterForm
+      .querySelectorAll('input[type="checkbox"]')
+      .forEach((checkbox) => {
+        checkbox.checked = false;
+      });
+
     // Reset radio buttons to default (AND mode)
     const radioButtons = filterForm.querySelectorAll('input[type="radio"]');
     radioButtons.forEach((radio) => {
@@ -4203,7 +4249,8 @@ function executeResetAllFilters() {
 
   const locationBtn = document.getElementById("useMyLocation");
   if (locationBtn) {
-    locationBtn.innerHTML = "<span data-i18n='useMyLocation'>📍 Mijn locatie gebruiken</span>";
+    locationBtn.innerHTML =
+      "<span data-i18n='useMyLocation'>📍 Mijn locatie gebruiken</span>";
     locationBtn.classList.remove("active");
   }
 
@@ -4244,7 +4291,7 @@ function executeResetAllFilters() {
   // Track event
   trackEvent("reset_all_filters", {
     source: "button_click",
-    confirmed: true
+    confirmed: true,
   });
 
   console.log("All filters reset to default state");
