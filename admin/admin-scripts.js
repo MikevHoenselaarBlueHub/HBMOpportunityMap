@@ -2187,14 +2187,14 @@ class AdminDashboard {
                         statusDiv.textContent = "Zoeken...";
                     }
 
-                    // Set new timeout for 2 seconds
+                    // Set new timeout for 1 second
                     searchTimeout = setTimeout(() => {
                         this.filterOpportunities();
                         // Hide status after search
                         if (statusDiv) {
                             statusDiv.style.display = "none";
                         }
-                    }, 2000);
+                    }, 1000);
                 });
             }
 
@@ -2276,30 +2276,13 @@ class AdminDashboard {
         if (opportunities.length === 0) {
             const row = document.createElement("tr");
             row.innerHTML = `
-                <td colspan="5" style="text-align: center; padding: 2rem; color: #666;">
+                <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
                     Geen kansen gevonden
                 </td>
             `;
             tableBody.appendChild(row);
             return;
         }
-
-        const tableHeader = `
-            <tr>
-                <th>Naam</th>
-                <th>Type</th>
-                <th>Gebruik</th>
-                <th>Gemeente</th>
-                <th>Sector</th>
-                <th>Organisatie</th>
-                <th>Coördinaten</th>
-                <th>Acties</th>
-            </tr>
-        `;
-
-        const headerRow = document.createElement('tr');
-        headerRow.innerHTML = tableHeader;
-        tableBody.appendChild(headerRow);
 
         opportunities.forEach((opportunity) => {
             const row = document.createElement("tr");
