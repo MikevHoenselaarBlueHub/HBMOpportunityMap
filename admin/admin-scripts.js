@@ -1474,6 +1474,7 @@ class AdminDashboard {
                 <td>${opportunity.HBMSector || "Onbekend"}</td>
                 <td class="action-buttons">
                     ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openOpportunityModal('${opportunity.Name}')" title="Bewerken">✏️</button>` : ""}
+                    ${canEdit ? `<button class="action-btn filter-btn" onclick="adminApp.openFilterSelectionModal('${opportunity.Name}')" title="Filters instellen">🔧</button>` : ""}
                     ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteOpportunity('${opportunity.Name}')">Verwijderen</button>` : ""}
                     ${!canEdit && !canDelete ? '<span style="color: #999;">Geen acties beschikbaar</span>' : ""}
                 </td>
@@ -1714,6 +1715,143 @@ class AdminDashboard {
         } catch (error) {
             console.error("Error deleting opportunity:", error);
             alert("Fout bij het verwijderen van kans");
+        }
+    }
+
+    async openFilterSelectionModal(opportunityName) {
+        try {
+            // Load current filters
+            const filtersResponse = await fetch("/admin/api/filters", {
+                headers: {
+                    Authorization: `Bearer ${this.token}`,
+                },
+            });
+            
+            if (!filtersResponse.ok) {
+                throw new Error("Failed to load filters");
+            }
+            
+            const filters = await filtersResponse.json();
+            
+            // Find the opportunity
+            const opportunity = this.allOpportunities.find(o => o.Name === opportunityName);
+            if (!opportunity) {
+                alert("Kans niet gevonden");
+                return;
+            }
+
+            // Create modal with filter checkboxes
+            const modalHTML = `
+                <div id="filterSelectionModal" class="modal-overlay">
+                    <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+                        <div class="modal-header">
+                            <h3>Filters instellen voor: ${opportunityName}</h3>
+                            <button class="modal-close" onclick="closeModal('filterSelectionModal')">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <p style="margin-bottom: 1rem; color: #666;">Selecteer de filters waar deze kans onder gevonden moet worden:</p>
+                            
+                            <div class="filter-categories">
+                                ${this.renderFilterCategory('HBMSector', 'Sectoren', filters.HBMSector, opportunity.HBMSector)}
+                                ${this.renderFilterCategory('OrganizationType', 'Organisatie Types', filters.OrganizationType, opportunity.OrganizationType)}
+                                ${this.renderFilterCategory('OrganizationField', 'Vakgebieden', filters.OrganizationField, opportunity.OrganizationField)}
+                                ${this.renderFilterCategory('ProjectType', 'Project Types', filters.ProjectType, opportunity.ProjectType)}
+                                ${this.renderFilterCategory('HBMTopic', 'HBM Topics', filters.HBMTopic, opportunity.HBMTopic)}
+                                ${this.renderFilterCategory('HBMCharacteristics', 'HBM Karakteristieken', filters.HBMCharacteristics, opportunity.HBMCharacteristics)}
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('filterSelectionModal')">Annuleren</button>
+                            <button type="button" class="btn btn-primary" onclick="adminApp.saveOpportunityFilters('${opportunityName}')">Opslaan</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML("beforeend", modalHTML);
+            
+        } catch (error) {
+            console.error("Error opening filter selection modal:", error);
+            alert("Fout bij het laden van filters");
+        }
+    }
+
+    renderFilterCategory(categoryKey, categoryName, filterOptions, currentValues) {
+        const currentArray = Array.isArray(currentValues) ? currentValues : 
+                           (currentValues ? [currentValues] : []);
+        
+        return `
+            <div class="filter-category" style="margin-bottom: 1.5rem; border: 1px solid #ddd; border-radius: 8px; padding: 1rem;">
+                <h4 style="margin: 0 0 0.75rem 0; color: rgb(38, 123, 41);">${categoryName}</h4>
+                <div class="filter-options" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem;">
+                    ${filterOptions.map(option => `
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.25rem;">
+                            <input type="checkbox" 
+                                   name="${categoryKey}" 
+                                   value="${option}" 
+                                   ${currentArray.includes(option) ? 'checked' : ''}
+                                   style="margin: 0;">
+                            <span style="font-size: 0.9rem;">${option}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    async saveOpportunityFilters(opportunityName) {
+        try {
+            const modal = document.getElementById('filterSelectionModal');
+            const formData = new FormData();
+            
+            // Collect all checked values for each category
+            const categories = ['HBMSector', 'OrganizationType', 'OrganizationField', 'ProjectType', 'HBMTopic', 'HBMCharacteristics'];
+            const updatedOpportunity = {};
+            
+            categories.forEach(category => {
+                const checkboxes = modal.querySelectorAll(`input[name="${category}"]:checked`);
+                const values = Array.from(checkboxes).map(cb => cb.value);
+                
+                if (values.length > 0) {
+                    updatedOpportunity[category] = values.length === 1 ? values[0] : values;
+                }
+            });
+
+            // Find the original opportunity to preserve other data
+            const originalOpportunity = this.allOpportunities.find(o => o.Name === opportunityName);
+            if (!originalOpportunity) {
+                alert("Kans niet gevonden");
+                return;
+            }
+
+            // Merge with existing data
+            const completeOpportunityData = {
+                ...originalOpportunity,
+                ...updatedOpportunity
+            };
+
+            // Save via API
+            const response = await fetch(`/admin/api/opportunities/${encodeURIComponent(opportunityName)}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.token}`,
+                },
+                body: JSON.stringify(completeOpportunityData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                closeModal("filterSelectionModal");
+                this.loadOpportunities();
+                alert("Filters succesvol opgeslagen!");
+            } else {
+                alert(`Fout: ${result.error || "Onbekende fout"}`);
+            }
+        } catch (error) {
+            console.error("Error saving opportunity filters:", error);
+            alert("Fout bij het opslaan van filters");
         }
     }
 
@@ -2073,6 +2211,10 @@ async function deleteUser(userId) {
 // Modal functions
 function openAddOpportunityModal() {
     window.adminDashboard.openOpportunityModal();
+}
+
+function openFilterSelectionModal(opportunityName) {
+    window.adminDashboard.openFilterSelectionModal(opportunityName);
 }
 
 function openAddFilterModal() {
