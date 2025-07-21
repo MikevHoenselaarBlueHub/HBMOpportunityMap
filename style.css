@@ -1971,72 +1971,61 @@ button {
   object-fit: contain;
 }
 
-/* === Photo Markers === */
-.photo-marker {
-  background: transparent !important;
-  border: none !important;
-}
-
-.photo-marker-container {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  overflow: hidden;
-  position: relative;
-  border: 3px solid rgb(139, 179, 17);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.photo-marker-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.photo-marker-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(139, 179, 17, 0.2);
-  pointer-events: none;
-}
-
+/* === Image Markers (unified for both photos and logos) === */
+.photo-marker,
 .logo-marker {
   background: transparent !important;
   border: none !important;
 }
 
+.photo-marker-container,
 .logo-marker-container {
   width: 50px;
   height: 50px;
   border-radius: 50%;
   overflow: hidden;
   position: relative;
-  border: 3px solid #164194;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   background: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
 }
 
+.photo-marker-container {
+  border: 3px solid rgb(139, 179, 17);
+}
+
+.logo-marker-container {
+  border: 3px solid #164194;
+}
+
+.photo-marker-image,
 .logo-marker-image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
 }
 
+.photo-marker-overlay,
 .logo-marker-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(33, 150, 243, 0.1);
   pointer-events: none;
+  border-radius: 50%;
+}
+
+.photo-marker-overlay {
+  background: rgba(139, 179, 17, 0.1);
+}
+
+.logo-marker-overlay {
+  background: rgba(22, 65, 148, 0.1);
 }
 
 .fallback-marker {
