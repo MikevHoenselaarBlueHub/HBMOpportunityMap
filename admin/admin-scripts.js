@@ -1768,22 +1768,40 @@ class AdminDashboard {
             try {
                 this.updateImportProgress(20 + ((i / data.length) * 60), `Verwerken record ${i + 1} van ${data.length}...`);
                 
+                // Log raw row data for debugging
+                console.log(`Processing row ${i + 1}:`, row);
+                
                 const opportunity = await this.processOpportunityRow(row);
                 
                 if (opportunity) {
+                    console.log(`Processed opportunity for row ${i + 1}:`, {
+                        name: opportunity.Name,
+                        type: opportunity.HBMType,
+                        municipality: opportunity.Municipality
+                    });
+                    
                     // Check if opportunity exists by name
                     const existingOpportunity = this.allOpportunities.find(o => o.Name === opportunity.Name);
                     
                     if (existingOpportunity) {
                         await this.updateExistingOpportunity(opportunity);
                         results.updated++;
+                        console.log(`Updated existing opportunity: ${opportunity.Name}`);
                     } else {
                         await this.createNewOpportunity(opportunity);
                         results.added++;
+                        console.log(`Created new opportunity: ${opportunity.Name}`);
                     }
+                } else {
+                    console.log(`Row ${i + 1} skipped (HBMUse = internal or missing data)`);
                 }
             } catch (error) {
-                console.error(`Error processing row ${i + 1}:`, error);
+                console.error(`Error processing row ${i + 1}:`, {
+                    error: error,
+                    errorMessage: error.message,
+                    errorStack: error.stack,
+                    rowData: row
+                });
                 results.failed++;
                 results.errors.push(`Rij ${i + 1}: ${error.message}`);
             }
@@ -1794,55 +1812,81 @@ class AdminDashboard {
 
     // Process single opportunity row
     async processOpportunityRow(row) {
-        // Map columns to opportunity object
-        const opportunity = {
-            Name: row[1] || "",
-            Address: row[2] || "",
-            PostalCode: row[3] || "",
-            City: row[4] || "",
-            Country: row[5] || "",
-            Municipality: row[6] || "",
-            OrganizationType: this.translateCommaSeparatedValues('OrganizationType', row[7]),
-            ProjectType: this.translateCommaSeparatedValues('ProjectType', row[8]),
-            ProjectPhase: row[9] || "",
-            HBMUse: row[10] || "",
-            HBMType: row[11] || "",
-            HBMTopic: this.translateCommaSeparatedValues('HBMTopic', row[12]),
-            HBMCharacteristics: this.translateCommaSeparatedValues('HBMCharacteristics', row[13]),
-            HBMSector: this.translateCommaSeparatedValues('HBMSector', row[14]),
-            ContactPerson: row[15] || "",
-            ContactEmail: row[16] || "",
-            ContactPhone: row[17] || "",
-            ContactWebsite: row[18] || "",
-            Latitude: row[19] || null,
-            Longitude: row[20] || null,
-            Remarks: row[21] || ""
-        };
+        try {
+            console.log(`Processing opportunity row with ${row.length} columns:`, row);
+            
+            // Validate row has minimum required data
+            if (!row || row.length < 12) {
+                throw new Error(`Row has insufficient data: ${row.length} columns found, minimum 12 required`);
+            }
+            
+            // Validate required fields
+            if (!row[1] || row[1].toString().trim() === '') {
+                throw new Error(`Missing required field: Name (column 1) is empty`);
+            }
+            
+            // Map columns to opportunity object
+            const opportunity = {
+                Name: (row[1] || "").toString().trim(),
+                Address: (row[2] || "").toString().trim(),
+                PostalCode: (row[3] || "").toString().trim(),
+                City: (row[4] || "").toString().trim(),
+                Country: (row[5] || "").toString().trim(),
+                Municipality: (row[6] || "").toString().trim(),
+                OrganizationType: this.translateCommaSeparatedValues('OrganizationType', row[7]),
+                ProjectType: this.translateCommaSeparatedValues('ProjectType', row[8]),
+                ProjectPhase: (row[9] || "").toString().trim(),
+                HBMUse: (row[10] || "").toString().trim(),
+                HBMType: (row[11] || "").toString().trim(),
+                HBMTopic: this.translateCommaSeparatedValues('HBMTopic', row[12]),
+                HBMCharacteristics: this.translateCommaSeparatedValues('HBMCharacteristics', row[13]),
+                HBMSector: this.translateCommaSeparatedValues('HBMSector', row[14]),
+                ContactPerson: (row[15] || "").toString().trim(),
+                ContactEmail: (row[16] || "").toString().trim(),
+                ContactPhone: (row[17] || "").toString().trim(),
+                ContactWebsite: (row[18] || "").toString().trim(),
+                Latitude: row[19] ? parseFloat(row[19]) : null,
+                Longitude: row[20] ? parseFloat(row[20]) : null,
+                Remarks: (row[21] || "").toString().trim()
+            };
 
-        // Skip if HBMUse is 'internal'
-        if (opportunity.HBMUse && opportunity.HBMUse.toLowerCase() === 'internal') {
-            return null;
-        }
+            console.log(`Mapped opportunity object:`, opportunity);
 
-        // Add municipality if it doesn't exist
-        if (opportunity.Municipality) {
-            await this.ensureMunicipalityExists(opportunity.Municipality, opportunity.Country);
-        }
+            // Skip if HBMUse is 'internal'
+            if (opportunity.HBMUse && opportunity.HBMUse.toLowerCase() === 'internal') {
+                console.log(`Skipping opportunity ${opportunity.Name} - HBMUse is internal`);
+                return null;
+            }
 
-        // Geocode if coordinates are missing
-        if (!opportunity.Latitude || !opportunity.Longitude) {
-            if (opportunity.Address && opportunity.City) {
-                const coords = await this.geocodeAddress(
-                    `${opportunity.Address}, ${opportunity.PostalCode} ${opportunity.City}, ${opportunity.Country}`
-                );
-                if (coords) {
-                    opportunity.Latitude = coords.lat;
-                    opportunity.Longitude = coords.lng;
+            // Add municipality if it doesn't exist
+            if (opportunity.Municipality) {
+                await this.ensureMunicipalityExists(opportunity.Municipality, opportunity.Country);
+            }
+
+            // Geocode if coordinates are missing
+            if (!opportunity.Latitude || !opportunity.Longitude) {
+                if (opportunity.Address && opportunity.City) {
+                    console.log(`Geocoding address for ${opportunity.Name}: ${opportunity.Address}, ${opportunity.PostalCode} ${opportunity.City}, ${opportunity.Country}`);
+                    const coords = await this.geocodeAddress(
+                        `${opportunity.Address}, ${opportunity.PostalCode} ${opportunity.City}, ${opportunity.Country}`
+                    );
+                    if (coords) {
+                        opportunity.Latitude = coords.lat;
+                        opportunity.Longitude = coords.lng;
+                        console.log(`Geocoded coordinates: ${coords.lat}, ${coords.lng}`);
+                    }
                 }
             }
-        }
 
-        return opportunity;
+            return opportunity;
+        } catch (error) {
+            console.error(`Error in processOpportunityRow:`, {
+                error: error.message,
+                stack: error.stack,
+                rowData: row
+            });
+            throw error;
+        }
     }
 
     // Ensure municipality exists
@@ -1918,17 +1962,36 @@ class AdminDashboard {
 
     // Create new opportunity
     async createNewOpportunity(opportunity) {
-        const response = await fetch("/admin/api/opportunities", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${this.token}`,
-            },
-            body: JSON.stringify(opportunity),
-        });
+        try {
+            console.log(`Creating new opportunity:`, {
+                name: opportunity.Name,
+                data: opportunity
+            });
+            
+            const response = await fetch("/admin/api/opportunities", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.token}`,
+                },
+                body: JSON.stringify(opportunity),
+            });
 
-        if (!response.ok) {
-            throw new Error(`Failed to create opportunity: ${opportunity.Name}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API Error creating opportunity ${opportunity.Name}:`, {
+                    status: response.status,
+                    statusText: response.statusText,
+                    errorText: errorText
+                });
+                throw new Error(`Failed to create opportunity: ${opportunity.Name} - ${response.status}: ${errorText}`);
+            }
+            
+            const result = await response.json();
+            console.log(`Successfully created opportunity: ${opportunity.Name}`, result);
+        } catch (error) {
+            console.error(`Exception creating opportunity ${opportunity.Name}:`, error);
+            throw error;
         }
     }
 
