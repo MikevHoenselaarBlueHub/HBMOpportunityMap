@@ -24,11 +24,7 @@
     "Country": "Netherlands",
     "Latitude": 50.890741,
     "Longitude": 5.73584,
-    "HBMUse": "both",
-    "ProjectPhase": [
-      "Definitief Ontwerp",
-      "Uitvoering"
-    ]
+    "HBMUse": "both"
   },
   {
     "Name": "Demo Locatie 2 (Krefeld)",

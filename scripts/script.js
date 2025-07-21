@@ -2668,8 +2668,8 @@ function openDetailPanel(item) {
 
         <div class="detail-specs">
           ${item.HBMTopic ? `<div class="detail-row"><strong>HBM Onderwerp:</strong> ${formatArrayWithLinks(item.HBMTopic, "HBMTopic", item.HBMType)}</div>` : ""}
-          ${item.ProjectPhase ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArrayWithLinks(item.ProjectPhase, "ProjectPhase", item.HBMType)}</div>` : ""}
-          ${item.ProjectType ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArrayWithLinks(item.ProjectType, "ProjectType", item.HBMType)}</div>` : ""}
+          ${item.ProjectPhase ? `<div class="detail-row"><strong>Projectfase:</strong> ${formatArrayWithLinks(item.ProjectPhase, "ProjectPhase", item.HBMType)}</div>` : ""}
+          ${item.ProjectType ? `<div class="detail-row"><strong>Projecttype:</strong> ${formatArrayWithLinks(item.ProjectType, "ProjectType", item.HBMType)}</div>` : ""}
           ${item.OrganizationType ? `<div class="detail-row"><strong>Organisatie:</strong> ${formatSingleValueWithLink(item.OrganizationType, "OrganizationType", item.HBMType)}</div>` : ""}
           ${item.OrganizationField ? `<div class="detail-row"><strong>Vakgebied:</strong> ${formatArrayWithLinks(item.OrganizationField, "OrganizationField", item.HBMType)}</div>` : ""}          
           ${item.HBMCharacteristics ? `<div class="detail-row"><strong>Kenmerken:</strong> ${formatArrayWithLinks(item.HBMCharacteristics, "HBMCharacteristics", item.HBMType)}</div>` : ""}
