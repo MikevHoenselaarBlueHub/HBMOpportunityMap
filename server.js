@@ -937,7 +937,7 @@ app.put("/admin/api/filters/:category/:item", authenticateToken, (req, res) => {
 
         if (!data[category]) {
             return res.status(400).json({
-                success: false,
+            success: false,
                 message: "Ongeldige filter categorie",
             });
         }
@@ -1966,7 +1966,7 @@ app.get("/admin/api/check-resources", authenticateToken, async (req, res) => {
                                     const packageInfo = JSON.parse(data);
                                     resolve(packageInfo.version);
                                 } catch (e) {
-                                    reject(e);
+                                                                   reject(e);
                                 }
                             });
                         },
