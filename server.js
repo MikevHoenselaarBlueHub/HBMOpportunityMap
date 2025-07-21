@@ -1976,7 +1976,10 @@ app.get("/admin/api/check-resources", authenticateToken, async (req, res) => {
 });
 
 // Update resources
-app.post("/admin/api/update-resources", authenticateToken, async (req, res) => {
+app.post("/admin/api/update-resources", authenticateToken, async changes related to fixing template literal syntax and ensuring the application runs smoothly after local file modifications.
+
+```javascript
+ (req, res) => {
     try {
         const https = require("https");
         const fs = require("fs");
@@ -2049,9 +2052,7 @@ app.use("/lib", express.static(path.join(__dirname, "lib")));
 // Start server - Fixed port configuration
 const PORT = 5000; // Fixed port voor consistentie
 app.listen(PORT, "0.0.0.0", () => {
-    const replUrl =
-        process.env.REPLIT_DEV_DOMAIN ||
-        `${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.replit.dev`;
+    const replUrl = process.env.REPLIT_DEV_DOMAIN || `${process.env.REPL_SLUG}-${process.env.REPL_OWNER}.replit.dev`;
 
     console.log(`========================================`);
     console.log(`🚀 Server succesvol gestart op poort ${PORT}`);
