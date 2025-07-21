@@ -2333,30 +2333,46 @@ class AdminDashboard {
         if (markerclusterStatus) markerclusterStatus.textContent = "Controleren...";
 
         try {
+            console.log("[RESOURCE_CHECK] Checking resource versions...");
+            
             const response = await fetch("/admin/api/check-resource-versions", {
+                method: "GET",
                 headers: {
                     Authorization: `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
                 },
+                timeout: 15000 // 15 second timeout
             });
 
+            console.log("[RESOURCE_CHECK] Response status:", response.status);
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorText = await response.text();
+                console.error("[RESOURCE_CHECK] Server error:", errorText);
+                throw new Error(`Server antwoordde met status ${response.status}: ${errorText}`);
             }
 
             const data = await response.json();
+            console.log("[RESOURCE_CHECK] Received data:", data);
 
             // Update status displays
             if (leafletStatus) {
                 const leafletInfo = data.leaflet;
-                if (leafletInfo.needsUpdate) {
+                if (leafletInfo.needsUpdate && leafletInfo.latest !== "Onbekend") {
                     leafletStatus.innerHTML = `
-                        <span style="color: #ffc107;">
+                        <span style="color: #ffc107; font-weight: bold;">
                             ${leafletInfo.current} → ${leafletInfo.latest} (Update beschikbaar)
+                        </span>
+                    `;
+                } else if (leafletInfo.latest === "Onbekend") {
+                    leafletStatus.innerHTML = `
+                        <span style="color: #6c757d;">
+                            ${leafletInfo.current} (Versie check gefaald)
                         </span>
                     `;
                 } else {
                     leafletStatus.innerHTML = `
-                        <span style="color: #28a745;">
+                        <span style="color: #28a745; font-weight: bold;">
                             ${leafletInfo.current} (Actueel)
                         </span>
                     `;
@@ -2365,15 +2381,21 @@ class AdminDashboard {
 
             if (markerclusterStatus) {
                 const markerclusterInfo = data.markercluster;
-                if (markerclusterInfo.needsUpdate) {
+                if (markerclusterInfo.needsUpdate && markerclusterInfo.latest !== "Onbekend") {
                     markerclusterStatus.innerHTML = `
-                        <span style="color: #ffc107;">
+                        <span style="color: #ffc107; font-weight: bold;">
                             ${markerclusterInfo.current} → ${markerclusterInfo.latest} (Update beschikbaar)
+                        </span>
+                    `;
+                } else if (markerclusterInfo.latest === "Onbekend") {
+                    markerclusterStatus.innerHTML = `
+                        <span style="color: #6c757d;">
+                            ${markerclusterInfo.current} (Versie check gefaald)
                         </span>
                     `;
                 } else {
                     markerclusterStatus.innerHTML = `
-                        <span style="color: #28a745;">
+                        <span style="color: #28a745; font-weight: bold;">
                             ${markerclusterInfo.current} (Actueel)
                         </span>
                     `;
@@ -2381,23 +2403,36 @@ class AdminDashboard {
             }
 
             // Show update button if updates are available
-            if (data.leaflet.needsUpdate || data.markercluster.needsUpdate) {
-                if (updateResourcesBtn) {
+            const hasUpdates = (data.leaflet.needsUpdate && data.leaflet.latest !== "Onbekend") || 
+                              (data.markercluster.needsUpdate && data.markercluster.latest !== "Onbekend");
+                              
+            if (updateResourcesBtn) {
+                if (hasUpdates) {
                     updateResourcesBtn.style.display = "inline-block";
-                }
-            } else {
-                if (updateResourcesBtn) {
+                } else {
                     updateResourcesBtn.style.display = "none";
                 }
             }
 
         } catch (error) {
-            console.error("Error checking resource updates:", error);
+            console.error("[RESOURCE_CHECK] Error checking resource updates:", error);
+            
+            // More user-friendly error messages
+            let errorMessage = "Onbekende fout";
+            if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
+                errorMessage = "Netwerkfout - controleer internetverbinding";
+            } else if (error.message.includes("timeout")) {
+                errorMessage = "Timeout - probeer later opnieuw";
+            } else if (error.message.includes("status 500")) {
+                errorMessage = "Server fout";
+            } else {
+                errorMessage = error.message;
+            }
             
             if (leafletStatus) {
                 leafletStatus.innerHTML = `
                     <span style="color: #dc3545;">
-                        Fout bij controleren
+                        Fout: ${errorMessage}
                     </span>
                 `;
             }
@@ -2405,12 +2440,14 @@ class AdminDashboard {
             if (markerclusterStatus) {
                 markerclusterStatus.innerHTML = `
                     <span style="color: #dc3545;">
-                        Fout bij controleren
+                        Fout: ${errorMessage}
                     </span>
                 `;
             }
 
-            alert("Fout bij het controleren van resource updates. Controleer je internetverbinding.");
+            // Don't show generic alert, error is already shown in status
+            console.warn(`[RESOURCE_CHECK] Resource check failed: ${errorMessage}`);
+
         } finally {
             if (checkResourcesBtn) {
                 checkResourcesBtn.disabled = false;

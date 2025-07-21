@@ -1950,45 +1950,105 @@ app.get("/admin/api/user", authenticateToken, (req, res) => {
 });
 
 // Check for resource updates
-app.get("/admin/api/check-resources", authenticateToken, async (req, res) => {
+app.get("/admin/api/check-resource-versions", authenticateToken, async (req, res) => {
     try {
         const https = require("https");
 
-        // Check current versions from package.json or hardcoded
-        const currentVersions = {
-            leaflet: "1.9.4",
-            markercluster: "1.5.3",
+        // Detecteer huidige versies van lokale bestanden
+        const getCurrentVersions = () => {
+            const versions = {
+                leaflet: "1.9.4", // Default versie
+                markercluster: "1.5.3" // Default versie
+            };
+
+            // Probeer versie uit bestanden te halen indien mogelijk
+            try {
+                const leafletPath = path.join(__dirname, "lib", "leaflet.js");
+                if (fs.existsSync(leafletPath)) {
+                    const leafletContent = fs.readFileSync(leafletPath, "utf8");
+                    const versionMatch = leafletContent.match(/version:\s*["']([^"']+)["']/);
+                    if (versionMatch) {
+                        versions.leaflet = versionMatch[1];
+                    }
+                }
+            } catch (error) {
+                console.log("Could not detect local Leaflet version, using default");
+            }
+
+            return versions;
         };
 
-        // Function to get latest version from npm
+        const currentVersions = getCurrentVersions();
+
+        // Function to get latest version from npm met betere error handling
         const getLatestVersion = (packageName) => {
             return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error(`Timeout getting version for ${packageName}`));
+                }, 10000); // 10 second timeout
+
                 https
                     .get(
                         `https://registry.npmjs.org/${packageName}/latest`,
-                        (res) => {
+                        { 
+                            timeout: 8000,
+                            headers: {
+                                'User-Agent': 'HBM-Admin/1.0.0'
+                            }
+                        },
+                        (apiRes) => {
                             let data = "";
-                            res.on("data", (chunk) => (data += chunk));
-                            res.on("end", () => {
+                            
+                            apiRes.on("data", (chunk) => (data += chunk));
+                            
+                            apiRes.on("end", () => {
+                                clearTimeout(timeout);
                                 try {
                                     const packageInfo = JSON.parse(data);
-                                    resolve(packageInfo.version);
+                                    if (packageInfo.version) {
+                                        resolve(packageInfo.version);
+                                    } else {
+                                        reject(new Error(`No version found for ${packageName}`));
+                                    }
                                 } catch (e) {
-                                    reject(e);
+                                    reject(new Error(`Invalid JSON response for ${packageName}: ${e.message}`));
                                 }
+                            });
+
+                            apiRes.on("error", (err) => {
+                                clearTimeout(timeout);
+                                reject(err);
                             });
                         },
                     )
-                    .on("error", reject);
+                    .on("error", (err) => {
+                        clearTimeout(timeout);
+                        reject(err);
+                    });
             });
         };
 
-        const [leafletLatest, markerclusterLatest] = await Promise.all([
-            getLatestVersion("leaflet"),
-            getLatestVersion("leaflet.markercluster"),
-        ]);
+        console.log("[RESOURCE_CHECK] Checking for resource updates...");
 
-        res.json({
+        // Check versies met fallbacks
+        let leafletLatest = currentVersions.leaflet;
+        let markerclusterLatest = currentVersions.markercluster;
+
+        try {
+            leafletLatest = await getLatestVersion("leaflet");
+            console.log(`[RESOURCE_CHECK] Leaflet latest version: ${leafletLatest}`);
+        } catch (error) {
+            console.warn(`[RESOURCE_CHECK] Could not check Leaflet version: ${error.message}`);
+        }
+
+        try {
+            markerclusterLatest = await getLatestVersion("leaflet.markercluster");
+            console.log(`[RESOURCE_CHECK] MarkerCluster latest version: ${markerclusterLatest}`);
+        } catch (error) {
+            console.warn(`[RESOURCE_CHECK] Could not check MarkerCluster version: ${error.message}`);
+        }
+
+        const result = {
             leaflet: {
                 current: currentVersions.leaflet,
                 latest: leafletLatest,
@@ -1997,13 +2057,29 @@ app.get("/admin/api/check-resources", authenticateToken, async (req, res) => {
             markercluster: {
                 current: currentVersions.markercluster,
                 latest: markerclusterLatest,
-                needsUpdate:
-                    currentVersions.markercluster !== markerclusterLatest,
+                needsUpdate: currentVersions.markercluster !== markerclusterLatest,
             },
-        });
+        };
+
+        console.log("[RESOURCE_CHECK] Version check result:", result);
+        res.json(result);
+
     } catch (error) {
-        console.error("Error checking resource versions:", error);
-        res.status(500).json({ error: "Failed to check resource versions" });
+        console.error("[RESOURCE_CHECK] Error checking resource versions:", error);
+        res.status(500).json({ 
+            error: "Kon resource versies niet controleren",
+            details: error.message,
+            leaflet: {
+                current: "1.9.4",
+                latest: "Onbekend",
+                needsUpdate: false,
+            },
+            markercluster: {
+                current: "1.5.3", 
+                latest: "Onbekend",
+                needsUpdate: false,
+            }
+        });
     }
 });
 
