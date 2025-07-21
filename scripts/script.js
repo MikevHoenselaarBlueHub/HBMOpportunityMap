@@ -1121,8 +1121,12 @@ function createMarkers(data) {
 
       if (hasImage) {
         // Create custom image marker
-        const imageUrl =
-          item.HBMType === "Bedrijf" ? item.Logo : item.ProjectImage;
+        let imageUrl = item.HBMType === "Bedrijf" ? item.Logo : item.ProjectImage;
+        
+        // Ensure absolute URL for uploads - convert relative paths to absolute
+        if (imageUrl && imageUrl.startsWith('/uploads/')) {
+          imageUrl = window.location.origin + imageUrl;
+        }
         const borderColor =
           item.HBMType === "Project"
             ? "rgb(139, 179, 17)"
@@ -2469,8 +2473,8 @@ function createListItem(item) {
       <h3 class="card-title">${item.Name || "Onbekend"}</h3>
       <span class="card-type-badge ${item.HBMType?.toLowerCase() || "unknown"}">${item.HBMType || "Onbekend"}</span>
     </div>
-    ${item.Logo ? `<img src="${item.Logo}" alt="Logo" class="card-logo" onerror="this.style.display='none'">` : ""}
-    ${item.ProjectImage ? `<img src="${item.ProjectImage}" alt="Project" class="card-image" onerror="this.style.display='none'">` : ""}
+    ${item.Logo ? `<img src="${item.Logo.startsWith('/uploads/') ? window.location.origin + item.Logo : item.Logo}" alt="Logo" class="card-logo" onerror="this.style.display='none'">` : ""}
+    ${item.ProjectImage ? `<img src="${item.ProjectImage.startsWith('/uploads/') ? window.location.origin + item.ProjectImage : item.ProjectImage}" alt="Project" class="card-image" onerror="this.style.display='none'">` : ""}
     <div class="card-details">
       ${item.OrganizationType ? `<div class="card-detail-row"><span class="card-detail-label">Type:</span><span class="card-detail-value">${item.OrganizationType}</span></div>` : ""}
       ${item.HBMSector ? `<div class="card-detail-row"><span class="card-detail-label">Sector:</span><span class="card-detail-value">${item.HBMSector}</span></div>` : ""}
@@ -2581,8 +2585,8 @@ function openDetailPanel(item) {
       </div>
 
       <div class="detail-images">
-        ${item.Logo ? `<img src="${item.Logo}" alt="Logo" class="detail-logo" onerror="this.style.display='none'">` : ""}
-        ${item.ProjectImage ? `<img src="${item.ProjectImage}" alt="Project" class="detail-image" onerror="this.style.display='none'">` : ""}
+        ${item.Logo ? `<img src="${item.Logo.startsWith('/uploads/') ? window.location.origin + item.Logo : item.Logo}" alt="Logo" class="detail-logo" onerror="this.style.display='none'">` : ""}
+        ${item.ProjectImage ? `<img src="${item.ProjectImage.startsWith('/uploads/') ? window.location.origin + item.ProjectImage : item.ProjectImage}" alt="Project" class="detail-image" onerror="this.style.display='none'">` : ""}
       </div>
 
       <div class="detail-info">

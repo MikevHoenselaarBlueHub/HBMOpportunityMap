@@ -1739,8 +1739,16 @@ app.post(
     },
 );
 
-// Serve uploaded files
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Serve uploaded files with proper headers
+app.use("/uploads", express.static(path.join(__dirname, "uploads"), {
+    setHeaders: (res, filePath) => {
+        // Set proper cache headers for uploaded images
+        if (filePath.match(/\.(jpg|jpeg|png|gif|svg|webp)$/i)) {
+            res.setHeader("Content-Type", "image/" + path.extname(filePath).substr(1));
+            res.setHeader("Cache-Control", "public, max-age=86400"); // 24 hours
+        }
+    }
+}));
 
 // One-time populate database from municipalities.json
 app.post(
