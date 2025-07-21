@@ -1820,14 +1820,29 @@ class AdminDashboard {
                 throw new Error(`Row has insufficient data: ${row.length} columns found, minimum 12 required`);
             }
             
-            // Validate required fields
-            if (!row[1] || row[1].toString().trim() === '') {
+            // Validate required fields and clean up the name
+            let opportunityName = (row[1] || "").toString().trim();
+            if (!opportunityName || opportunityName === '') {
                 throw new Error(`Missing required field: Name (column 1) is empty`);
+            }
+            
+            // Skip test/demo entries that might cause issues
+            if (opportunityName.toLowerCase().includes('prev.end') || 
+                opportunityName.toLowerCase().includes('example') ||
+                opportunityName.toLowerCase().includes('test')) {
+                console.log(`Skipping test/demo opportunity: ${opportunityName}`);
+                return null;
+            }
+            
+            // Clean up the name to remove any problematic characters
+            opportunityName = opportunityName.replace(/[^\w\s\-\(\)\.]/g, '').trim();
+            if (!opportunityName) {
+                throw new Error(`Invalid opportunity name after cleanup: "${row[1]}"`);
             }
             
             // Map columns to opportunity object
             const opportunity = {
-                Name: (row[1] || "").toString().trim(),
+                Name: opportunityName,
                 Address: (row[2] || "").toString().trim(),
                 PostalCode: (row[3] || "").toString().trim(),
                 City: (row[4] || "").toString().trim(),
@@ -1855,6 +1870,12 @@ class AdminDashboard {
             // Skip if HBMUse is 'internal'
             if (opportunity.HBMUse && opportunity.HBMUse.toLowerCase() === 'internal') {
                 console.log(`Skipping opportunity ${opportunity.Name} - HBMUse is internal`);
+                return null;
+            }
+
+            // Validate that we have enough data to create a meaningful opportunity
+            if (!opportunity.HBMType || (!opportunity.Municipality && !opportunity.City)) {
+                console.log(`Skipping opportunity ${opportunity.Name} - insufficient location or type data`);
                 return null;
             }
 
@@ -1968,13 +1989,25 @@ class AdminDashboard {
                 data: opportunity
             });
             
+            // Additional validation before sending to API
+            if (!opportunity.Name || opportunity.Name.trim() === '') {
+                throw new Error('Opportunity name is required');
+            }
+            
+            // Ensure required fields have default values
+            const cleanOpportunity = {
+                ...opportunity,
+                Description: opportunity.Description || `${opportunity.HBMType || 'Kans'} in ${opportunity.Municipality || opportunity.City || 'onbekende locatie'}`,
+                HBMType: opportunity.HBMType || 'Project'
+            };
+            
             const response = await fetch("/admin/api/opportunities", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${this.token}`,
                 },
-                body: JSON.stringify(opportunity),
+                body: JSON.stringify(cleanOpportunity),
             });
 
             if (!response.ok) {
@@ -1984,14 +2017,22 @@ class AdminDashboard {
                     statusText: response.statusText,
                     errorText: errorText
                 });
-                throw new Error(`Failed to create opportunity: ${opportunity.Name} - ${response.status}: ${errorText}`);
+                
+                // More specific error handling
+                if (response.status === 400) {
+                    throw new Error(`Validation error for ${opportunity.Name}: ${errorText}`);
+                } else if (response.status === 409) {
+                    throw new Error(`Duplicate opportunity: ${opportunity.Name} already exists`);
+                } else {
+                    throw new Error(`Server error creating ${opportunity.Name}: ${response.status} ${errorText}`);
+                }
             }
             
             const result = await response.json();
             console.log(`Successfully created opportunity: ${opportunity.Name}`, result);
         } catch (error) {
             console.error(`Exception creating opportunity ${opportunity.Name}:`, error);
-            throw error;
+            throw new Error(`Failed to create opportunity "${opportunity.Name}": ${error.message}`);
         }
     }
 
@@ -2121,18 +2162,39 @@ class AdminDashboard {
                 <button onclick="adminApp.clearOpportunityFilters()" class="btn btn-secondary">Wissen</button>
                 <button onclick="adminApp.openImportModal()" class="btn btn-primary" style="background: #28a745;">Import XLS</button>
             </div>
+            <div id="searchStatus" style="display: none; color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
+                Zoeken...
+            </div>
         `;
         
         sectionHeader.parentNode.insertBefore(searchDiv, sectionHeader.nextSibling);
 
-        // Add event listeners with slight delay to ensure DOM is ready
+        // Add event listeners with debouncing
         setTimeout(() => {
             const searchInput = document.getElementById("opportunitySearch");
             const typeFilter = document.getElementById("opportunityTypeFilter");
             
             if (searchInput) {
+                let searchTimeout;
                 searchInput.addEventListener("input", () => {
-                    this.filterOpportunities();
+                    // Clear previous timeout
+                    clearTimeout(searchTimeout);
+                    
+                    // Show searching status
+                    const statusDiv = document.getElementById("searchStatus");
+                    if (statusDiv) {
+                        statusDiv.style.display = "block";
+                        statusDiv.textContent = "Zoeken...";
+                    }
+                    
+                    // Set new timeout for 2 seconds
+                    searchTimeout = setTimeout(() => {
+                        this.filterOpportunities();
+                        // Hide status after search
+                        if (statusDiv) {
+                            statusDiv.style.display = "none";
+                        }
+                    }, 2000);
                 });
             }
 
@@ -2153,8 +2215,15 @@ class AdminDashboard {
             return;
         }
 
-        const searchTerm = searchInput.value.toLowerCase();
+        if (!this.allOpportunities || !Array.isArray(this.allOpportunities)) {
+            console.error("No opportunities data available for filtering");
+            return;
+        }
+
+        const searchTerm = searchInput.value.toLowerCase().trim();
         const typeFilter = typeFilterSelect.value;
+
+        console.log(`Filtering opportunities: search="${searchTerm}", type="${typeFilter}", total=${this.allOpportunities.length}`);
 
         let filtered = this.allOpportunities.filter(opp => {
             const matchesSearch = !searchTerm || 
@@ -2162,12 +2231,17 @@ class AdminDashboard {
                 (opp.Municipality && opp.Municipality.toLowerCase().includes(searchTerm)) ||
                 (opp.HBMSector && opp.HBMSector.toLowerCase().includes(searchTerm)) ||
                 (opp.OrganizationType && opp.OrganizationType.toLowerCase().includes(searchTerm)) ||
+                (opp.ProjectType && opp.ProjectType.toLowerCase().includes(searchTerm)) ||
+                (opp.HBMTopic && Array.isArray(opp.HBMTopic) && opp.HBMTopic.some(topic => topic.toLowerCase().includes(searchTerm))) ||
+                (opp.HBMCharacteristics && Array.isArray(opp.HBMCharacteristics) && opp.HBMCharacteristics.some(char => char.toLowerCase().includes(searchTerm))) ||
                 (opp.Description && opp.Description.toLowerCase().includes(searchTerm));
 
             const matchesType = !typeFilter || opp.HBMType === typeFilter;
 
             return matchesSearch && matchesType;
         });
+
+        console.log(`Filter result: ${filtered.length} opportunities found`);
 
         this.filteredOpportunities = filtered;
         this.renderOpportunities(filtered);
