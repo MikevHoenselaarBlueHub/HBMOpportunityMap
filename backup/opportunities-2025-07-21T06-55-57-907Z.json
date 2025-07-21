@@ -15,15 +15,15 @@
     ],
     "HBMSector": "Wonen",
     "HBMType": "Bedrijf",
-    "Description": "Voorbeeldlocatie met focuss op gezond bouwen en grensoverschrijdende samenwerking.",
+    "Description": "Voorbeeldlocatie met focus op gezond bouwen en grensoverschrijdende samenwerking.",
     "Logo": "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=150&h=75&fit=crop&crop=center",
     "Street": "Markt 78",
     "Zip": "6211CL",
     "City": "Maastricht",
     "Municipality": "Maastricht",
     "Country": "Netherlands",
-    "Latitude": 50.891231,
-    "Longitude": 5.735314
+    "Latitude": 50.891719,
+    "Longitude": 5.733705
   },
   {
     "Name": "Demo Locatie 2 (Krefeld)",
