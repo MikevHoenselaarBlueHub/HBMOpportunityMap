@@ -387,34 +387,29 @@
                                     class="resource-status"
                                     id="resourceStatus"
                                 >
-                                    <div class="status-item">
+                                    <div class="resource-item">
                                         <span>Leaflet:</span>
-                                        <span id="leafletStatus"
-                                            >Checking...</span
-                                        >
+                                        <span id="leafletStatus">Klaar om te updaten</span>
                                     </div>
-                                    <div class="status-item">
+                                    <div class="resource-item">
                                         <span>MarkerCluster:</span>
-                                        <span id="markerclusterStatus"
-                                            >Checking...</span
-                                        >
+                                        <span id="markerclusterStatus">Klaar om te updaten</span>
                                     </div>
                                 </div>
                                 <div class="resource-actions">
                                     <button
-                                        class="btn btn-primary"
-                                        onclick="adminApp.checkResourceUpdates()"
                                         id="checkResourcesBtn"
+                                        class="btn btn-secondary"
+                                        onclick="adminApp.checkResourceUpdates()"
                                     >
-                                        Check for updates
+                                        Status controleren
                                     </button>
                                     <button
-                                        class="btn btn-success"
-                                        onclick="adminApp.updateResources()"
                                         id="updateResourcesBtn"
-                                        style="display: none"
+                                        class="btn btn-primary"
+                                        onclick="adminApp.updateResources()"
                                     >
-                                        Update Resources
+                                        Download nieuwste versies
                                     </button>
                                 </div>
                             </div>

@@ -1954,136 +1954,80 @@ app.get("/admin/api/user", authenticateToken, (req, res) => {
     res.json({ username: req.user.username });
 });
 
-// Check for resource updates
-app.get("/admin/api/check-resource-versions", authenticateToken, async (req, res) => {
+// Simple resource update - just download latest versions
+app.post("/admin/api/update-resources", authenticateToken, async (req, res) => {
     try {
+        console.log("[RESOURCE_UPDATE] Starting simple resource update...");
+        
         const https = require("https");
+        
+        // Create lib directory if it doesn't exist
+        const libDir = path.join(__dirname, "lib");
+        if (!fs.existsSync(libDir)) {
+            fs.mkdirSync(libDir);
+        }
 
-        // Detecteer huidige versies van lokale bestanden
-        const getCurrentVersions = () => {
-            const versions = {
-                leaflet: "1.9.4", // Default versie
-                markercluster: "1.5.3" // Default versie
-            };
-
-            // Probeer versie uit bestanden te halen indien mogelijk
-            try {
-                const leafletPath = path.join(__dirname, "lib", "leaflet.js");
-                if (fs.existsSync(leafletPath)) {
-                    const leafletContent = fs.readFileSync(leafletPath, "utf8");
-                    const versionMatch = leafletContent.match(/version:\s*["']([^"']+)["']/);
-                    if (versionMatch) {
-                        versions.leaflet = versionMatch[1];
-                    }
-                }
-            } catch (error) {
-                console.log("Could not detect local Leaflet version, using default");
-            }
-
-            return versions;
-        };
-
-        const currentVersions = getCurrentVersions();
-
-        // Function to get latest version from npm met betere error handling
-        const getLatestVersion = (packageName) => {
+        // Function to download file
+        const downloadFile = (url, filepath) => {
             return new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => {
-                    reject(new Error(`Timeout getting version for ${packageName}`));
-                }, 10000); // 10 second timeout
-
+                const file = fs.createWriteStream(filepath);
                 https
-                    .get(
-                        `https://registry.npmjs.org/${packageName}/latest`,
-                        { 
-                            timeout: 8000,
-                            headers: {
-                                'User-Agent': 'HBM-Admin/1.0.0'
-                            }
-                        },
-                        (apiRes) => {
-                            let data = "";
-                            
-                            apiRes.on("data", (chunk) => (data += chunk));
-                            
-                            apiRes.on("end", () => {
-                                clearTimeout(timeout);
-                                try {
-                                    const packageInfo = JSON.parse(data);
-                                    if (packageInfo.version) {
-                                        resolve(packageInfo.version);
-                                    } else {
-                                        reject(new Error(`No version found for ${packageName}`));
-                                    }
-                                } catch (e) {
-                                    reject(new Error(`Invalid JSON response for ${packageName}: ${e.message}`));
-                                }
-                            });
-
-                            apiRes.on("error", (err) => {
-                                clearTimeout(timeout);
-                                reject(err);
-                            });
-                        },
-                    )
+                    .get(url, (response) => {
+                        if (response.statusCode !== 200) {
+                            reject(new Error(`HTTP ${response.statusCode}`));
+                            return;
+                        }
+                        response.pipe(file);
+                        file.on("finish", () => {
+                            file.close();
+                            resolve();
+                        });
+                    })
                     .on("error", (err) => {
-                        clearTimeout(timeout);
+                        fs.unlink(filepath, () => {}); // Delete the file async
                         reject(err);
                     });
             });
         };
 
-        console.log("[RESOURCE_CHECK] Checking for resource updates...");
+        console.log("[RESOURCE_UPDATE] Downloading latest Leaflet and MarkerCluster...");
 
-        // Check versies met fallbacks
-        let leafletLatest = currentVersions.leaflet;
-        let markerclusterLatest = currentVersions.markercluster;
+        // Download latest versions from unpkg CDN
+        await Promise.all([
+            downloadFile(
+                "https://unpkg.com/leaflet@latest/dist/leaflet.js",
+                path.join(libDir, "leaflet.js"),
+            ),
+            downloadFile(
+                "https://unpkg.com/leaflet@latest/dist/leaflet.css",
+                path.join(libDir, "leaflet.css"),
+            ),
+            downloadFile(
+                "https://unpkg.com/leaflet.markercluster@latest/dist/leaflet.markercluster.js",
+                path.join(libDir, "leaflet.markercluster.js"),
+            ),
+            downloadFile(
+                "https://unpkg.com/leaflet.markercluster@latest/dist/MarkerCluster.css",
+                path.join(libDir, "MarkerCluster.css"),
+            ),
+            downloadFile(
+                "https://unpkg.com/leaflet.markercluster@latest/dist/MarkerCluster.Default.css",
+                path.join(libDir, "MarkerCluster.Default.css"),
+            ),
+        ]);
 
-        try {
-            leafletLatest = await getLatestVersion("leaflet");
-            console.log(`[RESOURCE_CHECK] Leaflet latest version: ${leafletLatest}`);
-        } catch (error) {
-            console.warn(`[RESOURCE_CHECK] Could not check Leaflet version: ${error.message}`);
-        }
-
-        try {
-            markerclusterLatest = await getLatestVersion("leaflet.markercluster");
-            console.log(`[RESOURCE_CHECK] MarkerCluster latest version: ${markerclusterLatest}`);
-        } catch (error) {
-            console.warn(`[RESOURCE_CHECK] Could not check MarkerCluster version: ${error.message}`);
-        }
-
-        const result = {
-            leaflet: {
-                current: currentVersions.leaflet,
-                latest: leafletLatest,
-                needsUpdate: currentVersions.leaflet !== leafletLatest,
-            },
-            markercluster: {
-                current: currentVersions.markercluster,
-                latest: markerclusterLatest,
-                needsUpdate: currentVersions.markercluster !== markerclusterLatest,
-            },
-        };
-
-        console.log("[RESOURCE_CHECK] Version check result:", result);
-        res.json(result);
+        console.log("[RESOURCE_UPDATE] All resources updated successfully!");
+        res.json({ 
+            success: true, 
+            message: "Resources succesvol geüpdatet naar nieuwste versies!",
+            timestamp: new Date().toISOString()
+        });
 
     } catch (error) {
-        console.error("[RESOURCE_CHECK] Error checking resource versions:", error);
-        res.status(500).json({ 
-            error: "Kon resource versies niet controleren",
-            details: error.message,
-            leaflet: {
-                current: "1.9.4",
-                latest: "Onbekend",
-                needsUpdate: false,
-            },
-            markercluster: {
-                current: "1.5.3", 
-                latest: "Onbekend",
-                needsUpdate: false,
-            }
+        console.error("[RESOURCE_UPDATE] Error updating resources:", error);
+        res.status(500).json({
+            success: false,
+            message: "Fout bij het updaten van resources: " + error.message,
         });
     }
 });

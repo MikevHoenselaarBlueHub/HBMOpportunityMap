@@ -2312,162 +2312,14 @@ class AdminDashboard {
         }
     }
 
-    // Resource update functions
-    async checkResourceUpdates() {
-        if (this.userRole !== "admin") {
-            alert("Alleen administrators kunnen resource updates controleren.");
-            return;
-        }
-
-        const checkResourcesBtn = document.getElementById("checkResourcesBtn");
-        const updateResourcesBtn = document.getElementById("updateResourcesBtn");
-        const leafletStatus = document.getElementById("leafletStatus");
-        const markerclusterStatus = document.getElementById("markerclusterStatus");
-
-        if (checkResourcesBtn) {
-            checkResourcesBtn.disabled = true;
-            checkResourcesBtn.textContent = "Controleren...";
-        }
-
-        if (leafletStatus) leafletStatus.textContent = "Controleren...";
-        if (markerclusterStatus) markerclusterStatus.textContent = "Controleren...";
-
-        try {
-            console.log("[RESOURCE_CHECK] Checking resource versions...");
-            
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 15000);
-            
-            const response = await fetch("/admin/api/check-resource-versions", {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${this.token}`,
-                    'Content-Type': 'application/json'
-                },
-                signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
-
-            console.log("[RESOURCE_CHECK] Response status:", response.status);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error("[RESOURCE_CHECK] Server error:", errorText);
-                throw new Error(`Server antwoordde met status ${response.status}: ${errorText}`);
-            }
-
-            const data = await response.json();
-            console.log("[RESOURCE_CHECK] Received data:", data);
-
-            // Update status displays
-            if (leafletStatus) {
-                const leafletInfo = data.leaflet;
-                if (leafletInfo.needsUpdate && leafletInfo.latest !== "Onbekend") {
-                    leafletStatus.innerHTML = `
-                        <span style="color: #ffc107; font-weight: bold;">
-                            ${leafletInfo.current} → ${leafletInfo.latest} (Update beschikbaar)
-                        </span>
-                    `;
-                } else if (leafletInfo.latest === "Onbekend") {
-                    leafletStatus.innerHTML = `
-                        <span style="color: #6c757d;">
-                            ${leafletInfo.current} (Versie check gefaald)
-                        </span>
-                    `;
-                } else {
-                    leafletStatus.innerHTML = `
-                        <span style="color: #28a745; font-weight: bold;">
-                            ${leafletInfo.current} (Actueel)
-                        </span>
-                    `;
-                }
-            }
-
-            if (markerclusterStatus) {
-                const markerclusterInfo = data.markercluster;
-                if (markerclusterInfo.needsUpdate && markerclusterInfo.latest !== "Onbekend") {
-                    markerclusterStatus.innerHTML = `
-                        <span style="color: #ffc107; font-weight: bold;">
-                            ${markerclusterInfo.current} → ${markerclusterInfo.latest} (Update beschikbaar)
-                        </span>
-                    `;
-                } else if (markerclusterInfo.latest === "Onbekend") {
-                    markerclusterStatus.innerHTML = `
-                        <span style="color: #6c757d;">
-                            ${markerclusterInfo.current} (Versie check gefaald)
-                        </span>
-                    `;
-                } else {
-                    markerclusterStatus.innerHTML = `
-                        <span style="color: #28a745; font-weight: bold;">
-                            ${markerclusterInfo.current} (Actueel)
-                        </span>
-                    `;
-                }
-            }
-
-            // Show update button if updates are available
-            const hasUpdates = (data.leaflet.needsUpdate && data.leaflet.latest !== "Onbekend") || 
-                              (data.markercluster.needsUpdate && data.markercluster.latest !== "Onbekend");
-                              
-            if (updateResourcesBtn) {
-                if (hasUpdates) {
-                    updateResourcesBtn.style.display = "inline-block";
-                } else {
-                    updateResourcesBtn.style.display = "none";
-                }
-            }
-
-        } catch (error) {
-            console.error("[RESOURCE_CHECK] Error checking resource updates:", error);
-            
-            // More user-friendly error messages
-            let errorMessage = "Onbekende fout";
-            if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
-                errorMessage = "Netwerkfout - controleer internetverbinding";
-            } else if (error.message.includes("timeout")) {
-                errorMessage = "Timeout - probeer later opnieuw";
-            } else if (error.message.includes("status 500")) {
-                errorMessage = "Server fout";
-            } else {
-                errorMessage = error.message;
-            }
-            
-            if (leafletStatus) {
-                leafletStatus.innerHTML = `
-                    <span style="color: #dc3545;">
-                        Fout: ${errorMessage}
-                    </span>
-                `;
-            }
-            
-            if (markerclusterStatus) {
-                markerclusterStatus.innerHTML = `
-                    <span style="color: #dc3545;">
-                        Fout: ${errorMessage}
-                    </span>
-                `;
-            }
-
-            // Don't show generic alert, error is already shown in status
-            console.warn(`[RESOURCE_CHECK] Resource check failed: ${errorMessage}`);
-
-        } finally {
-            if (checkResourcesBtn) {
-                checkResourcesBtn.disabled = false;
-                checkResourcesBtn.textContent = "Check for updates";
-            }
-        }
-    }
-
+    // Simple resource update function
     async updateResources() {
         if (this.userRole !== "admin") {
             alert("Alleen administrators kunnen resources updaten.");
             return;
         }
 
-        if (!confirm("Weet je zeker dat je de resources wilt updaten? Dit kan enkele minuten duren.")) {
+        if (!confirm("Weet je zeker dat je de nieuwste versies van Leaflet en MarkerCluster wilt downloaden?")) {
             return;
         }
 
@@ -2475,13 +2327,14 @@ class AdminDashboard {
         const leafletStatus = document.getElementById("leafletStatus");
         const markerclusterStatus = document.getElementById("markerclusterStatus");
 
+        // Update UI to show progress
         if (updateResourcesBtn) {
             updateResourcesBtn.disabled = true;
-            updateResourcesBtn.textContent = "Updaten...";
+            updateResourcesBtn.textContent = "Downloaden...";
         }
 
-        if (leafletStatus) leafletStatus.textContent = "Updaten...";
-        if (markerclusterStatus) markerclusterStatus.textContent = "Updaten...";
+        if (leafletStatus) leafletStatus.innerHTML = `<span style="color: #007bff;">Downloaden...</span>`;
+        if (markerclusterStatus) markerclusterStatus.innerHTML = `<span style="color: #007bff;">Downloaden...</span>`;
 
         try {
             const response = await fetch("/admin/api/update-resources", {
@@ -2494,20 +2347,10 @@ class AdminDashboard {
             const data = await response.json();
 
             if (response.ok && data.success) {
-                alert("Resources succesvol geüpdatet! Herlaad de pagina om de nieuwe versies te gebruiken.");
+                alert("Resources succesvol gedownload! Herlaad de pagina om de nieuwe versies te gebruiken.");
                 
-                if (leafletStatus) leafletStatus.innerHTML = `<span style="color: #28a745;">Geüpdatet</span>`;
-                if (markerclusterStatus) markerclusterStatus.innerHTML = `<span style="color: #28a745;">Geüpdatet</span>`;
-                
-                // Hide update button
-                if (updateResourcesBtn) {
-                    updateResourcesBtn.style.display = "none";
-                }
-
-                // Automatically recheck versions after update
-                setTimeout(() => {
-                    this.checkResourceUpdates();
-                }, 2000);
+                if (leafletStatus) leafletStatus.innerHTML = `<span style="color: #28a745; font-weight: bold;">✓ Geüpdatet naar nieuwste versie</span>`;
+                if (markerclusterStatus) markerclusterStatus.innerHTML = `<span style="color: #28a745; font-weight: bold;">✓ Geüpdatet naar nieuwste versie</span>`;
 
             } else {
                 throw new Error(data.message || "Update failed");
@@ -2517,14 +2360,41 @@ class AdminDashboard {
             console.error("Error updating resources:", error);
             alert(`Fout bij het updaten van resources: ${error.message}`);
             
-            if (leafletStatus) leafletStatus.innerHTML = `<span style="color: #dc3545;">Update gefaald</span>`;
-            if (markerclusterStatus) markerclusterStatus.innerHTML = `<span style="color: #dc3545;">Update gefaald</span>`;
+            if (leafletStatus) leafletStatus.innerHTML = `<span style="color: #dc3545;">Download gefaald</span>`;
+            if (markerclusterStatus) markerclusterStatus.innerHTML = `<span style="color: #dc3545;">Download gefaald</span>`;
 
         } finally {
             if (updateResourcesBtn) {
                 updateResourcesBtn.disabled = false;
-                updateResourcesBtn.textContent = "Update Resources";
+                updateResourcesBtn.textContent = "Download nieuwste versies";
             }
+        }
+    }
+
+    // Simple check function that just shows current status and allows update
+    async checkResourceUpdates() {
+        if (this.userRole !== "admin") {
+            alert("Alleen administrators kunnen resource updates controleren.");
+            return;
+        }
+
+        const updateResourcesBtn = document.getElementById("updateResourcesBtn");
+        const leafletStatus = document.getElementById("leafletStatus");
+        const markerclusterStatus = document.getElementById("markerclusterStatus");
+
+        // Show current status and make update button visible
+        if (leafletStatus) {
+            leafletStatus.innerHTML = `<span style="color: #6c757d;">Lokale versie geladen - klik update voor nieuwste versie</span>`;
+        }
+        
+        if (markerclusterStatus) {
+            markerclusterStatus.innerHTML = `<span style="color: #6c757d;">Lokale versie geladen - klik update voor nieuwste versie</span>`;
+        }
+
+        // Always show update button
+        if (updateResourcesBtn) {
+            updateResourcesBtn.style.display = "inline-block";
+            updateResourcesBtn.textContent = "Download nieuwste versies";
         }
     }
 
