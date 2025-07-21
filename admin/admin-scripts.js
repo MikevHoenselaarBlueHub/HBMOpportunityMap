@@ -340,7 +340,7 @@ class AdminDashboard {
                             <div class="filter-item">
                                 <span>${item}</span>
                                 <div class="filter-actions">
-                                    ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openFilterModal('${category}', '${item}')" title="Bewerken">✏️</button>` : ""}
+                                    ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openFilterModal('${category}', '${item}')" title="Bewerken"><img src="icons/edit.svg" alt="Bewerken" style="width: 14px; height: 14px;" /></button>` : ""}
                                     ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteFilterItem('${category}', '${item}')">Verwijderen</button>` : ""}
                                 </div>
                             </div>
@@ -486,7 +486,7 @@ class AdminDashboard {
                     <td>${municipality.area || ""}</td>
                     <td>${visibilityStatus}</td>
                     <td>
-                        ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openMunicipalityModal('${municipality.name}')" title="Bewerken">✏️</button>` : ""}
+                        ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openMunicipalityModal('${municipality.name}')" title="Bewerken"><img src="icons/edit.svg" alt="Bewerken" style="width: 14px; height: 14px;" /></button>` : ""}
                         ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteMunicipality('${municipality.name}')">Verwijderen</button>` : ""}
                         ${!canEdit && !canDelete ? '<span style="color: #999;">Geen acties beschikbaar</span>' : ""}
                     </td>
@@ -2528,8 +2528,14 @@ class AdminDashboard {
                 <td>${this.formatArrayValue(opportunity.HBMSector)}</td>
                 <td>${this.formatArrayValue(opportunity.OrganizationType)}</td>
                 <td>
-                    <button onclick="adminApp.openOpportunityModal('${this.escapeHtml(opportunity.Name)}')" title="Bewerken"><img src="icons/edit.svg" alt="Bewerken" /></button>
-                    <button onclick="adminApp.openFilterSelectionModal('${this.escapeHtml(opportunity.Name)}')" title="Filters"><img src="icons/filter-setting.svg" alt="Filters" /></button>
+                    <button class="action-btn edit-btn" onclick="adminApp.openOpportunityModal('${this.escapeHtml(opportunity.Name)}')" title="Bewerken">
+                        <img src="icons/edit.svg" alt="Bewerken" style="width: 16px; height: 16px;" />
+                        Bewerken
+                    </button>
+                    <button class="action-btn filter-btn" onclick="adminApp.openFilterSelectionModal('${this.escapeHtml(opportunity.Name)}')" title="Filters">
+                        <img src="icons/filter-setting.svg" alt="Filters" style="width: 16px; height: 16px;" />
+                        Filters
+                    </button>
                     <button onclick="adminApp.deleteOpportunity('${this.escapeHtml(opportunity.Name)}')" class="btn btn-danger btn-sm">Verwijderen</button>
                 </td>
             `;
@@ -2638,8 +2644,16 @@ class AdminDashboard {
                         </div>
 
                         <div class="form-group">
-                            <label for="opportunityLogo">Logo URL</label>
-                            <input type="url" id="opportunityLogo" name="Logo">
+                            <label for="opportunityLogo">Logo</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: end;">
+                                <div style="flex: 1;">
+                                    <input type="url" id="opportunityLogo" name="Logo" placeholder="Logo URL">
+                                </div>
+                                <button type="button" class="btn btn-secondary" onclick="adminApp.openLogoUploadModal()" style="white-space: nowrap;">Upload Logo</button>
+                            </div>
+                            <div id="logoPreview" style="margin-top: 0.5rem; display: none;">
+                                <img id="logoPreviewImage" style="max-width: 150px; max-height: 75px; border: 1px solid #ddd; border-radius: 4px;" />
+                            </div>
                         </div>
 
                         <div class="modal-actions">
@@ -3265,6 +3279,136 @@ class AdminDashboard {
             // Close modal
             closeModal("locationPickerModal");
         }
+    }
+
+    openLogoUploadModal() {
+        const modalHTML = `
+            <div id="logoUploadModal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Logo uploaden</h3>
+                        <button class="modal-close" onclick="closeModal('logoUploadModal')">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="logoUploadFile">Selecteer logo bestand</label>
+                            <input type="file" id="logoUploadFile" accept="image/*" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                            <small style="color: #666; font-size: 0.8rem;">Ondersteunde formaten: JPG, PNG, SVG, GIF (max 5MB)</small>
+                        </div>
+                        <div id="logoUploadPreview" style="margin-top: 1rem; display: none;">
+                            <img id="logoUploadPreviewImage" style="max-width: 200px; max-height: 100px; border: 1px solid #ddd; border-radius: 4px;" />
+                        </div>
+                        <div id="logoUploadProgress" style="display: none; margin-top: 1rem;">
+                            <div style="background: #e9ecef; border-radius: 4px; overflow: hidden;">
+                                <div id="logoUploadProgressBar" style="height: 20px; background: #007bff; width: 0%; transition: width 0.3s;"></div>
+                            </div>
+                            <div id="logoUploadStatus" style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;"></div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('logoUploadModal')">Annuleren</button>
+                        <button type="button" class="btn btn-primary" onclick="adminApp.uploadLogo()">Uploaden</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+        // Add file change listener for preview
+        document.getElementById('logoUploadFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const preview = document.getElementById('logoUploadPreview');
+                    const previewImage = document.getElementById('logoUploadPreviewImage');
+                    previewImage.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    async uploadLogo() {
+        const fileInput = document.getElementById('logoUploadFile');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('Selecteer eerst een bestand');
+            return;
+        }
+
+        // Validate file
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Bestand is te groot. Maximum grootte is 5MB.');
+            return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            alert('Alleen afbeeldingen zijn toegestaan.');
+            return;
+        }
+
+        const progressContainer = document.getElementById('logoUploadProgress');
+        const progressBar = document.getElementById('logoUploadProgressBar');
+        const statusDiv = document.getElementById('logoUploadStatus');
+
+        progressContainer.style.display = 'block';
+        this.updateLogoUploadProgress(10, 'Bestand wordt voorbereid...');
+
+        try {
+            // Create form data
+            const formData = new FormData();
+            formData.append('logo', file);
+
+            this.updateLogoUploadProgress(30, 'Uploaden...');
+
+            // Upload to server
+            const response = await fetch('/admin/api/upload-logo', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Upload failed');
+            }
+
+            const result = await response.json();
+            this.updateLogoUploadProgress(100, 'Upload voltooid!');
+
+            // Update the logo URL field
+            document.getElementById('opportunityLogo').value = result.url;
+
+            // Show preview in main form
+            const mainPreview = document.getElementById('logoPreview');
+            const mainPreviewImage = document.getElementById('logoPreviewImage');
+            if (mainPreview && mainPreviewImage) {
+                mainPreviewImage.src = result.url;
+                mainPreview.style.display = 'block';
+            }
+
+            setTimeout(() => {
+                closeModal('logoUploadModal');
+            }, 1000);
+
+        } catch (error) {
+            console.error('Logo upload error:', error);
+            this.updateLogoUploadProgress(0, 'Upload gefaald');
+            alert('Fout bij uploaden van logo');
+        }
+    }
+
+    updateLogoUploadProgress(percentage, status) {
+        const progressBar = document.getElementById('logoUploadProgressBar');
+        const statusDiv = document.getElementById('logoUploadStatus');
+
+        if (progressBar) progressBar.style.width = percentage + '%';
+        if (statusDiv) statusDiv.textContent = status;
     }
 
     // Municipality tab switching functionality

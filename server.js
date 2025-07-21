@@ -33,6 +33,37 @@ app.use(generalLimiter);
 // Middleware
 app.use(express.json({ limit: '10mb' }));
 
+// Multer voor file uploads
+const multer = require('multer');
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadsDir = path.join(__dirname, 'uploads', 'logos');
+        if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        cb(null, uploadsDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, 'logo-' + uniqueSuffix + ext);
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Alleen afbeeldingen zijn toegestaan'));
+        }
+    }
+});
+
 // Security headers
 app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -1273,6 +1304,34 @@ app.post('/admin/api/save-municipalities-for-kansenkaart', authenticateToken, as
         });
     }
 });
+
+// Logo upload endpoint
+app.post('/admin/api/upload-logo', authenticateToken, upload.single('logo'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Geen bestand geüpload' });
+        }
+
+        // Generate public URL for the uploaded file
+        const logoUrl = `/uploads/logos/${req.file.filename}`;
+        
+        console.log(`[LOGO_UPLOAD] Logo uploaded: ${req.file.filename} by ${req.user.username}`);
+        
+        res.json({
+            success: true,
+            message: 'Logo succesvol geüpload',
+            url: logoUrl,
+            filename: req.file.filename,
+            size: req.file.size
+        });
+    } catch (error) {
+        console.error('[LOGO_UPLOAD] Error:', error);
+        res.status(500).json({ error: 'Fout bij uploaden van logo' });
+    }
+});
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // One-time populate database from municipalities.json
 app.post('/admin/api/populate-municipalities-database', authenticateToken, async (req, res) => {
