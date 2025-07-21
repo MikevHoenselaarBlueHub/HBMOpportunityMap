@@ -199,31 +199,65 @@ body {
     font-weight: bold;
 }
 
-/* Tables */
+/* === Table Styles === */
 .table-container {
     overflow-x: auto;
+    margin-top: 1rem;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 th, td {
     padding: 0.75rem;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #eee;
 }
 
 th {
-    background-color: #f8f9fa;
-    font-weight: bold;
-    color: rgb(38, 123, 41);
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #333;
 }
 
 tr:hover {
-    background-color: #f8f9fa;
+    background: #f8f9fa;
+}
+
+/* === Form Styles === */
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.type-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+}
+
+.type-badge.project {
+    background-color: #8bb311;
+}
+
+.type-badge.bedrijf {
+    background-color: #164194;
+}
+
+.type-badge.unknown {
+    background-color: #666;
 }
 
 /* Forms */

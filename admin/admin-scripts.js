@@ -295,32 +295,7 @@ class AdminDashboard {
         }
     }
 
-    async loadOpportunities() {
-        try {
-            const response = await fetch("/data/opportunities.json");
-            const opportunities = await response.json();
-
-            const tableBody = document.getElementById("opportunitiesTableBody");
-            tableBody.innerHTML = "";
-
-            opportunities.forEach((opportunity) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${opportunity.Name || "N/A"}</td>
-                    <td>${opportunity.HBMType || "N/A"}</td>
-                    <td>${opportunity.Municipality || "N/A"}</td>
-                    <td>${opportunity.HBMSector || "N/A"}</td>
-                    <td class="action-buttons">
-                        <button class="action-btn edit-btn" onclick="editOpportunity('${opportunity.Name}')">Bewerken</button>
-                        <button class="action-btn delete-btn" onclick="deleteOpportunity('${opportunity.Name}')">Verwijderen</button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        } catch (error) {
-            console.error("Error loading opportunities:", error);
-        }
-    }
+    
 
     async loadFilters() {
         try {
@@ -345,18 +320,15 @@ class AdminDashboard {
 
             container.innerHTML = "";
 
-            // Add save filters button at the top
-            const saveFiltersBtn = document.createElement("div");
-            saveFiltersBtn.innerHTML = `
+            // Add filter management header
+            const filterHeader = document.createElement("div");
+            filterHeader.innerHTML = `
                 <div style="margin-bottom: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px;">
                     <h3 style="margin: 0 0 10px 0; color: rgb(38, 123, 41);">Filter beheer</h3>
-                    <p style="margin: 0 0 15px 0; color: #666;">Klik op "Filters opslaan" om de huidige filterinstellingen op te slaan naar filters.json. Er wordt automatisch een backup gemaakt.</p>
-                    <button class="btn btn-primary" onclick="adminApp.saveFiltersToJson()" style="background: rgb(38, 123, 41); color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">
-                        Filters opslaan naar filters.json
-                    </button>
+                    <p style="margin: 0 0 15px 0; color: #666;">Beheer de filtercategorieën en hun items. Wijzigingen worden automatisch opgeslagen.</p>
                 </div>
             `;
-            container.appendChild(saveFiltersBtn);
+            container.appendChild(filterHeader);
 
             Object.keys(filters).forEach((category) => {
                 const section = document.createElement("div");
@@ -1370,56 +1342,378 @@ class AdminDashboard {
         return categoryDisplayNames[category] || category;
     }
 
-    async saveFiltersToJson() {
-        if (
-            !confirm(
-                "Weet je zeker dat je de huidige filters wilt opslaan naar filters.json? Er wordt automatisch een backup gemaakt van de huidige versie.",
-            )
-        ) {
-            return;
-        }
-
+    async loadOpportunities() {
         try {
-            // Get current filters from database
-            const response = await fetch("/admin/api/filters", {
+            const response = await fetch("/admin/api/opportunities", {
                 headers: {
                     Authorization: `Bearer ${this.token}`,
                 },
             });
 
             if (!response.ok) {
-                throw new Error("Failed to load current filters");
+                throw new Error(`Failed to load opportunities: ${response.status}`);
             }
 
-            const currentFilters = await response.json();
+            const opportunities = await response.json();
 
-            // Save to filters.json with backup
-            const saveResponse = await fetch(
-                "/admin/api/filters/save-to-json",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${this.token}`,
-                    },
-                    body: JSON.stringify(currentFilters),
-                },
-            );
+            const tableBody = document.getElementById("opportunitiesTableBody");
+            if (!tableBody) return;
 
-            const result = await saveResponse.json();
+            tableBody.innerHTML = "";
 
-            if (saveResponse.ok) {
-                alert(
-                    "Filters succesvol opgeslagen naar filters.json! Er is automatisch een backup gemaakt.",
-                );
+            // Add search functionality
+            this.renderOpportunitySearch();
+
+            // Store all opportunities for filtering
+            this.allOpportunities = opportunities;
+            this.filteredOpportunities = opportunities;
+
+            this.renderOpportunities(opportunities);
+        } catch (error) {
+            console.error("Error loading opportunities:", error);
+            alert("Fout bij het laden van kansen");
+        }
+    }
+
+    renderOpportunitySearch() {
+        const searchContainer = document.getElementById("opportunitySearchContainer");
+        if (!searchContainer) {
+            // Add search container if it doesn't exist
+            const section = document.getElementById("opportunities-section");
+            const sectionHeader = section.querySelector(".section-header");
+            
+            const searchDiv = document.createElement("div");
+            searchDiv.id = "opportunitySearchContainer";
+            searchDiv.innerHTML = `
+                <div style="margin: 1rem 0; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="opportunitySearch" placeholder="Zoek op naam, type, gemeente..." 
+                           style="flex: 1; min-width: 250px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                    <select id="opportunityTypeFilter" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">Alle types</option>
+                        <option value="Project">Project</option>
+                        <option value="Bedrijf">Bedrijf</option>
+                    </select>
+                    <button onclick="adminApp.clearOpportunityFilters()" class="btn btn-secondary">Wissen</button>
+                </div>
+            `;
+            
+            sectionHeader.parentNode.insertBefore(searchDiv, sectionHeader.nextSibling);
+
+            // Add event listeners
+            document.getElementById("opportunitySearch").addEventListener("input", (e) => {
+                this.filterOpportunities();
+            });
+
+            document.getElementById("opportunityTypeFilter").addEventListener("change", (e) => {
+                this.filterOpportunities();
+            });
+        }
+    }
+
+    filterOpportunities() {
+        const searchTerm = document.getElementById("opportunitySearch").value.toLowerCase();
+        const typeFilter = document.getElementById("opportunityTypeFilter").value;
+
+        let filtered = this.allOpportunities.filter(opp => {
+            const matchesSearch = !searchTerm || 
+                (opp.Name && opp.Name.toLowerCase().includes(searchTerm)) ||
+                (opp.Municipality && opp.Municipality.toLowerCase().includes(searchTerm)) ||
+                (opp.HBMSector && opp.HBMSector.toLowerCase().includes(searchTerm)) ||
+                (opp.OrganizationType && opp.OrganizationType.toLowerCase().includes(searchTerm));
+
+            const matchesType = !typeFilter || opp.HBMType === typeFilter;
+
+            return matchesSearch && matchesType;
+        });
+
+        this.filteredOpportunities = filtered;
+        this.renderOpportunities(filtered);
+    }
+
+    clearOpportunityFilters() {
+        document.getElementById("opportunitySearch").value = "";
+        document.getElementById("opportunityTypeFilter").value = "";
+        this.filteredOpportunities = this.allOpportunities;
+        this.renderOpportunities(this.allOpportunities);
+    }
+
+    renderOpportunities(opportunities) {
+        const tableBody = document.getElementById("opportunitiesTableBody");
+        tableBody.innerHTML = "";
+
+        if (opportunities.length === 0) {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td colspan="5" style="text-align: center; padding: 2rem; color: #666;">
+                    Geen kansen gevonden
+                </td>
+            `;
+            tableBody.appendChild(row);
+            return;
+        }
+
+        opportunities.forEach((opportunity) => {
+            const row = document.createElement("tr");
+            
+            const canEdit = this.userRole === "admin" || this.userRole === "editor";
+            const canDelete = this.userRole === "admin" || this.userRole === "editor";
+
+            row.innerHTML = `
+                <td>
+                    <div>
+                        <strong>${opportunity.Name || "Onbekend"}</strong>
+                        ${opportunity.Municipality ? `<br><small style="color: #666;">${opportunity.Municipality}</small>` : ""}
+                    </div>
+                </td>
+                <td>
+                    <span class="type-badge ${opportunity.HBMType?.toLowerCase() || "unknown"}">
+                        ${opportunity.HBMType || "Onbekend"}
+                    </span>
+                </td>
+                <td>${opportunity.Municipality || "Onbekend"}</td>
+                <td>${opportunity.HBMSector || "Onbekend"}</td>
+                <td class="action-buttons">
+                    ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openOpportunityModal('${opportunity.Name}')" title="Bewerken">✏️</button>` : ""}
+                    ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteOpportunity('${opportunity.Name}')">Verwijderen</button>` : ""}
+                    ${!canEdit && !canDelete ? '<span style="color: #999;">Geen acties beschikbaar</span>' : ""}
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        // Update results count
+        const resultsInfo = document.getElementById("opportunityResultsInfo");
+        if (!resultsInfo) {
+            const searchContainer = document.getElementById("opportunitySearchContainer");
+            const infoDiv = document.createElement("div");
+            infoDiv.id = "opportunityResultsInfo";
+            infoDiv.style.cssText = "margin-bottom: 1rem; color: #666; font-size: 0.9rem;";
+            searchContainer.appendChild(infoDiv);
+        }
+        
+        document.getElementById("opportunityResultsInfo").textContent = 
+            `${opportunities.length} van ${this.allOpportunities.length} kansen`;
+    }
+
+    openOpportunityModal(opportunityName = null) {
+        const isEdit = opportunityName !== null;
+
+        const modalHTML = `
+            <div id="opportunityModal" class="modal-overlay">
+                <div class="modal-content" style="max-width: 600px; max-height: 90vh; overflow-y: auto;">
+                    <div class="modal-header">
+                        <h3>${isEdit ? "Kans bewerken" : "Nieuwe kans toevoegen"}</h3>
+                        <button class="modal-close" onclick="closeModal('opportunityModal')">×</button>
+                    </div>
+                    <form id="opportunityForm" class="modal-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="opportunityName">Naam *</label>
+                                <input type="text" id="opportunityName" name="Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="opportunityType">Type *</label>
+                                <select id="opportunityType" name="HBMType" required>
+                                    <option value="">Selecteer type</option>
+                                    <option value="Project">Project</option>
+                                    <option value="Bedrijf">Bedrijf</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="opportunityMunicipality">Gemeente</label>
+                                <input type="text" id="opportunityMunicipality" name="Municipality">
+                            </div>
+                            <div class="form-group">
+                                <label for="opportunitySector">Sector</label>
+                                <input type="text" id="opportunitySector" name="HBMSector">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="opportunityOrgType">Organisatietype</label>
+                                <input type="text" id="opportunityOrgType" name="OrganizationType">
+                            </div>
+                            <div class="form-group">
+                                <label for="opportunityOrgField">Vakgebied</label>
+                                <input type="text" id="opportunityOrgField" name="OrganizationField">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="opportunityDescription">Beschrijving</label>
+                            <textarea id="opportunityDescription" name="Description" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="opportunityLat">Latitude</label>
+                                <input type="number" id="opportunityLat" name="Latitude" step="any">
+                            </div>
+                            <div class="form-group">
+                                <label for="opportunityLng">Longitude</label>
+                                <input type="number" id="opportunityLng" name="Longitude" step="any">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="opportunityLogo">Logo URL</label>
+                            <input type="url" id="opportunityLogo" name="Logo">
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('opportunityModal')">Annuleren</button>
+                            <button type="submit" class="btn btn-primary">${isEdit ? "Opslaan" : "Toevoegen"}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+        const form = document.getElementById("opportunityForm");
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            if (isEdit) {
+                this.updateOpportunity(opportunityName);
             } else {
-                alert(
-                    `Fout bij opslaan: ${result.message || result.error || "Onbekende fout"}`,
-                );
+                this.createOpportunity();
+            }
+        });
+
+        if (isEdit) {
+            this.loadOpportunityData(opportunityName);
+        }
+    }
+
+    async loadOpportunityData(opportunityName) {
+        try {
+            const opportunity = this.allOpportunities.find(o => o.Name === opportunityName);
+
+            if (opportunity) {
+                document.getElementById("opportunityName").value = opportunity.Name || "";
+                document.getElementById("opportunityType").value = opportunity.HBMType || "";
+                document.getElementById("opportunityMunicipality").value = opportunity.Municipality || "";
+                document.getElementById("opportunitySector").value = opportunity.HBMSector || "";
+                document.getElementById("opportunityOrgType").value = opportunity.OrganizationType || "";
+                document.getElementById("opportunityOrgField").value = opportunity.OrganizationField || "";
+                document.getElementById("opportunityDescription").value = opportunity.Description || "";
+                document.getElementById("opportunityLat").value = opportunity.Latitude || "";
+                document.getElementById("opportunityLng").value = opportunity.Longitude || "";
+                document.getElementById("opportunityLogo").value = opportunity.Logo || "";
             }
         } catch (error) {
-            console.error("Error saving filters to JSON:", error);
-            alert("Fout bij opslaan van filters naar JSON bestand");
+            console.error("Error loading opportunity data:", error);
+            alert("Fout bij het laden van kans gegevens");
+        }
+    }
+
+    async createOpportunity() {
+        const formData = new FormData(document.getElementById("opportunityForm"));
+        const opportunityData = {};
+        
+        for (let [key, value] of formData.entries()) {
+            if (value.trim()) {
+                if (key === "Latitude" || key === "Longitude") {
+                    opportunityData[key] = parseFloat(value);
+                } else {
+                    opportunityData[key] = value;
+                }
+            }
+        }
+
+        try {
+            const response = await fetch("/admin/api/opportunities", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.token}`,
+                },
+                body: JSON.stringify(opportunityData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                closeModal("opportunityModal");
+                this.loadOpportunities();
+                alert("Kans succesvol toegevoegd!");
+            } else {
+                alert(`Fout: ${result.error || "Onbekende fout"}`);
+            }
+        } catch (error) {
+            console.error("Error creating opportunity:", error);
+            alert("Fout bij het toevoegen van kans");
+        }
+    }
+
+    async updateOpportunity(originalName) {
+        const formData = new FormData(document.getElementById("opportunityForm"));
+        const opportunityData = {};
+        
+        for (let [key, value] of formData.entries()) {
+            if (value.trim()) {
+                if (key === "Latitude" || key === "Longitude") {
+                    opportunityData[key] = parseFloat(value);
+                } else {
+                    opportunityData[key] = value;
+                }
+            }
+        }
+
+        try {
+            const response = await fetch(`/admin/api/opportunities/${encodeURIComponent(originalName)}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.token}`,
+                },
+                body: JSON.stringify(opportunityData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                closeModal("opportunityModal");
+                this.loadOpportunities();
+                alert("Kans succesvol bijgewerkt!");
+            } else {
+                alert(`Fout: ${result.error || "Onbekende fout"}`);
+            }
+        } catch (error) {
+            console.error("Error updating opportunity:", error);
+            alert("Fout bij het bijwerken van kans");
+        }
+    }
+
+    async deleteOpportunity(opportunityName) {
+        if (!confirm(`Weet je zeker dat je "${opportunityName}" wilt verwijderen?`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/admin/api/opportunities/${encodeURIComponent(opportunityName)}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${this.token}`,
+                },
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                this.loadOpportunities();
+                alert("Kans succesvol verwijderd!");
+            } else {
+                alert(`Fout: ${result.error || "Onbekende fout"}`);
+            }
+        } catch (error) {
+            console.error("Error deleting opportunity:", error);
+            alert("Fout bij het verwijderen van kans");
         }
     }
 
@@ -1778,7 +2072,7 @@ async function deleteUser(userId) {
 
 // Modal functions
 function openAddOpportunityModal() {
-    alert("Toevoegen van nieuwe kansen - implementatie volgt");
+    window.adminDashboard.openOpportunityModal();
 }
 
 function openAddFilterModal() {
@@ -1787,16 +2081,6 @@ function openAddFilterModal() {
 
 function openAddMunicipalityModal() {
     window.adminDashboard.openMunicipalityModal();
-}
-
-function editOpportunity(name) {
-    alert(`Bewerken van kans: ${name} - implementatie volgt`);
-}
-
-function deleteOpportunity(name) {
-    if (confirm(`Weet je zeker dat je "${name}" wilt verwijderen?`)) {
-        alert(`Verwijderen van kans: ${name} - implementatie volgt`);
-    }
 }
 
 function editMunicipality(name) {

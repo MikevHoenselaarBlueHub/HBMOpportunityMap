@@ -269,52 +269,153 @@ app.delete("/admin/api/users/:id", authenticateToken, (req, res) => {
 });
 
 app.get("/admin/api/opportunities", authenticateToken, (req, res) => {
+    console.log(`[OPPORTUNITIES] Loading opportunities requested by: ${req.user.username}`);
     try {
-        const data = JSON.parse(fs.readFileSync(path.join(__dirname, "data/opportunities.json"), "utf8"));
+        const dataPath = path.join(__dirname, "data/opportunities.json");
+        if (!fs.existsSync(dataPath)) {
+            console.error(`[OPPORTUNITIES] File not found: ${dataPath}`);
+            return res.status(404).json({ error: "Opportunities data file not found" });
+        }
+
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+        console.log(`[OPPORTUNITIES] Successfully loaded ${data.length} opportunities`);
         res.json(data);
     } catch (error) {
-        res.status(500).json({ error: "Fout bij het laden van data" });
+        console.error(`[OPPORTUNITIES] Error loading opportunities:`, error);
+        res.status(500).json({ error: "Fout bij het laden van kansen" });
     }
 });
 
 app.post("/admin/api/opportunities", authenticateToken, (req, res) => {
+    console.log(`[CREATE_OPPORTUNITY] Creating opportunity by: ${req.user.username}`);
+    console.log(`[CREATE_OPPORTUNITY] Data:`, req.body);
+
     try {
-        const data = JSON.parse(fs.readFileSync(path.join(__dirname, "data/opportunities.json"), "utf8"));
+        const dataPath = path.join(__dirname, "data/opportunities.json");
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+        
+        // Validation
+        if (!req.body.Name || !req.body.HBMType) {
+            return res.status(400).json({ error: "Naam en type zijn verplichte velden" });
+        }
+
+        // Check if name already exists
+        const existingOpportunity = data.find(item => item.Name === req.body.Name);
+        if (existingOpportunity) {
+            return res.status(400).json({ error: "Een kans met deze naam bestaat al" });
+        }
+
         const newOpportunity = {
             ...req.body,
-            id: Date.now().toString(),
+            // Ensure proper data types
+            Latitude: req.body.Latitude ? parseFloat(req.body.Latitude) : null,
+            Longitude: req.body.Longitude ? parseFloat(req.body.Longitude) : null,
         };
+
         data.push(newOpportunity);
-        fs.writeFileSync(path.join(__dirname, "data/opportunities.json"), JSON.stringify(data, null, 2));
+        
+        // Create backup
+        const backupDir = path.join(__dirname, 'backup');
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+        }
+        
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupPath = path.join(backupDir, `opportunities-${timestamp}.json`);
+        fs.copyFileSync(dataPath, backupPath);
+
+        fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+        
+        console.log(`[CREATE_OPPORTUNITY] Successfully created opportunity: ${newOpportunity.Name}`);
         res.status(201).json(newOpportunity);
     } catch (error) {
-        res.status(500).json({ error: "Fout bij het opslaan van data" });
+        console.error(`[CREATE_OPPORTUNITY] Error:`, error);
+        res.status(500).json({ error: "Fout bij het toevoegen van kans" });
     }
 });
 
-app.put("/admin/api/opportunities/:id", authenticateToken, (req, res) => {
+app.put("/admin/api/opportunities/:name", authenticateToken, (req, res) => {
+    const opportunityName = decodeURIComponent(req.params.name);
+    console.log(`[UPDATE_OPPORTUNITY] Updating opportunity ${opportunityName} by: ${req.user.username}`);
+
     try {
-        const data = JSON.parse(fs.readFileSync(path.join(__dirname, "data/opportunities.json"), "utf8"));
-        const index = data.findIndex((item) => item.Name === req.params.id);
+        const dataPath = path.join(__dirname, "data/opportunities.json");
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+        
+        const index = data.findIndex((item) => item.Name === opportunityName);
         if (index === -1) {
-            return res.status(404).json({ error: "Item niet gevonden" });
+            return res.status(404).json({ error: "Kans niet gevonden" });
         }
-        data[index] = { ...data[index], ...req.body };
-        fs.writeFileSync(path.join(__dirname, "data/opportunities.json"), JSON.stringify(data, null, 2));
+
+        // Check if new name conflicts with existing (if name changed)
+        if (req.body.Name && req.body.Name !== opportunityName) {
+            const existingOpportunity = data.find(item => item.Name === req.body.Name);
+            if (existingOpportunity) {
+                return res.status(400).json({ error: "Een kans met deze naam bestaat al" });
+            }
+        }
+
+        // Create backup
+        const backupDir = path.join(__dirname, 'backup');
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+        }
+        
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupPath = path.join(backupDir, `opportunities-${timestamp}.json`);
+        fs.copyFileSync(dataPath, backupPath);
+
+        // Update opportunity
+        data[index] = {
+            ...data[index],
+            ...req.body,
+            // Ensure proper data types
+            Latitude: req.body.Latitude ? parseFloat(req.body.Latitude) : data[index].Latitude,
+            Longitude: req.body.Longitude ? parseFloat(req.body.Longitude) : data[index].Longitude,
+        };
+
+        fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+        
+        console.log(`[UPDATE_OPPORTUNITY] Successfully updated opportunity: ${data[index].Name}`);
         res.json(data[index]);
     } catch (error) {
-        res.status(500).json({ error: "Fout bij het bijwerken van data" });
+        console.error(`[UPDATE_OPPORTUNITY] Error:`, error);
+        res.status(500).json({ error: "Fout bij het bijwerken van kans" });
     }
 });
 
-app.delete("/admin/api/opportunities/:id", authenticateToken, (req, res) => {
+app.delete("/admin/api/opportunities/:name", authenticateToken, (req, res) => {
+    const opportunityName = decodeURIComponent(req.params.name);
+    console.log(`[DELETE_OPPORTUNITY] Deleting opportunity ${opportunityName} by: ${req.user.username}`);
+
     try {
-        const data = JSON.parse(fs.readFileSync(path.join(__dirname, "data/opportunities.json"), "utf8"));
-        const filteredData = data.filter((item) => item.Name !== req.params.id);
-        fs.writeFileSync(path.join(__dirname, "data/opportunities.json"), JSON.stringify(filteredData, null, 2));
-        res.json({ message: "Item verwijderd" });
+        const dataPath = path.join(__dirname, "data/opportunities.json");
+        const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+        
+        const originalLength = data.length;
+        const filteredData = data.filter((item) => item.Name !== opportunityName);
+        
+        if (filteredData.length === originalLength) {
+            return res.status(404).json({ error: "Kans niet gevonden" });
+        }
+
+        // Create backup
+        const backupDir = path.join(__dirname, 'backup');
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+        }
+        
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupPath = path.join(backupDir, `opportunities-${timestamp}.json`);
+        fs.copyFileSync(dataPath, backupPath);
+
+        fs.writeFileSync(dataPath, JSON.stringify(filteredData, null, 2));
+        
+        console.log(`[DELETE_OPPORTUNITY] Successfully deleted opportunity: ${opportunityName}`);
+        res.json({ message: "Kans succesvol verwijderd" });
     } catch (error) {
-        res.status(500).json({ error: "Fout bij het verwijderen van data" });
+        console.error(`[DELETE_OPPORTUNITY] Error:`, error);
+        res.status(500).json({ error: "Fout bij het verwijderen van kans" });
     }
 });
 
@@ -670,30 +771,7 @@ app.delete("/admin/api/filters/:category/:item", authenticateToken, (req, res) =
     }
 });
 
-// Save current filters to filters.json (simplified without backup)
-app.post('/admin/api/filters/save-to-json', authenticateToken, (req, res) => {
-    try {
-        const filtersData = req.body;
-        const filtersPath = path.join(__dirname, 'data', 'filters.json');
 
-        // Save new filters data
-        fs.writeFileSync(filtersPath, JSON.stringify(filtersData, null, 2));
-
-        console.log(`[SAVE_FILTERS] Filters saved to JSON by: ${req.user.username}`);
-
-        res.json({
-            success: true,
-            message: "Filters succesvol opgeslagen naar filters.json"
-        });
-
-    } catch (error) {
-        console.error('[SAVE_FILTERS] Error saving filters to JSON:', error);
-        res.status(500).json({
-            success: false,
-            message: "Fout bij opslaan van filters naar JSON bestand"
-        });
-    }
-});
 
 // Save selected municipalities (simplified)
 app.post('/admin/api/save-selected-municipalities', authenticateToken, (req, res) => {
