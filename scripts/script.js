@@ -1362,6 +1362,9 @@ function applyFilters() {
   const checkedProjectTypes = Array.from(
     document.querySelectorAll('input[name="ProjectType"]:checked'),
   ).map((cb) => cb.value);
+  const checkedProjectPhases = Array.from(
+    document.querySelectorAll('input[name="ProjectPhase"]:checked'),
+  ).map((cb) => cb.value);
   const checkedOrganizationTypes = Array.from(
     document.querySelectorAll('input[name="OrganizationType"]:checked'),
   ).map((cb) => cb.value);
@@ -1394,6 +1397,18 @@ function applyFilters() {
         : [item.ProjectType].filter(Boolean);
       if (
         !checkedProjectTypes.some((type) => itemProjectTypes.includes(type))
+      ) {
+        return false;
+      }
+    }
+
+    // ProjectPhase filter
+    if (checkedProjectPhases.length > 0) {
+      const itemProjectPhases = Array.isArray(item.ProjectPhase)
+        ? item.ProjectPhase
+        : [item.ProjectPhase].filter(Boolean);
+      if (
+        !checkedProjectPhases.some((type) => itemProjectPhases.includes(type))
       ) {
         return false;
       }
@@ -1814,6 +1829,7 @@ async function populateFilters(data) {
 
     // Populate filter sections
     populateFilterSection("ProjectType", filterOptions.ProjectType || []);
+    populateFilterSection("ProjectPhase", filterOptions.ProjectPhase || []);
     populateFilterSection(
       "OrganizationType",
       filterOptions.OrganizationType || [],
@@ -1869,6 +1885,18 @@ function populateFiltersFromData(data) {
     ),
   ].sort();
 
+  const phases = [
+    ...new Set(
+      data
+        .flatMap((item) =>
+          Array.isArray(item.ProjectPhase)
+            ? item.ProjectPhase
+            : [item.ProjectPhase],
+        )
+        .filter(Boolean),
+    ),
+  ].sort();
+
   const organizationFields = [
     ...new Set(
       data
@@ -1919,6 +1947,7 @@ function populateFiltersFromData(data) {
 
   // Populate filter sections
   populateFilterSection("ProjectType", projectTypes);
+  populateFilterSection("ProjectPhase", phases);
   populateFilterSection("OrganizationType", organizations);
   populateFilterSection("OrganizationField", organizationFields);
   populateFilterSection("HBMTopic", topics);
@@ -2517,13 +2546,14 @@ function createListItem(item) {
       <h3 class="card-title">${item.Name || "Onbekend"}</h3>
       <span class="card-type-badge ${item.HBMType?.toLowerCase() || "unknown"}">${item.HBMType || "Onbekend"}</span>
     </div>
+    ${item.Description ? `<p class="card-description">${item.Description}</p>` : ""}
     ${item.Logo ? `<img src="${item.Logo.startsWith("/uploads/") ? window.location.origin + item.Logo : item.Logo}" alt="Logo" class="card-logo" onerror="this.style.display='none'">` : ""}
-    ${item.ProjectImage ? `<img src="${item.ProjectImage.startsWith("/uploads/") ? window.location.origin + item.ProjectImage : item.ProjectImage}" alt="Project" class="card-image" onerror="this.style.display='none'">` : ""}
+    ${item.ProjectImage ? `<img src="${item.ProjectImage.startsWith("/uploads/") ? window.location.origin + item.ProjectImage : item.ProjectImage}" alt="" class="card-image" onerror="this.style.display='none'">` : ""}
     <div class="card-details">
       ${item.OrganizationType ? `<div class="card-detail-row"><span class="card-detail-label">Type:</span><span class="card-detail-value">${item.OrganizationType}</span></div>` : ""}
       ${item.HBMSector ? `<div class="card-detail-row"><span class="card-detail-label">Sector:</span><span class="card-detail-value">${item.HBMSector}</span></div>` : ""}
     </div>
-    ${item.Description ? `<p class="card-description">${item.Description}</p>` : ""}
+    
     <div class="card-actions">
       <button class="card-contact-btn" onclick="showDetails('${item.Name}')">Meer info</button>
     </div>
@@ -2637,10 +2667,11 @@ function openDetailPanel(item) {
         ${item.Description ? `<div class="detail-description"><h4>Beschrijving</h4><p>${item.Description}</p></div>` : ""}
 
         <div class="detail-specs">
+          ${item.HBMTopic ? `<div class="detail-row"><strong>HBM Onderwerp:</strong> ${formatArrayWithLinks(item.HBMTopic, "HBMTopic", item.HBMType)}</div>` : ""}
+          ${item.ProjectPhase ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArrayWithLinks(item.ProjectPhase, "ProjectPhase", item.HBMType)}</div>` : ""}
           ${item.ProjectType ? `<div class="detail-row"><strong>Project Type:</strong> ${formatArrayWithLinks(item.ProjectType, "ProjectType", item.HBMType)}</div>` : ""}
           ${item.OrganizationType ? `<div class="detail-row"><strong>Organisatie:</strong> ${formatSingleValueWithLink(item.OrganizationType, "OrganizationType", item.HBMType)}</div>` : ""}
-          ${item.OrganizationField ? `<div class="detail-row"><strong>Vakgebied:</strong> ${formatArrayWithLinks(item.OrganizationField, "OrganizationField", item.HBMType)}</div>` : ""}
-          ${item.HBMTopic ? `<div class="detail-row"><strong>HBM Onderwerp:</strong> ${formatArrayWithLinks(item.HBMTopic, "HBMTopic", item.HBMType)}</div>` : ""}
+          ${item.OrganizationField ? `<div class="detail-row"><strong>Vakgebied:</strong> ${formatArrayWithLinks(item.OrganizationField, "OrganizationField", item.HBMType)}</div>` : ""}          
           ${item.HBMCharacteristics ? `<div class="detail-row"><strong>Kenmerken:</strong> ${formatArrayWithLinks(item.HBMCharacteristics, "HBMCharacteristics", item.HBMType)}</div>` : ""}
           ${item.HBMSector ? `<div class="detail-row"><strong>Sector:</strong> ${formatSingleValueWithLink(item.HBMSector, "HBMSector", item.HBMType)}</div>` : ""}
           ${item.Street || item.City ? `<div class="detail-row"><strong>Adres:</strong> ${[item.Street, item.Zip, item.City].filter(Boolean).join(", ")}</div>` : ""}
@@ -2844,6 +2875,9 @@ function getCurrentFilteredData() {
   const checkedOrganizationTypes = Array.from(
     document.querySelectorAll('input[name="OrganizationType"]:checked'),
   ).map((cb) => cb.value);
+  const checkedProjectPhases = Array.from(
+    document.querySelectorAll('input[name="ProjectPhase"]:checked'),
+  ).map((cb) => cb.value);
   const checkedOrganizationFields = Array.from(
     document.querySelectorAll('input[name="OrganizationField"]:checked'),
   ).map((cb) => cb.value);
@@ -2887,6 +2921,18 @@ function getCurrentFilteredData() {
         !checkedOrganizationTypes.some((type) =>
           itemOrganizationTypes.includes(type),
         )
+      ) {
+        return false;
+      }
+    }
+
+    // ProjectPhase filter
+    if (checkedProjectPhases.length > 0) {
+      const itemProjectPhases = Array.isArray(item.ProjectPhase)
+        ? item.ProjectPhase
+        : [item.ProjectPhase].filter(Boolean);
+      if (
+        !checkedProjectPhases.some((type) => itemProjectPhases.includes(type))
       ) {
         return false;
       }
@@ -3001,6 +3047,7 @@ function updateFilterState() {
   // Get all other checked filters
   const filterSections = [
     "ProjectType",
+    "ProjectPhase",
     "OrganizationType",
     "OrganizationField",
     "HBMTopic",
@@ -3205,6 +3252,7 @@ function loadFromURL() {
   // Load other filters - mapping URL parameters to filter sections
   const filterSections = [
     { section: "ProjectType", param: "projecttype" },
+    { section: "ProjectPhase", param: "projectphase" },
     { section: "OrganizationType", param: "organizationtype" },
     { section: "OrganizationField", param: "organizationfield" },
     { section: "HBMTopic", param: "hbmtopic" },
@@ -3349,6 +3397,7 @@ function loadSavedFilter(filterName) {
   // Clear all other checkboxes first
   const filterSections = [
     "ProjectType",
+    "ProjectPhase",
     "OrganizationType",
     "OrganizationField",
     "HBMTopic",
@@ -3660,6 +3709,7 @@ function exportResultsToCSV() {
         [
           `"${item.Name || ""}"`,
           `"${Array.isArray(item.ProjectType) ? item.ProjectType.join("; ") : item.ProjectType || ""}"`,
+          `"${item.ProjectPhase || ""}"`,
           `"${item.OrganizationType || ""}"`,
           `"${Array.isArray(item.OrganizationField) ? item.OrganizationField.join("; ") : item.OrganizationField || ""}"`,
           `"${Array.isArray(item.HBMTopic) ? item.HBMTopic.join("; ") : item.HBMTopic || ""}"`,
@@ -3761,6 +3811,9 @@ function getFilteredData() {
   const checkedProjectTypes = Array.from(
     document.querySelectorAll('input[name="ProjectType"]:checked'),
   ).map((cb) => cb.value);
+  const checkedProjectPhases = Array.from(
+    document.querySelectorAll('input[name="ProjectPhase"]:checked'),
+  ).map((cb) => cb.value);
   const checkedOrganizationTypes = Array.from(
     document.querySelectorAll('input[name="OrganizationType"]:checked'),
   ).map((cb) => cb.value);
@@ -3793,6 +3846,18 @@ function getFilteredData() {
         : [item.ProjectType].filter(Boolean);
       if (
         !checkedProjectTypes.some((type) => itemProjectTypes.includes(type))
+      ) {
+        return false;
+      }
+    }
+
+    // ProjectPhase filter
+    if (checkedProjectPhases.length > 0) {
+      const itemProjectPhases = Array.isArray(item.ProjectPhase)
+        ? item.ProjectPhase
+        : [item.ProjectPhase].filter(Boolean);
+      if (
+        !checkedProjectPhases.some((type) => itemProjectPhases.includes(type))
       ) {
         return false;
       }
@@ -4325,6 +4390,7 @@ function updateCheckboxesFromFilterState() {
   // Other filters
   const filterSections = [
     "ProjectType",
+    "ProjectPhase",
     "OrganizationType",
     "OrganizationField",
     "HBMTopic",
@@ -4430,6 +4496,9 @@ function getCurrentFilteredData() {
   const checkedProjectTypes = Array.from(
     document.querySelectorAll('input[name="ProjectType"]:checked'),
   ).map((cb) => cb.value);
+  const checkedProjectPhases = Array.from(
+    document.querySelectorAll('input[name="ProjectPhase"]:checked'),
+  ).map((cb) => cb.value);
   const checkedOrganizationTypes = Array.from(
     document.querySelectorAll('input[name="OrganizationType"]:checked'),
   ).map((cb) => cb.value);
@@ -4476,6 +4545,18 @@ function getCurrentFilteredData() {
         !checkedOrganizationTypes.some((type) =>
           itemOrganizationTypes.includes(type),
         )
+      ) {
+        return false;
+      }
+    }
+
+    // ProjectPhase filter
+    if (checkedProjectPhases.length > 0) {
+      const itemProjectPhases = Array.isArray(item.ProjectPhase)
+        ? item.ProjectPhase
+        : [item.ProjectPhase].filter(Boolean);
+      if (
+        !checkedProjectPhases.some((type) => itemProjectPhases.includes(type))
       ) {
         return false;
       }
