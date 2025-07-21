@@ -375,6 +375,38 @@
                                     </button>
                                 </div>
                             </div>
+
+                            <div class="setting-item">
+                                <h3>Externe resources</h3>
+                                <p>Update externe libraries (Leaflet, MarkerCluster) naar lokale versies voor offline gebruik</p>
+                                <div class="resource-status" id="resourceStatus">
+                                    <div class="status-item">
+                                        <span>Leaflet:</span> 
+                                        <span id="leafletStatus">Checking...</span>
+                                    </div>
+                                    <div class="status-item">
+                                        <span>MarkerCluster:</span> 
+                                        <span id="markerclusterStatus">Checking...</span>
+                                    </div>
+                                </div>
+                                <div class="resource-actions">
+                                    <button
+                                        class="btn btn-primary"
+                                        onclick="checkResourceUpdates()"
+                                        id="checkResourcesBtn"
+                                    >
+                                        Check for updates
+                                    </button>
+                                    <button
+                                        class="btn btn-success"
+                                        onclick="updateResources()"
+                                        id="updateResourcesBtn"
+                                        style="display: none;"
+                                    >
+                                        Update Resources
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </section>
                 </div>

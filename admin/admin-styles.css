@@ -1249,6 +1249,33 @@ border: 1px solid #ddd;
     }
 }
 
+.resource-status {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.status-item:last-child {
+    margin-bottom: 0;
+}
+
+.resource-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.resource-actions button {
+    flex: 1;
+}
+}
+
 @media (max-width: 600px) {
     #filtersContainer {
         grid-template-columns: 1fr;

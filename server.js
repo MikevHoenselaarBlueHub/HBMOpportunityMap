@@ -808,7 +808,8 @@ app.delete("/admin/api/filters/:category/:item", authenticateToken, (req, res) =
 // Save selected municipalities (simplified)
 app.post('/admin/api/save-selected-municipalities', authenticateToken, (req, res) => {
     try {
-        const { municipalities } = req.body;
+        const { municipalities } = req.body;```text
+
         console.log(`[SAVE_SELECTED] Saving ${municipalities.length} selected municipalities`);
 
         const municipalitiesPath = path.join(__dirname, 'data', 'municipalities.json');
@@ -875,13 +876,13 @@ app.get('/api/opportunities', (req, res) => {
         }
 
         const data = JSON.parse(fs.readFileSync(dataPath, "utf8"));
-        
+
         // Filter out internal opportunities for main application
         const filteredData = data.filter(opp => {
             const hbmUse = opp.HBMUse || 'external';
             return hbmUse === 'external' || hbmUse === 'both';
         });
-        
+
         console.log(`[API] Successfully loaded ${data.length} total opportunities, ${filteredData.length} visible to public`);
 
         res.setHeader('Content-Type', 'application/json');
@@ -1314,9 +1315,9 @@ app.post('/admin/api/upload-logo', authenticateToken, upload.single('logo'), (re
 
         // Generate public URL for the uploaded file
         const logoUrl = `/uploads/logos/${req.file.filename}`;
-        
+
         console.log(`[LOGO_UPLOAD] Logo uploaded: ${req.file.filename} by ${req.user.username}`);
-        
+
         res.json({
             success: true,
             message: 'Logo succesvol geüpload',
@@ -1465,6 +1466,131 @@ app.post('/admin/api/generate-visible-geojson', authenticateToken, async (req, r
         });
     }
 });
+
+// Get user information
+app.get("/admin/api/user", authenticateToken, (req, res) => {
+    res.json({ username: req.user.username });
+});
+
+// Check for resource updates
+app.get("/admin/api/check-resources", authenticateToken, async (req, res) => {
+    try {
+        const https = require('https');
+
+        // Check current versions from package.json or hardcoded
+        const currentVersions = {
+            leaflet: "1.9.4",
+            markercluster: "1.5.3"
+        };
+
+        // Function to get latest version from npm
+        const getLatestVersion = (packageName) => {
+            return new Promise((resolve, reject) => {
+                https.get(`https://registry.npmjs.org/${packageName}/latest`, (res) => {
+                    let data = '';
+                    res.on('data', chunk => data += chunk);
+                    res.on('end', () => {
+                        try {
+                            const packageInfo = JSON.parse(data);
+                            resolve(packageInfo.version);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                }).on('error', reject);
+            });
+        };
+
+        const [leafletLatest, markerclusterLatest] = await Promise.all([
+            getLatestVersion('leaflet'),
+            getLatestVersion('leaflet.markercluster')
+        ]);
+
+        res.json({
+            leaflet: {
+                current: currentVersions.leaflet,
+                latest: leafletLatest,
+                needsUpdate: currentVersions.leaflet !== leafletLatest
+            },
+            markercluster: {
+                current: currentVersions.markercluster,
+                latest: markerclusterLatest,
+                needsUpdate: currentVersions.markercluster !== markerclusterLatest
+            }
+        });
+
+    } catch (error) {
+        console.error('Error checking resource versions:', error);
+        res.status(500).json({ error: 'Failed to check resource versions' });
+    }
+});
+
+// Update resources
+app.post("/admin/api/update-resources", authenticateToken, async (req, res) => {
+    try {
+        const https = require('https');
+        const fs = require('fs');
+        const path = require('path');
+
+        // Create lib directory if it doesn't exist
+        const libDir = path.join(__dirname, 'lib');
+        if (!fs.existsSync(libDir)) {
+            fs.mkdirSync(libDir);
+        }
+
+        // Function to download file
+        const downloadFile = (url, filepath) => {
+            return new Promise((resolve, reject) => {
+                const file = fs.createWriteStream(filepath);
+                https.get(url, (response) => {
+                    response.pipe(file);
+                    file.on('finish', () => {
+                        file.close();
+                        resolve();
+                    });
+                }).on('error', (err) => {
+                    fs.unlink(filepath, () => {}); // Delete the file async
+                    reject(err);
+                });
+            });
+        };
+
+        // Download latest Leaflet
+        await Promise.all([
+            downloadFile(
+                'https://unpkg.com/leaflet@latest/dist/leaflet.js',
+                path.join(libDir, 'leaflet.js')
+            ),
+            downloadFile(
+                'https://unpkg.com/leaflet@latest/dist/leaflet.css',
+                path.join(libDir, 'leaflet.css')
+            ),
+            downloadFile(
+                'https://unpkg.com/leaflet.markercluster@latest/dist/leaflet.markercluster.js',
+                path.join(libDir, 'leaflet.markercluster.js')
+            ),
+            downloadFile(
+                'https://unpkg.com/leaflet.markercluster@latest/dist/MarkerCluster.css',
+                path.join(libDir, 'MarkerCluster.css')
+            ),
+            downloadFile(
+                'https://unpkg.com/leaflet.markercluster@latest/dist/MarkerCluster.Default.css',
+                path.join(libDir, 'MarkerCluster.Default.css')
+            )
+        ]);
+
+        res.json({ success: true, message: 'Resources updated successfully' });
+
+    } catch (error) {
+        console.error('Error updating resources:', error);
+        res.status(500).json({ success: false, message: 'Failed to update resources: ' + error.message });
+    }
+});
+
+// Serve static files with caching
+app.use('/icons', express.static(path.join(__dirname, 'icons')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/lib', express.static(path.join(__dirname, 'lib')));
 
 // Start server - Fixed port configuration
 const PORT = 5000; // Fixed port voor consistentie  
