@@ -1500,13 +1500,23 @@ class AdminDashboard {
                 throw new Error("Alleen Excel bestanden (.xlsx, .xls) worden ondersteund");
             }
 
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                throw new Error("Bestand is te groot. Maximum grootte is 10MB.");
+            }
+
             // Update progress
-            this.updateImportProgress(5, "Bestand wordt voorbereid...");
+            this.updateImportProgress(5, "Bestand wordt gecontroleerd...");
             
             // Small delay to show progress
             await new Promise(resolve => setTimeout(resolve, 200));
             
-            this.updateImportProgress(10, "Bestand wordt gelezen...");
+            this.updateImportProgress(8, "Excel library wordt geladen...");
+            
+            // Ensure XLSX library is loaded first
+            await this.ensureXLSXLoaded();
+            
+            this.updateImportProgress(15, "Bestand wordt gelezen...");
             
             // Read file
             const data = await this.readExcelFile(file);
@@ -1549,39 +1559,92 @@ class AdminDashboard {
     // Read Excel file
     async readExcelFile(file) {
         return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    // Load SheetJS if not available
-                    if (typeof XLSX === 'undefined') {
-                        console.log("Loading XLSX library...");
-                        const script = document.createElement('script');
-                        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-                        script.onload = () => {
-                            console.log("XLSX library loaded successfully");
-                            setTimeout(() => {
-                                this.parseExcelData(e.target.result, resolve, reject);
-                            }, 100);
-                        };
-                        script.onerror = () => {
-                            console.error("Failed to load XLSX library");
-                            reject(new Error("Fout bij laden van Excel library"));
-                        };
-                        document.head.appendChild(script);
-                    } else {
-                        console.log("XLSX library already available");
+            // First ensure XLSX library is loaded
+            this.ensureXLSXLoaded().then(() => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        console.log("File read, parsing Excel data...");
                         this.parseExcelData(e.target.result, resolve, reject);
+                    } catch (error) {
+                        console.error("Error in readExcelFile:", error);
+                        reject(error);
                     }
-                } catch (error) {
-                    console.error("Error in readExcelFile:", error);
-                    reject(error);
+                };
+                reader.onerror = () => {
+                    console.error("FileReader error");
+                    reject(new Error("Fout bij lezen van bestand"));
+                };
+                reader.readAsArrayBuffer(file);
+            }).catch((error) => {
+                console.error("Failed to load XLSX library:", error);
+                reject(new Error("Fout bij laden van Excel library. Controleer je internetverbinding en probeer opnieuw."));
+            });
+        });
+    }
+
+    // Ensure XLSX library is loaded
+    ensureXLSXLoaded() {
+        return new Promise((resolve, reject) => {
+            if (typeof XLSX !== 'undefined') {
+                console.log("XLSX library already available");
+                resolve();
+                return;
+            }
+
+            console.log("Loading XLSX library...");
+            
+            // Try multiple CDN sources for better reliability
+            const cdnUrls = [
+                'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+                'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+                'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
+            ];
+
+            let currentIndex = 0;
+
+            const tryLoadScript = () => {
+                if (currentIndex >= cdnUrls.length) {
+                    reject(new Error("Alle Excel library bronnen gefaald"));
+                    return;
                 }
+
+                const script = document.createElement('script');
+                script.src = cdnUrls[currentIndex];
+                
+                script.onload = () => {
+                    console.log(`XLSX library loaded successfully from: ${cdnUrls[currentIndex]}`);
+                    // Add small delay to ensure library is fully initialized
+                    setTimeout(() => {
+                        if (typeof XLSX !== 'undefined') {
+                            console.log("XLSX version:", XLSX.version);
+                            resolve();
+                        } else {
+                            console.error("XLSX still undefined after script load");
+                            currentIndex++;
+                            tryLoadScript();
+                        }
+                    }, 200);
+                };
+                
+                script.onerror = () => {
+                    console.error(`Failed to load XLSX from: ${cdnUrls[currentIndex]}`);
+                    currentIndex++;
+                    tryLoadScript();
+                };
+
+                // Set timeout for script loading
+                setTimeout(() => {
+                    if (typeof XLSX === 'undefined') {
+                        console.error(`Timeout loading XLSX from: ${cdnUrls[currentIndex]}`);
+                        script.onerror();
+                    }
+                }, 10000);
+
+                document.head.appendChild(script);
             };
-            reader.onerror = () => {
-                console.error("FileReader error");
-                reject(new Error("Fout bij lezen van bestand"));
-            };
-            reader.readAsArrayBuffer(file);
+
+            tryLoadScript();
         });
     }
 
@@ -1591,16 +1654,30 @@ class AdminDashboard {
             console.log("Starting Excel parsing...");
             
             if (typeof XLSX === 'undefined') {
-                reject(new Error("XLSX library is not loaded"));
+                reject(new Error("XLSX library is niet beschikbaar. Herlaad de pagina en probeer opnieuw."));
                 return;
             }
 
             console.log("Reading workbook...");
-            const workbook = XLSX.read(data, { type: 'array' });
+            
+            // Try different read options for better compatibility
+            let workbook;
+            try {
+                workbook = XLSX.read(data, { type: 'array', cellDates: true, cellNF: false, cellText: false });
+            } catch (firstError) {
+                console.log("First read attempt failed, trying alternative method...");
+                try {
+                    workbook = XLSX.read(data, { type: 'buffer', cellDates: true });
+                } catch (secondError) {
+                    console.log("Second read attempt failed, trying basic method...");
+                    workbook = XLSX.read(data, { type: 'array' });
+                }
+            }
+            
             console.log("Workbook sheets:", workbook.SheetNames);
             
             if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
-                reject(new Error("Geen werkbladen gevonden in het Excel bestand"));
+                reject(new Error("Geen werkbladen gevonden in het Excel bestand. Controleer of het bestand geldig is."));
                 return;
             }
 
@@ -1608,19 +1685,32 @@ class AdminDashboard {
             console.log("Using sheet:", firstSheetName);
             
             const worksheet = workbook.Sheets[firstSheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-            console.log("Raw data rows:", jsonData.length);
             
-            if (jsonData.length < 2) {
-                reject(new Error("Excel bestand bevat geen data rows"));
+            if (!worksheet) {
+                reject(new Error("Werkblad kon niet worden gelezen. Controleer of het Excel bestand geldig is."));
                 return;
             }
 
-            // Log first few rows for debugging
+            // Convert to JSON with more options for better data handling
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+                header: 1, 
+                defval: "",
+                blankrows: false,
+                raw: false
+            });
+            
+            console.log("Raw data rows:", jsonData.length);
+            
+            if (jsonData.length < 2) {
+                reject(new Error("Excel bestand bevat geen data. Controleer of er data in het bestand staat."));
+                return;
+            }
+
+            // Log first few rows for debugging (but limit to avoid console spam)
             console.log("First 3 rows:", jsonData.slice(0, 3));
             
             // Skip header row and filter for approved records
-            const dataRows = jsonData.slice(1);
+            const dataRows = jsonData.slice(1).filter(row => row.some(cell => cell !== null && cell !== ""));
             const approvedRecords = dataRows.filter(row => {
                 const status = row[0] ? row[0].toString().toLowerCase().trim() : '';
                 return status === 'approved';
@@ -1629,14 +1719,22 @@ class AdminDashboard {
             console.log(`Found ${approvedRecords.length} approved records out of ${dataRows.length} total rows`);
             
             if (approvedRecords.length === 0) {
-                reject(new Error("Geen records met status 'Approved' gevonden in het bestand"));
+                reject(new Error("Geen records met status 'Approved' gevonden in het bestand. Controleer of de eerste kolom 'Approved' bevat."));
                 return;
             }
             
             resolve(approvedRecords);
         } catch (error) {
             console.error("Excel parsing error:", error);
-            reject(new Error("Fout bij verwerken van Excel data: " + error.message));
+            
+            // More specific error messages
+            if (error.message.includes("corrupted")) {
+                reject(new Error("Excel bestand is beschadigd. Probeer het bestand opnieuw op te slaan."));
+            } else if (error.message.includes("format")) {
+                reject(new Error("Excel bestand formaat wordt niet ondersteund. Gebruik .xlsx of .xls bestand."));
+            } else {
+                reject(new Error("Fout bij verwerken van Excel data: " + error.message + ". Controleer of het bestand geldig is."));
+            }
         }
     }
 
