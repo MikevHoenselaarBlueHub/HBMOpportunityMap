@@ -2053,17 +2053,34 @@ button {
   position: absolute;
   background: rgba(0, 0, 0, 0.8);
   color: white;
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 12px;
   pointer-events: none;
   z-index: 1000;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   max-width: 200px;
-  text-overflow: ellipsis;
   overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Image marker styling */
+.image-marker {
+  cursor: pointer;
+}
+
+.image-marker-container {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.image-marker-container:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.image-marker-image {
+  border-radius: 50%;
 }
 
 /* === Reset Confirmation Popup === */
