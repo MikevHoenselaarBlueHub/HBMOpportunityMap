@@ -446,10 +446,21 @@ tr:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .edit-btn:hover {
     background-color: #1976D2;
+}
+
+.edit-btn::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    background-image: url('../icons/edit.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: brightness(0) invert(1);
 }
 
 .delete-btn {
@@ -1223,10 +1234,26 @@ tr:hover {
     background-color: rgb(38, 123, 41);
     color: white;
     font-size: 0.9rem;
+    position: relative;
+    padding-left: 24px;
 }
 
 .action-btn.filter-btn:hover {
     background-color: rgb(28, 103, 31);
+}
+
+.action-btn.filter-btn::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background-image: url('../icons/filter-setting.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: brightness(0) invert(1);
 }
 
 .filter-categories {
