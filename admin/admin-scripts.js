@@ -486,7 +486,7 @@ class AdminDashboard {
                     <td>${municipality.area || ""}</td>
                     <td>${visibilityStatus}</td>
                     <td>
-                        ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openMunicipalityModal('${municipality.name}')" title="Bewerken"><img src="icons/edit.svg" alt="Bewerken" style="width: 14px; height: 14px;" /></button>` : ""}
+                        ${canEdit ? `<button class="action-btn edit-btn" onclick="adminApp.openMunicipalityModal('${municipality.name}')" title="Bewerken"></button>` : ""}
                         ${canDelete ? `<button class="action-btn delete-btn" onclick="adminApp.deleteMunicipality('${municipality.name}')">Verwijderen</button>` : ""}
                         ${!canEdit && !canDelete ? '<span style="color: #999;">Geen acties beschikbaar</span>' : ""}
                     </td>
@@ -2528,14 +2528,8 @@ class AdminDashboard {
                 <td>${this.formatArrayValue(opportunity.HBMSector)}</td>
                 <td>${this.formatArrayValue(opportunity.OrganizationType)}</td>
                 <td>
-                    <button class="action-btn edit-btn" onclick="adminApp.openOpportunityModal('${this.escapeHtml(opportunity.Name)}')" title="Bewerken">
-                        <img src="icons/edit.svg" alt="Bewerken" style="width: 16px; height: 16px;" />
-                        Bewerken
-                    </button>
-                    <button class="action-btn filter-btn" onclick="adminApp.openFilterSelectionModal('${this.escapeHtml(opportunity.Name)}')" title="Filters">
-                        <img src="icons/filter-setting.svg" alt="Filters" style="width: 16px; height: 16px;" />
-                        Filters
-                    </button>
+                    <button class="action-btn edit-btn" onclick="adminApp.openOpportunityModal('${this.escapeHtml(opportunity.Name)}')" title="Bewerken"></button>
+                    <button class="action-btn filter-btn" onclick="adminApp.openFilterSelectionModal('${this.escapeHtml(opportunity.Name)}')" title="Filters"></button>
                     <button onclick="adminApp.deleteOpportunity('${this.escapeHtml(opportunity.Name)}')" class="btn btn-danger btn-sm">Verwijderen</button>
                 </td>
             `;
@@ -3316,98 +3310,103 @@ class AdminDashboard {
         document.body.insertAdjacentHTML("beforeend", modalHTML);
 
         // Add file change listener for preview
-        document.getElementById('logoUploadFile').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const preview = document.getElementById('logoUploadPreview');
-                    const previewImage = document.getElementById('logoUploadPreviewImage');
-                    previewImage.src = e.target.result;
-                    preview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+        document
+            .getElementById("logoUploadFile")
+            .addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const preview =
+                            document.getElementById("logoUploadPreview");
+                        const previewImage = document.getElementById(
+                            "logoUploadPreviewImage",
+                        );
+                        previewImage.src = e.target.result;
+                        preview.style.display = "block";
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
     }
 
     async uploadLogo() {
-        const fileInput = document.getElementById('logoUploadFile');
+        const fileInput = document.getElementById("logoUploadFile");
         const file = fileInput.files[0];
 
         if (!file) {
-            alert('Selecteer eerst een bestand');
+            alert("Selecteer eerst een bestand");
             return;
         }
 
         // Validate file
         if (file.size > 5 * 1024 * 1024) {
-            alert('Bestand is te groot. Maximum grootte is 5MB.');
+            alert("Bestand is te groot. Maximum grootte is 5MB.");
             return;
         }
 
-        if (!file.type.startsWith('image/')) {
-            alert('Alleen afbeeldingen zijn toegestaan.');
+        if (!file.type.startsWith("image/")) {
+            alert("Alleen afbeeldingen zijn toegestaan.");
             return;
         }
 
-        const progressContainer = document.getElementById('logoUploadProgress');
-        const progressBar = document.getElementById('logoUploadProgressBar');
-        const statusDiv = document.getElementById('logoUploadStatus');
+        const progressContainer = document.getElementById("logoUploadProgress");
+        const progressBar = document.getElementById("logoUploadProgressBar");
+        const statusDiv = document.getElementById("logoUploadStatus");
 
-        progressContainer.style.display = 'block';
-        this.updateLogoUploadProgress(10, 'Bestand wordt voorbereid...');
+        progressContainer.style.display = "block";
+        this.updateLogoUploadProgress(10, "Bestand wordt voorbereid...");
 
         try {
             // Create form data
             const formData = new FormData();
-            formData.append('logo', file);
+            formData.append("logo", file);
 
-            this.updateLogoUploadProgress(30, 'Uploaden...');
+            this.updateLogoUploadProgress(30, "Uploaden...");
 
             // Upload to server
-            const response = await fetch('/admin/api/upload-logo', {
-                method: 'POST',
+            const response = await fetch("/admin/api/upload-logo", {
+                method: "POST",
                 headers: {
-                    'Authorization': `Bearer ${this.token}`
+                    Authorization: `Bearer ${this.token}`,
                 },
-                body: formData
+                body: formData,
             });
 
             if (!response.ok) {
-                throw new Error('Upload failed');
+                throw new Error("Upload failed");
             }
 
             const result = await response.json();
-            this.updateLogoUploadProgress(100, 'Upload voltooid!');
+            this.updateLogoUploadProgress(100, "Upload voltooid!");
 
             // Update the logo URL field
-            document.getElementById('opportunityLogo').value = result.url;
+            document.getElementById("opportunityLogo").value = result.url;
 
             // Show preview in main form
-            const mainPreview = document.getElementById('logoPreview');
-            const mainPreviewImage = document.getElementById('logoPreviewImage');
+            const mainPreview = document.getElementById("logoPreview");
+            const mainPreviewImage =
+                document.getElementById("logoPreviewImage");
             if (mainPreview && mainPreviewImage) {
                 mainPreviewImage.src = result.url;
-                mainPreview.style.display = 'block';
+                mainPreview.style.display = "block";
             }
 
             setTimeout(() => {
-                closeModal('logoUploadModal');
+                closeModal("logoUploadModal");
             }, 1000);
-
         } catch (error) {
-            console.error('Logo upload error:', error);
-            this.updateLogoUploadProgress(0, 'Upload gefaald');
-            alert('Fout bij uploaden van logo');
+            console.error("Logo upload error:", error);
+            this.updateLogoUploadProgress(0, "Upload gefaald");
+            alert("Fout bij uploaden van logo");
         }
     }
 
     updateLogoUploadProgress(percentage, status) {
-        const progressBar = document.getElementById('logoUploadProgressBar');
-        const statusDiv = document.getElementById('logoUploadStatus');
+        const progressBar = document.getElementById("logoUploadProgressBar");
+        const statusDiv = document.getElementById("logoUploadStatus");
 
-        if (progressBar) progressBar.style.width = percentage + '%';
+        if (progressBar) progressBar.style.width = percentage + "%";
         if (statusDiv) statusDiv.textContent = status;
     }
 
