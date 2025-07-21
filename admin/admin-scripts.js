@@ -2641,13 +2641,14 @@ class AdminDashboard {
                             <label for="opportunityLogo">Logo</label>
                             <div style="display: flex; gap: 0.5rem; align-items: end;">
                                 <div style="flex: 1;">
-                                    <input type="url" id="opportunityLogo" name="Logo" placeholder="Logo URL">
+                                    <input type="url" id="opportunityLogo" name="Logo" placeholder="Logo URL of upload een bestand">
                                 </div>
-                                <button type="button" class="btn btn-secondary" onclick="adminApp.openLogoUploadModal()" style="white-space: nowrap;">Upload Logo</button>
+                                <button type="button" class="btn btn-secondary" onclick="adminApp.openLogoUploadModal()" style="white-space: nowrap;">Logo toevoegen</button>
                             </div>
                             <div id="logoPreview" style="margin-top: 0.5rem; display: none;">
                                 <img id="logoPreviewImage" style="max-width: 150px; max-height: 75px; border: 1px solid #ddd; border-radius: 4px;" />
                             </div>
+                            <small style="color: #666; font-size: 0.8rem;">Je kunt een URL invoeren of een bestand uploaden via de "Logo toevoegen" knop</small>
                         </div>
 
                         <div class="modal-actions">
@@ -2671,11 +2672,38 @@ class AdminDashboard {
             }
         });
 
+        // Add logo URL input listener for preview
+        setTimeout(() => {
+            const logoInput = document.getElementById("opportunityLogo");
+            if (logoInput) {
+                logoInput.addEventListener('input', (e) => {
+                    this.updateLogoPreview(e.target.value);
+                });
+            }
+        }, 100);
+
         if (isEdit) {
             this.loadOpportunityData(opportunityName);
         } else {
             // Load municipality dropdown for new opportunities
             this.loadMunicipalityDropdown();
+        }
+    }
+
+    updateLogoPreview(url) {
+        const preview = document.getElementById("logoPreview");
+        const previewImage = document.getElementById("logoPreviewImage");
+        
+        if (url && this.isValidImageUrl(url)) {
+            previewImage.src = url;
+            previewImage.onload = () => {
+                preview.style.display = "block";
+            };
+            previewImage.onerror = () => {
+                preview.style.display = "none";
+            };
+        } else {
+            preview.style.display = "none";
         }
     }
 
@@ -2702,8 +2730,13 @@ class AdminDashboard {
                     opportunity.Latitude || "";
                 document.getElementById("opportunityLng").value =
                     opportunity.Longitude || "";
-                document.getElementById("opportunityLogo").value =
-                    opportunity.Logo || "";
+                const logoUrl = opportunity.Logo || "";
+                document.getElementById("opportunityLogo").value = logoUrl;
+                
+                // Show logo preview if URL exists
+                if (logoUrl) {
+                    this.updateLogoPreview(logoUrl);
+                }
             }
         } catch (error) {
             console.error("Error loading opportunity data:", error);
@@ -3280,28 +3313,55 @@ class AdminDashboard {
             <div id="logoUploadModal" class="modal-overlay">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>Logo uploaden</h3>
+                        <h3>Logo toevoegen</h3>
                         <button class="modal-close" onclick="closeModal('logoUploadModal')">×</button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="logoUploadFile">Selecteer logo bestand</label>
-                            <input type="file" id="logoUploadFile" accept="image/*" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                            <small style="color: #666; font-size: 0.8rem;">Ondersteunde formaten: JPG, PNG, SVG, GIF (max 5MB)</small>
-                        </div>
-                        <div id="logoUploadPreview" style="margin-top: 1rem; display: none;">
-                            <img id="logoUploadPreviewImage" style="max-width: 200px; max-height: 100px; border: 1px solid #ddd; border-radius: 4px;" />
-                        </div>
-                        <div id="logoUploadProgress" style="display: none; margin-top: 1rem;">
-                            <div style="background: #e9ecef; border-radius: 4px; overflow: hidden;">
-                                <div id="logoUploadProgressBar" style="height: 20px; background: #007bff; width: 0%; transition: width 0.3s;"></div>
+                            <label>Kies hoe je het logo wilt toevoegen:</label>
+                            <div class="upload-option">
+                                <label>
+                                    <input type="radio" name="logoMethod" value="url" checked>
+                                    URL invoeren
+                                </label>
+                                <label>
+                                    <input type="radio" name="logoMethod" value="upload">
+                                    Bestand uploaden
+                                </label>
                             </div>
-                            <div id="logoUploadStatus" style="margin-top: 0.5rem; font-size: 0.9rem; color: #666;"></div>
+                        </div>
+
+                        <div id="urlSection" class="logo-input">
+                            <div class="form-group">
+                                <label for="logoUrlInput">Logo URL</label>
+                                <input type="url" id="logoUrlInput" placeholder="https://example.com/logo.png" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                <small style="color: #666; font-size: 0.8rem;">Voer een directe link naar de afbeelding in</small>
+                            </div>
+                            <div id="urlPreview" style="margin-top: 1rem; display: none;">
+                                <img id="urlPreviewImage" style="max-width: 200px; max-height: 100px; border: 1px solid #ddd; border-radius: 4px;" />
+                            </div>
+                        </div>
+
+                        <div id="uploadSection" class="logo-input" style="display: none;">
+                            <div class="form-group">
+                                <label for="logoUploadFile">Selecteer logo bestand</label>
+                                <input type="file" id="logoUploadFile" accept="image/*" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                <small style="color: #666; font-size: 0.8rem;">Ondersteunde formaten: JPG, PNG, SVG, GIF (max 5MB)</small>
+                            </div>
+                            <div id="logoUploadPreview" style="margin-top: 1rem; display: none;">
+                                <img id="logoUploadPreviewImage" style="max-width: 200px; max-height: 100px; border: 1px solid #ddd; border-radius: 4px;" />
+                            </div>
+                            <div id="logoUploadProgress" style="display: none; margin-top: 1rem;">
+                                <div class="progress-bar">
+                                    <div id="logoUploadProgressBar" class="progress-fill"></div>
+                                </div>
+                                <div id="logoUploadStatus"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeModal('logoUploadModal')">Annuleren</button>
-                        <button type="button" class="btn btn-primary" onclick="adminApp.uploadLogo()">Uploaden</button>
+                        <button type="button" class="btn btn-primary" onclick="adminApp.processLogo()">Toevoegen</button>
                     </div>
                 </div>
             </div>
@@ -3309,25 +3369,121 @@ class AdminDashboard {
 
         document.body.insertAdjacentHTML("beforeend", modalHTML);
 
-        // Add file change listener for preview
-        document
-            .getElementById("logoUploadFile")
-            .addEventListener("change", (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const preview =
-                            document.getElementById("logoUploadPreview");
-                        const previewImage = document.getElementById(
-                            "logoUploadPreviewImage",
-                        );
-                        previewImage.src = e.target.result;
-                        preview.style.display = "block";
-                    };
-                    reader.readAsDataURL(file);
-                }
+        // Add radio button listeners
+        document.querySelectorAll('input[name="logoMethod"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.toggleLogoInputMethod(e.target.value);
             });
+        });
+
+        // Add URL input listener for preview
+        document.getElementById("logoUrlInput").addEventListener('input', (e) => {
+            this.previewUrlImage(e.target.value);
+        });
+
+        // Add file change listener for preview
+        document.getElementById("logoUploadFile").addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.previewUploadedFile(file);
+            }
+        });
+    }
+
+    toggleLogoInputMethod(method) {
+        const urlSection = document.getElementById('urlSection');
+        const uploadSection = document.getElementById('uploadSection');
+        
+        if (method === 'url') {
+            urlSection.style.display = 'block';
+            uploadSection.style.display = 'none';
+        } else {
+            urlSection.style.display = 'none';
+            uploadSection.style.display = 'block';
+        }
+    }
+
+    previewUrlImage(url) {
+        const preview = document.getElementById("urlPreview");
+        const previewImage = document.getElementById("urlPreviewImage");
+        
+        if (url && this.isValidImageUrl(url)) {
+            previewImage.src = url;
+            previewImage.onload = () => {
+                preview.style.display = "block";
+            };
+            previewImage.onerror = () => {
+                preview.style.display = "none";
+            };
+        } else {
+            preview.style.display = "none";
+        }
+    }
+
+    previewUploadedFile(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const preview = document.getElementById("logoUploadPreview");
+            const previewImage = document.getElementById("logoUploadPreviewImage");
+            previewImage.src = e.target.result;
+            preview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+    }
+
+    isValidImageUrl(url) {
+        try {
+            new URL(url);
+            return /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(url);
+        } catch {
+            return false;
+        }
+    }
+
+    async processLogo() {
+        const selectedMethod = document.querySelector('input[name="logoMethod"]:checked').value;
+        
+        if (selectedMethod === 'url') {
+            const url = document.getElementById('logoUrlInput').value.trim();
+            if (!url) {
+                alert('Voer een URL in');
+                return;
+            }
+            if (!this.isValidImageUrl(url)) {
+                alert('Voer een geldige afbeeldings-URL in');
+                return;
+            }
+            this.setLogoUrl(url);
+        } else {
+            const fileInput = document.getElementById("logoUploadFile");
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert("Selecteer eerst een bestand");
+                return;
+            }
+            
+            await this.uploadLogo();
+        }
+    }
+
+    setLogoUrl(url) {
+        // Set the URL in the main form
+        const logoInput = document.getElementById("opportunityLogo");
+        if (logoInput) {
+            logoInput.value = url;
+            
+            // Show preview in main form
+            const mainPreview = document.getElementById("logoPreview");
+            const mainPreviewImage = document.getElementById("logoPreviewImage");
+            if (mainPreview && mainPreviewImage) {
+                mainPreviewImage.src = url;
+                mainPreview.style.display = "block";
+            }
+        }
+        
+        closeModal("logoUploadModal");
+        alert("Logo URL succesvol toegevoegd!");
     }
 
     async uploadLogo() {
@@ -3392,9 +3548,11 @@ class AdminDashboard {
                 mainPreview.style.display = "block";
             }
 
+            // Show success message and close modal
+            alert("Logo succesvol geüpload!");
             setTimeout(() => {
                 closeModal("logoUploadModal");
-            }, 1000);
+            }, 500);
         } catch (error) {
             console.error("Logo upload error:", error);
             this.updateLogoUploadProgress(0, "Upload gefaald");
