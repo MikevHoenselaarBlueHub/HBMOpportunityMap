@@ -468,7 +468,7 @@ class AdminDashboard {
 
                 // Format municipality name with largest places
                 let municipalityDisplay = `<div class="municipality-info">
-                    <div class="municipality-name">${municipality.name}</div>`;
+                    <div class="municipality-name">${municipality.name}${municipality.country === 'Netherlands' ? ' (NL)' : municipality.country === 'Germany' ? ' (DE)' : ''}</div>`;
 
                 if (
                     municipality.largest_places &&
@@ -2375,6 +2375,7 @@ class AdminDashboard {
                     <option value="Bedrijf">Bedrijf</option>
                 </select>
                 <button onclick="adminApp.clearOpportunityFilters()" class="btn btn-secondary">Wissen</button>
+                <button onclick="adminApp.addNewOpportunity()" class="btn btn-primary">Nieuwe kans toevoegen</button>
                 <button onclick="adminApp.openImportModal()" class="btn btn-primary" style="background: #28a745;">Import XLS</button>
             </div>
             <div id="searchStatus" style="display: none; color: #666; font-size: 0.9rem; margin-top: 0.5rem;">
@@ -2527,27 +2528,20 @@ class AdminDashboard {
 
         opportunities.forEach((opportunity) => {
             const row = document.createElement("tr");
+            if (opportunity.HBMUse === 'internal'){
+              row.style.backgroundColor = '#f0f0f0'
+            }
             row.innerHTML = `
                 <td>${opportunity.Name || "Onbekend"}</td>
                 <td>
                     <span class="type-badge ${(opportunity.HBMType || "").toLowerCase()}">${opportunity.HBMType || "Onbekend"}</span>
                 </td>
-                <td>
-                    <span class="use-badge ${(opportunity.HBMUse || "external").toLowerCase()}">${opportunity.HBMUse || "external"}</span>
-                </td>
                 <td>${opportunity.Municipality || "Onbekend"}</td>
                 <td>${this.formatArrayValue(opportunity.HBMSector)}</td>
                 <td>${this.formatArrayValue(opportunity.OrganizationType)}</td>
                 <td>
-                    ${
-                        opportunity.Latitude && opportunity.Longitude
-                            ? `${parseFloat(opportunity.Latitude).toFixed(4)}, ${parseFloat(opportunity.Longitude).toFixed(4)}`
-                            : "Geen coördinaten"
-                    }
-                </td>
-                <td>
-                    <button onclick="adminApp.openOpportunityModal('${this.escapeHtml(opportunity.Name)}')" class="btn btn-primary btn-sm">Bewerken</button>
-                    <button onclick="adminApp.openFilterSelectionModal('${this.escapeHtml(opportunity.Name)}')" class="btn btn-secondary btn-sm">Filters</button>
+                    <button onclick="adminApp.openOpportunityModal('${this.escapeHtml(opportunity.Name)}')" title="Bewerken"><img src="icons/edit.svg" alt="Bewerken" /></button>
+                    <button onclick="adminApp.openFilterSelectionModal('${this.escapeHtml(opportunity.Name)}')" title="Filters"><img src="icons/filter-setting.svg" alt="Filters" /></button>
                     <button onclick="adminApp.deleteOpportunity('${this.escapeHtml(opportunity.Name)}')" class="btn btn-danger btn-sm">Verwijderen</button>
                 </td>
             `;
@@ -3577,6 +3571,10 @@ class AdminDashboard {
         if (dataTab && dataTab.classList.contains("active")) {
             this.refreshMunicipalityDataTab();
         }
+    }
+
+    addNewOpportunity() {
+      this.openOpportunityModal();
     }
 }
 

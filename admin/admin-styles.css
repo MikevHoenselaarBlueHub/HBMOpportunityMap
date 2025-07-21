@@ -447,6 +447,9 @@ tr:hover {
     align-items: center;
     justify-content: center;
     position: relative;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .edit-btn:hover {
@@ -1233,9 +1236,15 @@ tr:hover {
 .action-btn.filter-btn {
     background-color: rgb(38, 123, 41);
     color: white;
-    font-size: 0.9rem;
+    padding: 8px;
+    min-width: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
-    padding-left: 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .action-btn.filter-btn:hover {
@@ -1244,12 +1253,8 @@ tr:hover {
 
 .action-btn.filter-btn::before {
     content: '';
-    position: absolute;
-    left: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 12px;
-    height: 12px;
+    width: 16px;
+    height: 16px;
     background-image: url('../icons/filter-setting.svg');
     background-size: contain;
     background-repeat: no-repeat;
