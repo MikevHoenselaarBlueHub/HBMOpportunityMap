@@ -1433,5 +1433,32 @@
     "City": "Eindhoven",
     "Latitude": null,
     "Longitude": null
+  },
+  {
+    "Name": "prev.end",
+    "ProjectType": "Frisse Scholen",
+    "OrganizationType": "Construction company",
+    "OrganizationField": "",
+    "HBMTopic": null,
+    "HBMCharacteristics": null,
+    "HBMSector": null,
+    "HBMType": "",
+    "HBMUse": "",
+    "Description": "Kans in Mönchengladbach",
+    "Logo": "",
+    "ProjectImage": "",
+    "Street": "Egerstraße 2",
+    "Zip": "41236",
+    "City": "Mönchengladbachh",
+    "Municipality": "",
+    "Country": "DE",
+    "ContactPerson": "",
+    "ContactEmail": "",
+    "ContactPhone": "",
+    "ContactWebsite": "",
+    "ProjectPhase": "",
+    "Remarks": "",
+    "Latitude": null,
+    "Longitude": null
   }
 ]

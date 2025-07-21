@@ -1889,7 +1889,10 @@ class AdminDashboard {
                 // Log raw row data for debugging
                 console.log(`Processing row ${rowNumber}:`, row);
 
-                const opportunity = await this.processOpportunityRow(row, rowNumber);
+                const opportunity = await this.processOpportunityRow(
+                    row,
+                    rowNumber,
+                );
 
                 if (opportunity) {
                     console.log(`Processed opportunity for row ${rowNumber}:`, {
@@ -2048,10 +2051,7 @@ class AdminDashboard {
             console.log(`Mapped opportunity object:`, opportunity);
 
             //Validate that we have enough data to create a meaningful opportunity
-            if (
-                !opportunity.HBMType ||
-                (!opportunity.City)
-            ) {
+            if (!opportunity.HBMType || !opportunity.City) {
                 console.log(
                     `Rij ${rowNumber}: Skipping opportunity ${opportunity.Name} - insufficient location or type data`,
                 );
@@ -2087,11 +2087,14 @@ class AdminDashboard {
 
             return opportunity;
         } catch (error) {
-            console.error(`Error in processOpportunityRow for row ${rowNumber}:`, {
-                error: error.message,
-                stack: error.stack,
-                rowData: row,
-            });
+            console.error(
+                `Error in processOpportunityRow for row ${rowNumber}:`,
+                {
+                    error: error.message,
+                    stack: error.stack,
+                    rowData: row,
+                },
+            );
             throw error;
         }
     }
@@ -2277,9 +2280,15 @@ class AdminDashboard {
                     <div style="font-size: 2rem; font-weight: bold; color: #388e3c;">${results.added}</div>
                     <div>Nieuwe kansen</div>
                     <div class="details" style="display: none; margin-top: 1rem; font-size: 0.8rem; text-align: left;">
-                        ${results.addedItems.length > 0 ? 
-                            results.addedItems.map(item => `<div>Rij ${item.row}: ${item.name} (${item.type})</div>`).join('') : 
-                            '<div>Geen nieuwe kansen toegevoegd</div>'
+                        ${
+                            results.addedItems.length > 0
+                                ? results.addedItems
+                                      .map(
+                                          (item) =>
+                                              `<div>Rij ${item.row}: ${item.name} (${item.type})</div>`,
+                                      )
+                                      .join("")
+                                : "<div>Geen nieuwe kansen toegevoegd</div>"
                         }
                     </div>
                 </div>
@@ -2287,9 +2296,15 @@ class AdminDashboard {
                     <div style="font-size: 2rem; font-weight: bold; color: #f57c00;">${results.updated}</div>
                     <div>Bijgewerkt</div>
                     <div class="details" style="display: none; margin-top: 1rem; font-size: 0.8rem; text-align: left;">
-                        ${results.updatedItems.length > 0 ? 
-                            results.updatedItems.map(item => `<div>Rij ${item.row}: ${item.name} (${item.type})</div>`).join('') : 
-                            '<div>Geen kansen bijgewerkt</div>'
+                        ${
+                            results.updatedItems.length > 0
+                                ? results.updatedItems
+                                      .map(
+                                          (item) =>
+                                              `<div>Rij ${item.row}: ${item.name} (${item.type})</div>`,
+                                      )
+                                      .join("")
+                                : "<div>Geen kansen bijgewerkt</div>"
                         }
                     </div>
                 </div>
@@ -2297,9 +2312,15 @@ class AdminDashboard {
                     <div style="font-size: 2rem; font-weight: bold; color: #7b1fa2;">${results.skipped}</div>
                     <div>Overslagen</div>
                     <div class="details" style="display: none; margin-top: 1rem; font-size: 0.8rem; text-align: left;">
-                        ${results.skippedItems.length > 0 ? 
-                            results.skippedItems.map(item => `<div>Rij ${item.row}: ${item.name}<br><small style="color: #666;">${item.reason}</small></div>`).join('') : 
-                            '<div>Geen items overslagen</div>'
+                        ${
+                            results.skippedItems.length > 0
+                                ? results.skippedItems
+                                      .map(
+                                          (item) =>
+                                              `<div>Rij ${item.row}: ${item.name}<br><small style="color: #666;">${item.reason}</small></div>`,
+                                      )
+                                      .join("")
+                                : "<div>Geen items overslagen</div>"
                         }
                     </div>
                 </div>
@@ -2307,9 +2328,15 @@ class AdminDashboard {
                     <div style="font-size: 2rem; font-weight: bold; color: #d32f2f;">${results.failed}</div>
                     <div>Gefaald</div>
                     <div class="details" style="display: none; margin-top: 1rem; font-size: 0.8rem; text-align: left;">
-                        ${results.failedItems.length > 0 ? 
-                            results.failedItems.map(item => `<div>Rij ${item.row}: ${item.name}<br><small style="color: #666;">${item.error}</small></div>`).join('') : 
-                            '<div>Geen fouten opgetreden</div>'
+                        ${
+                            results.failedItems.length > 0
+                                ? results.failedItems
+                                      .map(
+                                          (item) =>
+                                              `<div>Rij ${item.row}: ${item.name}<br><small style="color: #666;">${item.error}</small></div>`,
+                                      )
+                                      .join("")
+                                : "<div>Geen fouten opgetreden</div>"
                         }
                     </div>
                 </div>
@@ -2659,15 +2686,16 @@ class AdminDashboard {
 
     renderOpportunityTable(opportunities) {
         const tableBody = document.getElementById("opportunitiesTableBody");
-        const tableHead = document.querySelector("#opportunitiesTable thead tr");
-        
+        const tableHead = document.querySelector(
+            "#opportunitiesTable thead tr",
+        );
+
         // Add checkbox column header if not exists
-        if (!tableHead.querySelector('.bulk-select-header')) {
+        if (!tableHead.querySelector(".bulk-select-header")) {
             const checkboxHeader = document.createElement("th");
             checkboxHeader.className = "bulk-select-header";
             checkboxHeader.innerHTML = `
                 <input type="checkbox" id="selectAllOpportunities" onchange="adminApp.toggleSelectAll()">
-                <label for="selectAllOpportunities" style="margin-left: 0.5rem; font-size: 0.9rem;">Alles</label>
             `;
             tableHead.insertBefore(checkboxHeader, tableHead.firstChild);
         }
@@ -2739,12 +2767,15 @@ class AdminDashboard {
             return;
         }
 
-        const searchContainer = document.getElementById("opportunitySearchContainer");
+        const searchContainer = document.getElementById(
+            "opportunitySearchContainer",
+        );
         if (!searchContainer) return;
 
         const bulkActionsDiv = document.createElement("div");
         bulkActionsDiv.id = "bulkActions";
-        bulkActionsDiv.style.cssText = "margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px; display: none;";
+        bulkActionsDiv.style.cssText =
+            "margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px; display: none;";
         bulkActionsDiv.innerHTML = `
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <span id="selectedCount" style="font-weight: bold; color: #333;">0 items geselecteerd</span>
@@ -2761,46 +2792,64 @@ class AdminDashboard {
     }
 
     toggleSelectAll() {
-        const selectAllCheckbox = document.getElementById("selectAllOpportunities");
-        const opportunityCheckboxes = document.querySelectorAll(".opportunity-checkbox");
-        
-        opportunityCheckboxes.forEach(checkbox => {
+        const selectAllCheckbox = document.getElementById(
+            "selectAllOpportunities",
+        );
+        const opportunityCheckboxes = document.querySelectorAll(
+            ".opportunity-checkbox",
+        );
+
+        opportunityCheckboxes.forEach((checkbox) => {
             checkbox.checked = selectAllCheckbox.checked;
         });
-        
+
         this.updateBulkActions();
     }
 
     selectAll() {
-        const selectAllCheckbox = document.getElementById("selectAllOpportunities");
-        const opportunityCheckboxes = document.querySelectorAll(".opportunity-checkbox");
-        
+        const selectAllCheckbox = document.getElementById(
+            "selectAllOpportunities",
+        );
+        const opportunityCheckboxes = document.querySelectorAll(
+            ".opportunity-checkbox",
+        );
+
         selectAllCheckbox.checked = true;
-        opportunityCheckboxes.forEach(checkbox => {
+        opportunityCheckboxes.forEach((checkbox) => {
             checkbox.checked = true;
         });
-        
+
         this.updateBulkActions();
     }
 
     selectNone() {
-        const selectAllCheckbox = document.getElementById("selectAllOpportunities");
-        const opportunityCheckboxes = document.querySelectorAll(".opportunity-checkbox");
-        
+        const selectAllCheckbox = document.getElementById(
+            "selectAllOpportunities",
+        );
+        const opportunityCheckboxes = document.querySelectorAll(
+            ".opportunity-checkbox",
+        );
+
         selectAllCheckbox.checked = false;
-        opportunityCheckboxes.forEach(checkbox => {
+        opportunityCheckboxes.forEach((checkbox) => {
             checkbox.checked = false;
         });
-        
+
         this.updateBulkActions();
     }
 
     updateBulkActions() {
-        const opportunityCheckboxes = document.querySelectorAll(".opportunity-checkbox");
-        const selectedCheckboxes = document.querySelectorAll(".opportunity-checkbox:checked");
+        const opportunityCheckboxes = document.querySelectorAll(
+            ".opportunity-checkbox",
+        );
+        const selectedCheckboxes = document.querySelectorAll(
+            ".opportunity-checkbox:checked",
+        );
         const bulkActions = document.getElementById("bulkActions");
         const selectedCount = document.getElementById("selectedCount");
-        const selectAllCheckbox = document.getElementById("selectAllOpportunities");
+        const selectAllCheckbox = document.getElementById(
+            "selectAllOpportunities",
+        );
 
         if (!bulkActions || !selectedCount) return;
 
@@ -2833,16 +2882,24 @@ class AdminDashboard {
     }
 
     async bulkDeleteOpportunities() {
-        const selectedCheckboxes = document.querySelectorAll(".opportunity-checkbox:checked");
-        
+        const selectedCheckboxes = document.querySelectorAll(
+            ".opportunity-checkbox:checked",
+        );
+
         if (selectedCheckboxes.length === 0) {
             alert("Selecteer eerst kansen om te verwijderen");
             return;
         }
 
-        const selectedNames = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
-        
-        if (!confirm(`Weet je zeker dat je ${selectedNames.length} geselecteerde kansen wilt verwijderen?\n\nDit kan niet ongedaan worden gemaakt.`)) {
+        const selectedNames = Array.from(selectedCheckboxes).map(
+            (checkbox) => checkbox.value,
+        );
+
+        if (
+            !confirm(
+                `Weet je zeker dat je ${selectedNames.length} geselecteerde kansen wilt verwijderen?\n\nDit kan niet ongedaan worden gemaakt.`,
+            )
+        ) {
             return;
         }
 
@@ -2864,7 +2921,7 @@ class AdminDashboard {
 
         for (let i = 0; i < selectedNames.length; i++) {
             const opportunityName = selectedNames[i];
-            
+
             try {
                 const response = await fetch(
                     `/admin/api/opportunities/${encodeURIComponent(opportunityName)}`,
@@ -2873,7 +2930,7 @@ class AdminDashboard {
                         headers: {
                             Authorization: `Bearer ${this.token}`,
                         },
-                    }
+                    },
                 );
 
                 if (response.ok) {
@@ -2902,7 +2959,7 @@ class AdminDashboard {
         if (failedCount > 0) {
             message += `❌ Gefaald: ${failedCount} items\n`;
             if (failedItems.length > 0) {
-                message += `\nGefaalde items:\n${failedItems.join('\n')}`;
+                message += `\nGefaalde items:\n${failedItems.join("\n")}`;
             }
         }
 
