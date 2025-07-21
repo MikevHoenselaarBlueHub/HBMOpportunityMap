@@ -1868,25 +1868,31 @@ class AdminDashboard {
             added: 0,
             updated: 0,
             failed: 0,
+            skipped: 0,
+            addedItems: [],
+            updatedItems: [],
+            failedItems: [],
+            skippedItems: [],
             errors: [],
         };
 
         for (let i = 0; i < data.length; i++) {
             const row = data[i];
+            const rowNumber = i + 1;
 
             try {
                 this.updateImportProgress(
                     20 + (i / data.length) * 60,
-                    `Verwerken record ${i + 1} van ${data.length}...`,
+                    `Verwerken record ${rowNumber} van ${data.length}...`,
                 );
 
                 // Log raw row data for debugging
-                console.log(`Processing row ${i + 1}:`, row);
+                console.log(`Processing row ${rowNumber}:`, row);
 
-                const opportunity = await this.processOpportunityRow(row);
+                const opportunity = await this.processOpportunityRow(row, rowNumber);
 
                 if (opportunity) {
-                    console.log(`Processed opportunity for row ${i + 1}:`, {
+                    console.log(`Processed opportunity for row ${rowNumber}:`, {
                         name: opportunity.Name,
                         type: opportunity.HBMType,
                         municipality: opportunity.Municipality,
@@ -1900,30 +1906,55 @@ class AdminDashboard {
                     if (existingOpportunity) {
                         await this.updateExistingOpportunity(opportunity);
                         results.updated++;
+                        results.updatedItems.push({
+                            row: rowNumber,
+                            name: opportunity.Name,
+                            type: opportunity.HBMType,
+                            municipality: opportunity.Municipality,
+                        });
                         console.log(
                             `Updated existing opportunity: ${opportunity.Name}`,
                         );
                     } else {
                         await this.createNewOpportunity(opportunity);
                         results.added++;
+                        results.addedItems.push({
+                            row: rowNumber,
+                            name: opportunity.Name,
+                            type: opportunity.HBMType,
+                            municipality: opportunity.Municipality,
+                        });
                         console.log(
                             `Created new opportunity: ${opportunity.Name}`,
                         );
                     }
                 } else {
+                    results.skipped++;
+                    const opportunityName = (row[1] || "").toString().trim();
+                    results.skippedItems.push({
+                        row: rowNumber,
+                        name: opportunityName || `Rij ${rowNumber}`,
+                        reason: "Onvoldoende locatie- of typegegevens",
+                    });
                     console.log(
-                        `Row ${i + 1} skipped (HBMUse = internal or missing data)`,
+                        `Row ${rowNumber} skipped (insufficient location or type data)`,
                     );
                 }
             } catch (error) {
-                console.error(`Error processing row ${i + 1}:`, {
+                console.error(`Error processing row ${rowNumber}:`, {
                     error: error,
                     errorMessage: error.message,
                     errorStack: error.stack,
                     rowData: row,
                 });
                 results.failed++;
-                results.errors.push(`Rij ${i + 1}: ${error.message}`);
+                const opportunityName = (row[1] || "").toString().trim();
+                results.failedItems.push({
+                    row: rowNumber,
+                    name: opportunityName || `Rij ${rowNumber}`,
+                    error: error.message,
+                });
+                results.errors.push(`Rij ${rowNumber}: ${error.message}`);
             }
         }
 
@@ -1931,17 +1962,17 @@ class AdminDashboard {
     }
 
     // Process single opportunity row
-    async processOpportunityRow(row) {
+    async processOpportunityRow(row, rowNumber = 0) {
         try {
             console.log(
-                `Processing opportunity row with ${row.length} columns:`,
+                `Processing opportunity row ${rowNumber} with ${row.length} columns:`,
                 row,
             );
 
             // Validate row has minimum required data
             if (!row || row.length < 12) {
                 throw new Error(
-                    `Row has insufficient data: ${row.length} columns found, minimum 12 required`,
+                    `Rij ${rowNumber}: Onvoldoende gegevens - ${row.length} kolommen gevonden, minimaal 12 vereist`,
                 );
             }
 
@@ -1949,7 +1980,7 @@ class AdminDashboard {
             let opportunityName = (row[1] || "").toString().trim();
             if (!opportunityName || opportunityName === "") {
                 throw new Error(
-                    `Missing required field: Name (column 1) is empty`,
+                    `Rij ${rowNumber}: Naam (kolom B) is verplicht maar leeg`,
                 );
             }
 
@@ -1959,7 +1990,7 @@ class AdminDashboard {
                 opportunityName.toLowerCase().includes("test")
             ) {
                 console.log(
-                    `Skipping test/demo opportunity: ${opportunityName}`,
+                    `Rij ${rowNumber}: Skipping test/demo opportunity: ${opportunityName}`,
                 );
                 return null;
             }
@@ -1970,7 +2001,7 @@ class AdminDashboard {
                 .trim();
             if (!opportunityName) {
                 throw new Error(
-                    `Invalid opportunity name after cleanup: "${row[1]}"`,
+                    `Rij ${rowNumber}: Ongeldige naam na opschoning: "${row[1]}"`,
                 );
             }
 
@@ -2022,7 +2053,7 @@ class AdminDashboard {
                 (!opportunity.City)
             ) {
                 console.log(
-                    `Skipping opportunity ${opportunity.Name} - insufficient location or type data`,
+                    `Rij ${rowNumber}: Skipping opportunity ${opportunity.Name} - insufficient location or type data`,
                 );
                 return null;
             }
@@ -2056,7 +2087,7 @@ class AdminDashboard {
 
             return opportunity;
         } catch (error) {
-            console.error(`Error in processOpportunityRow:`, {
+            console.error(`Error in processOpportunityRow for row ${rowNumber}:`, {
                 error: error.message,
                 stack: error.stack,
                 rowData: row,
@@ -2242,27 +2273,58 @@ class AdminDashboard {
                     <div style="font-size: 2rem; font-weight: bold; color: #1976d2;">${results.total}</div>
                     <div>Totaal verwerkt</div>
                 </div>
-                <div style="text-align: center; padding: 1rem; background: #e8f5e9; border-radius: 4px;">
+                <div style="text-align: center; padding: 1rem; background: #e8f5e9; border-radius: 4px; cursor: pointer;" onclick="this.querySelector('.details').style.display = this.querySelector('.details').style.display === 'none' ? 'block' : 'none';">
                     <div style="font-size: 2rem; font-weight: bold; color: #388e3c;">${results.added}</div>
                     <div>Nieuwe kansen</div>
+                    <div class="details" style="display: none; margin-top: 1rem; font-size: 0.8rem; text-align: left;">
+                        ${results.addedItems.length > 0 ? 
+                            results.addedItems.map(item => `<div>Rij ${item.row}: ${item.name} (${item.type})</div>`).join('') : 
+                            '<div>Geen nieuwe kansen toegevoegd</div>'
+                        }
+                    </div>
                 </div>
-                <div style="text-align: center; padding: 1rem; background: #fff3e0; border-radius: 4px;">
+                <div style="text-align: center; padding: 1rem; background: #fff3e0; border-radius: 4px; cursor: pointer;" onclick="this.querySelector('.details').style.display = this.querySelector('.details').style.display === 'none' ? 'block' : 'none';">
                     <div style="font-size: 2rem; font-weight: bold; color: #f57c00;">${results.updated}</div>
                     <div>Bijgewerkt</div>
+                    <div class="details" style="display: none; margin-top: 1rem; font-size: 0.8rem; text-align: left;">
+                        ${results.updatedItems.length > 0 ? 
+                            results.updatedItems.map(item => `<div>Rij ${item.row}: ${item.name} (${item.type})</div>`).join('') : 
+                            '<div>Geen kansen bijgewerkt</div>'
+                        }
+                    </div>
                 </div>
-                <div style="text-align: center; padding: 1rem; background: #ffebee; border-radius: 4px;">
+                <div style="text-align: center; padding: 1rem; background: #f3e5f5; border-radius: 4px; cursor: pointer;" onclick="this.querySelector('.details').style.display = this.querySelector('.details').style.display === 'none' ? 'block' : 'none';">
+                    <div style="font-size: 2rem; font-weight: bold; color: #7b1fa2;">${results.skipped}</div>
+                    <div>Overslagen</div>
+                    <div class="details" style="display: none; margin-top: 1rem; font-size: 0.8rem; text-align: left;">
+                        ${results.skippedItems.length > 0 ? 
+                            results.skippedItems.map(item => `<div>Rij ${item.row}: ${item.name}<br><small style="color: #666;">${item.reason}</small></div>`).join('') : 
+                            '<div>Geen items overslagen</div>'
+                        }
+                    </div>
+                </div>
+                <div style="text-align: center; padding: 1rem; background: #ffebee; border-radius: 4px; cursor: pointer;" onclick="this.querySelector('.details').style.display = this.querySelector('.details').style.display === 'none' ? 'block' : 'none';">
                     <div style="font-size: 2rem; font-weight: bold; color: #d32f2f;">${results.failed}</div>
                     <div>Gefaald</div>
+                    <div class="details" style="display: none; margin-top: 1rem; font-size: 0.8rem; text-align: left;">
+                        ${results.failedItems.length > 0 ? 
+                            results.failedItems.map(item => `<div>Rij ${item.row}: ${item.name}<br><small style="color: #666;">${item.error}</small></div>`).join('') : 
+                            '<div>Geen fouten opgetreden</div>'
+                        }
+                    </div>
                 </div>
+            </div>
+            <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px; font-size: 0.9rem; color: #666;">
+                <strong>Tip:</strong> Klik op de status kaarten hierboven om details te bekijken van welke rijen verwerkt zijn.
             </div>
         `;
 
         if (results.errors.length > 0) {
             resultHTML += `
                 <div style="margin-top: 1rem;">
-                    <h4>Fouten tijdens import:</h4>
-                    <div style="max-height: 200px; overflow-y: auto; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
-                        ${results.errors.map((error) => `<div style="margin-bottom: 0.5rem; color: #dc3545;">${error}</div>`).join("")}
+                    <h4>Gedetailleerde foutmeldingen:</h4>
+                    <div style="max-height: 200px; overflow-y: auto; padding: 1rem; background: #f8f9fa; border-radius: 4px; border: 1px solid #dee2e6;">
+                        ${results.errors.map((error) => `<div style="margin-bottom: 0.5rem; color: #dc3545; font-family: monospace; font-size: 0.85rem;">${error}</div>`).join("")}
                     </div>
                 </div>
             `;
