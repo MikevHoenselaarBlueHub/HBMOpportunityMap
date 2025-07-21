@@ -1681,10 +1681,17 @@ class AdminDashboard {
                 return;
             }
 
-            const firstSheetName = workbook.SheetNames[0];
-            console.log("Using sheet:", firstSheetName);
+            // Look for 'Data' sheet first, fallback to first sheet
+            let targetSheetName = null;
+            if (workbook.SheetNames.includes('Data')) {
+                targetSheetName = 'Data';
+                console.log("Found 'Data' sheet, using it for import");
+            } else {
+                targetSheetName = workbook.SheetNames[0];
+                console.log("No 'Data' sheet found, using first sheet:", targetSheetName);
+            }
             
-            const worksheet = workbook.Sheets[firstSheetName];
+            const worksheet = workbook.Sheets[targetSheetName];
             
             if (!worksheet) {
                 reject(new Error("Werkblad kon niet worden gelezen. Controleer of het Excel bestand geldig is."));
@@ -1711,15 +1718,22 @@ class AdminDashboard {
             
             // Skip header row and filter for approved records
             const dataRows = jsonData.slice(1).filter(row => row.some(cell => cell !== null && cell !== ""));
+            
+            // Debug: log first few status values
+            console.log("First 10 status values:", dataRows.slice(0, 10).map(row => row[0]));
+            
             const approvedRecords = dataRows.filter(row => {
                 const status = row[0] ? row[0].toString().toLowerCase().trim() : '';
+                console.log(`Row status: '${row[0]}' -> normalized: '${status}'`);
                 return status === 'approved';
             });
             
             console.log(`Found ${approvedRecords.length} approved records out of ${dataRows.length} total rows`);
             
+            // More detailed error message
             if (approvedRecords.length === 0) {
-                reject(new Error("Geen records met status 'Approved' gevonden in het bestand. Controleer of de eerste kolom 'Approved' bevat."));
+                const uniqueStatuses = [...new Set(dataRows.map(row => row[0]).filter(status => status !== null && status !== ""))];
+                reject(new Error(`Geen records met status 'Approved' gevonden in het bestand. Gevonden statuswaarden in eerste kolom: ${uniqueStatuses.join(', ')}. Controleer of er records zijn met exact de tekst 'Approved' in de eerste kolom.`));
                 return;
             }
             
