@@ -1294,6 +1294,45 @@ tr:hover {
     border-top-color: rgba(0, 0, 0, 0.8);
 }
 
+/* Bulk selection styles */
+.bulk-select-header {
+    width: 120px;
+    text-align: center;
+}
+
+.bulk-select-header input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+.opportunity-checkbox {
+    cursor: pointer;
+}
+
+#bulkActions {
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+#bulkActions .btn-sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+/* Indeterminate checkbox styling */
+input[type="checkbox"]:indeterminate {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+input[type="checkbox"]:indeterminate::before {
+    content: '–';
+    display: block;
+    color: white;
+    font-size: 12px;
+    text-align: center;
+    line-height: 1;
+}
+
 .action-btn.delete-btn {
     background-color: #ff4757;
     border-color: #ff4757;

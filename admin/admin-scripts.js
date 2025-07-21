@@ -2659,12 +2659,25 @@ class AdminDashboard {
 
     renderOpportunityTable(opportunities) {
         const tableBody = document.getElementById("opportunitiesTableBody");
+        const tableHead = document.querySelector("#opportunitiesTable thead tr");
+        
+        // Add checkbox column header if not exists
+        if (!tableHead.querySelector('.bulk-select-header')) {
+            const checkboxHeader = document.createElement("th");
+            checkboxHeader.className = "bulk-select-header";
+            checkboxHeader.innerHTML = `
+                <input type="checkbox" id="selectAllOpportunities" onchange="adminApp.toggleSelectAll()">
+                <label for="selectAllOpportunities" style="margin-left: 0.5rem; font-size: 0.9rem;">Alles</label>
+            `;
+            tableHead.insertBefore(checkboxHeader, tableHead.firstChild);
+        }
+
         tableBody.innerHTML = "";
 
         if (opportunities.length === 0) {
             const row = document.createElement("tr");
             row.innerHTML = `
-                <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
+                <td colspan="9" style="text-align: center; padding: 2rem; color: #666;">
                     Geen kansen gevonden
                 </td>
             `;
@@ -2678,6 +2691,9 @@ class AdminDashboard {
                 row.style.backgroundColor = "#f0f0f0";
             }
             row.innerHTML = `
+                <td>
+                    <input type="checkbox" class="opportunity-checkbox" value="${this.escapeHtml(opportunity.Name)}" onchange="adminApp.updateBulkActions()">
+                </td>
                 <td>${opportunity.Name || "Onbekend"}</td>
                 <td>
                     <span class="type-badge ${(opportunity.HBMType || "").toLowerCase()}">${opportunity.HBMType || "Onbekend"}</span>
@@ -2694,6 +2710,9 @@ class AdminDashboard {
             tableBody.appendChild(row);
         });
 
+        // Add bulk actions if not exists
+        this.renderBulkActions();
+
         // Update results count
         const resultsInfo = document.getElementById("opportunityResultsInfo");
         if (!resultsInfo) {
@@ -2709,6 +2728,191 @@ class AdminDashboard {
 
         document.getElementById("opportunityResultsInfo").textContent =
             `${opportunities.length} van ${this.allOpportunities.length} kansen`;
+
+        // Reset bulk actions state
+        this.updateBulkActions();
+    }
+
+    renderBulkActions() {
+        // Check if bulk actions already exist
+        if (document.getElementById("bulkActions")) {
+            return;
+        }
+
+        const searchContainer = document.getElementById("opportunitySearchContainer");
+        if (!searchContainer) return;
+
+        const bulkActionsDiv = document.createElement("div");
+        bulkActionsDiv.id = "bulkActions";
+        bulkActionsDiv.style.cssText = "margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px; display: none;";
+        bulkActionsDiv.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span id="selectedCount" style="font-weight: bold; color: #333;">0 items geselecteerd</span>
+                <button onclick="adminApp.selectAll()" class="btn btn-secondary btn-sm">Selecteer alles</button>
+                <button onclick="adminApp.selectNone()" class="btn btn-secondary btn-sm">Selecteer geen</button>
+                <button onclick="adminApp.bulkDeleteOpportunities()" class="btn btn-danger btn-sm">
+                    <span style="margin-right: 0.5rem;">🗑️</span>
+                    Geselecteerde verwijderen
+                </button>
+            </div>
+        `;
+
+        searchContainer.appendChild(bulkActionsDiv);
+    }
+
+    toggleSelectAll() {
+        const selectAllCheckbox = document.getElementById("selectAllOpportunities");
+        const opportunityCheckboxes = document.querySelectorAll(".opportunity-checkbox");
+        
+        opportunityCheckboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+        
+        this.updateBulkActions();
+    }
+
+    selectAll() {
+        const selectAllCheckbox = document.getElementById("selectAllOpportunities");
+        const opportunityCheckboxes = document.querySelectorAll(".opportunity-checkbox");
+        
+        selectAllCheckbox.checked = true;
+        opportunityCheckboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+        
+        this.updateBulkActions();
+    }
+
+    selectNone() {
+        const selectAllCheckbox = document.getElementById("selectAllOpportunities");
+        const opportunityCheckboxes = document.querySelectorAll(".opportunity-checkbox");
+        
+        selectAllCheckbox.checked = false;
+        opportunityCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        this.updateBulkActions();
+    }
+
+    updateBulkActions() {
+        const opportunityCheckboxes = document.querySelectorAll(".opportunity-checkbox");
+        const selectedCheckboxes = document.querySelectorAll(".opportunity-checkbox:checked");
+        const bulkActions = document.getElementById("bulkActions");
+        const selectedCount = document.getElementById("selectedCount");
+        const selectAllCheckbox = document.getElementById("selectAllOpportunities");
+
+        if (!bulkActions || !selectedCount) return;
+
+        const selectedLength = selectedCheckboxes.length;
+        const totalLength = opportunityCheckboxes.length;
+
+        // Update selected count
+        selectedCount.textContent = `${selectedLength} items geselecteerd`;
+
+        // Show/hide bulk actions
+        if (selectedLength > 0) {
+            bulkActions.style.display = "block";
+        } else {
+            bulkActions.style.display = "none";
+        }
+
+        // Update select all checkbox state
+        if (selectAllCheckbox) {
+            if (selectedLength === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (selectedLength === totalLength) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            }
+        }
+    }
+
+    async bulkDeleteOpportunities() {
+        const selectedCheckboxes = document.querySelectorAll(".opportunity-checkbox:checked");
+        
+        if (selectedCheckboxes.length === 0) {
+            alert("Selecteer eerst kansen om te verwijderen");
+            return;
+        }
+
+        const selectedNames = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+        
+        if (!confirm(`Weet je zeker dat je ${selectedNames.length} geselecteerde kansen wilt verwijderen?\n\nDit kan niet ongedaan worden gemaakt.`)) {
+            return;
+        }
+
+        let successCount = 0;
+        let failedCount = 0;
+        const failedItems = [];
+
+        // Show progress
+        const bulkActions = document.getElementById("bulkActions");
+        const originalContent = bulkActions.innerHTML;
+        bulkActions.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="font-weight: bold; color: #333;">Verwijderen van ${selectedNames.length} items...</span>
+                <div style="width: 200px; height: 20px; background: #e9ecef; border-radius: 10px; overflow: hidden;">
+                    <div id="deleteProgress" style="height: 100%; background: #dc3545; width: 0%; transition: width 0.3s;"></div>
+                </div>
+            </div>
+        `;
+
+        for (let i = 0; i < selectedNames.length; i++) {
+            const opportunityName = selectedNames[i];
+            
+            try {
+                const response = await fetch(
+                    `/admin/api/opportunities/${encodeURIComponent(opportunityName)}`,
+                    {
+                        method: "DELETE",
+                        headers: {
+                            Authorization: `Bearer ${this.token}`,
+                        },
+                    }
+                );
+
+                if (response.ok) {
+                    successCount++;
+                } else {
+                    failedCount++;
+                    failedItems.push(opportunityName);
+                }
+            } catch (error) {
+                console.error(`Error deleting ${opportunityName}:`, error);
+                failedCount++;
+                failedItems.push(opportunityName);
+            }
+
+            // Update progress
+            const progress = ((i + 1) / selectedNames.length) * 100;
+            const progressBar = document.getElementById("deleteProgress");
+            if (progressBar) {
+                progressBar.style.width = progress + "%";
+            }
+        }
+
+        // Show results
+        let message = `Verwijdering voltooid!\n\n`;
+        message += `✅ Succesvol verwijderd: ${successCount} items\n`;
+        if (failedCount > 0) {
+            message += `❌ Gefaald: ${failedCount} items\n`;
+            if (failedItems.length > 0) {
+                message += `\nGefaalde items:\n${failedItems.join('\n')}`;
+            }
+        }
+
+        alert(message);
+
+        // Restore bulk actions
+        bulkActions.innerHTML = originalContent;
+
+        // Reload opportunities
+        await this.loadOpportunities();
     }
 
     formatArrayValue(value) {
