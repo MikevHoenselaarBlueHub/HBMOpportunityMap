@@ -1376,38 +1376,49 @@ class AdminDashboard {
     }
 
     renderOpportunitySearch() {
-        const searchContainer = document.getElementById("opportunitySearchContainer");
-        if (!searchContainer) {
-            // Add search container if it doesn't exist
-            const section = document.getElementById("opportunities-section");
-            const sectionHeader = section.querySelector(".section-header");
-            
-            const searchDiv = document.createElement("div");
-            searchDiv.id = "opportunitySearchContainer";
-            searchDiv.innerHTML = `
-                <div style="margin: 1rem 0; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-                    <input type="text" id="opportunitySearch" placeholder="Zoek op naam, type, gemeente..." 
-                           style="flex: 1; min-width: 250px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                    <select id="opportunityTypeFilter" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                        <option value="">Alle types</option>
-                        <option value="Project">Project</option>
-                        <option value="Bedrijf">Bedrijf</option>
-                    </select>
-                    <button onclick="adminApp.clearOpportunityFilters()" class="btn btn-secondary">Wissen</button>
-                </div>
-            `;
-            
-            sectionHeader.parentNode.insertBefore(searchDiv, sectionHeader.nextSibling);
-
-            // Add event listeners
-            document.getElementById("opportunitySearch").addEventListener("input", (e) => {
-                this.filterOpportunities();
-            });
-
-            document.getElementById("opportunityTypeFilter").addEventListener("change", (e) => {
-                this.filterOpportunities();
-            });
+        const existingContainer = document.getElementById("opportunitySearchContainer");
+        if (existingContainer) {
+            existingContainer.remove();
         }
+
+        // Add search container
+        const section = document.getElementById("opportunities-section");
+        const sectionHeader = section.querySelector(".section-header");
+        
+        const searchDiv = document.createElement("div");
+        searchDiv.id = "opportunitySearchContainer";
+        searchDiv.innerHTML = `
+            <div style="margin: 1rem 0; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="opportunitySearch" placeholder="Zoek op naam, type, gemeente..." 
+                       style="flex: 1; min-width: 250px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                <select id="opportunityTypeFilter" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="">Alle types</option>
+                    <option value="Project">Project</option>
+                    <option value="Bedrijf">Bedrijf</option>
+                </select>
+                <button onclick="adminApp.clearOpportunityFilters()" class="btn btn-secondary">Wissen</button>
+            </div>
+        `;
+        
+        sectionHeader.parentNode.insertBefore(searchDiv, sectionHeader.nextSibling);
+
+        // Add event listeners with slight delay to ensure DOM is ready
+        setTimeout(() => {
+            const searchInput = document.getElementById("opportunitySearch");
+            const typeFilter = document.getElementById("opportunityTypeFilter");
+            
+            if (searchInput) {
+                searchInput.addEventListener("input", () => {
+                    this.filterOpportunities();
+                });
+            }
+
+            if (typeFilter) {
+                typeFilter.addEventListener("change", () => {
+                    this.filterOpportunities();
+                });
+            }
+        }, 100);
     }
 
     filterOpportunities() {
@@ -1522,26 +1533,12 @@ class AdminDashboard {
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="opportunityMunicipality">Gemeente</label>
-                                <input type="text" id="opportunityMunicipality" name="Municipality">
-                            </div>
-                            <div class="form-group">
-                                <label for="opportunitySector">Sector</label>
-                                <input type="text" id="opportunitySector" name="HBMSector">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="opportunityOrgType">Organisatietype</label>
-                                <input type="text" id="opportunityOrgType" name="OrganizationType">
-                            </div>
-                            <div class="form-group">
-                                <label for="opportunityOrgField">Vakgebied</label>
-                                <input type="text" id="opportunityOrgField" name="OrganizationField">
-                            </div>
+                        <div class="form-group">
+                            <label for="opportunityMunicipality">Gemeente</label>
+                            <select id="opportunityMunicipality" name="Municipality">
+                                <option value="">Selecteer gemeente</option>
+                            </select>
+                            <button type="button" class="btn btn-secondary" onclick="adminApp.openNewMunicipalityModal()" style="margin-top: 0.5rem;">Nieuwe gemeente toevoegen</button>
                         </div>
 
                         <div class="form-group">
@@ -1549,14 +1546,18 @@ class AdminDashboard {
                             <textarea id="opportunityDescription" name="Description" rows="3"></textarea>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="opportunityLat">Latitude</label>
-                                <input type="number" id="opportunityLat" name="Latitude" step="any">
-                            </div>
-                            <div class="form-group">
-                                <label for="opportunityLng">Longitude</label>
-                                <input type="number" id="opportunityLng" name="Longitude" step="any">
+                        <div class="form-group">
+                            <label>Locatie</label>
+                            <div style="display: flex; gap: 0.5rem; align-items: end;">
+                                <div style="flex: 1;">
+                                    <label for="opportunityLat" style="font-size: 0.8em;">Latitude</label>
+                                    <input type="number" id="opportunityLat" name="Latitude" step="any">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label for="opportunityLng" style="font-size: 0.8em;">Longitude</label>
+                                    <input type="number" id="opportunityLng" name="Longitude" step="any">
+                                </div>
+                                <button type="button" class="btn btn-secondary" onclick="adminApp.openLocationPicker()" style="white-space: nowrap;">Selecteer op kaart</button>
                             </div>
                         </div>
 
@@ -1588,6 +1589,9 @@ class AdminDashboard {
 
         if (isEdit) {
             this.loadOpportunityData(opportunityName);
+        } else {
+            // Load municipality dropdown for new opportunities
+            this.loadMunicipalityDropdown();
         }
     }
 
@@ -1598,10 +1602,9 @@ class AdminDashboard {
             if (opportunity) {
                 document.getElementById("opportunityName").value = opportunity.Name || "";
                 document.getElementById("opportunityType").value = opportunity.HBMType || "";
+                // Load municipality dropdown
+                await this.loadMunicipalityDropdown();
                 document.getElementById("opportunityMunicipality").value = opportunity.Municipality || "";
-                document.getElementById("opportunitySector").value = opportunity.HBMSector || "";
-                document.getElementById("opportunityOrgType").value = opportunity.OrganizationType || "";
-                document.getElementById("opportunityOrgField").value = opportunity.OrganizationField || "";
                 document.getElementById("opportunityDescription").value = opportunity.Description || "";
                 document.getElementById("opportunityLat").value = opportunity.Latitude || "";
                 document.getElementById("opportunityLng").value = opportunity.Longitude || "";
@@ -1610,6 +1613,139 @@ class AdminDashboard {
         } catch (error) {
             console.error("Error loading opportunity data:", error);
             alert("Fout bij het laden van kans gegevens");
+        }
+    }
+
+    async loadMunicipalityDropdown() {
+        try {
+            const response = await fetch("/admin/api/municipalities", {
+                headers: {
+                    Authorization: `Bearer ${this.token}`,
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const municipalitySelect = document.getElementById("opportunityMunicipality");
+                
+                if (municipalitySelect) {
+                    // Clear existing options except the first one
+                    municipalitySelect.innerHTML = '<option value="">Selecteer gemeente</option>';
+                    
+                    // Add municipalities
+                    data.municipalities.forEach(municipality => {
+                        const option = document.createElement("option");
+                        option.value = municipality.name;
+                        option.textContent = municipality.name;
+                        municipalitySelect.appendChild(option);
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error loading municipalities for dropdown:", error);
+        }
+    }
+
+    openNewMunicipalityModal() {
+        const modalHTML = `
+            <div id="newMunicipalityModal" class="modal-overlay">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Nieuwe gemeente toevoegen</h3>
+                        <button class="modal-close" onclick="closeModal('newMunicipalityModal')">×</button>
+                    </div>
+                    <form id="newMunicipalityForm" class="modal-form">
+                        <div class="form-group">
+                            <label for="newMunicipalityName">Naam *</label>
+                            <input type="text" id="newMunicipalityName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newMunicipalityCountry">Land *</label>
+                            <select id="newMunicipalityCountry" name="country" required>
+                                <option value="">Selecteer land</option>
+                                <option value="Netherlands">Nederland</option>
+                                <option value="Germany">Duitsland</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="newMunicipalityCode">Code *</label>
+                            <select id="newMunicipalityCode" name="code" required>
+                                <option value="">Selecteer code</option>
+                                <option value="NL">NL</option>
+                                <option value="DE">DE</option>
+                            </select>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('newMunicipalityModal')">Annuleren</button>
+                            <button type="submit" class="btn btn-primary">Toevoegen</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+        // Set up country-code synchronization
+        const countrySelect = document.getElementById("newMunicipalityCountry");
+        const codeSelect = document.getElementById("newMunicipalityCode");
+
+        countrySelect.addEventListener("change", () => {
+            if (countrySelect.value === "Netherlands") {
+                codeSelect.value = "NL";
+            } else if (countrySelect.value === "Germany") {
+                codeSelect.value = "DE";
+            }
+        });
+
+        codeSelect.addEventListener("change", () => {
+            if (codeSelect.value === "NL") {
+                countrySelect.value = "Netherlands";
+            } else if (codeSelect.value === "DE") {
+                countrySelect.value = "Germany";
+            }
+        });
+
+        const form = document.getElementById("newMunicipalityForm");
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            this.createNewMunicipality();
+        });
+    }
+
+    async createNewMunicipality() {
+        const formData = new FormData(document.getElementById("newMunicipalityForm"));
+        const municipalityData = {
+            name: formData.get("name"),
+            country: formData.get("country"),
+            code: formData.get("code"),
+        };
+
+        try {
+            const response = await fetch("/admin/api/municipalities", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${this.token}`,
+                },
+                body: JSON.stringify(municipalityData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                closeModal("newMunicipalityModal");
+                // Reload the municipality dropdown
+                await this.loadMunicipalityDropdown();
+                // Select the newly added municipality
+                document.getElementById("opportunityMunicipality").value = municipalityData.name;
+                alert("Gemeente succesvol toegevoegd!");
+            } else {
+                alert(`Fout: ${result.message || "Onbekende fout"}`);
+            }
+        } catch (error) {
+            console.error("Error creating municipality:", error);
+            alert("Fout bij het toevoegen van gemeente");
         }
     }
 
@@ -1852,6 +1988,137 @@ class AdminDashboard {
         } catch (error) {
             console.error("Error saving opportunity filters:", error);
             alert("Fout bij het opslaan van filters");
+        }
+    }
+
+    openLocationPicker() {
+        // Get current values if they exist
+        const currentLat = document.getElementById("opportunityLat").value || 51.2;
+        const currentLng = document.getElementById("opportunityLng").value || 6.0;
+
+        const modalHTML = `
+            <div id="locationPickerModal" class="modal-overlay">
+                <div class="modal-content" style="max-width: 800px; max-height: 90vh;">
+                    <div class="modal-header">
+                        <h3>Selecteer locatie op kaart</h3>
+                        <button class="modal-close" onclick="closeModal('locationPickerModal')">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="locationPickerMap" style="height: 400px; border: 1px solid #ddd; border-radius: 4px;"></div>
+                        <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+                            <p style="margin: 0 0 0.5rem 0;"><strong>Instructies:</strong></p>
+                            <p style="margin: 0; font-size: 0.9em;">Zoom en sleep de kaart om de gewenste locatie in het midden te plaatsen. De rode marker toont de huidige selectie.</p>
+                            <div style="margin-top: 0.5rem;">
+                                <strong>Huidige coördinaten:</strong> 
+                                <span id="currentCoordinates">${currentLat}, ${currentLng}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('locationPickerModal')">Annuleren</button>
+                        <button type="button" class="btn btn-primary" onclick="adminApp.saveSelectedLocation()">Locatie opslaan</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+        // Initialize map after modal is added to DOM
+        setTimeout(() => {
+            this.initLocationPickerMap(parseFloat(currentLat), parseFloat(currentLng));
+        }, 100);
+    }
+
+    initLocationPickerMap(lat, lng) {
+        if (typeof L === "undefined") {
+            // Load Leaflet if not available
+            const leafletCSS = document.createElement("link");
+            leafletCSS.rel = "stylesheet";
+            leafletCSS.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+            document.head.appendChild(leafletCSS);
+
+            const leafletJS = document.createElement("script");
+            leafletJS.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+            document.head.appendChild(leafletJS);
+
+            leafletJS.onload = () => {
+                this.createLocationPickerMap(lat, lng);
+            };
+        } else {
+            this.createLocationPickerMap(lat, lng);
+        }
+    }
+
+    createLocationPickerMap(lat, lng) {
+        const mapContainer = document.getElementById("locationPickerMap");
+        if (!mapContainer) return;
+
+        // Initialize map
+        this.locationPickerMap = L.map("locationPickerMap", {
+            center: [lat, lng],
+            zoom: 13,
+            zoomControl: true,
+        });
+
+        // Add base tile layer
+        L.tileLayer(
+            "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+            {
+                attribution: "© OpenStreetMap contributors © CARTO",
+                maxZoom: 18,
+            },
+        ).addTo(this.locationPickerMap);
+
+        // Add center marker
+        this.centerMarker = L.marker([lat, lng], {
+            draggable: false,
+            icon: L.icon({
+                iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="8" fill="#dc3545" stroke="#fff" stroke-width="2"/>
+                    </svg>
+                `),
+                iconSize: [24, 24],
+                iconAnchor: [12, 12],
+            })
+        }).addTo(this.locationPickerMap);
+
+        // Update coordinates on map move
+        this.locationPickerMap.on('move', () => {
+            const center = this.locationPickerMap.getCenter();
+            this.centerMarker.setLatLng(center);
+            
+            const coordinatesElement = document.getElementById("currentCoordinates");
+            if (coordinatesElement) {
+                coordinatesElement.textContent = `${center.lat.toFixed(6)}, ${center.lng.toFixed(6)}`;
+            }
+        });
+
+        // Set initial coordinates display
+        const coordinatesElement = document.getElementById("currentCoordinates");
+        if (coordinatesElement) {
+            coordinatesElement.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        }
+    }
+
+    saveSelectedLocation() {
+        if (this.locationPickerMap) {
+            const center = this.locationPickerMap.getCenter();
+            
+            // Update the form fields
+            document.getElementById("opportunityLat").value = center.lat.toFixed(6);
+            document.getElementById("opportunityLng").value = center.lng.toFixed(6);
+            
+            // Clean up map
+            this.locationPickerMap.remove();
+            this.locationPickerMap = null;
+            this.centerMarker = null;
+            
+            // Close modal
+            closeModal("locationPickerModal");
+            
+            alert("Locatie succesvol ingesteld!");
         }
     }
 
