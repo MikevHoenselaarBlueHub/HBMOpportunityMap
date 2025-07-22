@@ -1,0 +1,45 @@
+Hierbij heb ik een dataset gevonden die beter aansluit bij jouw vraag naar gebouwgezondheid. Het gaat om ernstige geluidhinder. Deze indicatoren komen uit de Gezondheidsmonitor en meten hoeveel mensen van 19‑65 jaar ernstige geluidhinder ervaren van weg- en treinverkeer, vliegtuigen, brommers of buren
+dataderden.cbs.nl
+. Geluidhinder beïnvloedt het welzijn in woningen, scholen en kantoren. Het zijn dus uitgesproken ‘binnen’-metingen.
+
+Waarom geluidhinder?
+De indicatoren gaan over ervaren hinder. Mensen geven dus zelf aan in hoeverre geluid hun woon‑ of werkomgeving verstoort
+dataderden.cbs.nl
+.
+
+Geluidhinder komt veel voor in gebouwen en heeft directe impact op gezondheid (stress, slaap, concentratie).
+
+De data zijn beschikbaar op gemeentelijk niveau, zodat je er dezelfde kaartvisualisatie op kunt toepassen.
+
+Wat zit er in het nieuwe bestand?
+Gemeentecode en –naam.
+
+Het gemiddelde van zes soorten ernstige geluidhinder:
+– Wegverkeer > 50 km/u;
+– Wegverkeer < 50 km/u;
+– Treinverkeer;
+– Vliegverkeer;
+– Brommers/scooters;
+– Buren
+dataderden.cbs.nl
+.
+
+Per gemeente heb ik dit gemiddelde berekend uit de bovengenoemde percentages. Er zijn 387 gemeenten met gegevens.
+
+Kleurverloop voor geluidhinder
+Om de kaart duidelijk te maken stel ik deze grenzen voor:
+
+Groen: minder dan 3 % van de bevolking ervaart ernstige geluidhinder. Dit zijn rustige gemeenten.
+
+Oranje: 3 tot 4,5 % hinder. Hier is geluidhinder een aandachtspunt.
+
+Rood: meer dan 4,5 % hinder. Dit zijn de gemeenten waar bewoners vaak geluidsoverlast melden.
+
+De indeling zorgt voor een ongeveer gelijke verdeling over Nederland (ongeveer 113 gemeenten groen, 158 oranje en 114 rood).
+
+Het bestand gebruiken
+Je kunt het nieuwe GeoJSON‑bestand hieronder downloaden en in je Replit‑omgeving inladen. De laag heet NoiseHinderAvg en bevat het gemiddelde percentage ernstige geluidhinder. Met de voorgestelde kleuren zie je snel waar geluid een groot probleem is.
+
+Download het GeoJSON‑bestand: noise_hindrance_2022_municipalities.geojson
+
+Voel je vrij om verdere indicatoren of extra kleuren te testen. Laat het me weten als ik het bestand moet uitbreiden met afzonderlijke soorten geluidhinder of een andere schaal!
