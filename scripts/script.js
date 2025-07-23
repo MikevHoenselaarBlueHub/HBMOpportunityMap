@@ -4390,7 +4390,13 @@ async function loadNoiseHindranceLayer() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const geojsonData = await response.json();
+    // Get the response as text first to handle NaN values
+    const responseText = await response.text();
+    
+    // Replace NaN with null to make it valid JSON
+    const cleanedJson = responseText.replace(/:\s*NaN/g, ': null');
+    
+    const geojsonData = JSON.parse(cleanedJson);
     
     if (!geojsonData.features || geojsonData.features.length === 0) {
       throw new Error("No noise hindrance data found");
