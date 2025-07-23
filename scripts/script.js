@@ -4,6 +4,7 @@
 let map;
 let markers;
 let municipalityLayer;
+let noiseHindranceLayer;
 let userLocationCircle;
 let currentFilter = {};
 let locationWatchId;
@@ -13,6 +14,7 @@ let municipalities = [];
 let translations = {};
 let currentLanguage = "nl";
 let currentBaseLayer = "street";
+let noiseLegend;
 
 // Filter state management
 let filterState = {
@@ -368,6 +370,9 @@ function initMap() {
 
   // Initialize municipality layer
   municipalityLayer = L.layerGroup();
+  
+  // Initialize noise hindrance layer
+  noiseHindranceLayer = L.layerGroup();
 
   // Add layer control with base layers and overlays
   const layerControl = L.control
@@ -379,6 +384,7 @@ function initMap() {
       {
         '<img src="images/Interreg-logo-icon.png" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;">Interreg-gemeenten':
           municipalityLayer,
+        'Geluidhinder per gemeente': noiseHindranceLayer,
       },
       {
         position: "topright",
@@ -420,10 +426,22 @@ function initMap() {
 
   // Lazy load municipality boundaries when layer is added
   let municipalitiesLoaded = false;
+  let noiseHindranceLoaded = false;
+  
   map.on("overlayadd", function (e) {
     if (e.name.includes("Interreg-gemeenten") && !municipalitiesLoaded) {
       municipalitiesLoaded = true;
       loadMunicipalityBoundaries();
+    }
+    if (e.name.includes("Geluidhinder") && !noiseHindranceLoaded) {
+      noiseHindranceLoaded = true;
+      loadNoiseHindranceLayer();
+    }
+  });
+
+  map.on("overlayremove", function (e) {
+    if (e.name.includes("Geluidhinder")) {
+      removeNoiseLegend();
     }
   });
 
@@ -4360,6 +4378,178 @@ function executeResetAllFilters() {
   });
 
   console.log("All filters reset to default state");
+}
+
+// Noise hindrance layer functions
+async function loadNoiseHindranceLayer() {
+  try {
+    console.log("Loading noise hindrance data...");
+    const response = await fetch("attached_assets/noise_hindrance_2022_municipalities_1753199925265.geojson");
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const geojsonData = await response.json();
+    
+    if (!geojsonData.features || geojsonData.features.length === 0) {
+      throw new Error("No noise hindrance data found");
+    }
+
+    console.log(`Processing ${geojsonData.features.length} municipalities with noise data...`);
+    let loadedCount = 0;
+
+    geojsonData.features.forEach((feature) => {
+      if (feature.properties) {
+        const municipalityName = feature.properties.name || feature.properties.NAME;
+        const noiseValue = feature.properties.NoiseHinderAvg;
+
+        if (municipalityName && feature.geometry && noiseValue !== undefined) {
+          try {
+            const color = getNoiseColor(noiseValue);
+            
+            const geoJsonLayer = L.geoJSON(feature, {
+              style: {
+                color: color,
+                weight: 2,
+                opacity: 0.8,
+                fillColor: color,
+                fillOpacity: 0.6,
+                smoothFactor: 1,
+              },
+              onEachFeature: function (feature, layer) {
+                layer.on({
+                  mouseover: function (e) {
+                    const layer = e.target;
+                    layer.setStyle({
+                      weight: 4,
+                      opacity: 1,
+                      fillOpacity: 0.8,
+                    });
+                    layer.bringToFront();
+
+                    // Show hover label
+                    showHoverLabel(e, `${municipalityName}: ${noiseValue.toFixed(1)}%`);
+                  },
+                  mouseout: function (e) {
+                    const layer = e.target;
+                    const color = getNoiseColor(noiseValue);
+                    layer.setStyle({
+                      color: color,
+                      weight: 2,
+                      opacity: 0.8,
+                      fillColor: color,
+                      fillOpacity: 0.6,
+                    });
+
+                    hideHoverLabel();
+                  },
+                  click: function (e) {
+                    // Filter by municipality
+                    filterByMunicipality(municipalityName);
+
+                    // Track event
+                    trackEvent("noise_municipality_click", {
+                      municipality: municipalityName,
+                      noise_level: noiseValue,
+                    });
+                  },
+                });
+
+                // Add popup with noise information
+                layer.bindPopup(
+                  `
+                  <div class="noise-popup">
+                    <h3>${municipalityName}</h3>
+                    <p><strong>Geluidhinder:</strong> ${noiseValue.toFixed(1)}%</p>
+                    <p><small>Percentage inwoners (19-65 jaar) met ernstige geluidhinder van weg-, trein-, vliegverkeer, brommers en buren (2022)</small></p>
+                    <p><a href="#" onclick="filterByMunicipalityAndZoom('${municipalityName}'); return false;">Bekijk projecten en bedrijven in deze gemeente</a></p>
+                  </div>
+                `,
+                  {
+                    maxWidth: 300,
+                    minWidth: 200,
+                    autoPan: true,
+                    autoPanPadding: [20, 20],
+                    keepInView: true,
+                    closeOnEscapeKey: true,
+                  },
+                );
+              },
+            });
+
+            noiseHindranceLayer.addLayer(geoJsonLayer);
+            loadedCount++;
+          } catch (layerError) {
+            console.warn(`Error creating layer for municipality ${municipalityName}:`, layerError);
+          }
+        }
+      }
+    });
+
+    console.log(`Successfully loaded ${loadedCount} municipalities with noise data`);
+    
+    // Show legend
+    showNoiseLegend();
+    
+  } catch (error) {
+    console.error("Error loading noise hindrance data:", error);
+  }
+}
+
+function getNoiseColor(noiseValue) {
+  if (noiseValue === null || noiseValue === undefined) {
+    return "#cccccc"; // Grijs voor geen data
+  }
+  
+  if (noiseValue < 3) {
+    return "#28a745"; // Groen - rustige gemeenten
+  } else if (noiseValue <= 4.5) {
+    return "#fd7e14"; // Oranje - aandachtspunt
+  } else {
+    return "#dc3545"; // Rood - veel geluidhinder
+  }
+}
+
+function showNoiseLegend() {
+  if (noiseLegend) {
+    map.removeControl(noiseLegend);
+  }
+
+  noiseLegend = L.control({ position: "bottomleft" });
+  
+  noiseLegend.onAdd = function () {
+    const div = L.DomUtil.create("div", "noise-legend");
+    div.innerHTML = `
+      <h4>Geluidhinder</h4>
+      <div class="noise-legend-item">
+        <div class="noise-legend-color" style="background-color: #28a745;"></div>
+        <span>&lt; 3%: Rustig</span>
+      </div>
+      <div class="noise-legend-item">
+        <div class="noise-legend-color" style="background-color: #fd7e14;"></div>
+        <span>3-4.5%: Aandacht</span>
+      </div>
+      <div class="noise-legend-item">
+        <div class="noise-legend-color" style="background-color: #dc3545;"></div>
+        <span>&gt; 4.5%: Veel hinder</span>
+      </div>
+      <div class="noise-legend-item">
+        <div class="noise-legend-color" style="background-color: #cccccc;"></div>
+        <span>Geen data</span>
+      </div>
+    `;
+    return div;
+  };
+  
+  noiseLegend.addTo(map);
+}
+
+function removeNoiseLegend() {
+  if (noiseLegend) {
+    map.removeControl(noiseLegend);
+    noiseLegend = null;
+  }
 }
 
 // Export for global access
