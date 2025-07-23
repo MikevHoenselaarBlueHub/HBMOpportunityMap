@@ -4404,7 +4404,7 @@ async function loadNoiseHindranceLayer() {
         const municipalityName = feature.properties.name || feature.properties.NAME;
         const noiseValue = feature.properties.NoiseHinderAvg;
 
-        if (municipalityName && feature.geometry && noiseValue !== undefined) {
+        if (municipalityName && feature.geometry && noiseValue !== undefined && noiseValue !== null) {
           try {
             const color = getNoiseColor(noiseValue);
             
@@ -4439,7 +4439,63 @@ async function loadNoiseHindranceLayer() {
                       weight: 2,
                       opacity: 0.8,
                       fillColor: color,
-                      fillOpacity: 0.6,
+                      fillOpacity: 0.6
+                    });
+
+                    hideHoverLabel();
+                  },
+                  click: function (e) {
+                    // Filter by municipality
+                    filterByMunicipality(municipalityName);
+
+                    // Track event
+                    trackEvent("noise_municipality_click", {
+                      municipality: municipalityName,
+                      noise_level: noiseValue,
+                    });
+                  },
+                });
+
+                // Add popup with noise information
+                layer.bindPopup(
+                  `
+                  <div class="noise-popup">
+                    <h3>${municipalityName}</h3>
+                    <p><strong>Geluidhinder:</strong> ${noiseValue.toFixed(1)}%</p>
+                    <p><small>Percentage inwoners (19-65 jaar) met ernstige geluidhinder van weg-, trein-, vliegverkeer, brommers en buren (2022)</small></p>
+                    <p><a href="#" onclick="filterByMunicipalityAndZoom('${municipalityName}'); return false;">Bekijk projecten en bedrijven in deze gemeente</a></p>
+                  </div>
+                `,
+                  {
+                    maxWidth: 300,
+                    minWidth: 200,
+                    autoPan: true,
+                    autoPanPadding: [20, 20],
+                    keepInView: true,
+                    closeOnEscapeKey: true,
+                  },
+                );
+              }
+            });
+
+            noiseHindranceLayer.addLayer(geoJsonLayer);
+            loadedCount++;
+          } catch (layerError) {
+            console.warn(`Error creating layer for municipality ${municipalityName}:`, layerError);
+          }
+        }
+      }
+    });
+
+    console.log(`Successfully loaded ${loadedCount} municipalities with noise data`);
+    
+    // Show legend
+    showNoiseLegend();
+    
+  } catch (error) {
+    console.error("Error loading noise hindrance data:", error);
+  }
+},
                     });
 
                     hideHoverLabel();
@@ -4498,7 +4554,7 @@ async function loadNoiseHindranceLayer() {
 }
 
 function getNoiseColor(noiseValue) {
-  if (noiseValue === null || noiseValue === undefined) {
+  if (noiseValue === null || noiseValue === undefined || isNaN(noiseValue)) {
     return "#cccccc"; // Grijs voor geen data
   }
   
@@ -4541,6 +4597,16 @@ function showNoiseLegend() {
     `;
     return div;
   };
+  
+  noiseLegend.addTo(map);
+}
+
+function removeNoiseLegend() {
+  if (noiseLegend) {
+    map.removeControl(noiseLegend);
+    noiseLegend = null;
+  }
+}
   
   noiseLegend.addTo(map);
 }
